@@ -47,7 +47,7 @@ and get back a response like
       }
     }
 
-It may so happen that different inputs will ened up traversing into code that's not in the `lib/` directory so if that happens you just need to copy the missing jarfile over and re-run.
+It may so happen that different inputs will ened up traversing into code that's not in the `lib/` directory so if that happens we just need to add missing jarfile to the update script.
 
 ## Deploying
 
