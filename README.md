@@ -1,45 +1,77 @@
-## mosaic-server
-
-This is a partial fix for the issue where 2MASS tiles overlap the FOV in a non-helpful way, as described in Gemini issue `REL-1093`.
-
-### Building and Running Locally
-
-This requies a local install of my Montage fork on the `mArchiveList-segfault` branch. There was a [PR](https://github.com/Caltech-IPAC/Montage/pull/32) back to Montage that may have been merged by now, so check it before proceeding.
-
-It also requires a patched OT with the change on my Ocs fork on the `tpe-fixes` branch, and a hacked `ImageCatalog.scala` thus:
-
-```patch
-@@ -88,7 +88,8 @@ abstract class AstroCatalog(id: CatalogId, displayName: String, shortName: Strin
-   def adjacentOverlap: Angle = Angle.zero
-
-   override def queryUrl(c: Coordinates, site: Option[Site]): NonEmptyList[URL] =
--    NonEmptyList(new URL(s" http://irsa.ipac.caltech.edu/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${size.toArcsecs.toInt}&band=${band.name}"))
-+  //  NonEmptyList(new URL(s" http://irsa.ipac.caltech.edu/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${size.toArcsecs.toInt}&band=${band.name}"))
-+    NonEmptyList(new URL(s" http://localhost:8080/?object=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&radius=${0.25}&band=${band.name}"))
- }
-```
-
-### Running on Heroku
-
-This only works for Rob. Anyone else needs to be [added as a collaborator](https://devcenter.heroku.com/articles/collaborating#add-collaborators).
-
-To release a new version to Heroku do:
-
-```
-sbt core/docker:publish
-heroku container:release web
-```
-
-An example invocation is:
-
-```
-curl -o /tmp/foo.fits 'http://gemini-2mass-mosaic.herokuapp.com/?object=05:51:10.305%2008:10:21.43&radius=0.25&band=H'
-```
+# itc-server
 
 
-### Next Steps
+This is a *temporary* packaged-up version of the Gemini ITC server with the subset of the library jars required to implement just the JSON endpoint. We can deploy this to Heroku and make it available externally.
 
-Next steps:
+## Setting Up
 
-- Move cache to S3 … the dyno will run out of disk quickly
-- I'm using fs2/cats-effect milestones in order to get `Bracket` and `Resource`. http4s isn't quite ready yet so I'm using Jetty for now on the front end.
+First, build the ITC in your ocs codebase.
+
+    sbt
+    > project app_itc
+    > ocsDist Test
+
+Now run `update.sh`, passing the generated bundle directory. Something like
+
+    $ ./update.sh ../ocs/app/itc/target/itc/2016A-test.1.1.1/Test/itc/bundle/
+    🔸 Reading from /Users/rnorris/Scala/ocs/app/itc/target/itc/2016A-test.1.1.1/Test/itc/bundle
+    🔸 Writing to   /Users/rnorris/Scala/itc-server/lib
+    🔸 Removing old library bundles.
+    🔸 Copying bundles.
+    $
+
+This will copy the necessary jars into the local `lib/` directory. This directory is ignored by Git and is not part of the repository.
+
+## Running
+
+Once you're set up you can run locally with `sbt run`; or with `bloop run itc-server` if you have bloop set up. There is a sample request in `data.json` so if you're in the project root you can say:
+
+    curl http://localhost:8080/json -d @data.json
+
+and get back a response like
+
+    {
+      "ItcSpectroscopyResult" : {
+        "ccds" : [
+          {
+            "wellDepth" : 125000.0,
+            "peakPixelFlux" : 0.03607547711165799,
+            "warnings" : [],
+            "singleSNRatio" : 4.6417881419574975E-194,
+            "totalSNRatio" : 7.339311472273343E-194,
+            "ampGain" : 5.11
+          },
+          ...
+        ],
+        "chartGroups" : []
+      }
+    }
+
+It may so happen that different inputs will ened up traversing into code that's not in the `lib/` directory so if that happens you just need to copy the missing jarfile over and re-run.
+
+## Deploying
+
+To deploy you need to first be logged into Heroku and also logged into the docker registry. So
+
+    heroku login
+
+and then
+
+    heroku container:login
+
+You probably only need to do this once, I don't know. Anyway you can then build the app with
+
+    sbt docker:publish
+
+which will build and upload the `web` image to the Docker registry for the `gemini-itc`. To deploy this new version you say
+
+    heroku -a gemini-itc container:release web
+
+To watch the logs you can say
+
+    heroku logs -a gemini-itc -t
+
+The endpoint for the Heroku app is
+
+    https://gemini-itc.herokuapp.com/
+

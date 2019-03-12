@@ -2,3 +2,6 @@ target
 .DS_Store
 .metals
 .bloop
+
+# We ignore the lib/ directory because we copy stuff over
+lib
