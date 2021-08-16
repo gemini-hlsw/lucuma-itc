@@ -63,15 +63,15 @@ You probably only need to do this once, I don't know. Anyway you can then build 
 
     sbt docker:publish
 
-which will build and upload the `web` image to the Docker registry for the `gemini-itc`. To deploy this new version you say
+which will build and upload the `web` image to the Docker registry for the `gemini-new-itc`. To deploy this new version you say
 
-    heroku -a gemini-itc container:release web
+    heroku container:release -a gemini-new-itc web
 
 To watch the logs you can say
 
-    heroku logs -a gemini-itc -t
+    heroku logs -a gemini-new-itc -t
 
 The endpoint for the Heroku app is
 
-    https://gemini-itc.herokuapp.com/
+    https://gemini-new-itc.herokuapp.com/
 

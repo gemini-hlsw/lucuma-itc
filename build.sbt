@@ -15,12 +15,12 @@ libraryDependencies ++= Seq(
 // Docker Settings
 Docker / packageName := "web"
 dockerRepository     := Some("registry.heroku.com")
-dockerUsername       := Some("gemini-itc")
-name in Docker       := "web"
+dockerUsername       := Some("gemini-new-itc")
+Docker / name        := "web"
 dockerAlias          := DockerAlias(
   dockerRepository.value,
   dockerUsername.value,
-  (name in Docker).value,
+  (Docker / name).value,
   None
 )
 dockerCommands   := """
