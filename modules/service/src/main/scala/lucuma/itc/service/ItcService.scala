@@ -3,11 +3,11 @@
 
 package lucuma.itc.service
 
-import cats.effect.Concurrent
-import cats.effect.kernel.Async
+import cats.effect._
 import cats.implicits._
 import edu.gemini.grackle.Mapping
 import io.circe._
+import natchez.Trace
 import org.http4s.HttpRoutes
 import org.http4s.InvalidMessageBodyFailure
 import org.http4s.ParseFailure
@@ -21,7 +21,9 @@ trait ItcService[F[_]] {
 }
 
 object ItcService {
-  def routes[F[_]: Concurrent](service: ItcService[F]): HttpRoutes[F] = {
+  def routes[F[_]: Concurrent: Trace](
+    service: ItcService[F]
+  ): HttpRoutes[F] = {
     val dsl = new Http4sDsl[F] {}
     import dsl._
 
@@ -34,6 +36,20 @@ object ItcService {
     object QueryMatcher         extends QueryParamDecoderMatcher[String]("query")
     object OperationNameMatcher extends OptionalQueryParamDecoderMatcher[String]("operationName")
     object VariablesMatcher     extends OptionalValidatingQueryParamDecoderMatcher[Json]("variables")
+
+    def runGraphQL(
+      op:    Option[String],
+      vs:    Option[Json],
+      query: String
+    ): F[Json] =
+      Trace[F].span("graphql") {
+        for {
+          _    <- Trace[F].put("graphql.query" -> query.toString)
+          _    <- op.traverse(s => Trace[F].put("graphql.operationName" -> s))
+          _    <- vs.traverse(j => Trace[F].put("graphql.variables" -> j.spaces2))
+          json <- service.runQuery(op, vs, query)
+        } yield json
+      }
 
     HttpRoutes.of[F] {
       // GraphQL query is embedded in the URI query string when queried via GET
@@ -59,7 +75,7 @@ object ItcService {
                       .liftTo[F](InvalidMessageBodyFailure("Missing query field"))
           op      = obj("operationName").flatMap(_.asString)
           vars    = obj("variables")
-          result <- service.runQuery(op, vars, query)
+          result <- runGraphQL(op, vars, query)
           resp   <- Ok(result)
         } yield resp
     }
