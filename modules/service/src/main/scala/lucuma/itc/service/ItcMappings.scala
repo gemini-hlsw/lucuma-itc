@@ -19,13 +19,9 @@ import eu.timepit.refined._
 import eu.timepit.refined.numeric.Positive
 import io.circe.Encoder
 import io.circe.Json
-import lucuma.core.enum.GmosNorthDisperser
-import lucuma.core.enum.GmosNorthFilter
-import lucuma.core.enum.GmosNorthFpu
-import lucuma.core.enum.MagnitudeBand
-import lucuma.core.enum.MagnitudeSystem
-import lucuma.core.enum.NonStellarLibrarySpectrum
-import lucuma.core.enum.StellarLibrarySpectrum
+import lucuma.core.enum.SkyBackground
+import lucuma.core.enum.WaterVapor
+import lucuma.core.enum._
 import lucuma.core.math.Angle
 import lucuma.core.math.MagnitudeValue
 import lucuma.core.math.Redshift
@@ -33,12 +29,16 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.Magnitude
 import lucuma.core.model.SpatialProfile
 import lucuma.core.model.SpectralDistribution
+import lucuma.core.syntax.string._
+import lucuma.core.util.Enumerated
 import lucuma.itc.Itc
+import lucuma.itc.ItcObservingConditions
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosNorth
 import lucuma.itc.search.Result.Spectroscopy
 import lucuma.itc.search.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
+import lucuma.itc.search.syntax.conditions._
 import lucuma.itc.service.syntax.all._
 import spire.math.Rational
 
@@ -168,6 +168,13 @@ object ItcMapping extends Encoders {
           TargetProfile(sp, sd, m, rs),
           ObservingMode.Spectroscopy
             .GmosNorth(wv, GmosNorthDisperser.B480_G5309, GmosNorthFpu.Ifu2Slits, none),
+          ItcObservingConditions(
+            iq = ImageQuality.OnePointZero,    // Orginially 0.85
+            cc = CloudExtinction.OnePointZero, // Originally 0.7
+            wv = WaterVapor.Wet,               // Orginally Any
+            sb = SkyBackground.Dark,           // Originally 0.5
+            airmass = 1.5
+          ),
           sn.value
         )
         .map(r =>
@@ -191,23 +198,16 @@ object ItcMapping extends Encoders {
 
   def spectroscopy[F[_]: ApplicativeError[*[_], Throwable]](
     itc: Itc[F]
-  )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] = {
-    println(env)
-    println(env.get[Wavelength]("wavelength"))
-    println(env.get[Redshift]("redshift"))
-    println(env.get[types.numeric.PosInt]("signalToNoise"))
-    println(env.get[SpatialProfile]("spatialProfile"))
-    println(env.get[SpectralDistribution]("spectralDistribution"))
-    println(env.get[Magnitude]("magnitude"))
-    println(env.get[List[GmosNITCParams]]("modes"))
+  )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] =
     (env.get[Wavelength]("wavelength"),
      env.get[Redshift]("redshift"),
      env.get[types.numeric.PosInt]("signalToNoise"),
      env.get[SpatialProfile]("spatialProfile"),
      env.get[SpectralDistribution]("spectralDistribution"),
      env.get[Magnitude]("magnitude"),
-     env.get[List[GmosNITCParams]]("modes")
-    ).traverseN { (wv, rs, sn, sp, sd, m, modes) =>
+     env.get[List[GmosNITCParams]]("modes"),
+     env.get[ItcObservingConditions]("constraints")
+    ).traverseN { (wv, rs, sn, sp, sd, m, modes, c) =>
       modes
         .traverse { mode =>
           itc
@@ -215,6 +215,7 @@ object ItcMapping extends Encoders {
               TargetProfile(sp, sd, m, rs),
               ObservingMode.Spectroscopy
                 .GmosNorth(wv, mode.disperser, mode.fpu, mode.filter),
+              c,
               sn.value
             )
             .handleError { case x =>
@@ -236,7 +237,6 @@ object ItcMapping extends Encoders {
           Problem(s"Error calculating itc $x").leftIorNec
         }
     }.map(_.getOrElse((Problem("Missing parameters for spectroscopy")).leftIorNec))
-  }
 
   def parseFwhw(units: List[(String, Value)]): Option[Angle] =
     units.find(_._2 != Value.AbsentValue) match {
@@ -528,6 +528,47 @@ object ItcMapping extends Encoders {
           cursorEnvAdd("modes", modes)(i)
         }
 
+        def bigDecimalValue(v: Value): Option[BigDecimal] = v match {
+          case IntValue(r)   => BigDecimal(r).some
+          case FloatValue(r) => BigDecimal(r).some
+          case _             => none
+        }
+
+        def constraintsPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
+                                                IorNec[Problem, Environment]
+        ] = {
+          case (i,
+                ("constraints",
+                 ObjectValue(
+                   List(("imageQuality", TypedEnumValue(EnumValue(iq, _, _, _))),
+                        ("cloudExtinction", TypedEnumValue(EnumValue(ce, _, _, _))),
+                        ("skyBackground", TypedEnumValue(EnumValue(sb, _, _, _))),
+                        ("waterVapor", TypedEnumValue(EnumValue(wv, _, _, _))),
+                        ("elevationRange",
+                         ObjectValue(
+                           List(("airmassRange", ObjectValue(List(("min", min), ("max", max)))))
+                         )
+                        )
+                   )
+                 )
+                )
+              ) =>
+            val am = (bigDecimalValue(min), bigDecimalValue(max)).mapN { (min, max) =>
+              if (max > min && min >= 1 && max >= 1) max.some else none
+            }.flatten
+
+            (iqFromTag(iq.fromScreamingSnakeCase)
+               .orElse(iqFromTag(iq)),
+             ceFromTag(ce.fromScreamingSnakeCase)
+               .orElse(ceFromTag(ce)),
+             (Enumerated[WaterVapor].all.find(_.label.toScreamingSnakeCase === wv)),
+             Enumerated[SkyBackground].all.find(_.label.equalsIgnoreCase(sb)),
+             am
+            ).mapN((iq, ce, wv, sb, am) =>
+              cursorEnvAdd("constraints", ItcObservingConditions(iq, ce, wv, sb, am.toDouble))(i)
+            ).getOrElse(i.addProblem("Cannot parse constraints"))
+        }
+
         def fallback(a: (IorNec[Problem, Environment], (String, Value))) =
           a._1.addProblem(s"Unexpected param ${a._2._1}")
 
@@ -545,6 +586,7 @@ object ItcMapping extends Encoders {
                         .orElse(spectralDistributionPartial)
                         .orElse(magnitudePartial)
                         .orElse(instrumentModesPartial)
+                        .orElse(constraintsPartial)
                         .applyOrElse(
                           (e, c),
                           fallback

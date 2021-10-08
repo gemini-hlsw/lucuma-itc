@@ -6,6 +6,7 @@ package lucuma.itc.service
 import cats.effect._
 import io.circe.Json
 import lucuma.itc.Itc
+import lucuma.itc.ItcObservingConditions
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
 import natchez.Trace.Implicits.noop
@@ -20,6 +21,7 @@ trait GraphQLSuite extends munit.CatsEffectSuite {
     def calculate(
       targetProfile: TargetProfile,
       observingMode: ObservingMode,
+      constraints:   ItcObservingConditions,
       signalToNoise: Int
     ): IO[Itc.Result] =
       IO.pure(
