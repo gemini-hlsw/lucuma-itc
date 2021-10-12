@@ -30,7 +30,7 @@ object Config {
        .default(Environment.Local),
      envOrProp("ITC_PORT")
        .or(envOrProp("PORT"))
-       .or(ConfigValue.default("8080"))
+       .or(ConfigValue.default("6060"))
        .as[Int],
      envOrProp("ITC_URL").as[Uri],
      HoneycombConfig.config.option

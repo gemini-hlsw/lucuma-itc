@@ -247,13 +247,13 @@ object ItcMapping extends Encoders {
 
   def parseFwhw(units: List[(String, Value)]): Option[Angle] =
     units.find(_._2 != Value.AbsentValue) match {
-      case Some(("microarcseconds", IntValue(n))) =>
-        Angle.microarcseconds.reverseGet(n.toLong).some
-      case Some(("milliarcseconds", n))           =>
+      case Some(("microarcseconds", n)) =>
+        bigDecimalValue(n).map(n => Angle.microarcseconds.reverseGet(n.toLong))
+      case Some(("milliarcseconds", n)) =>
         bigDecimalValue(n).map(n => Angle.milliarcseconds.reverseGet(n.toInt))
-      case Some(("arcseconds", n))                =>
+      case Some(("arcseconds", n))      =>
         bigDecimalValue(n).map(n => Angle.arcseconds.reverseGet(n.toInt))
-      case _                                      => None
+      case _                            => None
     }
 
   def parseWavelength(units: List[(String, Value)]): Option[Wavelength] =
@@ -425,17 +425,17 @@ object ItcMapping extends Encoders {
                 val powerLaw = SpectralDistribution.PowerLaw(BigDecimal(pl))
                 cursorEnvAdd("spectralDistribution", powerLaw)(i)
               case ("stellar", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil                      =>
-                StellarLibrarySpectrum
+                Enumerated[StellarLibrarySpectrum]
                   .fromTag(s.fromScreamingSnakeCase)
-                  .orElse(StellarLibrarySpectrum.fromTag(s))
+                  .orElse(Enumerated[StellarLibrarySpectrum].fromTag(s))
                   .map(s =>
                     cursorEnvAdd("spectralDistribution", SpectralDistribution.Library(s.asLeft))(i)
                   )
                   .getOrElse(i.addProblem(s"Unknow stellar library value $s"))
               case ("nonStellar", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil                   =>
-                NonStellarLibrarySpectrum
+                Enumerated[NonStellarLibrarySpectrum]
                   .fromTag(s.fromScreamingSnakeCase)
-                  .orElse(NonStellarLibrarySpectrum.fromTag(s))
+                  .orElse(Enumerated[NonStellarLibrarySpectrum].fromTag(s))
                   .map(s =>
                     cursorEnvAdd("spectralDistribution", SpectralDistribution.Library(s.asRight))(i)
                   )
