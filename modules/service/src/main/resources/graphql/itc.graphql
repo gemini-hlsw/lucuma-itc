@@ -547,10 +547,16 @@ input AirmassRangeInput {
   max: BigDecimal!
 }
 
+# Hour Angle creation parameters
+input HourAngleRangeInput {
+  minHours: BigDecimal!
+  maxHours: BigDecimal!
+}
+
 # Elevation range creation parameters
 input ElevationRangeInput {
   airmassRange: AirmassRangeInput
-  # hourAngleRange: CreateHourAngleRangeInput
+  hourAngleRange: HourAngleRangeInput
 }
 
 # Constraint set creation parameters
