@@ -532,7 +532,10 @@ object ItcMapping extends Encoders {
                         ("waterVapor", TypedEnumValue(EnumValue(wv, _, _, _))),
                         ("elevationRange",
                          ObjectValue(
-                           List(("airmassRange", ObjectValue(List(("min", min), ("max", max)))))
+                           List(
+                             ("airmassRange", ObjectValue(List(("min", min), ("max", max)))),
+                             ("hourAngleRange", AbsentValue)
+                           )
                          )
                         )
                    )
@@ -550,6 +553,42 @@ object ItcMapping extends Encoders {
              (Enumerated[WaterVapor].all.find(_.label.toScreamingSnakeCase === wv)),
              Enumerated[SkyBackground].all.find(_.label.equalsIgnoreCase(sb)),
              am
+            ).mapN((iq, ce, wv, sb, am) =>
+              cursorEnvAdd("constraints", ItcObservingConditions(iq, ce, wv, sb, am.toDouble))(i)
+            ).getOrElse(i.addProblem("Cannot parse constraints"))
+          case (i,
+                ("constraints",
+                 ObjectValue(
+                   List(
+                     ("imageQuality", TypedEnumValue(EnumValue(iq, _, _, _))),
+                     ("cloudExtinction", TypedEnumValue(EnumValue(ce, _, _, _))),
+                     ("skyBackground", TypedEnumValue(EnumValue(sb, _, _, _))),
+                     ("waterVapor", TypedEnumValue(EnumValue(wv, _, _, _))),
+                     ("elevationRange",
+                      ObjectValue(
+                        List(
+                          ("airmassRange", AbsentValue),
+                          ("hourAngleRange",
+                           ObjectValue(List(("minHours", min), ("maxHours", max)))
+                          )
+                        )
+                      )
+                     )
+                   )
+                 )
+                )
+              ) =>
+            val ha = (bigDecimalValue(min), bigDecimalValue(max)).mapN { (min, max) =>
+              if (max > min) max.some else none
+            }.flatten
+
+            (iqFromTag(iq.fromScreamingSnakeCase)
+               .orElse(iqFromTag(iq)),
+             ceFromTag(ce.fromScreamingSnakeCase)
+               .orElse(ceFromTag(ce)),
+             (Enumerated[WaterVapor].all.find(_.label.toScreamingSnakeCase === wv)),
+             Enumerated[SkyBackground].all.find(_.label.equalsIgnoreCase(sb)),
+             ha
             ).mapN((iq, ce, wv, sb, am) =>
               cursorEnvAdd("constraints", ItcObservingConditions(iq, ce, wv, sb, am.toDouble))(i)
             ).getOrElse(i.addProblem("Cannot parse constraints"))
