@@ -8,12 +8,18 @@ import cats.implicits._
 import edu.gemini.grackle.Mapping
 import io.circe._
 import natchez.Trace
+import org.http4s.CacheDirective
+import org.http4s.Headers
 import org.http4s.HttpRoutes
 import org.http4s.InvalidMessageBodyFailure
+import org.http4s.Method
 import org.http4s.ParseFailure
 import org.http4s.QueryParamDecoder
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
+import org.http4s.headers.`Cache-Control`
+
+import scala.concurrent.duration._
 
 trait ItcService[F[_]] {
   def runQuery(op: Option[String], vars: Option[Json], query: String): F[Json]
@@ -38,13 +44,15 @@ object ItcService {
     object VariablesMatcher     extends OptionalValidatingQueryParamDecoderMatcher[Json]("variables")
 
     def runGraphQL(
-      op:    Option[String],
-      vs:    Option[Json],
-      query: String
+      op:     Option[String],
+      vs:     Option[Json],
+      query:  String,
+      method: Method
     ): F[Json] =
       Trace[F].span("graphql") {
         for {
           _    <- Trace[F].put("graphql.query" -> query.toString)
+          _    <- Trace[F].put("graphql.method" -> method.toString)
           _    <- op.traverse(s => Trace[F].put("graphql.operationName" -> s))
           _    <- vs.traverse(j => Trace[F].put("graphql.variables" -> j.spaces2))
           json <- service.runQuery(op, vs, query)
@@ -60,8 +68,8 @@ object ItcService {
           errors => BadRequest(errors.map(_.sanitized).mkString_("", ",", "")),
           vars =>
             for {
-              result <- service.runQuery(op, vars, query)
-              resp   <- Ok(result)
+              result <- runGraphQL(op, vars, query, GET)
+              resp   <- Ok(result, Headers(`Cache-Control`(CacheDirective.`max-age`(1.days))))
             } yield resp
         )
 
@@ -75,7 +83,7 @@ object ItcService {
                       .liftTo[F](InvalidMessageBodyFailure("Missing query field"))
           op      = obj("operationName").flatMap(_.asString)
           vars    = obj("variables")
-          result <- runGraphQL(op, vars, query)
+          result <- runGraphQL(op, vars, query, POST)
           resp   <- Ok(result)
         } yield resp
     }

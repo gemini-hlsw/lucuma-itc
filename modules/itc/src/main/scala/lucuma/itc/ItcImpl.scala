@@ -69,8 +69,8 @@ object ItcImpl {
         // at some point but this is ok for now.
 
         // Convenience method to compute an OCS2 ITC result for the specified profile/mode.
-        def itc(exposureDuration: FiniteDuration, exposures: Int): F[ItcResult] =
-          Trace[F].span("itc-query") {
+        def itc(exposureDuration: FiniteDuration, exposures: Int, level: Int): F[ItcResult] =
+          Trace[F].span("legacy-itc-query") {
             val json =
               spectroscopyParams(targetProfile,
                                  observingMode,
@@ -78,7 +78,11 @@ object ItcImpl {
                                  constraints,
                                  exposures
               ).asJson
-            c.expect(POST(json, uri))(jsonOf[F, ItcResult])
+            Trace[F].put("itc.query"              -> json.spaces2) *>
+              Trace[F].put("itc.exposureDuration" -> exposureDuration.toMillis.toInt) *>
+              Trace[F].put("itc.exposures" -> exposures) *>
+              Trace[F].put("itc.level" -> level) *>
+              c.expect(POST(json, uri))(jsonOf[F, ItcResult])
           }
 
         // Pull our exposure limits out of the observing mode since we'll need them soon.
@@ -94,7 +98,7 @@ object ItcImpl {
         // end up being good enough. Unclear.
 
         Trace[F].span("itc") {
-          itc(1.second, 1).flatMap { baseline =>
+          itc(1.second, 1, 1).flatMap { baseline =>
             // First thing we need to check is the saturation for a minimum-length exposure. If it's
             // greater than our limit we simply can't observe in this mode because the source is
             // too bright.
@@ -126,7 +130,7 @@ object ItcImpl {
 
                 // We can do this in one exposure, but we need to hit ITC again to get an accurate
                 // signal-to-noise value.
-                itc(singleExposureDuration, 1).map { r =>
+                itc(singleExposureDuration, 1, 2).map { r =>
                   Itc.Result.Success(singleExposureDuration, 1, r.maxTotalSNRatio.toInt)
                 }
 
@@ -143,14 +147,14 @@ object ItcImpl {
 
                 // We can't compute S/N accurately enough to extrapolate the number of exposures we
                 // need so we must ask ITC to do it.
-                itc(multipleExposureSecs, 1).flatMap { r =>
+                itc(multipleExposureSecs, 1, 2).flatMap { r =>
                   // Now estimate the number of exposures. It may be low due to read noise but we
                   // don't really have a way to compensate yet.
                   val n =
                     ((signalToNoise * signalToNoise) / (r.maxTotalSNRatio * r.maxTotalSNRatio)).ceil.toInt
 
                   // But in any case we can calculate our final answer, which may come in low.
-                  itc(multipleExposureSecs, n).map { r2 =>
+                  itc(multipleExposureSecs, n, 3).map { r2 =>
                     Itc.Result.Success(multipleExposureSecs, n, r2.maxTotalSNRatio.toInt)
                   }
 

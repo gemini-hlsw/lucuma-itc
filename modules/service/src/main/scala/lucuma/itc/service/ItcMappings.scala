@@ -40,6 +40,7 @@ import lucuma.itc.search.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.search.syntax.conditions._
 import lucuma.itc.service.syntax.all._
+import natchez.Trace
 import spire.math.Rational
 
 import java.math.RoundingMode
@@ -196,7 +197,7 @@ object ItcMapping extends Encoders {
         }
     }.map(_.getOrElse((Problem("Error calculating itc")).leftIorNec))
 
-  def spectroscopy[F[_]: ApplicativeError[*[_], Throwable]](
+  def spectroscopy[F[_]: ApplicativeError[*[_], Throwable]: Parallel: Trace](
     itc: Itc[F]
   )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] =
     (env.get[Wavelength]("wavelength"),
@@ -209,28 +210,30 @@ object ItcMapping extends Encoders {
      env.get[ItcObservingConditions]("constraints")
     ).traverseN { (wv, rs, sn, sp, sd, m, modes, c) =>
       modes
-        .traverse { mode =>
-          itc
-            .calculate(
-              TargetProfile(sp, sd, m, rs),
-              ObservingMode.Spectroscopy
-                .GmosNorth(wv, mode.disperser, mode.fpu, mode.filter),
-              c,
-              sn.value
-            )
-            .handleError { case x =>
-              Itc.Result.CalculationError(s"Error calculating itc $x")
-            }
-            .map(r =>
-              SpectroscopyResults(
-                List(
-                  Spectroscopy(
-                    ObservingMode.Spectroscopy.GmosNorth(wv, mode.disperser, mode.fpu, mode.filter),
-                    r
+        .parTraverse { mode =>
+          Trace[F].put(("itc.modes_count", modes.length)) *>
+            itc
+              .calculate(
+                TargetProfile(sp, sd, m, rs),
+                ObservingMode.Spectroscopy
+                  .GmosNorth(wv, mode.disperser, mode.fpu, mode.filter),
+                c,
+                sn.value
+              )
+              .handleError { case x =>
+                Itc.Result.CalculationError(s"Error calculating itc $x")
+              }
+              .map(r =>
+                SpectroscopyResults(
+                  List(
+                    Spectroscopy(
+                      ObservingMode.Spectroscopy
+                        .GmosNorth(wv, mode.disperser, mode.fpu, mode.filter),
+                      r
+                    )
                   )
                 )
               )
-            )
         }
         .map(_.rightIor[NonEmptyChain[Problem]])
         .handleError { case x =>
@@ -269,7 +272,7 @@ object ItcMapping extends Encoders {
       case _                                 => None
     }
 
-  def apply[F[_]: Sync](itc: Itc[F]): F[Mapping[F]] =
+  def apply[F[_]: Sync: Parallel: Trace](itc: Itc[F]): F[Mapping[F]] =
     loadSchema[F].map { loadedSchema =>
       new CirceMapping[F] with ComputeMapping[F] {
 
