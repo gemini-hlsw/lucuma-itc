@@ -17,7 +17,7 @@ trait Itc[F[_]] {
     targetProfile: TargetProfile,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
-    signalToNoise: Int
+    signalToNoise: BigDecimal
   ): F[Itc.Result]
 
 }
@@ -32,7 +32,7 @@ object Itc {
     final case class Success(
       exposureTime:  FiniteDuration,
       exposures:     Int,
-      signalToNoise: Int
+      signalToNoise: BigDecimal
     ) extends Result
 
     /** Object is too bright to be observed in the specified mode. */
