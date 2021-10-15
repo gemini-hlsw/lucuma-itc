@@ -4,12 +4,14 @@
 package lucuma.itc.service
 
 import cats.Applicative
+import cats.Parallel
 import cats.effect._
 import cats.syntax.all._
 import lucuma.itc.ItcImpl
 import lucuma.itc.service.config.Environment._
 import lucuma.itc.service.config._
 import natchez.EntryPoint
+import natchez.Trace
 import natchez.honeycomb.Honeycomb
 import natchez.http4s.NatchezMiddleware
 import natchez.http4s.implicits._
@@ -77,7 +79,7 @@ object Main extends IOApp {
       .withHttpApp(app)
       .resource
 
-  def routes[F[_]: Async: natchez.Trace](cfg: Config): Resource[F, HttpRoutes[F]] =
+  def routes[F[_]: Async: Parallel: Trace](cfg: Config): Resource[F, HttpRoutes[F]] =
     for {
       itc <- ItcImpl.forUri(cfg.itcUrl)
       map <- Resource.eval(ItcMapping(itc))
@@ -85,7 +87,6 @@ object Main extends IOApp {
     } yield
 
     // Routes for static resources, ie. GraphQL Playground
-
     resourceServiceBuilder[F]("/assets").toRoutes <+>
       // Routes for the ITC GraphQL service
       NatchezMiddleware.server(cors(cfg.environment, none)(ItcService.routes(its)))
@@ -94,7 +95,7 @@ object Main extends IOApp {
    * Our main server, as a resource that starts up our server on acquire and shuts it all down in
    * cleanup, yielding an `ExitCode`. Users will `use` this resource and hold it forever.
    */
-  def server[F[_]: Async: Logger](cfg: Config): Resource[F, ExitCode] =
+  def server[F[_]: Async: Parallel: Logger](cfg: Config): Resource[F, ExitCode] =
     for {
       _  <- Resource.eval(banner)
       ep <- entryPointResource(cfg.honeycomb)
