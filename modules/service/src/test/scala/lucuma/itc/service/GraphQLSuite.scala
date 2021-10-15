@@ -23,7 +23,7 @@ trait GraphQLSuite extends munit.CatsEffectSuite {
       targetProfile: TargetProfile,
       observingMode: ObservingMode,
       constraints:   ItcObservingConditions,
-      signalToNoise: Int
+      signalToNoise: BigDecimal
     ): IO[Itc.Result] =
       IO.pure(
         Itc.Result.Success(1.seconds, 10, 10)

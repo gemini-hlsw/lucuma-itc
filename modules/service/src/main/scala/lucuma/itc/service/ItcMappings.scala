@@ -159,7 +159,7 @@ object ItcMapping extends Encoders {
      env.get[Wavelength]("simultaneousCoverage"),
      env.get[Redshift]("redshift"),
      env.get[Rational]("resolution"),
-     env.get[types.numeric.PosInt]("signalToNoise"),
+     env.get[types.numeric.PosBigDecimal]("signalToNoise"),
      env.get[SpatialProfile]("spatialProfile"),
      env.get[SpectralDistribution]("spectralDistribution"),
      env.get[Magnitude]("magnitude")
@@ -202,7 +202,7 @@ object ItcMapping extends Encoders {
   )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] =
     (env.get[Wavelength]("wavelength"),
      env.get[Redshift]("redshift"),
-     env.get[types.numeric.PosInt]("signalToNoise"),
+     env.get[types.numeric.PosBigDecimal]("signalToNoise"),
      env.get[SpatialProfile]("spatialProfile"),
      env.get[SpectralDistribution]("spectralDistribution"),
      env.get[Magnitude]("magnitude"),
@@ -370,7 +370,7 @@ object ItcMapping extends Encoders {
           case (i, ("signalToNoise", r)) =>
             bigDecimalValue(r) match {
               case Some(r) if r > 0 =>
-                refineV[Positive](r.toInt)
+                refineV[Positive](r)
                   .fold(i.addProblem, v => cursorEnvAdd("signalToNoise", v)(i))
               case Some(r)          =>
                 i.addProblem(s"signalToNoise value $r must be positive")

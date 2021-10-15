@@ -48,7 +48,7 @@ object ItcImpl {
         targetProfile: TargetProfile,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
-        signalToNoise: Int
+        signalToNoise: BigDecimal
       ): F[Itc.Result] =
         observingMode match {
           case _: ObservingMode.Spectroscopy =>
@@ -60,7 +60,7 @@ object ItcImpl {
         targetProfile: TargetProfile,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
-        signalToNoise: Int
+        signalToNoise: BigDecimal
       ): F[Itc.Result] = {
 
         // The OCS2 ITC doesn't know how to compute exposure time and exposure count for a
@@ -116,7 +116,7 @@ object ItcImpl {
               // the detector then we can do the whole thing in a single exposure.
 
               val singleExposureDuration: FiniteDuration =
-                (signalToNoise * signalToNoise / (baseline.maxTotalSNRatio * baseline.maxTotalSNRatio)).seconds
+                (signalToNoise * signalToNoise / (baseline.maxTotalSNRatio * baseline.maxTotalSNRatio)).toInt.seconds
                   .secondsCeilIf(integralDurations)
 
               val singleExposureSaturation: Double =
@@ -151,7 +151,7 @@ object ItcImpl {
                   // Now estimate the number of exposures. It may be low due to read noise but we
                   // don't really have a way to compensate yet.
                   val n =
-                    ((signalToNoise * signalToNoise) / (r.maxTotalSNRatio * r.maxTotalSNRatio)).ceil.toInt
+                    ((signalToNoise * signalToNoise) / (r.maxTotalSNRatio * r.maxTotalSNRatio)).toFloat.ceil.toInt
 
                   // But in any case we can calculate our final answer, which may come in low.
                   itc(multipleExposureSecs, n, 3).map { r2 =>
@@ -189,8 +189,12 @@ object ItcImpl {
           sourceFraction = 1.0,
           ditherOffset = Angle.Angle0
         ),
-        analysisMethod = ItcObservationDetails.AnalysisMethod.Aperture.Auto(
-          skyAperture = 5.0
+        // analysisMethod = ItcObservationDetails.AnalysisMethod.Aperture.Auto(
+        //   skyAperture = 5.0
+        // )
+        analysisMethod = ItcObservationDetails.AnalysisMethod.Ifu.Single(
+          skyFibres = 250,
+          offset = 5.0
         )
       ),
       conditions = conditions,
