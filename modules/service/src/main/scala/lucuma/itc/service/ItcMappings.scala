@@ -495,9 +495,16 @@ object ItcMapping extends Encoders {
               case ObjectValue(
                     List(("disperser", TypedEnumValue(EnumValue(d, _, _, _))),
                          ("fpu", TypedEnumValue(EnumValue(fpu, _, _, _))),
-                         ("filter", TypedEnumValue(EnumValue(f, _, _, _)))
+                         ("filter", f)
                     )
                   ) =>
+                val filterOpt = f match {
+                  case TypedEnumValue(EnumValue(f, _, _, _)) =>
+                    GmosNorthFilter
+                      .fromTag(f.fromScreamingSnakeCase)
+                      .orElse(GmosNorthFilter.fromTag(f))
+                  case _                                     => none
+                }
                 (GmosNorthDisperser
                    .fromTag(d.fromScreamingSnakeCase)
                    .orElse(GmosNorthDisperser.fromTag(d)),
@@ -509,15 +516,9 @@ object ItcMapping extends Encoders {
                        _.tag.toLowerCase.replace("_", "") === fpu.toLowerCase.replace("_", "")
                      )
                    )
-                ).mapN(
-                  GmosNITCParams(_,
-                                 _,
-                                 GmosNorthFilter
-                                   .fromTag(f.fromScreamingSnakeCase)
-                                   .orElse(GmosNorthFilter.fromTag(f))
-                  )
-                )
-              case _ => none
+                ).mapN(GmosNITCParams(_, _, filterOpt))
+              case _ =>
+                none
             }
           }.flatten
           cursorEnvAdd("modes", modes)(i)
