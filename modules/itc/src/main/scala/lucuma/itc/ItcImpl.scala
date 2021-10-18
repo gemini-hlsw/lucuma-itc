@@ -189,13 +189,7 @@ object ItcImpl {
           sourceFraction = 1.0,
           ditherOffset = Angle.Angle0
         ),
-        // analysisMethod = ItcObservationDetails.AnalysisMethod.Aperture.Auto(
-        //   skyAperture = 5.0
-        // )
-        analysisMethod = ItcObservationDetails.AnalysisMethod.Ifu.Single(
-          skyFibres = 250,
-          offset = 5.0
-        )
+        analysisMethod = observingMode.analysisMethod
       ),
       conditions = conditions,
       telescope = ItcTelescopeDetails(

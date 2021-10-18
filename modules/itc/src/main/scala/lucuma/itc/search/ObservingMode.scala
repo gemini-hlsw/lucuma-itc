@@ -9,9 +9,11 @@ import lucuma.itc.search.syntax.gmosnorthdisperser._
 import lucuma.itc.search.syntax.gmosnorthfilter._
 import lucuma.itc.search.syntax.gmosnorthfpu._
 import spire.math.Rational
+import lucuma.itc.ItcObservationDetails
 
 sealed trait ObservingMode {
   def instrument: Instrument
+  def analysisMethod: ItcObservationDetails.AnalysisMethod
 }
 
 object ObservingMode {
@@ -40,6 +42,16 @@ object ObservingMode {
       def coverage: Coverage =
         filter.foldLeft(disperser.coverage(λ))(_ ⋂ _.coverage)
 
+      def analysisMethod: ItcObservationDetails.AnalysisMethod =
+        if (fpu.isIfu)
+          ItcObservationDetails.AnalysisMethod.Ifu.Single(
+            skyFibres = 250,
+            offset = 5.0
+          )
+        else
+          ItcObservationDetails.AnalysisMethod.Aperture.Auto(
+            skyAperture = 5.0
+          )
     }
 
   }
