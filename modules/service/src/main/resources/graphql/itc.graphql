@@ -656,7 +656,7 @@ input GmosSITCInput {
   disperser: GmosNorthDisperser!
 
   # Gmos North Focal plane unit
-  fpu: GmosNorthFpu
+  fpu: GmosNorthFpu!
 
   # Gmos North filter
   filter: GmosNorthFilter
@@ -669,7 +669,7 @@ type GmosNITCParams {
   # Gmos North Focal plane unit
   customMask: GmosCustomMask
 
-  fpu: GmosNorthFpu
+  fpu: GmosNorthFpu!
 
   # Gmos North filter
   filter: GmosNorthFilter
