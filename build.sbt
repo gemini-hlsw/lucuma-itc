@@ -83,7 +83,7 @@ lazy val service = project
       "-Ymacro-annotations"
     ),
     scalacOptions -= "-Vtype-diffs",
-    reStart / envVars := Map("ITC_URL" -> "https://gemini-itc.herokuapp.com/json"),
+    reStart / envVars := Map("ITC_URL" -> "https://gemini-new-itc.herokuapp.com/json"),
     libraryDependencies ++= Seq(
       "edu.gemini"    %% "gsp-graphql-core"    % grackleVersion,
       "edu.gemini"    %% "gsp-graphql-generic" % grackleVersion,
