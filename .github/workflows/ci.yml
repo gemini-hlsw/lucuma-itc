@@ -15,4 +15,4 @@ jobs:
           java-version: adopt@1.11
       - name: Running tests
         run: |
-          sbt -v -J-Xmx4g +compile +scalafmtCheckAll headerCheck Test/headerCheck +test gatlint/test
+          sbt -v -J-Xmx4g +compile +scalafmtCheckAll headerCheck Test/headerCheck +test Gatling/test
