@@ -92,7 +92,6 @@ object Main extends IOApp {
     // Routes for static resources, ie. GraphQL Playground
     resourceServiceBuilder[F]("/assets").toRoutes <+>
       // Routes for the ITC GraphQL service
-      // ItcService.routes(its)
       NatchezMiddleware.server(cors(cfg.environment, none)(ItcService.routes(its)))
 
   /**

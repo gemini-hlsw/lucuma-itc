@@ -3,8 +3,6 @@
 
 package lucuma.itc
 
-// import scala.concurrent.duration._
-//
 import cats.syntax.all._
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
@@ -34,6 +32,11 @@ import lucuma.core.enum.WaterVapor
 import lucuma.core.enum.SkyBackground
 import lucuma.core.util.Enumerated
 
+/**
+ * This is a unit test mostly to ensure all possible combination of params can be parsed by the
+ * legacy ITC (Note that the ITC may still return an error but we want to ensure it can parse the
+ * values
+ */
 class LegacyITCSimulation extends GatlingHttpFunSpec {
   val headers_10 = Map("Content-Type" -> """application/json""")
   val baseUrl    = "https://gemini-new-itc.herokuapp.com"
@@ -57,19 +60,16 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     analysisMethod = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
   )
 
-  val telescope                    = ItcTelescopeDetails(
+  val telescope                       = ItcTelescopeDetails(
     wfs = ItcWavefrontSensor.OIWFS
   )
-  val instrument                   = ItcInstrumentDetails.fromObservingMode(
+  val instrument                      = ItcInstrumentDetails.fromObservingMode(
     ObservingMode.Spectroscopy.GmosNorth(Wavelength.decimalNanometers.getOption(60).get,
                                          GmosNorthDisperser.B1200_G5301,
                                          GmosNorthFpu.Ifu2Slits,
                                          GmosNorthFilter.GG455.some
     )
   )
-  def conditions(iq: ImageQuality) =
-    ItcObservingConditions(iq, CloudExtinction.OnePointFive, WaterVapor.Dry, SkyBackground.Dark, 2)
-
   def body(c: ItcObservingConditions) = Json.obj(
     "source"      -> sourceDefinition.asJson,
     "observation" -> obs.asJson,
@@ -86,16 +86,6 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       .map { case (((iq, ce), wv), sb) =>
         ItcObservingConditions(iq, ce, wv, sb, 2)
       }
-  // val allConditions  = Enumerated[ImageQuality].all.map { iq =>
-  //   Enumerated[CloudExtinction].all.map { ce =>
-  //     Enumerated[WaterVapor].all.map { wv =>
-  //       Enumerated[SkyBackground].all.map { sb =>
-  //         ItcObservingConditions(iq, ce, wv, sb, 2)
-  //       }
-  //     }.flatten
-  //   }.flatten
-  // }.flatten
-  println(allConditions.length)
 
   allConditions.map { c =>
     spec {
