@@ -18,7 +18,7 @@
 	<!-- uncomment to log SSE events -->
     <!--<logger name="io.gatling.http.action.sse.fsm" level="DEBUG" />-->
 
-	<root level="DEBUG">
+	<root level="WARN">
 		<appender-ref ref="CONSOLE" />
 	</root>
 

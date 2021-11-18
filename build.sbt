@@ -69,6 +69,7 @@ lazy val itc = project
       "edu.gemini"    %% "clue-model"               % clueVersion,
       "io.circe"      %% "circe-generic"            % circeVersion,
       "org.tpolecat"  %% "natchez-http4s"           % natcchezHttp4sVersion,
+      "org.typelevel" %% "log4cats-slf4j"           % log4catsVersion,
       "org.typelevel" %% "munit-cats-effect-3"      % munitCatsEffectVersion % Test
     )
   )

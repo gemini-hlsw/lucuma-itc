@@ -52,6 +52,7 @@ import scala.util.Using
 import Query._
 import Value._
 import QueryCompiler._
+import org.typelevel.log4cats.Logger
 
 trait Encoders {
   import io.circe.generic.semiauto._
@@ -197,7 +198,7 @@ object ItcMapping extends Encoders {
         }
     }.map(_.getOrElse((Problem("Error calculating itc")).leftIorNec))
 
-  def spectroscopy[F[_]: ApplicativeError[*[_], Throwable]: Parallel: Trace](
+  def spectroscopy[F[_]: ApplicativeError[*[_], Throwable]: Logger: Parallel: Trace](
     itc: Itc[F]
   )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] =
     (env.get[Wavelength]("wavelength"),
@@ -211,7 +212,8 @@ object ItcMapping extends Encoders {
     ).traverseN { (wv, rs, sn, sp, sd, m, modes, c) =>
       modes
         .parTraverse { mode =>
-          Trace[F].put(("itc.modes_count", modes.length)) *>
+          Logger[F].info(s"ITC calculate for $mode") *>
+            Trace[F].put(("itc.modes_count", modes.length)) *>
             itc
               .calculate(
                 TargetProfile(sp, sd, m, rs),
@@ -220,8 +222,9 @@ object ItcMapping extends Encoders {
                 c,
                 sn.value
               )
-              .handleError { case x =>
-                Itc.Result.CalculationError(s"Error calculating itc $x")
+              .handleErrorWith { case x =>
+                Logger[F].error(x)(s"Upstream error") *>
+                  Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen
               }
               .map(r =>
                 SpectroscopyResults(
@@ -236,8 +239,8 @@ object ItcMapping extends Encoders {
               )
         }
         .map(_.rightIor[NonEmptyChain[Problem]])
-        .handleError { case x =>
-          Problem(s"Error calculating itc $x").leftIorNec
+        .handleErrorWith { case x =>
+          Problem(s"Error calculating itc $x").leftIorNec.pure[F]
         }
     }.map(_.getOrElse((Problem("Missing parameters for spectroscopy")).leftIorNec))
 
@@ -272,7 +275,7 @@ object ItcMapping extends Encoders {
       case _                                 => None
     }
 
-  def apply[F[_]: Sync: Parallel: Trace](itc: Itc[F]): F[Mapping[F]] =
+  def apply[F[_]: Sync: Logger: Parallel: Trace](itc: Itc[F]): F[Mapping[F]] =
     loadSchema[F].map { loadedSchema =>
       new CirceMapping[F] with ComputeMapping[F] {
 
