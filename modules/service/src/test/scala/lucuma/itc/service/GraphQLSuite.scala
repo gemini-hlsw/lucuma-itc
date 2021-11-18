@@ -14,10 +14,13 @@ import natchez.Trace.Implicits.noop
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.syntax.all._
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.duration._
 
 trait GraphQLSuite extends munit.CatsEffectSuite {
+  implicit val unsafeLogger = Slf4jLogger.getLogger[IO]
+
   val itc = new Itc[IO] {
     def calculate(
       targetProfile: TargetProfile,
@@ -32,7 +35,8 @@ trait GraphQLSuite extends munit.CatsEffectSuite {
 
   val service: IO[HttpRoutes[IO]] =
     ItcMapping[IO](itc).map(m => ItcService.routes[IO](ItcService.service[IO](m)))
-  val itcFixture                  = ResourceSuiteLocalFixture(
+
+  val itcFixture = ResourceSuiteLocalFixture(
     "itc",
     Resource.make(service)(_ => IO.unit)
   )

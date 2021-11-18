@@ -21,6 +21,7 @@ val natcchezHttp4sVersion       = "0.2.0"
 val natchezVersion              = "0.1.5"
 val munitVersion                = "0.7.29"
 val disciplineMunitVersion      = "1.0.9"
+val gatlingVersion              = "3.7.0-M4"
 
 inThisBuild(
   Seq(
@@ -68,6 +69,7 @@ lazy val itc = project
       "edu.gemini"    %% "clue-model"               % clueVersion,
       "io.circe"      %% "circe-generic"            % circeVersion,
       "org.tpolecat"  %% "natchez-http4s"           % natcchezHttp4sVersion,
+      "org.typelevel" %% "log4cats-slf4j"           % log4catsVersion,
       "org.typelevel" %% "munit-cats-effect-3"      % munitCatsEffectVersion % Test
     )
   )
@@ -97,10 +99,22 @@ lazy val service = project
       "org.typelevel" %% "cats-effect"         % catsEffectVersion,
       "is.cir"        %% "ciris"               % cirisVersion,
       "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
-      "org.slf4j"      % "slf4j-simple"        % slf4jVersion,
+      // "org.slf4j"      % "slf4j-simple"        % slf4jVersion,
       "org.http4s"    %% "http4s-core"         % http4sVersion,
       "org.http4s"    %% "http4s-blaze-server" % http4sVersion,
       "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test
     )
   )
   .enablePlugins(JavaAppPackaging)
+
+lazy val benchmark = project
+  .in(file("modules/benchmarks"))
+  .enablePlugins(GatlingPlugin)
+  .settings(
+    libraryDependencies ++= Seq(
+      "io.circe"      %% "circe-core"            % circeVersion,
+      "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % Test,
+      "io.gatling"            % "gatling-test-framework"    % gatlingVersion % Test
+    )
+  )
+  .dependsOn(service)

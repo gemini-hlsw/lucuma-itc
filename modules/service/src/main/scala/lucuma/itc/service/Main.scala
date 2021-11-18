@@ -81,8 +81,11 @@ object Main extends IOApp {
 
   def routes[F[_]: Async: Parallel: Trace](cfg: Config): Resource[F, HttpRoutes[F]] =
     for {
-      itc <- ItcImpl.forUri(cfg.itcUrl)
-      map <- Resource.eval(ItcMapping(itc))
+      log <- Resource.eval(Slf4jLogger.create[F])
+      map <- {
+        implicit val L: Logger[F] = log
+        ItcImpl.forUri(cfg.itcUrl).flatMap(itc => Resource.eval(ItcMapping(itc)))
+      }
       its <- Resource.pure(ItcService.service(map))
     } yield
 

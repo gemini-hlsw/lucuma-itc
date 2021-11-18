@@ -22,18 +22,20 @@ import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.client.middleware._
 import org.http4s.dsl.io._
 import org.http4s.syntax.all._
+import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration._
+import cats.Applicative
 
 /** An ITC implementation that calls the OCS2 ITC server remotely. */
 object ItcImpl {
 
   private val MaxPercentSaturation = 50.0
 
-  def forHeroku[F[_]: Async: Trace]: Resource[F, Itc[F]] =
+  def forHeroku[F[_]: Async: Logger: Trace]: Resource[F, Itc[F]] =
     forUri(uri"https://gemini-itc.herokuapp.com/json")
 
-  def forUri[F[_]: Async: Trace](uri: Uri): Resource[F, Itc[F]] =
+  def forUri[F[_]: Async: Logger: Trace](uri: Uri): Resource[F, Itc[F]] =
     AsyncHttpClient
       .resource(AsyncHttpClient.configure(_.setRequestTimeout(30000)))
       .map(NatchezMiddleware.client[F])
@@ -41,8 +43,9 @@ object ItcImpl {
       .map(ResponseLogger(true, true))
       .map(forClientAndUri[F](_, uri))
 
-  def forClientAndUri[F[_]: Concurrent: Trace](c: Client[F], uri: Uri): Itc[F] =
+  def forClientAndUri[F[_]: Concurrent: Logger: Trace](c: Client[F], uri: Uri): Itc[F] =
     new Itc[F] with Http4sClientDsl[F] {
+      val L = Logger[F]
 
       def calculate(
         targetProfile: TargetProfile,
@@ -78,11 +81,16 @@ object ItcImpl {
                                  constraints,
                                  exposures
               ).asJson
-            Trace[F].put("itc.query"              -> json.spaces2) *>
+            L.info(s"ITC remote query ${json.noSpaces}") *>
+              Trace[F].put("itc.query" -> json.spaces2) *>
               Trace[F].put("itc.exposureDuration" -> exposureDuration.toMillis.toInt) *>
               Trace[F].put("itc.exposures" -> exposures) *>
               Trace[F].put("itc.level" -> level) *>
-              c.expect(POST(json, uri))(jsonOf[F, ItcResult])
+              c.expect(POST(json, uri))(jsonOf[F, ItcResult]).attemptTap {
+                case Left(e) => L.warn(e)("Remote ITC error")
+                case _       => Applicative[F].unit
+              }
+
           }
 
         // Pull our exposure limits out of the observing mode since we'll need them soon.

@@ -51,7 +51,7 @@ object ItcSourceDefinition {
       p.redshift
     )
 
-  private implicit val spatialProfileEncoder: Encoder[SpatialProfile] =
+  implicit val spatialProfileEncoder: Encoder[SpatialProfile] =
     new Encoder[SpatialProfile] {
       import SpatialProfile._
       def apply(a: SpatialProfile): Json =
@@ -67,7 +67,7 @@ object ItcSourceDefinition {
         }
     }
 
-  private implicit val spectralDistributionEncoder: Encoder[SpectralDistribution] =
+  implicit val spectralDistributionEncoder: Encoder[SpectralDistribution] =
     new Encoder[SpectralDistribution] {
       import SpectralDistribution._
       def apply(a: SpectralDistribution): Json =
@@ -87,7 +87,7 @@ object ItcSourceDefinition {
         }
     }
 
-  private implicit val unitEncoder: Encoder[Either[MagnitudeSystem, SurfaceBrightness]] =
+  implicit val unitEncoder: Encoder[Either[MagnitudeSystem, SurfaceBrightness]] =
     new Encoder[Either[MagnitudeSystem, SurfaceBrightness]] {
       def apply(a: Either[MagnitudeSystem, SurfaceBrightness]): Json =
         a match {
@@ -96,13 +96,13 @@ object ItcSourceDefinition {
         }
     }
 
-  private implicit val magnitudeValueEncoder: Encoder[MagnitudeValue] =
+  implicit val magnitudeValueEncoder: Encoder[MagnitudeValue] =
     Encoder[BigDecimal].contramap(MagnitudeValue.fromBigDecimal.reverseGet)
 
-  private implicit val magnitudeBandEncoder: Encoder[MagnitudeBand] =
-    Encoder[String].contramap(_.tag)
+  implicit val magnitudeBandEncoder: Encoder[MagnitudeBand] =
+    Encoder[String].contramap(_.shortName)
 
-  private implicit val redshiftEncoder: Encoder[Redshift] =
+  implicit val redshiftEncoder: Encoder[Redshift] =
     Encoder.forProduct1("z")(_.z)
 
   implicit val encoder: Encoder[ItcSourceDefinition] =
