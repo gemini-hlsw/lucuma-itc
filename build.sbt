@@ -10,7 +10,7 @@ val http4sVersion               = "0.23.6"
 val http4sJdkHttpClientVersion  = "0.5.0"
 val fs2Version                  = "3.2.2"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.14.3"
+val lucumaCoreVersion           = "0.15.0"
 val slf4jVersion                = "1.7.32"
 val log4catsVersion             = "2.1.1"
 val monocleVersion              = "3.1.0"
@@ -112,7 +112,7 @@ lazy val benchmark = project
   .enablePlugins(GatlingPlugin)
   .settings(
     libraryDependencies ++= Seq(
-      "io.circe"      %% "circe-core"            % circeVersion,
+      "io.circe"             %% "circe-core"                % circeVersion,
       "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % Test,
       "io.gatling"            % "gatling-test-framework"    % gatlingVersion % Test
     )
