@@ -99,7 +99,7 @@ lazy val service = project
       "org.typelevel" %% "cats-effect"         % catsEffectVersion,
       "is.cir"        %% "ciris"               % cirisVersion,
       "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
-      // "org.slf4j"      % "slf4j-simple"        % slf4jVersion,
+      "org.slf4j"      % "slf4j-simple"        % slf4jVersion,
       "org.http4s"    %% "http4s-core"         % http4sVersion,
       "org.http4s"    %% "http4s-blaze-server" % http4sVersion,
       "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test
