@@ -4,33 +4,32 @@
 package lucuma.itc
 
 import cats.syntax.all._
-import io.gatling.core.Predef._
-import io.gatling.http.Predef._
-import io.circe.Json
-import io.gatling.http.funspec.GatlingHttpFunSpec
-import lucuma.itc.ItcSourceDefinition._
-import lucuma.core.model.SpatialProfile
-import io.circe.syntax._
-import lucuma.core.model.SpectralDistribution
-import eu.timepit.refined.numeric.Positive
-
 import coulomb.refined._
 import coulomb.si.Kelvin
-import lucuma.core.enum.MagnitudeSystem
-import lucuma.core.math.Redshift
-import lucuma.core.math.MagnitudeValue
-import lucuma.core.enum.MagnitudeBand
-import lucuma.core.math.Angle
-import lucuma.itc.search.ObservingMode
-import lucuma.core.math.Wavelength
-import lucuma.core.enum.GmosNorthDisperser
-import lucuma.core.enum.GmosNorthFpu
-import lucuma.core.enum.GmosNorthFilter
-import lucuma.core.enum.ImageQuality
+import eu.timepit.refined.numeric.Positive
+import io.circe.Json
+import io.circe.syntax._
+import io.gatling.core.Predef._
+import io.gatling.http.Predef._
+import io.gatling.http.funspec.GatlingHttpFunSpec
 import lucuma.core.enum.CloudExtinction
-import lucuma.core.enum.WaterVapor
+import lucuma.core.enum.GmosNorthDisperser
+import lucuma.core.enum.GmosNorthFilter
+import lucuma.core.enum.GmosNorthFpu
+import lucuma.core.enum.ImageQuality
+import lucuma.core.enum.MagnitudeBand
+import lucuma.core.enum.MagnitudeSystem
 import lucuma.core.enum.SkyBackground
+import lucuma.core.enum.WaterVapor
+import lucuma.core.math.Angle
+import lucuma.core.math.MagnitudeValue
+import lucuma.core.math.Redshift
+import lucuma.core.math.Wavelength
+import lucuma.core.model.SpatialProfile
+import lucuma.core.model.SpectralDistribution
 import lucuma.core.util.Enumerated
+import lucuma.itc.ItcSourceDefinition._
+import lucuma.itc.search.ObservingMode
 
 /**
  * This is a unit test mostly to ensure all possible combination of params can be parsed by the

@@ -29,6 +29,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.Magnitude
 import lucuma.core.model.SpatialProfile
 import lucuma.core.model.SpectralDistribution
+import lucuma.core.syntax.enumerated._
 import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
 import lucuma.itc.Itc
@@ -41,6 +42,7 @@ import lucuma.itc.search.TargetProfile
 import lucuma.itc.search.syntax.conditions._
 import lucuma.itc.service.syntax.all._
 import natchez.Trace
+import org.typelevel.log4cats.Logger
 import spire.math.Rational
 
 import java.math.RoundingMode
@@ -52,7 +54,6 @@ import scala.util.Using
 import Query._
 import Value._
 import QueryCompiler._
-import org.typelevel.log4cats.Logger
 
 trait Encoders {
   import io.circe.generic.semiauto._
@@ -527,6 +528,9 @@ object ItcMapping extends Encoders {
           cursorEnvAdd("modes", modes)(i)
         }
 
+        val wvItems = Enumerated[WaterVapor].all.fproductLeft(_.tag.toScreamingSnakeCase).toMap
+        val sbItems = Enumerated[SkyBackground].all.fproductLeft(_.tag.toScreamingSnakeCase).toMap
+
         def constraintsPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
                                                 IorNec[Problem, Environment]
         ] = {
@@ -557,12 +561,12 @@ object ItcMapping extends Encoders {
                .orElse(iqFromTag(iq)),
              ceFromTag(ce.fromScreamingSnakeCase)
                .orElse(ceFromTag(ce)),
-             (Enumerated[WaterVapor].all.find(_.label.toScreamingSnakeCase === wv)),
-             Enumerated[SkyBackground].all.find(_.label.equalsIgnoreCase(sb)),
+             wvItems.get(wv),
+             sbItems.get(sb),
              am
             ).mapN((iq, ce, wv, sb, am) =>
               cursorEnvAdd("constraints", ItcObservingConditions(iq, ce, wv, sb, am.toDouble))(i)
-            ).getOrElse(i.addProblem("Cannot parse constraints"))
+            ).getOrElse(i.addProblem("Cannot parse constraints 2"))
           case (i,
                 ("constraints",
                  ObjectValue(
@@ -593,8 +597,8 @@ object ItcMapping extends Encoders {
                .orElse(iqFromTag(iq)),
              ceFromTag(ce.fromScreamingSnakeCase)
                .orElse(ceFromTag(ce)),
-             (Enumerated[WaterVapor].all.find(_.label.toScreamingSnakeCase === wv)),
-             Enumerated[SkyBackground].all.find(_.label.equalsIgnoreCase(sb)),
+             wvItems.get(wv),
+             sbItems.get(sb),
              ha
             ).mapN((iq, ce, wv, sb, am) =>
               cursorEnvAdd("constraints", ItcObservingConditions(iq, ce, wv, sb, am.toDouble))(i)
