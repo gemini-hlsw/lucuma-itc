@@ -29,8 +29,8 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.Magnitude
 import lucuma.core.model.SpatialProfile
 import lucuma.core.model.SpectralDistribution
-import lucuma.core.syntax.string._
 import lucuma.core.syntax.enumerated._
+import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
 import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
@@ -42,6 +42,7 @@ import lucuma.itc.search.TargetProfile
 import lucuma.itc.search.syntax.conditions._
 import lucuma.itc.service.syntax.all._
 import natchez.Trace
+import org.typelevel.log4cats.Logger
 import spire.math.Rational
 
 import java.math.RoundingMode
@@ -53,7 +54,6 @@ import scala.util.Using
 import Query._
 import Value._
 import QueryCompiler._
-import org.typelevel.log4cats.Logger
 
 trait Encoders {
   import io.circe.generic.semiauto._

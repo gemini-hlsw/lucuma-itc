@@ -3,6 +3,7 @@
 
 package lucuma.itc
 
+import cats.Applicative
 import cats.effect._
 import cats.implicits._
 import io.circe.syntax._
@@ -25,7 +26,6 @@ import org.http4s.syntax.all._
 import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration._
-import cats.Applicative
 
 /** An ITC implementation that calls the OCS2 ITC server remotely. */
 object ItcImpl {

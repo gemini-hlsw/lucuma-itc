@@ -5,15 +5,14 @@ package lucuma.itc.service
 
 import cats.syntax.all._
 import io.circe.literal._
-import io.circe.syntax._
-import lucuma.core.enum.ImageQuality
 import lucuma.core.enum.CloudExtinction
-import lucuma.core.enum.WaterVapor
+import lucuma.core.enum.ImageQuality
 import lucuma.core.enum.SkyBackground
+import lucuma.core.enum.WaterVapor
+import lucuma.core.syntax.enumerated._
+import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcObservingConditions
-import lucuma.core.syntax.string._
-import lucuma.core.syntax.enumerated._
 
 class GraphQLSpectroscopySuite extends GraphQLSuite {
 
