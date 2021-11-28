@@ -1,6 +1,6 @@
 val catsEffectVersion           = "3.2.9"
 val catsTestkitScalaTestVersion = "2.1.5"
-val catsVersion                 = "2.6.1"
+val catsVersion                 = "2.7.0"
 val catsScalacheckVersion       = "0.3.1"
 val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.1"
