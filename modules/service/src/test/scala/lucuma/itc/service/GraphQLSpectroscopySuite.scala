@@ -372,4 +372,92 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
       )
     }
   }
+
+  test("Bad airmass") {
+    query(
+      """
+        query {
+          spectroscopy(input: {
+            wavelength: {
+              nanometers: 60,
+            },
+            redshift: 0.1,
+            signalToNoise: 2,
+            spatialProfile: {
+              sourceType: POINT_SOURCE
+            },
+            spectralDistribution: {
+              blackBody: {
+                temperature: 50.1
+              }
+            },
+            magnitude: {
+              band: AP,
+              value: 5,
+              error: 1.2,
+              system: JY
+            },
+            constraints: {
+              imageQuality: POINT_THREE,
+              cloudExtinction: POINT_FIVE,
+              skyBackground: DARK,
+              waterVapor: DRY,
+              elevationRange: {
+                airmassRange: {
+                  min: 2,
+                  max: 1
+                }
+              }
+            },
+            modes: [{
+              gmosN: {
+                filter: G_PRIME,
+                fpu: LONG_SLIT_0_25,
+                disperser: B1200_G5301
+              }
+            }, {
+              gmosN: {
+                filter: GG455,
+                fpu: LONG_SLIT_0_25,
+                disperser: B1200_G5301
+              }
+            }
+            ]
+          }) {
+            results {
+                mode {
+                  instrument
+                  resolution
+                  params {
+                    ... on GmosNITCParams {
+                      disperser
+                    }
+                  }
+                  wavelength {
+                    nanometers
+                  }
+                }
+                itc {
+                  ... on ItcSuccess {
+                    exposures
+                    exposureTime {
+                      seconds
+                    }
+                  }
+                }
+            }
+          }
+        }
+        """,
+      json"""
+        {
+          "errors": [
+            {
+              "message" : "Airmass max value 1 must be more than the min value 2"
+            }
+          ]
+        }
+        """
+    )
+  }
 }
