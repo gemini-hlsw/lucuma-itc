@@ -180,8 +180,8 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
               "waterVapor" : "DRY",
               "elevationRange" : {
                 "airmassRange": {
-                  "min": "1",
-                  "max": "2"
+                  "min": "0.1",
+                  "max": "1.3"
                 }
               }
             },

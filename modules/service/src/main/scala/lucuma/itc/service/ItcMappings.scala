@@ -213,7 +213,7 @@ object ItcMapping extends Encoders {
     ).traverseN { (wv, rs, sn, sp, sd, m, modes, c) =>
       modes
         .parTraverse { mode =>
-          Logger[F].info(s"ITC calculate for $mode") *>
+          Logger[F].info(s"ITC calculate for $mode and conditions $c") *>
             Trace[F].put(("itc.modes_count", modes.length)) *>
             itc
               .calculate(
@@ -305,6 +305,8 @@ object ItcMapping extends Encoders {
             LeafMapping[Long](LongType),
             LeafMapping[FiniteDuration](DurationType)
           )
+
+        val AirMassBuckets = Vector(BigDecimal(1.2), BigDecimal(1.5), BigDecimal(2.0))
 
         def wavelengthPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
                                                IorNec[Problem, Environment]
@@ -556,7 +558,10 @@ object ItcMapping extends Encoders {
             val airMass: IorNec[String, BigDecimal] =
               (bigDecimalValue(min), bigDecimalValue(max))
                 .mapN { (min, max) =>
-                  if (max >= min) max.rightIor
+                  if (max >= min)
+                    max.rightIor.map { m =>
+                      AirMassBuckets.find(m <= _).getOrElse(AirMassBuckets.last)
+                    }
                   else s"Airmass max value $max must be more than the min value $min".leftIorNec
                 }
                 .getOrElse("Missing airmass values".leftIorNec)
