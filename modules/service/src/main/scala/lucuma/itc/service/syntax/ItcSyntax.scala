@@ -30,6 +30,11 @@ trait ItcSyntax {
       self.addLeft(NonEmptyChain.of(Problem(problem)))
   }
 
+  implicit class NecOps[A](self: IorNec[String, A]) {
+    def leftProblems: Ior[NonEmptyChain[Problem], A] =
+      self.leftMap(_.map(Problem(_)))
+  }
+
   implicit class StringOps(val self: String) {
     def fromScreamingSnakeCase: String =
       self.split("_").map(_.toLowerCase.capitalize).mkString("")

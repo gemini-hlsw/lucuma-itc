@@ -213,7 +213,7 @@ object ItcMapping extends Encoders {
     ).traverseN { (wv, rs, sn, sp, sd, m, modes, c) =>
       modes
         .parTraverse { mode =>
-          Logger[F].info(s"ITC calculate for $mode") *>
+          Logger[F].info(s"ITC calculate for $mode and conditions $c") *>
             Trace[F].put(("itc.modes_count", modes.length)) *>
             itc
               .calculate(
@@ -305,6 +305,8 @@ object ItcMapping extends Encoders {
             LeafMapping[Long](LongType),
             LeafMapping[FiniteDuration](DurationType)
           )
+
+        val AirMassBuckets = Vector(BigDecimal(1.2), BigDecimal(1.5), BigDecimal(2.0))
 
         def wavelengthPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
                                                IorNec[Problem, Environment]
@@ -553,20 +555,38 @@ object ItcMapping extends Encoders {
                  )
                 )
               ) =>
-            val am = (bigDecimalValue(min), bigDecimalValue(max)).mapN { (min, max) =>
-              if (max > min && min >= 1 && max >= 1) max.some else none
-            }.flatten
+            val airMass: IorNec[String, BigDecimal] =
+              (bigDecimalValue(min), bigDecimalValue(max))
+                .mapN { (min, max) =>
+                  if (max >= min)
+                    max.rightIor.map { m =>
+                      AirMassBuckets.find(m <= _).getOrElse(AirMassBuckets.last)
+                    }
+                  else s"Airmass max value $max must be more than the min value $min".leftIorNec
+                }
+                .getOrElse("Missing airmass values".leftIorNec)
 
-            (iqFromTag(iq.fromScreamingSnakeCase)
-               .orElse(iqFromTag(iq)),
-             ceFromTag(ce.fromScreamingSnakeCase)
-               .orElse(ceFromTag(ce)),
-             wvItems.get(wv),
-             sbItems.get(sb),
-             am
-            ).mapN((iq, ce, wv, sb, am) =>
-              cursorEnvAdd("constraints", ItcObservingConditions(iq, ce, wv, sb, am.toDouble))(i)
-            ).getOrElse(i.addProblem("Cannot parse constraints 2"))
+            val imageQuality: IorNec[String, ImageQuality] =
+              iqFromTag(iq.fromScreamingSnakeCase)
+                .orElse(iqFromTag(iq))
+                .toRightIorNec("Cannot parse iq")
+
+            val cloudExtinction: IorNec[String, CloudExtinction] =
+              ceFromTag(ce.fromScreamingSnakeCase)
+                .orElse(ceFromTag(ce))
+                .toRightIorNec("Cannot parse cloud extinction")
+
+            val waterVapor    = wvItems.get(wv).toRightIorNec("Cannot parse water vapor")
+            val skyBackground = sbItems.get(sb).toRightIorNec("Cannot parse sky background")
+            (airMass, imageQuality, cloudExtinction, waterVapor, skyBackground)
+              .parMapN { (am, iq, ce, wv, sb) =>
+                cursorEnvAdd("constraints", ItcObservingConditions(iq, ce, wv, sb, am.toDouble))(
+                  i
+                )
+              }
+              .leftProblems
+              .flatten
+
           case (i,
                 ("constraints",
                  ObjectValue(
@@ -589,20 +609,34 @@ object ItcMapping extends Encoders {
                  )
                 )
               ) =>
-            val ha = (bigDecimalValue(min), bigDecimalValue(max)).mapN { (min, max) =>
-              if (max > min) max.some else none
-            }.flatten
+            val hourAngle: IorNec[String, BigDecimal] =
+              (bigDecimalValue(min), bigDecimalValue(max))
+                .mapN { (min, max) =>
+                  if (max >= min) max.rightIor
+                  else s"Hour Angle max value $max must be more than the min value $min".leftIorNec
+                }
+                .getOrElse("Missing Hour Angle values".leftIorNec)
 
-            (iqFromTag(iq.fromScreamingSnakeCase)
-               .orElse(iqFromTag(iq)),
-             ceFromTag(ce.fromScreamingSnakeCase)
-               .orElse(ceFromTag(ce)),
-             wvItems.get(wv),
-             sbItems.get(sb),
-             ha
-            ).mapN((iq, ce, wv, sb, am) =>
-              cursorEnvAdd("constraints", ItcObservingConditions(iq, ce, wv, sb, am.toDouble))(i)
-            ).getOrElse(i.addProblem("Cannot parse constraints"))
+            val imageQuality: IorNec[String, ImageQuality] =
+              iqFromTag(iq.fromScreamingSnakeCase)
+                .orElse(iqFromTag(iq))
+                .toRightIorNec("Cannot parse iq")
+
+            val cloudExtinction: IorNec[String, CloudExtinction] =
+              ceFromTag(ce.fromScreamingSnakeCase)
+                .orElse(ceFromTag(ce))
+                .toRightIorNec("Cannot parse cloud extinction")
+
+            val waterVapor    = wvItems.get(wv).toRightIorNec("Cannot parse water vapor")
+            val skyBackground = sbItems.get(sb).toRightIorNec("Cannot parse sky background")
+            (hourAngle, imageQuality, cloudExtinction, waterVapor, skyBackground)
+              .parMapN { (am, iq, ce, wv, sb) =>
+                cursorEnvAdd("constraints", ItcObservingConditions(iq, ce, wv, sb, am.toDouble))(
+                  i
+                )
+              }
+              .leftProblems
+              .flatten
         }
 
         def fallback(a: (IorNec[Problem, Environment], (String, Value))) =
