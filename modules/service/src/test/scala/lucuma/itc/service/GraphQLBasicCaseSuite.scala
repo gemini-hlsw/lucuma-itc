@@ -27,7 +27,9 @@ class GraphQLBasicCaseSuite extends GraphQLSuite {
               nanometers: 60,
               picometers: 300
             },
-            redshift: 0.1,
+            radialVelocity: {
+              kilometersPerSecond: 1000
+            },
             simultaneousCoverage: {
               picometers: 200
             },
@@ -65,7 +67,7 @@ class GraphQLBasicCaseSuite extends GraphQLSuite {
     )
   }
 
-  test("bad redshift") {
+  test("bad radial velocity") {
     query(
       """
         query {
@@ -73,7 +75,9 @@ class GraphQLBasicCaseSuite extends GraphQLSuite {
             wavelength: {
               picometers: 300
             },
-            redshift: "ddd",
+            radialVelocity: {
+              kilometersPerSecond: ddd
+            },
             simultaneousCoverage: {
               picometers: 200
             },
@@ -106,13 +110,13 @@ class GraphQLBasicCaseSuite extends GraphQLSuite {
         """,
       json"""{
         "errors": [
-          {"message": "Redshift value is not valid StringValue(ddd)"}
+          {"message" : "Radial Velocity value is not valid List((centimetersPerSecond,AbsentValue), (metersPerSecond,AbsentValue), (kilometersPerSecond,UntypedEnumValue(ddd)))"}
         ]
       }"""
     )
   }
 
-  test("bad redshift and wavelength") {
+  test("bad radial velocity and wavelength") {
     query(
       """
         query {
@@ -121,7 +125,9 @@ class GraphQLBasicCaseSuite extends GraphQLSuite {
               picometers: 300,
               nanometers: 200
             },
-            redshift: "0.1",
+            radialVelocity: {
+              kilometersPerSecond: ddd
+            },
             simultaneousCoverage: {
               picometers: 200
             },
@@ -153,7 +159,8 @@ class GraphQLBasicCaseSuite extends GraphQLSuite {
         """,
       json"""{
         "errors": [
-          {"message": "Wavelength defined with multiple units {picometers, nanometers}"}
+          {"message": "Wavelength defined with multiple units {picometers, nanometers}"},
+          {"message" : "Radial Velocity value is not valid List((centimetersPerSecond,AbsentValue), (metersPerSecond,AbsentValue), (kilometersPerSecond,UntypedEnumValue(ddd)))"}
         ]
       }"""
     )
@@ -167,7 +174,9 @@ class GraphQLBasicCaseSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            redshift: 0.1,
+            radialVelocity: {
+              kilometersPerSecond: 100
+            },
             simultaneousCoverage: {
               nanometers: 200
             },
@@ -240,11 +249,13 @@ class GraphQLBasicCaseSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            redshift: 0.1,
             simultaneousCoverage: {
               nanometers: 200
             },
             resolution: 10,
+            radialVelocity: {
+              kilometersPerSecond: 5
+            },
             signalToNoise: 2,
             spatialProfile: {
               sourceType: POINT_SOURCE
@@ -296,7 +307,9 @@ class GraphQLBasicCaseSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            redshift: 0.1,
+            radialVelocity: {
+              kilometersPerSecond: 10
+            },
             simultaneousCoverage: {
               nanometers: 200
             },

@@ -24,8 +24,9 @@ import lucuma.core.enum.WaterVapor
 import lucuma.core.enum._
 import lucuma.core.math.Angle
 import lucuma.core.math.MagnitudeValue
-import lucuma.core.math.Redshift
+import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
+import lucuma.core.math.units._
 import lucuma.core.model.Magnitude
 import lucuma.core.model.SpatialProfile
 import lucuma.core.model.SpectralDistribution
@@ -159,7 +160,7 @@ object ItcMapping extends Encoders {
   )(env: Cursor.Env): F[Result[SpectroscopyResults]] =
     (env.get[Wavelength]("wavelength"),
      env.get[Wavelength]("simultaneousCoverage"),
-     env.get[Redshift]("redshift"),
+     env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[Rational]("resolution"),
      env.get[types.numeric.PosBigDecimal]("signalToNoise"),
      env.get[SpatialProfile]("spatialProfile"),
@@ -203,7 +204,7 @@ object ItcMapping extends Encoders {
     itc: Itc[F]
   )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] =
     (env.get[Wavelength]("wavelength"),
-     env.get[Redshift]("redshift"),
+     env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[types.numeric.PosBigDecimal]("signalToNoise"),
      env.get[SpatialProfile]("spatialProfile"),
      env.get[SpectralDistribution]("spectralDistribution"),
@@ -274,6 +275,17 @@ object ItcMapping extends Encoders {
       case Some(("micrometers", n))          =>
         bigDecimalValue(n).flatMap(Wavelength.decimalMicrometers.getOption)
       case _                                 => None
+    }
+
+  def parseRadialVelocity(units: List[(String, Value)]): Option[RadialVelocity] =
+    units.find(_._2 != Value.AbsentValue) match {
+      case Some(("centimetersPerSecond", IntValue(n))) =>
+        RadialVelocity(n.withUnit[CentimetersPerSecond].to[BigDecimal, MetersPerSecond])
+      case Some(("metersPerSecond", n))                =>
+        bigDecimalValue(n).flatMap(v => RadialVelocity(v.withUnit[MetersPerSecond]))
+      case Some(("kilometersPerSecond", n))            =>
+        bigDecimalValue(n).flatMap(v => RadialVelocity.kilometerspersecond.getOption(v))
+      case _                                           => None
     }
 
   def apply[F[_]: Sync: Logger: Parallel: Trace](itc: Itc[F]): F[Mapping[F]] =
@@ -355,17 +367,16 @@ object ItcMapping extends Encoders {
               .getOrElse(i.addProblem("Simultaneous coverage couldn't be parsed"))
         }
 
-        def redshiftPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
-                                             IorNec[Problem, Environment]
+        def radialVelocityPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
+                                                   IorNec[Problem, Environment]
         ] = {
-          // redshift
-          case (i, ("redshift", r)) =>
-            bigDecimalValue(r) match {
+          // radialVelocity
+          case (i, ("radialVelocity", ObjectValue(r))) =>
+            parseRadialVelocity(r) match {
               case Some(r) =>
-                val rs = Redshift(r)
-                cursorEnvAdd("redshift", rs)(i)
+                cursorEnvAdd("radialVelocity", r)(i)
               case _       =>
-                i.addProblem(s"Redshift value is not valid $r")
+                i.addProblem(s"Radial Velocity value is not valid $r")
             }
         }
 
@@ -650,7 +661,7 @@ object ItcMapping extends Encoders {
                   wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
                     case (e, c) =>
                       wavelengthPartial
-                        .orElse(redshiftPartial)
+                        .orElse(radialVelocityPartial)
                         .orElse(signalToNoisePartial)
                         .orElse(spatialProfilePartial)
                         .orElse(spectralDistributionPartial)
@@ -671,7 +682,7 @@ object ItcMapping extends Encoders {
                         .orElse(signalToNoisePartial)
                         .orElse(spatialProfilePartial)
                         .orElse(spectralDistributionPartial)
-                        .orElse(redshiftPartial)
+                        .orElse(radialVelocityPartial)
                         .orElse(magnitudePartial)
                         .applyOrElse(
                           (e, c),
