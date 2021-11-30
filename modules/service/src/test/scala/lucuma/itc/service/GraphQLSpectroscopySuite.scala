@@ -24,7 +24,9 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            redshift: 0.1,
+            radialVelocity: {
+              kilometersPerSecond: 1000
+            },
             signalToNoise: 2,
             spatialProfile: {
               sourceType: POINT_SOURCE
@@ -172,7 +174,9 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
               "error" : null,
               "system" : "VEGA"
             },
-            "redshift" : "0.1",
+            "radialVelocity": {
+              "metersPerSecond": 1000
+            },
             "constraints" : {
               "imageQuality" : "POINT_EIGHT",
               "cloudExtinction" : "POINT_FIVE",
@@ -249,7 +253,9 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            redshift: 0.1,
+            radialVelocity: {
+              centimetersPerSecond: 1000
+            },
             signalToNoise: 2,
             spatialProfile: {
               sourceType: POINT_SOURCE
@@ -381,7 +387,9 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            redshift: 0.1,
+            radialVelocity: {
+              metersPerSecond: 1000
+            },
             signalToNoise: 2,
             spatialProfile: {
               sourceType: POINT_SOURCE
