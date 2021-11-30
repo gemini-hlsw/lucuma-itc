@@ -1,4 +1,4 @@
-val catsEffectVersion           = "3.2.9"
+val catsEffectVersion           = "3.3.0"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsVersion                 = "2.7.0"
 val catsScalacheckVersion       = "0.3.1"
