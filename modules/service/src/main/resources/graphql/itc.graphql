@@ -751,7 +751,7 @@ input QueryConfigurationAlternativeSearchInput {
   # Target magnitude/system/band.
   magnitude: MagnitudeCreateInput!
 
-  # Target redshift.
+  # Target radial velocity
   radialVelocity: RadialVelocityInput!
 }
 
