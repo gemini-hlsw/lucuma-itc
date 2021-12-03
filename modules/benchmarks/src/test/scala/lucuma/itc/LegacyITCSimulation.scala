@@ -30,6 +30,9 @@ import lucuma.core.model.SpectralDistribution
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcSourceDefinition._
 import lucuma.itc.search.ObservingMode
+import lucuma.core.enum.GmosSouthDisperser
+import lucuma.core.enum.GmosSouthFilter
+import lucuma.core.enum.GmosSouthFpu
 
 /**
  * This is a unit test mostly to ensure all possible combination of params can be parsed by the
@@ -59,17 +62,25 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     analysisMethod = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
   )
 
-  val telescope                       = ItcTelescopeDetails(
+  val telescope  = ItcTelescopeDetails(
     wfs = ItcWavefrontSensor.OIWFS
   )
-  val instrument                      = ItcInstrumentDetails.fromObservingMode(
+  val instrument = ItcInstrumentDetails.fromObservingMode(
     ObservingMode.Spectroscopy.GmosNorth(Wavelength.decimalNanometers.getOption(60).get,
                                          GmosNorthDisperser.B1200_G5301,
                                          GmosNorthFpu.Ifu2Slits,
-                                         GmosNorthFilter.GG455.some
+                                         none
     )
   )
-  def body(c: ItcObservingConditions) = Json.obj(
+
+  val conditions = ItcObservingConditions(ImageQuality.PointEight,
+                                          CloudExtinction.OnePointFive,
+                                          WaterVapor.Median,
+                                          SkyBackground.Bright,
+                                          2
+  )
+
+  def bodyCond(c: ItcObservingConditions) = Json.obj(
     "source"      -> sourceDefinition.asJson,
     "observation" -> obs.asJson,
     "conditions"  -> c.asJson,
@@ -77,24 +88,138 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     "instrument"  -> instrument.asJson
   )
 
-  val allConditions =
-    Enumerated[ImageQuality].all
-      .zip(Enumerated[CloudExtinction].all)
-      .zip(Enumerated[WaterVapor].all)
-      .zip(Enumerated[SkyBackground].all)
-      .map { case (((iq, ce), wv), sb) =>
-        ItcObservingConditions(iq, ce, wv, sb, 2)
-      }
-
-  allConditions.map { c =>
+  Enumerated[ImageQuality].all.map { iq =>
     spec {
-      http("sanity")
+      http("sanity_cond_iq")
         .post("/json")
         .headers(headers_10)
         .check(status.in(200, 400))
         .check(substring("decode").notExists)
-        .body(StringBody(body(c).noSpaces))
+        .body(StringBody(bodyCond(conditions.copy(iq = iq)).noSpaces))
     }
   }
 
+  Enumerated[CloudExtinction].all.map { ce =>
+    spec {
+      http("sanity_cond_ce")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200, 400))
+        .check(substring("decode").notExists)
+        .body(StringBody(bodyCond(conditions.copy(cc = ce)).noSpaces))
+    }
+  }
+
+  Enumerated[WaterVapor].all.map { wv =>
+    spec {
+      http("sanity_cond_wv")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200, 400))
+        .check(substring("decode").notExists)
+        .body(StringBody(bodyCond(conditions.copy(wv = wv)).noSpaces))
+    }
+  }
+
+  Enumerated[SkyBackground].all.map { sb =>
+    spec {
+      http("sanity_cond_sb")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200, 400))
+        .check(substring("decode").notExists)
+        .body(StringBody(bodyCond(conditions.copy(sb = sb)).noSpaces))
+    }
+  }
+
+  val gnConf = ObservingMode.Spectroscopy.GmosNorth(Wavelength.decimalNanometers.getOption(60).get,
+                                                    GmosNorthDisperser.B1200_G5301,
+                                                    GmosNorthFpu.Ifu2Slits,
+                                                    none
+  )
+
+  val gsConf = ObservingMode.Spectroscopy.GmosSouth(Wavelength.decimalNanometers.getOption(60).get,
+                                                    GmosSouthDisperser.B1200_G5321,
+                                                    GmosSouthFpu.Ifu2Slits,
+                                                    none
+  )
+
+  def bodyConf(c: ObservingMode.Spectroscopy) = Json.obj(
+    "source"      -> sourceDefinition.asJson,
+    "observation" -> obs.asJson,
+    "conditions"  -> ItcObservingConditions(ImageQuality.PointEight,
+                                           CloudExtinction.OnePointFive,
+                                           WaterVapor.Median,
+                                           SkyBackground.Dark,
+                                           2
+    ).asJson,
+    "telescope"   -> telescope.asJson,
+    "instrument"  -> ItcInstrumentDetails.fromObservingMode(c).asJson
+  )
+
+  Enumerated[GmosNorthDisperser].all.map { d =>
+    spec {
+      http("sanity_gn_disperser")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200, 400))
+        .check(substring("decode").notExists)
+        .body(StringBody(bodyConf(gnConf.copy(disperser = d)).noSpaces))
+    }
+  }
+
+  Enumerated[GmosNorthFpu].all.map { f =>
+    spec {
+      http("sanity_gn_fpu")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200, 400))
+        .check(substring("decode").notExists)
+        .body(StringBody(bodyConf(gnConf.copy(fpu = f)).noSpaces))
+    }
+  }
+
+  Enumerated[GmosNorthFilter].all.map { f =>
+    spec {
+      http("sanity_gn_filter")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200, 400))
+        .check(substring("decode").notExists)
+        .body(StringBody(bodyConf(gnConf.copy(filter = f.some)).noSpaces))
+    }
+  }
+
+  Enumerated[GmosSouthDisperser].all.map { d =>
+    spec {
+      http("sanity_gs_disperser")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200, 400))
+        .check(substring("decode").notExists)
+        .body(StringBody(bodyConf(gsConf.copy(disperser = d)).noSpaces))
+    }
+  }
+
+  Enumerated[GmosSouthFpu].all.filter(_ =!= GmosSouthFpu.Bhros).map { f =>
+    spec {
+      http("sanity_gs_fpu")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200, 400))
+        .check(substring("decode").notExists)
+        .body(StringBody(bodyConf(gsConf.copy(fpu = f)).noSpaces))
+    }
+  }
+
+  Enumerated[GmosSouthFilter].all.map { f =>
+    spec {
+      http("sanity_gn_filter")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200, 400))
+        .check(substring("decode").notExists)
+        .body(StringBody(bodyConf(gsConf.copy(filter = f.some)).noSpaces))
+    }
+  }
 }

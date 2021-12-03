@@ -37,6 +37,7 @@ import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosNorth
+import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
 import lucuma.itc.search.Result.Spectroscopy
 import lucuma.itc.search.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
@@ -113,7 +114,10 @@ trait Encoders {
   implicit val encoderGmosNITCParams: Encoder[GmosNITCParams] =
     deriveEncoder[GmosNITCParams]
 
-  implicit val encoderGmosNorth: Encoder[GmosNorth]                      = new Encoder[GmosNorth] {
+  implicit val encoderGmosSITCParams: Encoder[GmosSITCParams] =
+    deriveEncoder[GmosSITCParams]
+
+  implicit val encoderGmosNorth: Encoder[GmosNorth] = new Encoder[GmosNorth] {
     final def apply(a: GmosNorth): Json = Json.obj(
       ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
       ("resolution", Json.fromInt(a.resolution.toInt)),
@@ -121,8 +125,19 @@ trait Encoders {
       ("wavelength", a.λ.asJson)
     )
   }
+
+  implicit val encoderGmosSouth: Encoder[GmosSouth] = new Encoder[GmosSouth] {
+    final def apply(a: GmosSouth): Json = Json.obj(
+      ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+      ("resolution", Json.fromInt(a.resolution.toInt)),
+      ("params", GmosSITCParams(a.disperser, a.fpu, a.filter).asJson),
+      ("wavelength", a.λ.asJson)
+    )
+  }
+
   implicit val encoderObservingMode: Encoder[ObservingMode.Spectroscopy] = Encoder.instance {
     case gn: GmosNorth => gn.asJson
+    case gs: GmosSouth => gs.asJson
   }
 
   implicit val encoderSpectroscopy: Encoder[Spectroscopy] = new Encoder[Spectroscopy] {
@@ -137,11 +152,19 @@ trait Encoders {
 
 }
 
+sealed trait SpectroscopyParams
+
 final case class GmosNITCParams(
   disperser: GmosNorthDisperser,
   fpu:       GmosNorthFpu,
   filter:    Option[GmosNorthFilter]
-)
+) extends SpectroscopyParams
+
+final case class GmosSITCParams(
+  disperser: GmosSouthDisperser,
+  fpu:       GmosSouthFpu,
+  filter:    Option[GmosSouthFilter]
+) extends SpectroscopyParams
 
 object ItcMapping extends Encoders {
 
@@ -209,36 +232,32 @@ object ItcMapping extends Encoders {
      env.get[SpatialProfile]("spatialProfile"),
      env.get[SpectralDistribution]("spectralDistribution"),
      env.get[Magnitude]("magnitude"),
-     env.get[List[GmosNITCParams]]("modes"),
+     env.get[List[SpectroscopyParams]]("modes"),
      env.get[ItcObservingConditions]("constraints")
-    ).traverseN { (wv, rs, sn, sp, sd, m, modes, c) =>
+    ).traverseN { (wv, rs, sn, sp, sd, brightness, modes, c) =>
       modes
         .parTraverse { mode =>
-          Logger[F].info(s"ITC calculate for $mode and conditions $c") *>
-            Trace[F].put(("itc.modes_count", modes.length)) *>
-            itc
-              .calculate(
-                TargetProfile(sp, sd, m, rs),
-                ObservingMode.Spectroscopy
-                  .GmosNorth(wv, mode.disperser, mode.fpu, mode.filter),
-                c,
-                sn.value
-              )
-              .handleErrorWith { case x =>
-                Logger[F].error(x)(s"Upstream error") *>
-                  Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen
+          Logger[F].info(s"ITC calculate for $mode, conditions $c and brightness $brightness") *>
+            Trace[F].put(("itc.modes_count", modes.length)) *> {
+              val specMode = mode match {
+                case GmosNITCParams(disperser, fpu, filter) =>
+                  ObservingMode.Spectroscopy.GmosNorth(wv, disperser, fpu, filter)
+                case GmosSITCParams(disperser, fpu, filter) =>
+                  ObservingMode.Spectroscopy.GmosSouth(wv, disperser, fpu, filter)
               }
-              .map(r =>
-                SpectroscopyResults(
-                  List(
-                    Spectroscopy(
-                      ObservingMode.Spectroscopy
-                        .GmosNorth(wv, mode.disperser, mode.fpu, mode.filter),
-                      r
-                    )
-                  )
+              itc
+                .calculate(
+                  TargetProfile(sp, sd, brightness, rs),
+                  specMode,
+                  c,
+                  sn.value
                 )
-              )
+                .handleErrorWith { case x =>
+                  Logger[F].error(x)(s"Upstream error") *>
+                    Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen
+                }
+                .map(r => SpectroscopyResults(List(Spectroscopy(specMode, r))))
+            }
         }
         .map(_.rightIor[NonEmptyChain[Problem]])
         .handleErrorWith { case x =>
@@ -287,6 +306,20 @@ object ItcMapping extends Encoders {
         bigDecimalValue(n).flatMap(v => RadialVelocity.kilometerspersecond.getOption(v))
       case _                                           => None
     }
+
+  def enumTags[A: Enumerated] =
+    Enumerated[A].all.fproductLeft(_.tag.toScreamingSnakeCase).toMap
+
+  val gnFilter    = enumTags[GmosNorthFilter]
+  val gnDisperser = enumTags[GmosNorthDisperser]
+  val gnFpu       = enumTags[GmosNorthFpu]
+
+  val gsFilter    = enumTags[GmosSouthFilter]
+  val gsDisperser = enumTags[GmosSouthDisperser]
+  val gsFpu       = enumTags[GmosSouthFpu]
+
+  val wvItems = enumTags[WaterVapor]
+  val sbItems = enumTags[SkyBackground]
 
   def apply[F[_]: Sync: Logger: Parallel: Trace](itc: Itc[F]): F[Mapping[F]] =
     loadSchema[F].map { loadedSchema =>
@@ -507,42 +540,44 @@ object ItcMapping extends Encoders {
         def instrumentModesPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
                                                     IorNec[Problem, Environment]
         ] = { case (i, ("modes", ListValue(m))) =>
-          val modes = m.collect { case ObjectValue(List(("gmosN", gmosN))) =>
-            gmosN match {
-              case ObjectValue(
-                    List(("disperser", TypedEnumValue(EnumValue(d, _, _, _))),
-                         ("fpu", TypedEnumValue(EnumValue(fpu, _, _, _))),
-                         ("filter", f)
-                    )
-                  ) =>
-                val filterOpt = f match {
-                  case TypedEnumValue(EnumValue(f, _, _, _)) =>
-                    GmosNorthFilter
-                      .fromTag(f.fromScreamingSnakeCase)
-                      .orElse(GmosNorthFilter.fromTag(f))
-                  case _                                     => none
-                }
-                (GmosNorthDisperser
-                   .fromTag(d.fromScreamingSnakeCase)
-                   .orElse(GmosNorthDisperser.fromTag(d)),
-                 GmosNorthFpu
-                   .fromTag(fpu.fromScreamingSnakeCase)
-                   .orElse(GmosNorthFpu.fromTag(fpu))
-                   .orElse(
-                     GmosNorthFpu.all.find(
-                       _.tag.toLowerCase.replace("_", "") === fpu.toLowerCase.replace("_", "")
-                     )
-                   )
-                ).mapN(GmosNITCParams(_, _, filterOpt))
-              case _ =>
-                none
-            }
+          val modes = m.collect {
+            case ObjectValue(List(("gmosN", AbsentValue), ("gmosS", gmosS))) =>
+              gmosS match {
+                case ObjectValue(
+                      List(("disperser", TypedEnumValue(EnumValue(d, _, _, _))),
+                           ("fpu", TypedEnumValue(EnumValue(fpu, _, _, _))),
+                           ("filter", f)
+                      )
+                    ) =>
+                  val filterOpt = f match {
+                    case TypedEnumValue(EnumValue(f, _, _, _)) =>
+                      gsFilter.get(f)
+                    case _                                     => none
+                  }
+                  (gsDisperser.get(d), gsFpu.get(fpu)).mapN(GmosSITCParams(_, _, filterOpt))
+                case _ =>
+                  none
+              }
+            case ObjectValue(List(("gmosN", gmosN), ("gmosS", AbsentValue))) =>
+              gmosN match {
+                case ObjectValue(
+                      List(("disperser", TypedEnumValue(EnumValue(d, _, _, _))),
+                           ("fpu", TypedEnumValue(EnumValue(fpu, _, _, _))),
+                           ("filter", f)
+                      )
+                    ) =>
+                  val filterOpt = f match {
+                    case TypedEnumValue(EnumValue(f, _, _, _)) =>
+                      gnFilter.get(f)
+                    case _                                     => none
+                  }
+                  (gnDisperser.get(d), gnFpu.get(fpu)).mapN(GmosNITCParams(_, _, filterOpt))
+                case _ =>
+                  none
+              }
           }.flatten
           cursorEnvAdd("modes", modes)(i)
         }
-
-        val wvItems = Enumerated[WaterVapor].all.fproductLeft(_.tag.toScreamingSnakeCase).toMap
-        val sbItems = Enumerated[SkyBackground].all.fproductLeft(_.tag.toScreamingSnakeCase).toMap
 
         def constraintsPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
                                                 IorNec[Problem, Environment]
