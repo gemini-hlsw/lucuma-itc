@@ -8,6 +8,9 @@ package object syntax {
       extends ToGmosNorthFilterOps
       with ToGmosNorthDisperserOps
       with ToGmosNorthFpuOps
+      with ToGmosSouthFilterOps
+      with ToGmosSouthDisperserOps
+      with ToGmosSouthFpuOps
       with ToConditionsOps
 
 }

@@ -9,6 +9,9 @@ import lucuma.itc.ItcObservationDetails
 import lucuma.itc.search.syntax.gmosnorthdisperser._
 import lucuma.itc.search.syntax.gmosnorthfilter._
 import lucuma.itc.search.syntax.gmosnorthfpu._
+import lucuma.itc.search.syntax.gmossouthdisperser._
+import lucuma.itc.search.syntax.gmossouthfilter._
+import lucuma.itc.search.syntax.gmossouthfpu._
 import spire.math.Rational
 
 sealed trait ObservingMode {
@@ -26,24 +29,11 @@ object ObservingMode {
 
   object Spectroscopy {
 
-    final case class GmosNorth(
-      λ:         Wavelength,
-      disperser: GmosNorthDisperser,
-      fpu:       GmosNorthFpu,
-      filter:    Option[GmosNorthFilter]
-    ) extends Spectroscopy {
-
-      val instrument: Instrument =
-        Instrument.GmosNorth
-
-      def resolution: Rational =
-        disperser.resolution(λ, fpu.effectiveSlitWidth)
-
-      def coverage: Coverage =
-        filter.foldLeft(disperser.coverage(λ))(_ ⋂ _.coverage)
+    sealed trait GmosSpectroscopy extends Spectroscopy {
+      def isIfu: Boolean
 
       def analysisMethod: ItcObservationDetails.AnalysisMethod =
-        if (fpu.isIfu)
+        if (isIfu)
           ItcObservationDetails.AnalysisMethod.Ifu.Single(
             skyFibres = 250,
             offset = 5.0
@@ -54,6 +44,41 @@ object ObservingMode {
           )
     }
 
+    final case class GmosNorth(
+      λ:         Wavelength,
+      disperser: GmosNorthDisperser,
+      fpu:       GmosNorthFpu,
+      filter:    Option[GmosNorthFilter]
+    ) extends GmosSpectroscopy {
+      val isIfu = fpu.isIfu
+
+      val instrument: Instrument =
+        Instrument.GmosNorth
+
+      def resolution: Rational =
+        disperser.resolution(λ, fpu.effectiveSlitWidth)
+
+      def coverage: Coverage =
+        filter.foldLeft(disperser.coverage(λ))(_ ⋂ _.coverage)
+    }
+
+    final case class GmosSouth(
+      λ:         Wavelength,
+      disperser: GmosSouthDisperser,
+      fpu:       GmosSouthFpu,
+      filter:    Option[GmosSouthFilter]
+    ) extends GmosSpectroscopy {
+      val isIfu = fpu.isIfu
+
+      val instrument: Instrument =
+        Instrument.GmosSouth
+
+      def resolution: Rational =
+        disperser.resolution(λ, fpu.effectiveSlitWidth)
+
+      def coverage: Coverage =
+        filter.foldLeft(disperser.coverage(λ))(_ ⋂ _.coverage)
+    }
   }
 
 }

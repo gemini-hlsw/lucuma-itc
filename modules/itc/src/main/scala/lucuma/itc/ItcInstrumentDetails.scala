@@ -43,12 +43,41 @@ object ItcInstrumentDetails {
         )
     }
 
+  val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.Spectroscopy.GmosSouth] =
+    new Encoder[ObservingMode.Spectroscopy.GmosSouth] {
+      def apply(a: ObservingMode.Spectroscopy.GmosSouth): Json =
+        Json.obj(
+          // Translate observing mode to OCS2 style
+          "centralWavelength" -> Json.fromString(
+            s"${Wavelength.decimalNanometers.reverseGet(a.λ)} nm"
+          ),
+          "filter"            -> Json.obj(
+            "FilterSouth" -> a.filter.fold[Json](Json.fromString("NONE"))(r =>
+              Json.fromString(r.ocs2Tag)
+            )
+          ),
+          "grating"           -> Json.obj("DisperserSouth" -> Json.fromString(a.disperser.ocs2Tag)),
+          "fpMask"            -> Json.obj("FPUnitSouth" -> Json.fromString(a.fpu.ocs2Tag)),
+          // Remaining fields are defaulted for now.
+          "spectralBinning"   -> Json.fromInt(1),
+          "site"              -> Json.fromString("GN"),
+          "ccdType"           -> Json.fromString("HAMAMATSU"),
+          "ampReadMode"       -> Json.fromString("SLOW"),
+          "builtinROI"        -> Json.fromString("FULL_FRAME"),
+          "spatialBinning"    -> Json.fromInt(1),
+          "customSlitWidth"   -> Json.Null,
+          "ampGain"           -> Json.fromString("LOW")
+        )
+    }
+
   implicit val encoder: Encoder[ItcInstrumentDetails] =
     new Encoder[ItcInstrumentDetails] {
       def apply(a: ItcInstrumentDetails): Json =
         a.mode match {
           case a: ObservingMode.Spectroscopy.GmosNorth =>
             Json.obj("GmosParameters" -> encodeGmosNorthSpectroscopy(a))
+          case a: ObservingMode.Spectroscopy.GmosSouth =>
+            Json.obj("GmosParameters" -> encodeGmosSouthSpectroscopy(a))
         }
     }
 
