@@ -60,7 +60,7 @@ object ItcInstrumentDetails {
           "fpMask"            -> Json.obj("FPUnitSouth" -> Json.fromString(a.fpu.ocs2Tag)),
           // Remaining fields are defaulted for now.
           "spectralBinning"   -> Json.fromInt(1),
-          "site"              -> Json.fromString("GN"),
+          "site"              -> Json.fromString("GS"),
           "ccdType"           -> Json.fromString("HAMAMATSU"),
           "ampReadMode"       -> Json.fromString("SLOW"),
           "builtinROI"        -> Json.fromString("FULL_FRAME"),
