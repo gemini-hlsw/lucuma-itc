@@ -85,9 +85,7 @@ trait Encoders {
     case f: Itc.Result.Success          =>
       Json.obj(("resultType", Json.fromString("Success"))).deepMerge(f.asJson)
     case Itc.Result.CalculationError(m) =>
-      Json.obj(("resultType", Json.fromString("Error")),
-               ("msg", Json.fromString(s"Calculation error $m"))
-      )
+      Json.obj(("resultType", Json.fromString("Error")), ("msg", Json.fromString(m)))
     case Itc.Result.SourceTooBright(m)  =>
       Json.obj(("resultType", Json.fromString("Error")),
                ("msg", Json.fromString(s"Source too bright $m"))
@@ -321,6 +319,8 @@ object ItcMapping extends Encoders {
   val wvItems = enumTags[WaterVapor]
   val sbItems = enumTags[SkyBackground]
 
+  val stellarLibraryItems = enumTags[StellarLibrarySpectrum]
+
   def apply[F[_]: Sync: Logger: Parallel: Trace](itc: Itc[F]): F[Mapping[F]] =
     loadSchema[F].map { loadedSchema =>
       new CirceMapping[F] with ComputeMapping[F] {
@@ -484,7 +484,7 @@ object ItcMapping extends Encoders {
                   .map(s =>
                     cursorEnvAdd("spectralDistribution", SpectralDistribution.Library(s.asLeft))(i)
                   )
-                  .getOrElse(i.addProblem(s"Unknow stellar library value $s"))
+                  .getOrElse(i.addProblem(s"Unknown stellar library value $s"))
               case ("nonStellar", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil                   =>
                 Enumerated[NonStellarLibrarySpectrum]
                   .fromTag(s.fromScreamingSnakeCase)
@@ -492,7 +492,7 @@ object ItcMapping extends Encoders {
                   .map(s =>
                     cursorEnvAdd("spectralDistribution", SpectralDistribution.Library(s.asRight))(i)
                   )
-                  .getOrElse(i.addProblem(s"Unknow stellar library value $s"))
+                  .getOrElse(i.addProblem(s"Unknown non-stellar library value $s"))
               case _                                                                              =>
                 i.addProblem("Cannot parse spatialDistribution")
             }
