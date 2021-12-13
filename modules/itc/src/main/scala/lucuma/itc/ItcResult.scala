@@ -16,6 +16,7 @@ final case class ItcResult(ccds: NonEmptyList[ItcCcd]) {
   def maxPeakPixelFlux: Int      = ccds.map(_.peakPixelFlux).maximum.toInt
   def maxAdu: Int                = ccds.map(_.adu).maximum
   def maxPercentFullWell: Double = ccds.map(_.percentFullWell).maximum
+  def maxWellDepth: Double       = ccds.map(_.wellDepth).maximum
   def maxSingleSNRatio: Double   = ccds.map(_.singleSNRatio).maximum
   def maxTotalSNRatio: Double    = ccds.map(_.totalSNRatio).maximum
 

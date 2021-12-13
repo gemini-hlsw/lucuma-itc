@@ -16,6 +16,9 @@ import lucuma.core.enum.CloudExtinction
 import lucuma.core.enum.GmosNorthDisperser
 import lucuma.core.enum.GmosNorthFilter
 import lucuma.core.enum.GmosNorthFpu
+import lucuma.core.enum.GmosSouthDisperser
+import lucuma.core.enum.GmosSouthFilter
+import lucuma.core.enum.GmosSouthFpu
 import lucuma.core.enum.ImageQuality
 import lucuma.core.enum.MagnitudeBand
 import lucuma.core.enum.MagnitudeSystem
@@ -30,9 +33,6 @@ import lucuma.core.model.SpectralDistribution
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcSourceDefinition._
 import lucuma.itc.search.ObservingMode
-import lucuma.core.enum.GmosSouthDisperser
-import lucuma.core.enum.GmosSouthFilter
-import lucuma.core.enum.GmosSouthFpu
 
 /**
  * This is a unit test mostly to ensure all possible combination of params can be parsed by the

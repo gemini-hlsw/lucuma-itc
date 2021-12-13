@@ -26,7 +26,7 @@ object Itc {
 
   def apply[F[_]](implicit ev: Itc[F]): ev.type = ev
 
-  sealed trait Result
+  sealed trait Result extends Product with Serializable
   object Result {
 
     final case class Success(
