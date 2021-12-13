@@ -23,7 +23,7 @@ class BasicITCChecks extends Simulation {
     cancelToken.foreach(c => c())
   }
   val headers_10   = Map("Content-Type" -> """application/json""")
-  val httpProtocol = http.baseUrl("http://127.0.0.1:5000")
+  val httpProtocol = http.baseUrl("http://localhost:5000")
 
   val queryStr = """query {
           spectroscopy(input: {
@@ -98,7 +98,7 @@ class BasicITCChecks extends Simulation {
   val body = Json.obj("query" -> Json.fromString(queryStr))
 
   val scn = scenario("BasicSimulation")
-    .pause(1)
+    .pause(2)
     .exec(
       http("request_1")
         .post("/itc")
