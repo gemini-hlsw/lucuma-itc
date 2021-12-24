@@ -88,7 +88,6 @@ object Main extends IOApp {
       }
       its <- Resource.pure(ItcService.service(map))
     } yield
-
     // Routes for static resources, ie. GraphQL Playground
     resourceServiceBuilder[F]("/assets").toRoutes <+>
       // Routes for the ITC GraphQL service
