@@ -17,19 +17,16 @@ import edu.gemini.grackle._
 import edu.gemini.grackle.circe.CirceMapping
 import eu.timepit.refined._
 import eu.timepit.refined.numeric.Positive
+import eu.timepit.refined.types.numeric.PosBigDecimal
 import io.circe.Encoder
 import io.circe.Json
 import lucuma.core.enum.SkyBackground
 import lucuma.core.enum.WaterVapor
 import lucuma.core.enum._
 import lucuma.core.math.Angle
-import lucuma.core.math.MagnitudeValue
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
 import lucuma.core.math.units._
-import lucuma.core.model.Magnitude
-import lucuma.core.model.SpatialProfile
-import lucuma.core.model.SpectralDistribution
 import lucuma.core.syntax.enumerated._
 import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
@@ -55,6 +52,8 @@ import scala.util.Using
 import Query._
 import Value._
 import QueryCompiler._
+import lucuma.core.model.SourceProfile
+import lucuma.core.model.UnnormalizedSED
 
 trait Encoders {
   import io.circe.generic.semiauto._
@@ -165,6 +164,29 @@ final case class GmosSITCParams(
 
 object ItcMapping extends Encoders {
 
+  def enumTags[A: Enumerated] =
+    Enumerated[A].all.fproductLeft(_.tag.toScreamingSnakeCase).toMap
+
+  val gnFilter    = enumTags[GmosNorthFilter]
+  val gnDisperser = enumTags[GmosNorthDisperser]
+  val gnFpu       = enumTags[GmosNorthFpu]
+
+  val gsFilter    = enumTags[GmosSouthFilter]
+  val gsDisperser = enumTags[GmosSouthDisperser]
+  val gsFpu       = enumTags[GmosSouthFpu]
+
+  val iqItems = enumTags[ImageQuality]
+  val ceItems = enumTags[CloudExtinction]
+  val wvItems = enumTags[WaterVapor]
+  val sbItems = enumTags[SkyBackground]
+
+  val stellarLibraryItems  = enumTags[StellarLibrarySpectrum]
+  val galaxyItems          = enumTags[GalaxySpectrum]
+  val planetItems          = enumTags[PlanetSpectrum]
+  val hiiItems             = enumTags[HIIRegionSpectrum]
+  val planetaryNebulaItems = enumTags[PlanetaryNebulaSpectrum]
+  val quasarItems          = enumTags[QuasarSpectrum]
+
   // In principle this is a pure operation because resources are constant values, but the potential
   // for error in dev is high and it's nice to handle failures in `F`.
   def loadSchema[F[_]: Sync]: F[Schema] =
@@ -183,13 +205,12 @@ object ItcMapping extends Encoders {
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[Rational]("resolution"),
      env.get[types.numeric.PosBigDecimal]("signalToNoise"),
-     env.get[SpatialProfile]("spatialProfile"),
-     env.get[SpectralDistribution]("spectralDistribution"),
-     env.get[Magnitude]("magnitude")
-    ).traverseN { (wv, sc, rs, r, sn, sp, sd, m) =>
+     env.get[SourceProfile]("sourceProfile"),
+     env.get[Band]("band")
+    ).traverseN { (wv, sc, rs, r, sn, sp, b) =>
       itc
         .calculate(
-          TargetProfile(sp, sd, m, rs),
+          TargetProfile(sp, b, rs),
           ObservingMode.Spectroscopy
             .GmosNorth(wv, GmosNorthDisperser.B480_G5309, GmosNorthFpu.Ifu2Slits, none),
           ItcObservingConditions(
@@ -225,16 +246,15 @@ object ItcMapping extends Encoders {
   )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
-     env.get[types.numeric.PosBigDecimal]("signalToNoise"),
-     env.get[SpatialProfile]("spatialProfile"),
-     env.get[SpectralDistribution]("spectralDistribution"),
-     env.get[Magnitude]("magnitude"),
+     env.get[PosBigDecimal]("signalToNoise"),
+     env.get[SourceProfile]("sourceProfile"),
+     env.get[Band]("band"),
      env.get[List[SpectroscopyParams]]("modes"),
      env.get[ItcObservingConditions]("constraints")
-    ).traverseN { (wv, rs, sn, sp, sd, brightness, modes, c) =>
+    ).traverseN { (wv, rs, sn, sp, sd, modes, c) =>
       modes
         .parTraverse { mode =>
-          Logger[F].info(s"ITC calculate for $mode, conditions $c and brightness $brightness") *>
+          Logger[F].info(s"ITC calculate for $mode, conditions $c and profile $sp") *>
             Trace[F].put(("itc.modes_count", modes.length)) *> {
               val specMode = mode match {
                 case GmosNITCParams(disperser, fpu, filter) =>
@@ -244,7 +264,7 @@ object ItcMapping extends Encoders {
               }
               itc
                 .calculate(
-                  TargetProfile(sp, sd, brightness, rs),
+                  TargetProfile(sp, sd, rs),
                   specMode,
                   c,
                   sn.value
@@ -303,24 +323,6 @@ object ItcMapping extends Encoders {
         bigDecimalValue(n).flatMap(v => RadialVelocity.kilometerspersecond.getOption(v))
       case _                                           => None
     }
-
-  def enumTags[A: Enumerated] =
-    Enumerated[A].all.fproductLeft(_.tag.toScreamingSnakeCase).toMap
-
-  val gnFilter    = enumTags[GmosNorthFilter]
-  val gnDisperser = enumTags[GmosNorthDisperser]
-  val gnFpu       = enumTags[GmosNorthFpu]
-
-  val gsFilter    = enumTags[GmosSouthFilter]
-  val gsDisperser = enumTags[GmosSouthDisperser]
-  val gsFpu       = enumTags[GmosSouthFpu]
-
-  val iqItems = enumTags[ImageQuality]
-  val ceItems = enumTags[CloudExtinction]
-  val wvItems = enumTags[WaterVapor]
-  val sbItems = enumTags[SkyBackground]
-
-  val stellarLibraryItems = enumTags[StellarLibrarySpectrum]
 
   def apply[F[_]: Sync: Logger: Parallel: Trace](itc: Itc[F]): F[Mapping[F]] =
     loadSchema[F].map { loadedSchema =>
@@ -430,27 +432,27 @@ object ItcMapping extends Encoders {
             }
         }
 
-        def spatialProfilePartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
-                                                   IorNec[Problem, Environment]
+        def sourceProfilePartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
+                                                  IorNec[Problem, Environment]
         ] = {
-          // spatialProfile
-          case (i, ("spatialProfile", ObjectValue(v))) if v.length === 1 || v.length === 2 =>
+          // sourceProfile
+          case (i, ("sourceProfile", ObjectValue(v))) if v.length === 1 || v.length === 2 =>
             (v match {
               case ("sourceType", TypedEnumValue(EnumValue("POINT_SOURCE", _, _, _))) ::
                   ("fwhm", NullValue | AbsentValue) :: Nil =>
-                SpatialProfile.PointSource.some
+                SourceProfile.Point.some
               case ("sourceType", TypedEnumValue(EnumValue("UNIFORM_SOURCE", _, _, _))) ::
                   ("fwhm", NullValue | AbsentValue) :: Nil =>
-                SpatialProfile.UniformSource.some
+                SourceProfile.Uniform.some
               case ("sourceType", TypedEnumValue(EnumValue("GAUSSIAN_SOURCE", _, _, _))) ::
                   ("fwhm", ObjectValue(fwhm)) :: Nil
                   if fwhm.filter(_._2 != Value.AbsentValue).length === 1 =>
-                parseFwhw(fwhm).map(SpatialProfile.GaussianSource(_))
+                parseFwhw(fwhm).map(SourceProfile.Gaussian(_, null))
               case _ => none
-            }).map(sp => cursorEnvAdd("spatialProfile", sp)(i))
-              .getOrElse(i.addProblem("Cannot parse spatialProfile"))
-          case (i, ("spatialProfile", _))                                                  =>
-            i.addProblem("Cannot parse spatialProfile")
+            }).map(sp => cursorEnvAdd("sourceProfile", sp)(i))
+              .getOrElse(i.addProblem("Cannot parse sourceProfile"))
+          case (i, ("sourceProfile", _))                                                  =>
+            i.addProblem("Cannot parse sourceProfile")
         }
 
         def spectralDistributionPartial
@@ -461,40 +463,61 @@ object ItcMapping extends Encoders {
           case (i, ("spectralDistribution", ObjectValue(sd)))
               if sd.filter(_._2 != Value.AbsentValue).length === 1 =>
             sd.filter(_._2 != Value.AbsentValue) match {
-              case ("blackBody", ObjectValue(List(("temperature", IntValue(v))))) :: Nil if v > 0 =>
-                val blackBody = SpectralDistribution.BlackBody(
-                  BigDecimal(v).withRefinedUnit[Positive, Kelvin]
-                )
-                cursorEnvAdd("spectralDistribution", blackBody)(i)
-              case ("blackBody", ObjectValue(List(("temperature", FloatValue(v))))) :: Nil
-                  if v > 0 =>
-                val blackBody = SpectralDistribution.BlackBody(
-                  BigDecimal(v).withRefinedUnit[Positive, Kelvin]
-                )
-                cursorEnvAdd("spectralDistribution", blackBody)(i)
-              case ("powerLaw", ObjectValue(List(("index", IntValue(pl))))) :: Nil if pl > 0      =>
-                val powerLaw = SpectralDistribution.PowerLaw(BigDecimal(pl))
-                cursorEnvAdd("spectralDistribution", powerLaw)(i)
-              case ("powerLaw", ObjectValue(List(("index", FloatValue(pl))))) :: Nil if pl > 0    =>
-                val powerLaw = SpectralDistribution.PowerLaw(BigDecimal(pl))
-                cursorEnvAdd("spectralDistribution", powerLaw)(i)
-              case ("stellar", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil                      =>
-                Enumerated[StellarLibrarySpectrum]
-                  .fromTag(s.fromScreamingSnakeCase)
-                  .orElse(Enumerated[StellarLibrarySpectrum].fromTag(s))
-                  .map(s =>
-                    cursorEnvAdd("spectralDistribution", SpectralDistribution.Library(s.asLeft))(i)
-                  )
-                  .getOrElse(i.addProblem(s"Unknown stellar library value $s"))
-              case ("nonStellar", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil                   =>
-                Enumerated[NonStellarLibrarySpectrum]
-                  .fromTag(s.fromScreamingSnakeCase)
-                  .orElse(Enumerated[NonStellarLibrarySpectrum].fromTag(s))
-                  .map(s =>
-                    cursorEnvAdd("spectralDistribution", SpectralDistribution.Library(s.asRight))(i)
-                  )
-                  .getOrElse(i.addProblem(s"Unknown non-stellar library value $s"))
-              case _                                                                              =>
+              case ("blackBody", ObjectValue(List(("temperature", r)))) :: Nil      =>
+                bigDecimalValue(r) match {
+                  case Some(r) if r > 0 =>
+                    val blackBody = UnnormalizedSED.BlackBody(
+                      r.withRefinedUnit[Positive, Kelvin]
+                    )
+                    cursorEnvAdd("spectralDistribution", blackBody)(i)
+                  case Some(r)          =>
+                    i.addProblem(s"black body temperature value $r must be positive")
+                  case _                =>
+                    i.addProblem(s"Not a valid temperature value $r")
+                }
+              case ("powerLaw", ObjectValue(List(("temperature", r)))) :: Nil       =>
+                bigDecimalValue(r) match {
+                  case Some(r) if r > 0 =>
+                    val powerLaw = UnnormalizedSED.PowerLaw(r)
+                    cursorEnvAdd("spectralDistribution", powerLaw)(i)
+                  case Some(r)          =>
+                    i.addProblem(s"power law value $r must be positive")
+                  case _                =>
+                    i.addProblem(s"Not a valid power law value $r")
+                }
+              case ("stellar", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil        =>
+                val l = stellarLibraryItems.get(s).toRightIorNec("Cannot parse stellar library")
+                l.map(s =>
+                  cursorEnvAdd("spectralDistribution", UnnormalizedSED.StellarLibrary(s))(i)
+                ).leftProblems
+                  .flatten
+              case ("gallaxy", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil        =>
+                val l = galaxyItems.get(s).toRightIorNec("Cannot parse galaxy")
+                l.map(s => cursorEnvAdd("spectralDistribution", UnnormalizedSED.Galaxy(s))(i))
+                  .leftProblems
+                  .flatten
+              case ("planet", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil         =>
+                val l = planetItems.get(s).toRightIorNec("Cannot parse planet")
+                l.map(s => cursorEnvAdd("spectralDistribution", UnnormalizedSED.Planet(s))(i))
+                  .leftProblems
+                  .flatten
+              case ("hiiRegion", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil      =>
+                val l = hiiItems.get(s).toRightIorNec("Cannot parse hii region")
+                l.map(s => cursorEnvAdd("spectralDistribution", UnnormalizedSED.HIIRegion(s))(i))
+                  .leftProblems
+                  .flatten
+              case ("plantaryNebula", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil =>
+                val l = planetaryNebulaItems.get(s).toRightIorNec("Cannot parse planetary nebula")
+                l.map(s =>
+                  cursorEnvAdd("spectralDistribution", UnnormalizedSED.PlanetaryNebula(s))(i)
+                ).leftProblems
+                  .flatten
+              case ("quasar", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil         =>
+                val l = quasarItems.get(s).toRightIorNec("Cannot parse quasar")
+                l.map(s => cursorEnvAdd("spectralDistribution", UnnormalizedSED.Quasar(s))(i))
+                  .leftProblems
+                  .flatten
+              case _                                                                =>
                 i.addProblem("Cannot parse spatialDistribution")
             }
           case (i, ("spectralDistribution", ObjectValue(sd))) =>
@@ -518,24 +541,25 @@ object ItcMapping extends Encoders {
                  )
                 )
               ) =>
-            val b = MagnitudeBand.fromTag(band.fromScreamingSnakeCase)
-            val v = bigDecimalValue(value).flatMap(MagnitudeValue.fromBigDecimal.getOption)
-            val e = bigDecimalValue(error).flatMap(MagnitudeValue.fromBigDecimal.getOption)
-            val s = sys match {
-              case TypedEnumValue(EnumValue(s, _, _, _)) =>
-                MagnitudeSystem
-                  .fromTag(s.fromScreamingSnakeCase)
-                  .orElse(MagnitudeSystem.fromTag(s))
-              case UntypedEnumValue(s)                   =>
-                MagnitudeSystem
-                  .fromTag(s.fromScreamingSnakeCase)
-                  .orElse(MagnitudeSystem.fromTag(s))
-              case _                                     => none
-            }
-            (v, b, s)
-              .mapN(Magnitude(_, _, e, _))
-              .map(cursorEnvAdd("magnitude", _)(i))
-              .getOrElse(i.addProblem("Cannot parse magnitude"))
+            // val b = MagnitudeBand.fromTag(band.fromScreamingSnakeCase)
+            // val v = bigDecimalValue(value).flatMap(MagnitudeValue.fromBigDecimal.getOption)
+            // val e = bigDecimalValue(error).flatMap(MagnitudeValue.fromBigDecimal.getOption)
+            // val s = sys match {
+            //   case TypedEnumValue(EnumValue(s, _, _, _)) =>
+            //     MagnitudeSystem
+            //       .fromTag(s.fromScreamingSnakeCase)
+            //       .orElse(MagnitudeSystem.fromTag(s))
+            //   case UntypedEnumValue(s)                   =>
+            //     MagnitudeSystem
+            //       .fromTag(s.fromScreamingSnakeCase)
+            //       .orElse(MagnitudeSystem.fromTag(s))
+            //   case _                                     => none
+            // }
+            // (v, b, s)
+            //   .mapN(Magnitude(_, _, e, _))
+            //   .map(cursorEnvAdd("magnitude", _)(i))
+            //   .getOrElse(i.addProblem("Cannot parse magnitude"))
+            i.addProblem("Cannot parse magnitude")
         }
 
         def instrumentModesPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
@@ -691,7 +715,7 @@ object ItcMapping extends Encoders {
                       wavelengthPartial
                         .orElse(radialVelocityPartial)
                         .orElse(signalToNoisePartial)
-                        .orElse(spatialProfilePartial)
+                        .orElse(sourceProfilePartial)
                         .orElse(spectralDistributionPartial)
                         .orElse(magnitudePartial)
                         .orElse(instrumentModesPartial)
@@ -708,7 +732,7 @@ object ItcMapping extends Encoders {
                         .orElse(simultaneousCoveragePartial)
                         .orElse(resolutionPartial)
                         .orElse(signalToNoisePartial)
-                        .orElse(spatialProfilePartial)
+                        .orElse(sourceProfilePartial)
                         .orElse(spectralDistributionPartial)
                         .orElse(radialVelocityPartial)
                         .orElse(magnitudePartial)

@@ -157,7 +157,7 @@ object ItcImpl {
 
         L.info(s"Desired S/N $signalToNoise") *>
           L.info(
-            s"Target brightness ${targetProfile.magnitude.value.toDoubleValue} at band ${targetProfile.magnitude.band}"
+            s"Target brightness ${targetProfile.brightness} at band ${targetProfile.band}"
           ) *>
           Trace[F].span("itc") {
 

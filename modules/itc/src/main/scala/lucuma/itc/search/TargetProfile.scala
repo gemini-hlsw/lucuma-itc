@@ -4,14 +4,25 @@
 package lucuma.itc.search
 
 import lucuma.core.math.Redshift
-import lucuma.core.model.Magnitude
-import lucuma.core.model.SpatialProfile
-import lucuma.core.model.SpectralDistribution
+import lucuma.core.model.SourceProfile
+import lucuma.core.enum.Band
+import lucuma.core.math.BrightnessValue
+import lucuma.core.model.BandBrightness
+import lucuma.core.math.BrightnessUnits
+// import coulomb.define.UnitDefinition
 
 /** Target properties we need to know at phase zero. */
 final case class TargetProfile(
-  spatialProfile:       SpatialProfile,
-  spectralDistribution: SpectralDistribution,
-  magnitude:            Magnitude,
-  redshift:             Redshift
-)
+  sourceProfile: SourceProfile,
+  band:          Band,
+  redshift:      Redshift
+) {
+  val integratedBrightness: Option[BandBrightness[BrightnessUnits.Integrated]] =
+    SourceProfile.integratedBandBrightnessIn(band).headOption(sourceProfile)
+  val surfaceBrightness: Option[BandBrightness[BrightnessUnits.Surface]]       =
+    SourceProfile.surfaceBandBrightnessIn(band).headOption(sourceProfile)
+  val brightness: Option[BrightnessValue]                                      =
+    integratedBrightness.orElse(surfaceBrightness).map(_.quantity.value)
+  // val brightnessUnits: Option[UnitDefinition]                                  =
+  //   integratedBrightness.orElse(surfaceBrightness).map(_.quantity.unit.definition)
+}

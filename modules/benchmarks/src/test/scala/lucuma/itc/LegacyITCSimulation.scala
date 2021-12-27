@@ -33,6 +33,9 @@ import lucuma.core.model.SpectralDistribution
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcSourceDefinition._
 import lucuma.itc.search.ObservingMode
+import lucuma.core.model.SourceProfile
+import lucuma.core.model.SpectralDefinition
+import lucuma.core.model.UnnormalizedSED
 
 /**
  * This is a unit test mostly to ensure all possible combination of params can be parsed by the
@@ -44,10 +47,15 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
   val baseUrl    = "https://gemini-new-itc.herokuapp.com"
 
   val sourceDefinition = ItcSourceDefinition(
-    SpatialProfile.PointSource,
-    SpectralDistribution.BlackBody(BigDecimal(50.1).withRefinedUnit[Positive, Kelvin]),
-    MagnitudeValue(5),
-    MagnitudeSystem.Jy.asLeft,
+    SourceProfile.Point(
+      SpectralDefinition.BandNormalized(
+        UnnormalizedSED.BlackBody(BigDecimal(50.1).withRefinedUnit[Positive, Kelvin])
+      ),
+    Map[Band.Ap, Brigh
+    ),
+    UnnormalizedSED.BlackBody(BigDecimal(50.1).withRefinedUnit[Positive, Kelvin]),
+    BrightnessValue(5),
+    // MagnitudeSystem.Jy.asLeft,
     MagnitudeBand.Ap,
     Redshift(0.1)
   )
