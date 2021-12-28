@@ -28,14 +28,14 @@ class BasicITCChecks extends Simulation {
   val queryStr = """query {
           spectroscopy(input: {
             wavelength: {
-              nanometers: 600,
+              nanometers: 500,
             },
             radialVelocity: {
               centimetersPerSecond: 0
             },
             signalToNoise: 5,
             spatialProfile: {
-              sourceType: UNIFORM_SOURCE
+              sourceType: POINT_SOURCE
             },
             spectralDistribution: {
               stellar: A0V
@@ -47,7 +47,7 @@ class BasicITCChecks extends Simulation {
               system: VEGA
             },
             constraints: {
-              imageQuality: ONE_POINT_ZERO,
+              imageQuality: POINT_EIGHT,
               cloudExtinction: ONE_POINT_ZERO,
               skyBackground: GRAY,
               waterVapor: WET,
@@ -60,9 +60,8 @@ class BasicITCChecks extends Simulation {
             },
             modes: [{
               gmosN: {
-                filter: R_PRIME,
                 fpu: LONG_SLIT_1_00,
-                disperser: R831_G5302
+                disperser: B600_G5307
               }
             }]
           }) {
@@ -105,9 +104,9 @@ class BasicITCChecks extends Simulation {
         .headers(headers_10)
         .check(status.is(200))
         .check(jsonPath("$.data.spectroscopy[0].results[0].itc.exposures").is("1"))
-        .check(jsonPath("$.data.spectroscopy[0].results[0].itc.exposureTime.seconds").is("5"))
+        .check(jsonPath("$.data.spectroscopy[0].results[0].itc.exposureTime.seconds").is("3"))
         .check(
-          jsonPath("$.data.spectroscopy[0].results[0].itc.signalToNoise").is("6.898590514665387")
+          jsonPath("$.data.spectroscopy[0].results[0].itc.signalToNoise").is("5.3388133344202195")
         )
         .body(StringBody(body.noSpaces))
     )

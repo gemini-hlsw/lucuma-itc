@@ -102,6 +102,8 @@ lazy val service = project
       "org.slf4j"      % "slf4j-simple"        % slf4jVersion,
       "org.http4s"    %% "http4s-core"         % http4sVersion,
       "org.http4s"    %% "http4s-blaze-server" % http4sVersion,
+      "eu.timepit"    %% "refined"             % refinedVersion,
+      "eu.timepit"    %% "refined-cats"        % refinedVersion,
       "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test
     )
   )
