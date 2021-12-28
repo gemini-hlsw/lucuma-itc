@@ -114,8 +114,8 @@ object ItcImpl {
           val newNExp    = ceil(totalTime / maxTime)
           val newExpTime = ceil(totalTime / newNExp)
           val next       = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
-          L.debug(s"Total time: $totalTime") *>
-            L.debug(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
+          L.info(s"Total time: $totalTime maxTime: $maxTime") *>
+            L.info(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
               if (nExp != oldNExp || abs(expTime - oldExpTime) > 1 && counter < MaxIterations) {
                 itc(targetProfile,
                     observingMode,
@@ -161,7 +161,7 @@ object ItcImpl {
               .flatMap { r =>
                 val halfWellTime = r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime
                 L.info(
-                  s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio}"
+                  s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} $halfWellTime"
                 ) *> {
                   if (halfWellTime < 1.0) {
                     val msg = s"Target is too bright. Well half filled in $halfWellTime"
@@ -169,7 +169,7 @@ object ItcImpl {
                   } else {
                     val maxTime = min(startExpTime, halfWellTime)
 
-                    itcStep(numberOfExposures, 0, startExpTime, 0, maxTime, r.maxTotalSNRatio, r, 0)
+                    itcStep(numberOfExposures, 0, startExpTime, 0, r.maxTotalSNRatio, maxTime, r, 0)
                   }
                 }
 
