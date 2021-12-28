@@ -25,7 +25,7 @@ class BasicITCChecks extends Simulation {
   val headers_10   = Map("Content-Type" -> """application/json""")
   val httpProtocol = http.baseUrl("http://localhost:5000")
 
-  val queryStr = """query {
+  val queryStrCase1 = """query {
           spectroscopy(input: {
             wavelength: {
               nanometers: 500,
@@ -94,9 +94,9 @@ class BasicITCChecks extends Simulation {
           }
         }"""
 
-  val body = Json.obj("query" -> Json.fromString(queryStr))
+  val body1 = Json.obj("query" -> Json.fromString(queryStrCase1))
 
-  val scn = scenario("BasicSimulation")
+  val scn1 = scenario("ITC Case 1")
     .pause(2)
     .exec(
       http("request_1")
@@ -108,11 +108,98 @@ class BasicITCChecks extends Simulation {
         .check(
           jsonPath("$.data.spectroscopy[0].results[0].itc.signalToNoise").is("5.3388133344202195")
         )
-        .body(StringBody(body.noSpaces))
+        .body(StringBody(body1.noSpaces))
+    )
+
+  val queryStrCase2 = """query {
+          spectroscopy(input: {
+            wavelength: {
+              nanometers: 850,
+            },
+            radialVelocity: {
+              centimetersPerSecond: 0
+            },
+            signalToNoise: 35,
+            spatialProfile: {
+              sourceType: POINT_SOURCE
+            },
+            spectralDistribution: {
+              stellar: A0V
+            },
+            magnitude: {
+              band: R,
+              value: 20,
+              error: 1.2,
+              system: VEGA
+            },
+            constraints: {
+              imageQuality: POINT_EIGHT,
+              cloudExtinction: ONE_POINT_ZERO,
+              skyBackground: GRAY,
+              waterVapor: WET,
+              elevationRange: {
+                airmassRange: {
+                  min: 1,
+                  max: 1.5
+                }
+              }
+            },
+            modes: [{
+              gmosN: {
+                fpu: LONG_SLIT_0_25,
+                disperser: R831_G5302
+              }
+            }]
+          }) {
+            results {
+                mode {
+                  instrument
+                  resolution
+                  params {
+                    ... on GmosNITCParams {
+                      disperser
+                    }
+                  }
+                  wavelength {
+                    nanometers
+                  }
+                }
+                itc {
+                  ... on ItcError {
+                    msg
+                  }
+                  ... on ItcSuccess {
+                    exposures
+                    exposureTime {
+                      seconds
+                    }
+                    signalToNoise
+                  }
+                }
+            }
+          }
+        }"""
+
+  val body2 = Json.obj("query" -> Json.fromString(queryStrCase2))
+
+  val scn2 = scenario("ITC Case 2")
+    .pause(2)
+    .exec(
+      http("request_2")
+        .post("/itc")
+        .headers(headers_10)
+        .check(status.is(200))
+        .check(jsonPath("$.data.spectroscopy[0].results[0].itc.exposures").is("289"))
+        .check(jsonPath("$.data.spectroscopy[0].results[0].itc.exposureTime.seconds").is("1199"))
+        .check(
+          jsonPath("$.data.spectroscopy[0].results[0].itc.signalToNoise").is("35.014480570763865")
+        )
+        .body(StringBody(body2.noSpaces))
     )
 
   setUp(
-    scn.inject(atOnceUsers(1))
+    scn2.inject(atOnceUsers(1)),
+    scn1.inject(atOnceUsers(1))
   )
     .assertions(
       forAll.successfulRequests.percent.gt(95.0)
