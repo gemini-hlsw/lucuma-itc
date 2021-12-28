@@ -48,7 +48,7 @@ class BasicITCChecks extends Simulation {
             },
             constraints: {
               imageQuality: POINT_EIGHT,
-              cloudExtinction: ONE_POINT_ZERO,
+              cloudExtinction: POINT_THREE,
               skyBackground: GRAY,
               waterVapor: WET,
               elevationRange: {
@@ -134,7 +134,7 @@ class BasicITCChecks extends Simulation {
             },
             constraints: {
               imageQuality: POINT_EIGHT,
-              cloudExtinction: ONE_POINT_ZERO,
+              cloudExtinction: POINT_THREE,
               skyBackground: GRAY,
               waterVapor: WET,
               elevationRange: {
