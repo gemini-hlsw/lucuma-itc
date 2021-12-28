@@ -63,7 +63,7 @@ object ItcImpl {
         targetProfile:    TargetProfile,
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
-        exposureDuration: FiniteDuration,
+        exposureDuration: Double,
         exposures:        Int,
         level:            NonNegInt
       ): F[ItcResult] =
@@ -71,13 +71,13 @@ object ItcImpl {
           val json =
             spectroscopyParams(targetProfile,
                                observingMode,
-                               exposureDuration,
+                               exposureDuration.seconds,
                                constraints,
                                exposures
             ).asJson
           L.info(s"ITC remote query ${json.noSpaces}") *>
             Trace[F].put("itc.query" -> json.spaces2) *>
-            Trace[F].put("itc.exposureDuration" -> exposureDuration.toMillis.toInt) *>
+            Trace[F].put("itc.exposureDuration" -> exposureDuration.toInt) *>
             Trace[F].put("itc.exposures" -> exposures) *>
             Trace[F].put("itc.level" -> level.value) *>
             c.expect(POST(json, uri))(jsonOf[F, ItcResult]).attemptTap {
@@ -95,7 +95,7 @@ object ItcImpl {
         constraints:   ItcObservingConditions,
         signalToNoise: BigDecimal
       ): F[Itc.Result] = {
-        val startExpTime      = 1200.0
+        val startExpTime      = 1200.0 // in seconds
         val numberOfExposures = 1
         val requestedSN       = signalToNoise.toDouble
 
@@ -111,19 +111,18 @@ object ItcImpl {
           counter:    NonNegInt
         ): F[Itc.Result] = {
           val totalTime  = expTime * nExp.toDouble * pow(requestedSN / snr, 2)
-          val newNExp    = ceil(totalTime / maxTime)
-          val newExpTime = ceil(totalTime / newNExp)
+          val newNExp    = (totalTime / maxTime).ceil
+          val newExpTime = (totalTime / newNExp).ceil
           val next       = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
           L.info(s"Total time: $totalTime maxTime: $maxTime") *>
             L.info(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
-              if (nExp != oldNExp || abs(expTime - oldExpTime) > 1 && counter < MaxIterations) {
-                itc(targetProfile,
-                    observingMode,
-                    constraints,
-                    newExpTime.seconds,
-                    newNExp.toInt,
-                    next
-                )
+              if (
+                nExp != oldNExp ||
+                abs(expTime - oldExpTime) > 1 &&
+                counter < MaxIterations &&
+                newExpTime < (pow(2, 63) - 1)
+              ) {
+                itc(targetProfile, observingMode, constraints, newExpTime, newNExp.toInt, next)
                   .flatMap { s =>
                     L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *>
                       itcStep(newNExp.toInt,
@@ -151,13 +150,7 @@ object ItcImpl {
           ) *>
           Trace[F].span("itc") {
 
-            itc(targetProfile,
-                observingMode,
-                constraints,
-                startExpTime.seconds,
-                numberOfExposures,
-                1
-            )
+            itc(targetProfile, observingMode, constraints, startExpTime, numberOfExposures, 1)
               .flatMap { r =>
                 val halfWellTime = r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime
                 L.info(
@@ -168,7 +161,6 @@ object ItcImpl {
                     L.error(msg) *> Itc.Result.SourceTooBright(msg).pure[F].widen[Itc.Result]
                   } else {
                     val maxTime = min(startExpTime, halfWellTime)
-
                     itcStep(numberOfExposures, 0, startExpTime, 0, r.maxTotalSNRatio, maxTime, r, 0)
                   }
                 }
