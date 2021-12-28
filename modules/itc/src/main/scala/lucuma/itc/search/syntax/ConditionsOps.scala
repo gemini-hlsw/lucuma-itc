@@ -35,13 +35,12 @@ final class CloudExtinctionOps(val self: CloudExtinction) extends AnyVal {
 
   def ocs2Tag: String =
     self match {
-      case CloudExtinction.PointOne       => "PERCENT_20"
-      case CloudExtinction.PointThree     => "PERCENT_20"
-      case CloudExtinction.PointFive      => "PERCENT_50"
-      case CloudExtinction.OnePointZero   => "PERCENT_70"
-      case CloudExtinction.OnePointFive   => "PERCENT_80"
-      case CloudExtinction.TwoPointZero   => "PERCENT_90"
-      case CloudExtinction.ThreePointZero => "ANY"
+      case CloudExtinction.PointOne                                 => "PERCENT_50"
+      case CloudExtinction.PointThree                               => "PERCENT_70"
+      case CloudExtinction.PointFive | CloudExtinction.OnePointZero => "PERCENT_80"
+      case CloudExtinction.OnePointFive | CloudExtinction.TwoPointZero |
+          CloudExtinction.ThreePointZero =>
+        "ANY"
     }
 }
 
