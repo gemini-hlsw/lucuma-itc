@@ -6,6 +6,8 @@ package lucuma.itc
 import cats.Applicative
 import cats.effect._
 import cats.implicits._
+import eu.timepit.refined.auto._
+import eu.timepit.refined.types.numeric._
 import io.circe.syntax._
 import lucuma.core.math.Angle
 import lucuma.itc.Itc
@@ -63,7 +65,7 @@ object ItcImpl {
         constraints:      ItcObservingConditions,
         exposureDuration: FiniteDuration,
         exposures:        Int,
-        level:            Int
+        level:            NonNegInt
       ): F[ItcResult] =
         Trace[F].span("legacy-itc-query") {
           val json =
@@ -77,7 +79,7 @@ object ItcImpl {
             Trace[F].put("itc.query" -> json.spaces2) *>
             Trace[F].put("itc.exposureDuration" -> exposureDuration.toMillis.toInt) *>
             Trace[F].put("itc.exposures" -> exposures) *>
-            Trace[F].put("itc.level" -> level) *>
+            Trace[F].put("itc.level" -> level.value) *>
             c.expect(POST(json, uri))(jsonOf[F, ItcResult]).attemptTap {
               case Left(e) => L.warn(e)("Remote ITC error")
               case _       => Applicative[F].unit
@@ -92,15 +94,62 @@ object ItcImpl {
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         signalToNoise: BigDecimal
-      ): F[Itc.Result] =
+      ): F[Itc.Result] = {
+        val startExpTime      = 1200.0
+        val numberOfExposures = 1
+        val requestedSN       = signalToNoise.toDouble
+
+        // This loops should be necessary only a few times but put a circuit breaker just in case
+        def itcStep(
+          nExp:       Int,
+          oldNExp:    Int,
+          expTime:    Double,
+          oldExpTime: Double,
+          snr:        Double,
+          maxTime:    Double,
+          s:          ItcResult,
+          counter:    NonNegInt
+        ): F[Itc.Result] = {
+          val totalTime  = expTime * nExp.toDouble * pow(requestedSN / snr, 2)
+          val newNExp    = ceil(totalTime / maxTime)
+          val newExpTime = ceil(totalTime / newNExp)
+          val next       = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
+          L.debug(s"Total time: $totalTime") *>
+            L.debug(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
+              if (nExp != oldNExp || abs(expTime - oldExpTime) > 1 && counter < MaxIterations) {
+                itc(targetProfile,
+                    observingMode,
+                    constraints,
+                    newExpTime.seconds,
+                    newNExp.toInt,
+                    next
+                )
+                  .flatMap { s =>
+                    L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *>
+                      itcStep(newNExp.toInt,
+                              nExp,
+                              newExpTime,
+                              expTime,
+                              s.maxTotalSNRatio,
+                              maxTime,
+                              s,
+                              next
+                      )
+                  }
+              } else
+                Itc.Result
+                  .Success(newExpTime.seconds, newNExp.toInt, s.maxTotalSNRatio)
+                  .pure[F]
+                  .widen[Itc.Result]
+            }
+
+        }
+
         L.info(s"Desired S/N $signalToNoise") *>
           L.info(
             s"Target brightness ${targetProfile.magnitude.value.toDoubleValue} at band ${targetProfile.magnitude.band}"
           ) *>
           Trace[F].span("itc") {
-            val startExpTime      = 1200.0
-            val numberOfExposures = 1
-            val requestedSN       = signalToNoise.toDouble
 
             itc(targetProfile,
                 observingMode,
@@ -116,47 +165,18 @@ object ItcImpl {
                 ) *> {
                   if (halfWellTime < 1.0) {
                     val msg = s"Target is too bright. Well half filled in $halfWellTime"
-                    L.error(
-                      s"Target is too bright. Well half filled in $halfWellTime"
-                    ) *> Itc.Result.SourceTooBright(msg).pure[F].widen[Itc.Result]
+                    L.error(msg) *> Itc.Result.SourceTooBright(msg).pure[F].widen[Itc.Result]
                   } else {
                     val maxTime = min(startExpTime, halfWellTime)
-                    // This loops should be necessary only a few times but put a circuit breaker just in case
-                    def itcStep(nExp: Int, expTime: Double, snr: Double, counter: Int)
-                      : F[Itc.Result] = {
-                      val totalTime  = expTime * nExp.toDouble * pow(requestedSN / snr, 2)
-                      val newExpTime = ceil(totalTime / nExp)
-                      val newNExp    = ceil(totalTime / maxTime)
-                      L.debug(s"Total time: $totalTime") *>
-                        L.debug(s"Exp time $newExpTime s") *>
-                        L.debug(s"Num exp $newNExp") *>
-                        itc(targetProfile,
-                            observingMode,
-                            constraints,
-                            newExpTime.seconds,
-                            newNExp.toInt,
-                            counter + 1
-                        ).flatMap { s =>
-                          L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *> {
-                            if (counter < MaxIterations && (s.maxTotalSNRatio - requestedSN < -1.0))
-                              itcStep(newNExp.toInt, newExpTime, s.maxTotalSNRatio, counter + 1)
-                            else
-                              Itc.Result
-                                .Success(newExpTime.seconds, newNExp.toInt, s.maxTotalSNRatio)
-                                .pure[F]
-                                .widen[Itc.Result]
-                          }
-                        }
 
-                    }
-
-                    itcStep(numberOfExposures, startExpTime, r.maxTotalSNRatio, 0)
+                    itcStep(numberOfExposures, 0, startExpTime, 0, maxTime, r.maxTotalSNRatio, r, 0)
                   }
                 }
 
               }
           }
 
+      }
     }
 
   // def oldSpectroscopy[F[_]: Trace: Applicative](
