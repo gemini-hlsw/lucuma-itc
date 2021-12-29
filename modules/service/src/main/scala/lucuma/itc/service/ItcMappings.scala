@@ -41,7 +41,6 @@ import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
 import lucuma.itc.search.Result.Spectroscopy
 import lucuma.itc.search.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
-import lucuma.itc.search.syntax.conditions._
 import lucuma.itc.service.syntax.all._
 import natchez.Trace
 import org.typelevel.log4cats.Logger
@@ -317,7 +316,7 @@ object ItcMapping extends Encoders {
   val gsFpu       = enumTags[GmosSouthFpu]
 
   val iqItems = enumTags[ImageQuality]
-  val ceItems = enumTags[CloudExtinction]
+  val ceItems = enumTags[CloudExtinction ]
   val wvItems = enumTags[WaterVapor]
   val sbItems = enumTags[SkyBackground]
 
@@ -615,14 +614,10 @@ object ItcMapping extends Encoders {
                 .getOrElse("Missing airmass values".leftIorNec)
 
             val imageQuality: IorNec[String, ImageQuality] =
-              iqFromTag(iq.fromScreamingSnakeCase)
-                .orElse(iqFromTag(iq))
-                .toRightIorNec("Cannot parse iq")
+              iqItems.get(iq).toRightIorNec("Cannot parse image quality")
 
             val cloudExtinction: IorNec[String, CloudExtinction] =
-              ceFromTag(ce.fromScreamingSnakeCase)
-                .orElse(ceFromTag(ce))
-                .toRightIorNec("Cannot parse cloud extinction")
+              ceItems.get(ce).toRightIorNec("Cannot parse cloud extinction")
 
             val waterVapor    = wvItems.get(wv).toRightIorNec("Cannot parse water vapor")
             val skyBackground = sbItems.get(sb).toRightIorNec("Cannot parse sky background")
@@ -669,7 +664,7 @@ object ItcMapping extends Encoders {
               iqItems.get(iq).toRightIorNec("Cannot parse image quality")
 
             val cloudExtinction: IorNec[String, CloudExtinction] =
-              ceItems.get(iq).toRightIorNec("Cannot parse cloud extinction")
+              ceItems.get(ce).toRightIorNec("Cannot parse cloud extinction")
 
             val waterVapor    = wvItems.get(wv).toRightIorNec("Cannot parse water vapor")
             val skyBackground = sbItems.get(sb).toRightIorNec("Cannot parse sky background")
