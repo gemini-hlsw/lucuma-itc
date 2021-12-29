@@ -1,3 +1,4 @@
+val coulombVersion              = "0.5.7"
 val catsEffectVersion           = "3.3.1"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsVersion                 = "2.7.0"
@@ -59,18 +60,20 @@ lazy val itc = project
   .settings(
     name := "lucuma-itc",
     libraryDependencies ++= Seq(
-      "edu.gemini"    %% "lucuma-core"              % lucumaCoreVersion,
-      "org.typelevel" %% "cats-core"                % catsVersion,
-      "org.typelevel" %% "cats-effect"              % catsEffectVersion,
-      "org.http4s"    %% "http4s-async-http-client" % http4sVersion,
-      "org.http4s"    %% "http4s-circe"             % http4sVersion,
-      "org.http4s"    %% "http4s-dsl"               % http4sVersion,
-      "io.circe"      %% "circe-literal"            % circeVersion,
-      "edu.gemini"    %% "clue-model"               % clueVersion,
-      "io.circe"      %% "circe-generic"            % circeVersion,
-      "org.tpolecat"  %% "natchez-http4s"           % natcchezHttp4sVersion,
-      "org.typelevel" %% "log4cats-slf4j"           % log4catsVersion,
-      "org.typelevel" %% "munit-cats-effect-3"      % munitCatsEffectVersion % Test
+      "edu.gemini"     %% "lucuma-core"              % lucumaCoreVersion,
+      "org.typelevel"  %% "cats-core"                % catsVersion,
+      "org.typelevel"  %% "cats-effect"              % catsEffectVersion,
+      "org.http4s"     %% "http4s-async-http-client" % http4sVersion,
+      "org.http4s"     %% "http4s-circe"             % http4sVersion,
+      "org.http4s"     %% "http4s-dsl"               % http4sVersion,
+      "io.circe"       %% "circe-literal"            % circeVersion,
+      "edu.gemini"     %% "clue-model"               % clueVersion,
+      "io.circe"       %% "circe-generic"            % circeVersion,
+      "org.tpolecat"   %% "natchez-http4s"           % natcchezHttp4sVersion,
+      "org.typelevel"  %% "log4cats-slf4j"           % log4catsVersion,
+      "com.manyangled" %% "coulomb"                  % coulombVersion,
+      "com.manyangled" %% "coulomb-cats"             % coulombVersion,
+      "org.typelevel"  %% "munit-cats-effect-3"      % munitCatsEffectVersion % Test
     )
   )
 

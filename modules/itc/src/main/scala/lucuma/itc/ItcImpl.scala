@@ -5,7 +5,9 @@ package lucuma.itc
 
 import cats.Applicative
 import cats.effect._
-import cats.implicits._
+import cats.syntax.all._
+import coulomb._
+import coulomb.si.Second
 import eu.timepit.refined.auto._
 import eu.timepit.refined.types.numeric._
 import io.circe.syntax._
@@ -24,6 +26,7 @@ import org.http4s.client.middleware._
 import org.http4s.dsl.io._
 import org.http4s.syntax.all._
 import org.typelevel.log4cats.Logger
+import spire.implicits._
 
 import scala.concurrent.duration._
 import scala.math._
@@ -63,7 +66,7 @@ object ItcImpl {
         targetProfile:    TargetProfile,
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
-        exposureDuration: FiniteDuration,
+        exposureDuration: Quantity[BigDecimal, Second],
         exposures:        Int,
         level:            NonNegInt
       ): F[ItcResult] =
@@ -71,13 +74,13 @@ object ItcImpl {
           val json =
             spectroscopyParams(targetProfile,
                                observingMode,
-                               exposureDuration,
+                               exposureDuration.value.toDouble.seconds,
                                constraints,
                                exposures
             ).asJson
           L.info(s"ITC remote query ${json.noSpaces}") *>
             Trace[F].put("itc.query" -> json.spaces2) *>
-            Trace[F].put("itc.exposureDuration" -> exposureDuration.toMillis.toInt) *>
+            Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
             Trace[F].put("itc.exposures" -> exposures) *>
             Trace[F].put("itc.level" -> level.value) *>
             c.expect(POST(json, uri))(jsonOf[F, ItcResult]).attemptTap {
@@ -95,7 +98,7 @@ object ItcImpl {
         constraints:   ItcObservingConditions,
         signalToNoise: BigDecimal
       ): F[Itc.Result] = {
-        val startExpTime      = 1200.0
+        val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise.toDouble
 
@@ -103,24 +106,31 @@ object ItcImpl {
         def itcStep(
           nExp:       Int,
           oldNExp:    Int,
-          expTime:    Double,
-          oldExpTime: Double,
+          expTime:    Quantity[BigDecimal, Second],
+          oldExpTime: Quantity[BigDecimal, Second],
           snr:        Double,
-          maxTime:    Double,
+          maxTime:    Quantity[BigDecimal, Second],
           s:          ItcResult,
           counter:    NonNegInt
         ): F[Itc.Result] = {
-          val totalTime  = expTime * nExp.toDouble * pow(requestedSN / snr, 2)
-          val newNExp    = ceil(totalTime / maxTime)
-          val newExpTime = ceil(totalTime / newNExp)
-          val next       = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
+          val totalTime: Quantity[BigDecimal, Second] =
+            expTime * nExp.withUnit[Unitless] * pow(requestedSN / snr, 2).withUnit[Unitless]
+          val newNExp: BigDecimal                     = (totalTime / maxTime).value.ceil
+          val newExpTime: BigDecimal                  = (totalTime / newNExp.withUnit[Unitless]).value.ceil
+          val next                                    = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
           L.info(s"Total time: $totalTime maxTime: $maxTime") *>
             L.info(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
-              if (nExp != oldNExp || abs(expTime - oldExpTime) > 1 && counter < MaxIterations) {
+              if (
+                nExp != oldNExp ||
+                ((expTime - oldExpTime) > 1.withUnit[Second] || (oldExpTime - expTime) > 1
+                  .withUnit[Second]) &&
+                counter < MaxIterations &&
+                newExpTime < (pow(2, 63) - 1)
+              ) {
                 itc(targetProfile,
                     observingMode,
                     constraints,
-                    newExpTime.seconds,
+                    newExpTime.withUnit[Second],
                     newNExp.toInt,
                     next
                 )
@@ -128,7 +138,7 @@ object ItcImpl {
                     L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *>
                       itcStep(newNExp.toInt,
                               nExp,
-                              newExpTime,
+                              newExpTime.withUnit[Second],
                               expTime,
                               s.maxTotalSNRatio,
                               maxTime,
@@ -138,7 +148,7 @@ object ItcImpl {
                   }
               } else
                 Itc.Result
-                  .Success(newExpTime.seconds, newNExp.toInt, s.maxTotalSNRatio)
+                  .Success(newExpTime.toDouble.seconds, newNExp.toInt, s.maxTotalSNRatio)
                   .pure[F]
                   .widen[Itc.Result]
             }
@@ -151,15 +161,9 @@ object ItcImpl {
           ) *>
           Trace[F].span("itc") {
 
-            itc(targetProfile,
-                observingMode,
-                constraints,
-                startExpTime.seconds,
-                numberOfExposures,
-                1
-            )
+            itc(targetProfile, observingMode, constraints, startExpTime, numberOfExposures, 1)
               .flatMap { r =>
-                val halfWellTime = r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime
+                val halfWellTime = r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime.value
                 L.info(
                   s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} $halfWellTime"
                 ) *> {
@@ -167,9 +171,16 @@ object ItcImpl {
                     val msg = s"Target is too bright. Well half filled in $halfWellTime"
                     L.error(msg) *> Itc.Result.SourceTooBright(msg).pure[F].widen[Itc.Result]
                   } else {
-                    val maxTime = min(startExpTime, halfWellTime)
-
-                    itcStep(numberOfExposures, 0, startExpTime, 0, r.maxTotalSNRatio, maxTime, r, 0)
+                    val maxTime = startExpTime.value.min(halfWellTime)
+                    itcStep(numberOfExposures,
+                            0,
+                            startExpTime,
+                            BigDecimal(0).withUnit[Second],
+                            r.maxTotalSNRatio,
+                            maxTime.withUnit[Second],
+                            r,
+                            0
+                    )
                   }
                 }
 
