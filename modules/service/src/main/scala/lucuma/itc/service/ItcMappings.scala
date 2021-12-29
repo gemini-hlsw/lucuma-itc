@@ -316,7 +316,7 @@ object ItcMapping extends Encoders {
   val gsFpu       = enumTags[GmosSouthFpu]
 
   val iqItems = enumTags[ImageQuality]
-  val ceItems = enumTags[CloudExtinction ]
+  val ceItems = enumTags[CloudExtinction]
   val wvItems = enumTags[WaterVapor]
   val sbItems = enumTags[SkyBackground]
 
