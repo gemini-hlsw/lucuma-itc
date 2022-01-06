@@ -78,7 +78,8 @@ object ItcImpl {
                                constraints,
                                exposures
             ).asJson
-          L.info(s"ITC remote query ${json.noSpaces}") *>
+          println(json.spaces2)
+          L.debug(s"ITC remote query ${json.noSpaces}") *>
             Trace[F].put("itc.query" -> json.spaces2) *>
             Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
             Trace[F].put("itc.exposures" -> exposures) *>
@@ -157,7 +158,7 @@ object ItcImpl {
 
         L.info(s"Desired S/N $signalToNoise") *>
           L.info(
-            s"Target brightness ${targetProfile.brightness} at band ${targetProfile.band}"
+            s"Target brightness ${targetProfile} at band ${targetProfile.band}"
           ) *>
           Trace[F].span("itc") {
 

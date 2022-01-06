@@ -16,15 +16,13 @@ import lucuma.itc.search.syntax.sed._
 import lucuma.core.math.BrightnessValue
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.UnnormalizedSED
+import lucuma.core.math.dimensional.Measure
+import lucuma.core.model.SpectralDefinition
 
 final case class ItcSourceDefinition(
-  profile:      SourceProfile,
-  distribution: UnnormalizedSED,
-  norm:         BrightnessValue,
-  // units:        UnitDefinition,
-  // units:        Either[MagnitudeSystem, SurfaceBrightness],
-  normBand:     Band,
-  redshift:     Redshift
+  profile:  SourceProfile,
+  normBand: Band,
+  redshift: Redshift
 )
 
 object ItcSourceDefinition {
@@ -32,27 +30,6 @@ object ItcSourceDefinition {
   def fromTargetProfile(p: TargetProfile): ItcSourceDefinition =
     ItcSourceDefinition(
       p.sourceProfile,
-      SourceProfile.unnormalizedSED
-        .getOption(p.sourceProfile)
-        .getOrElse(sys.error("Needs to have a SED defined")),
-      p.brightness.getOrElse(sys.error("Needs to have a brightness defined")),
-      // Nothing,
-      // p.brightnessUnits.getOrElse(sys.error("Needs to have a brightness units defined")),
-      // p.sourceProfile match {
-      //   case SpatialProfile.GaussianSource(_) => Left(p.magnitude.system)
-      //   case SpatialProfile.PointSource       => Left(p.magnitude.system)
-      //   case SpatialProfile.UniformSource     =>
-      //     Right {
-      //       p.magnitude.system match {
-      //         case MagnitudeSystem.Vega           => SurfaceBrightness.Vega
-      //         case MagnitudeSystem.AB             => SurfaceBrightness.AB
-      //         case MagnitudeSystem.Jy             => SurfaceBrightness.Jy
-      //         case MagnitudeSystem.Watts          => SurfaceBrightness.Watts
-      //         case MagnitudeSystem.ErgsFrequency  => SurfaceBrightness.ErgsFrequency
-      //         case MagnitudeSystem.ErgsWavelength => SurfaceBrightness.ErgsWavelength
-      //       }
-      //     }
-      // },
       p.band,
       p.redshift
     )
@@ -62,7 +39,8 @@ object ItcSourceDefinition {
       import SourceProfile._
       def apply(a: SourceProfile): Json =
         a match {
-          case _: Point    => Json.obj("PointSource" -> Json.obj())
+          case _: Point    =>
+            Json.obj("PointSource" -> Json.obj(), "units" -> Json.fromString("AAAAA"))
           case _: Uniform  => Json.obj("UniformSource" -> Json.obj())
           case g: Gaussian =>
             Json.obj(
@@ -125,6 +103,49 @@ object ItcSourceDefinition {
     Encoder.forProduct1("z")(_.z)
 
   implicit val encoder: Encoder[ItcSourceDefinition] =
-    deriveEncoder
+    // deriveEncoder[ItcSourceDefinition]
+    new Encoder[ItcSourceDefinition] {
+      def apply(s: ItcSourceDefinition): Json = {
+        val source = s.profile match {
+          case _: SourceProfile.Point    =>
+            Json.obj("PointSource" -> Json.obj())
+          case _: SourceProfile.Uniform  => Json.obj("UniformSource" -> Json.obj())
+          case g: SourceProfile.Gaussian =>
+            Json.obj(
+              "GaussianSource" -> Json.obj(
+                "fwhm" -> Angle.signedDecimalArcseconds.get(g.fwhm).asJson
+              )
+            )
+        }
+
+        val units: Json = s.profile match {
+          case SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses))
+              if brightnesses.contains(s.normBand) =>
+            brightnesses.get(s.normBand).map(_.units.serialized) match {
+              case Some("VEGA_MAGNITUDE") => Json.obj("MagnitudeSystem" -> Json.fromString("Vega"))
+              case r                      => println(r); Json.Null
+            }
+          case _ => Json.Null
+        }
+
+        val distribution = s.profile match {
+          case SourceProfile.Point(SpectralDefinition.BandNormalized(sed, _)) =>
+            sed.asJson
+          // case SourceProfile.Uniform(sed, _)  =>
+          //   sed.toJson
+          // case SourceProfile.Gaussian(sed, _) =>
+          // sed.toJson
+        }
+
+        Json.obj("profile"      -> source,
+                 "normBand"     -> s.normBand.asJson,
+                 "norm"         -> Json.fromInt(5),
+                 "redshift"     -> s.redshift.asJson,
+                 "units"        -> units,
+                 "distribution" -> distribution
+        )
+      }
+      // Json.fromString("ITC")
+    }
 
 }
