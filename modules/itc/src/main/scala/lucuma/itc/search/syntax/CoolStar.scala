@@ -11,7 +11,7 @@ import lucuma.core.model.UnnormalizedSED.CoolStarModel
 final class CoolStarModelOps(val self: CoolStarModel) extends AnyVal {
 
   def ocs2Tag: String =
-    s"{self.temperature}"
+    s"${self.temperature}"
 
 }
 

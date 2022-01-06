@@ -5,8 +5,6 @@ package lucuma.itc
 
 import io.circe.Encoder
 import io.circe.generic.semiauto._
-import io.circe.Json
-import io.circe.syntax._
 
 case class ItcParameters(
   source:      ItcSourceDefinition,
@@ -19,8 +17,4 @@ case class ItcParameters(
 object ItcParameters {
   implicit val encoder: Encoder[ItcParameters] =
     deriveEncoder[ItcParameters]
-    // new Encoder[ItcParameters] {
-    //   def apply(p: ItcParameters): Json =
-    //     p.source.asJson.deepMerge(Json.obj("observation" -> p.observation.asJson))
-    // }
 }

@@ -3,10 +3,8 @@
 
 package lucuma.itc
 
-// import coulomb.define.UnitDefinition
 import io.circe.Encoder
 import io.circe.Json
-import io.circe.generic.semiauto._
 import io.circe.syntax._
 import lucuma.core.enum._
 import lucuma.core.math.Angle
@@ -16,7 +14,6 @@ import lucuma.itc.search.syntax.sed._
 import lucuma.core.math.BrightnessValue
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.UnnormalizedSED
-import lucuma.core.math.dimensional.Measure
 import lucuma.core.model.SpectralDefinition
 
 final case class ItcSourceDefinition(
@@ -83,16 +80,6 @@ object ItcSourceDefinition {
         }
     }
 
-  // implicit val unitEncoder: Encoder[UnitDefinition]             = ???
-  // implicit val unitEncoder: Encoder[Either[MagnitudeSystem, SurfaceBrightness]] =
-  //   new Encoder[Either[MagnitudeSystem, SurfaceBrightness]] {
-  //     def apply(a: Either[MagnitudeSystem, SurfaceBrightness]): Json =
-  //       a match {
-  //         case Left(ms)  => Json.obj("MagnitudeSystem" -> Json.fromString(ms.tag))
-  //         case Right(sb) => Json.obj("SurfaceBrightness" -> Json.fromString(sb.ocs2Tag))
-  //       }
-  //   }
-  //
   implicit val brightnessValueEncoder: Encoder[BrightnessValue] =
     Encoder[BigDecimal].contramap(BrightnessValue.fromBigDecimal.reverseGet)
 
@@ -103,7 +90,6 @@ object ItcSourceDefinition {
     Encoder.forProduct1("z")(_.z)
 
   implicit val encoder: Encoder[ItcSourceDefinition] =
-    // deriveEncoder[ItcSourceDefinition]
     new Encoder[ItcSourceDefinition] {
       def apply(s: ItcSourceDefinition): Json = {
         val source = s.profile match {
@@ -128,6 +114,24 @@ object ItcSourceDefinition {
           case _ => Json.Null
         }
 
+        val value: Json = s.profile match {
+          case SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses))
+              if brightnesses.contains(s.normBand) =>
+            brightnesses
+              .get(s.normBand)
+              .map(_.value.toDoubleValue)
+              .flatMap(Json.fromDouble)
+              .getOrElse(Json.Null)
+          case SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses))
+              if brightnesses.contains(s.normBand) =>
+            brightnesses
+              .get(s.normBand)
+              .map(_.value.toDoubleValue)
+              .flatMap(Json.fromDouble)
+              .getOrElse(Json.Null)
+          case _ => Json.Null
+        }
+
         val distribution = s.profile match {
           case SourceProfile.Point(SpectralDefinition.BandNormalized(sed, _)) =>
             sed.asJson
@@ -139,13 +143,12 @@ object ItcSourceDefinition {
 
         Json.obj("profile"      -> source,
                  "normBand"     -> s.normBand.asJson,
-                 "norm"         -> Json.fromInt(5),
+                 "norm"         -> value,
                  "redshift"     -> s.redshift.asJson,
                  "units"        -> units,
                  "distribution" -> distribution
         )
       }
-      // Json.fromString("ITC")
     }
 
 }
