@@ -19,6 +19,7 @@ import lucuma.core.math.Redshift
 import lucuma.core.math.Wavelength
 import lucuma.core.util.Enumerated
 import lucuma.itc.search.ObservingMode
+import lucuma.itc.search.syntax.gmossouthfpu._
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
@@ -53,7 +54,12 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     Band.R,
     Redshift(0.1)
   )
-  val obs              = ItcObservationDetails(
+
+  val lsAnalysisMethod  = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
+  val ifuAnalysisMethod =
+    ItcObservationDetails.AnalysisMethod.Ifu.Single(skyFibres = 250, offset = 5.0)
+
+  val obs = ItcObservationDetails(
     calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
       exposures = 1,
       coadds = None,
@@ -61,7 +67,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       sourceFraction = 1.0,
       ditherOffset = Angle.Angle0
     ),
-    analysisMethod = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
+    analysisMethod = lsAnalysisMethod
   )
 
   val telescope  = ItcTelescopeDetails(
@@ -91,53 +97,53 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       instrument
     )
 
-  // Enumerated[ImageQuality].all.map { iq =>
-  //   spec {
-  //     http("sanity_cond_iq")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200))
-  //       .check(substring("decode").notExists)
-  //       .check(substring("ItcSpectroscopyResult").exists)
-  //       .body(StringBody(bodyCond(conditions.copy(iq = iq)).asJson.noSpaces))
-  //   }
-  // }
-  //
-  // Enumerated[CloudExtinction].all.map { ce =>
-  //   spec {
-  //     http("sanity_cond_ce")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200))
-  //       .check(substring("decode").notExists)
-  //       .check(substring("ItcSpectroscopyResult").exists)
-  //       .body(StringBody(bodyCond(conditions.copy(cc = ce)).asJson.noSpaces))
-  //   }
-  // }
-  //
-  // Enumerated[WaterVapor].all.map { wv =>
-  //   spec {
-  //     http("sanity_cond_wv")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200))
-  //       .check(substring("decode").notExists)
-  //       .check(substring("ItcSpectroscopyResult").exists)
-  //       .body(StringBody(bodyCond(conditions.copy(wv = wv)).asJson.noSpaces))
-  //   }
-  // }
-  //
-  // Enumerated[SkyBackground].all.map { sb =>
-  //   spec {
-  //     http("sanity_cond_sb")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200))
-  //       .check(substring("ItcSpectroscopyResult").exists)
-  //       .check(substring("decode").notExists)
-  //       .body(StringBody(bodyCond(conditions.copy(sb = sb)).asJson.noSpaces))
-  //   }
-  // }
+  Enumerated[ImageQuality].all.map { iq =>
+    spec {
+      http("sanity_cond_iq")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodyCond(conditions.copy(iq = iq)).asJson.noSpaces))
+    }
+  }
+
+  Enumerated[CloudExtinction].all.map { ce =>
+    spec {
+      http("sanity_cond_ce")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodyCond(conditions.copy(cc = ce)).asJson.noSpaces))
+    }
+  }
+
+  Enumerated[WaterVapor].all.map { wv =>
+    spec {
+      http("sanity_cond_wv")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodyCond(conditions.copy(wv = wv)).asJson.noSpaces))
+    }
+  }
+
+  Enumerated[SkyBackground].all.map { sb =>
+    spec {
+      http("sanity_cond_sb")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("ItcSpectroscopyResult").exists)
+        .check(substring("decode").notExists)
+        .body(StringBody(bodyCond(conditions.copy(sb = sb)).asJson.noSpaces))
+    }
+  }
 
   val gnConf = ObservingMode.Spectroscopy.GmosNorth(Wavelength.decimalNanometers.getOption(600).get,
                                                     GmosNorthDisperser.B1200_G5301,
@@ -151,10 +157,13 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
                                                     none
   )
 
-  def bodyConf(c: ObservingMode.Spectroscopy) =
+  def bodyConf(
+    c:        ObservingMode.Spectroscopy,
+    analysis: ItcObservationDetails.AnalysisMethod = lsAnalysisMethod
+  ) =
     ItcParameters(
       sourceDefinition,
-      obs,
+      obs.copy(analysisMethod = analysis),
       ItcObservingConditions(ImageQuality.PointEight,
                              CloudExtinction.OnePointFive,
                              WaterVapor.Median,
@@ -165,64 +174,74 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       ItcInstrumentDetails.fromObservingMode(c)
     )
 
-  // Enumerated[GmosNorthDisperser].all.map { d =>
-  //   spec {
-  //     http("sanity_gn_disperser")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200))
-  //       .check(substring("decode").notExists)
-  //       .check(substring("ItcSpectroscopyResult").exists)
-  //       .body(StringBody(bodyConf(gnConf.copy(disperser = d)).asJson.noSpaces))
-  //   }
-  // }
-  //
-  // Enumerated[GmosNorthFpu].all.map { f =>
-  //   spec {
-  //     http("sanity_gn_fpu")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200, 400))
-  //       .check(substring("decode").notExists)
-  //       .body(StringBody(bodyConf(gnConf.copy(fpu = f)).asJson.noSpaces))
-  //   }
-  // }
-  //
-  // Enumerated[GmosNorthFilter].all.map { f =>
-  //   println(bodyConf(gnConf.copy(filter = f.some)).asJson.spaces2)
-  //   spec {
-  //     http("sanity_gn_filter")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200))
-  //       .check(substring("decode").notExists)
-  //       .check(substring("ItcSpectroscopyResult").exists)
-  //       .body(StringBody(bodyConf(gnConf.copy(filter = f.some)).asJson.noSpaces))
-  //   }
-  // }
-  //
-  // Enumerated[GmosSouthDisperser].all.map { d =>
-  //   spec {
-  //     http("sanity_gs_disperser")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200, 400))
-  //       .check(substring("decode").notExists)
-  //       .body(StringBody(bodyConf(gsConf.copy(disperser = d)).asJson.noSpaces))
-  //   }
-  // }
-  //
-  // Enumerated[GmosSouthFpu].all.filter(_ =!= GmosSouthFpu.Bhros).map { f =>
-  //   spec {
-  //     http("sanity_gs_fpu")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200, 400))
-  //       .check(substring("decode").notExists)
-  //       .body(StringBody(bodyConf(gsConf.copy(fpu = f)).asJson.noSpaces))
-  //   }
-  // }
-  //
+  Enumerated[GmosNorthDisperser].all.map { d =>
+    spec {
+      http("sanity_gn_disperser")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodyConf(gnConf.copy(disperser = d)).asJson.noSpaces))
+    }
+  }
+
+  Enumerated[GmosNorthFpu].all.map { f =>
+    spec {
+      http("sanity_gn_fpu")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200, 400))
+        .check(substring("decode").notExists)
+        .body(StringBody(bodyConf(gnConf.copy(fpu = f)).asJson.noSpaces))
+    }
+  }
+
+  Enumerated[GmosNorthFilter].all.map { f =>
+    spec {
+      http("sanity_gn_filter")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200, 400))
+        .check(substring("decode").notExists)
+        // .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodyConf(gnConf.copy(filter = f.some)).asJson.noSpaces))
+    }
+  }
+
+  Enumerated[GmosSouthDisperser].all.map { d =>
+    spec {
+      http("sanity_gs_disperser")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodyConf(gsConf.copy(disperser = d)).asJson.noSpaces))
+    }
+  }
+
+  Enumerated[GmosSouthFpu].all
+    .filter(f =>
+      f =!= GmosSouthFpu.Bhros && f =!= GmosSouthFpu.IfuNSBlue && f =!= GmosSouthFpu.IfuNSRed
+    )
+    .map { f =>
+      val conf =
+        if (f.isIfu)
+          bodyConf(gsConf.copy(fpu = f), ifuAnalysisMethod)
+        else
+          bodyConf(gsConf.copy(fpu = f))
+      spec {
+        http("sanity_gs_fpu")
+          .post("/json")
+          .headers(headers_10)
+          .check(status.in(200))
+          .check(substring("decode").notExists)
+          .check(substring("ItcSpectroscopyResult").exists)
+          .body(StringBody(conf.asJson.noSpaces))
+      }
+    }
+
   // Enumerated[GmosSouthFilter].all.map { f =>
   //   spec {
   //     http("sanity_gn_filter")
@@ -230,10 +249,11 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
   //       .headers(headers_10)
   //       .check(status.in(200, 400))
   //       .check(substring("decode").notExists)
+  //       // .check(substring("ItcSpectroscopyResult").exists)
   //       .body(StringBody(bodyConf(gsConf.copy(filter = f.some)).asJson.noSpaces))
   //   }
   // }
-  //
+
   def bodySED(c: UnnormalizedSED) =
     ItcParameters(
       sourceDefinition.copy(profile = SourceProfile.unnormalizedSED
