@@ -43,7 +43,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         // UnnormalizedSED.BlackBody(BigDecimal(50.1).withRefinedUnit[Positive, Kelvin])
         UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V),
         SortedMap(
-          Band.J  -> BrightnessValue(5).withUnit[VegaMagnitude].toMeasureTagged,
+          Band.J -> BrightnessValue(5).withUnit[VegaMagnitude].toMeasureTagged,
           Band.R -> VegaMagnitudeIsIntegratedBrightnessUnit.unit.withValueTagged(
             BrightnessValue(5)
           )
@@ -91,63 +91,63 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       instrument
     )
 
-  Enumerated[ImageQuality].all.map { iq =>
-    spec {
-      http("sanity_cond_iq")
-        .post("/json")
-        .headers(headers_10)
-        .check(status.in(200))
-        .check(substring("decode").notExists)
-        .check(substring("ItcSpectroscopyResult").exists)
-        .body(StringBody(bodyCond(conditions.copy(iq = iq)).asJson.noSpaces))
-    }
-  }
+  // Enumerated[ImageQuality].all.map { iq =>
+  //   spec {
+  //     http("sanity_cond_iq")
+  //       .post("/json")
+  //       .headers(headers_10)
+  //       .check(status.in(200))
+  //       .check(substring("decode").notExists)
+  //       .check(substring("ItcSpectroscopyResult").exists)
+  //       .body(StringBody(bodyCond(conditions.copy(iq = iq)).asJson.noSpaces))
+  //   }
+  // }
+  //
+  // Enumerated[CloudExtinction].all.map { ce =>
+  //   spec {
+  //     http("sanity_cond_ce")
+  //       .post("/json")
+  //       .headers(headers_10)
+  //       .check(status.in(200))
+  //       .check(substring("decode").notExists)
+  //       .check(substring("ItcSpectroscopyResult").exists)
+  //       .body(StringBody(bodyCond(conditions.copy(cc = ce)).asJson.noSpaces))
+  //   }
+  // }
+  //
+  // Enumerated[WaterVapor].all.map { wv =>
+  //   spec {
+  //     http("sanity_cond_wv")
+  //       .post("/json")
+  //       .headers(headers_10)
+  //       .check(status.in(200))
+  //       .check(substring("decode").notExists)
+  //       .check(substring("ItcSpectroscopyResult").exists)
+  //       .body(StringBody(bodyCond(conditions.copy(wv = wv)).asJson.noSpaces))
+  //   }
+  // }
+  //
+  // Enumerated[SkyBackground].all.map { sb =>
+  //   spec {
+  //     http("sanity_cond_sb")
+  //       .post("/json")
+  //       .headers(headers_10)
+  //       .check(status.in(200))
+  //       .check(substring("ItcSpectroscopyResult").exists)
+  //       .check(substring("decode").notExists)
+  //       .body(StringBody(bodyCond(conditions.copy(sb = sb)).asJson.noSpaces))
+  //   }
+  // }
 
-  Enumerated[CloudExtinction].all.map { ce =>
-    spec {
-      http("sanity_cond_ce")
-        .post("/json")
-        .headers(headers_10)
-        .check(status.in(200))
-        .check(substring("decode").notExists)
-        .check(substring("ItcSpectroscopyResult").exists)
-        .body(StringBody(bodyCond(conditions.copy(cc = ce)).asJson.noSpaces))
-    }
-  }
-
-  Enumerated[WaterVapor].all.map { wv =>
-    spec {
-      http("sanity_cond_wv")
-        .post("/json")
-        .headers(headers_10)
-        .check(status.in(200))
-        .check(substring("decode").notExists)
-        .check(substring("ItcSpectroscopyResult").exists)
-        .body(StringBody(bodyCond(conditions.copy(wv = wv)).asJson.noSpaces))
-    }
-  }
-
-  Enumerated[SkyBackground].all.map { sb =>
-    spec {
-      http("sanity_cond_sb")
-        .post("/json")
-        .headers(headers_10)
-        .check(status.in(200))
-        .check(substring("ItcSpectroscopyResult").exists)
-        .check(substring("decode").notExists)
-        .body(StringBody(bodyCond(conditions.copy(sb = sb)).asJson.noSpaces))
-    }
-  }
-
-  val gnConf = ObservingMode.Spectroscopy.GmosNorth(Wavelength.decimalNanometers.getOption(60).get,
+  val gnConf = ObservingMode.Spectroscopy.GmosNorth(Wavelength.decimalNanometers.getOption(600).get,
                                                     GmosNorthDisperser.B1200_G5301,
-                                                    GmosNorthFpu.Ifu2Slits,
+                                                    GmosNorthFpu.LongSlit_1_00,
                                                     none
   )
 
-  val gsConf = ObservingMode.Spectroscopy.GmosSouth(Wavelength.decimalNanometers.getOption(60).get,
+  val gsConf = ObservingMode.Spectroscopy.GmosSouth(Wavelength.decimalNanometers.getOption(600).get,
                                                     GmosSouthDisperser.B1200_G5321,
-                                                    GmosSouthFpu.Ifu2Slits,
+                                                    GmosSouthFpu.LongSlit_1_00,
                                                     none
   )
 
@@ -170,8 +170,9 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
   //     http("sanity_gn_disperser")
   //       .post("/json")
   //       .headers(headers_10)
-  //       .check(status.in(200, 400))
+  //       .check(status.in(200))
   //       .check(substring("decode").notExists)
+  //       .check(substring("ItcSpectroscopyResult").exists)
   //       .body(StringBody(bodyConf(gnConf.copy(disperser = d)).asJson.noSpaces))
   //   }
   // }
@@ -188,12 +189,14 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
   // }
   //
   // Enumerated[GmosNorthFilter].all.map { f =>
+  //   println(bodyConf(gnConf.copy(filter = f.some)).asJson.spaces2)
   //   spec {
   //     http("sanity_gn_filter")
   //       .post("/json")
   //       .headers(headers_10)
-  //       .check(status.in(200, 400))
+  //       .check(status.in(200))
   //       .check(substring("decode").notExists)
+  //       .check(substring("ItcSpectroscopyResult").exists)
   //       .body(StringBody(bodyConf(gnConf.copy(filter = f.some)).asJson.noSpaces))
   //   }
   // }
@@ -233,10 +236,10 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
   //
   def bodySED(c: UnnormalizedSED) =
     ItcParameters(
-      sourceDefinition.copy(profile =
-        SourceProfile.unnormalizedSED
-          .modifyOption(_ => c)(sourceDefinition.profile)
-          .getOrElse(sourceDefinition.profile)
+      sourceDefinition.copy(profile = SourceProfile.unnormalizedSED
+                              .modifyOption(_ => c)(sourceDefinition.profile)
+                              .getOrElse(sourceDefinition.profile),
+                            redshift = Redshift(0.03)
       ),
       obs,
       ItcObservingConditions(ImageQuality.PointEight,
@@ -249,39 +252,88 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       instrument
     )
 
-  // Enumerated[StellarLibrarySpectrum].all.map { f =>
-  //   println(bodySED(UnnormalizedSED.StellarLibrary(f)).asJson.spaces2)
-  //   spec {
-  //     http("stellar_library")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200, 400))
-  //       .check(substring("decode").notExists)
-  //       .body(StringBody(bodySED(UnnormalizedSED.StellarLibrary(f)).asJson.noSpaces))
-  //   }
-  // }
+  Enumerated[StellarLibrarySpectrum].all.map { f =>
+    spec {
+      http("stellar_library")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodySED(UnnormalizedSED.StellarLibrary(f)).asJson.noSpaces))
+    }
+  }
 
-  // Enumerated[CoolStarTemperature].all.map { f =>
-  //   println(bodySED(UnnormalizedSED.CoolStarModel(f)).asJson.spaces2)
-  //   spec {
-  //     http("cool_star")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200, 400))
-  //       .check(substring("decode").notExists)
-  //       .check(substring("ItcSpectroscopyResult").exists)
-  //       .body(StringBody(bodySED(UnnormalizedSED.CoolStarModel(f)).asJson.noSpaces))
-  //   }
-  // }
-  //
-  // Enumerated[GalaxySpectrum].all.map { f =>
-  //   spec {
-  //     http("galaxy")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200, 400))
-  //       .check(substring("decode").notExists)
-  //       .body(StringBody(bodySED(UnnormalizedSED.Galaxy(f)).asJson.noSpaces))
-  //   }
-  // }
+  Enumerated[CoolStarTemperature].all.map { f =>
+    spec {
+      http("cool_star")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodySED(UnnormalizedSED.CoolStarModel(f)).asJson.noSpaces))
+    }
+  }
+
+  Enumerated[GalaxySpectrum].all.map { f =>
+    spec {
+      http("galaxy")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodySED(UnnormalizedSED.Galaxy(f)).asJson.noSpaces))
+    }
+  }
+
+  Enumerated[PlanetSpectrum].all.map { f =>
+    spec {
+      http("planet")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodySED(UnnormalizedSED.Planet(f)).asJson.noSpaces))
+    }
+  }
+
+  Enumerated[QuasarSpectrum].all.map { f =>
+    spec {
+      http("quasar")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodySED(UnnormalizedSED.Quasar(f)).asJson.noSpaces))
+    }
+  }
+
+  Enumerated[HIIRegionSpectrum].all.map { f =>
+    spec {
+      http("hiiregion")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodySED(UnnormalizedSED.HIIRegion(f)).asJson.noSpaces))
+    }
+  }
+
+  Enumerated[PlanetaryNebulaSpectrum].all.map { f =>
+    spec {
+      http("quasar")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodySED(UnnormalizedSED.PlanetaryNebula(f)).asJson.noSpaces))
+    }
+  }
+
 }

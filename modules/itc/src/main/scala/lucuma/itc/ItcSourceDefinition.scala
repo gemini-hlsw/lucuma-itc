@@ -63,19 +63,19 @@ object ItcSourceDefinition {
             Json.obj("PowerLaw" -> Json.obj("index" -> Json.fromDoubleOrNull(i.toDouble)))
           case StellarLibrary(s)  =>
             Json.obj("Library" -> Json.obj("LibraryStar" -> Json.fromString(s.ocs2Tag)))
+          case s: CoolStarModel   =>
+            Json.obj("Library" -> Json.obj("LibraryStar" -> Json.fromString(s.ocs2Tag)))
+          case PlanetaryNebula(s) =>
+            Json.obj("Library" -> Json.obj("LibraryStar" -> Json.fromString(s.ocs2Tag)))
           case Galaxy(s)          =>
             Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
           case Planet(s)          =>
             Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
           case HIIRegion(s)       =>
             Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
-          case PlanetaryNebula(s) =>
-            Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
           case Quasar(s)          =>
             Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
-          case s: CoolStarModel   =>
-            Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
-          case _                  => // TODO CoolStar and UserDefined
+          case _                  => // TODO UserDefined
             Json.obj("Library" -> Json.Null)
         }
     }
@@ -133,12 +133,12 @@ object ItcSourceDefinition {
         }
 
         val distribution = s.profile match {
-          case SourceProfile.Point(SpectralDefinition.BandNormalized(sed, _)) =>
+          case SourceProfile.Point(SpectralDefinition.BandNormalized(sed, _))       =>
             sed.asJson
-          // case SourceProfile.Uniform(sed, _)  =>
-          //   sed.toJson
-          // case SourceProfile.Gaussian(sed, _) =>
-          // sed.toJson
+          case SourceProfile.Uniform(SpectralDefinition.BandNormalized(sed, _))     =>
+            sed.asJson
+          case SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(sed, _)) =>
+            sed.asJson
         }
 
         Json.obj("profile"      -> source,

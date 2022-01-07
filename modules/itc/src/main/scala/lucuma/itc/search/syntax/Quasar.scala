@@ -12,8 +12,8 @@ final class QuasarSpectrumOps(val self: QuasarSpectrum) extends AnyVal {
 
   def ocs2Tag: String =
     self match {
-      case QuasarSpectrum.QS0  => "QS0"
-      case QuasarSpectrum.QS02 => "QS02"
+      case QuasarSpectrum.QS0  => "QSO"
+      case QuasarSpectrum.QS02 => "QSO2"
     }
 
 }

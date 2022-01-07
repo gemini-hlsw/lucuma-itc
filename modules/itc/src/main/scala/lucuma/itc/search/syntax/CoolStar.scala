@@ -4,14 +4,20 @@
 package lucuma.itc.search.syntax
 
 import lucuma.core.model.UnnormalizedSED.CoolStarModel
+import lucuma.core.enum.CoolStarTemperature
 
 /**
  * Syntax extensions for missing ocs2Tag items
  */
 final class CoolStarModelOps(val self: CoolStarModel) extends AnyVal {
 
-  def ocs2Tag: String =
-    s"${self.temperature}"
+  def ocs2Tag: String = self.temperature match {
+    case CoolStarTemperature.T400K => "T0400K"
+    case CoolStarTemperature.T600K => "T0600K"
+    case CoolStarTemperature.T800K => "T0800K"
+    case CoolStarTemperature.T900K => "T0900K"
+    case _                         => s"${self.temperature}"
+  }
 
 }
 

@@ -12,7 +12,7 @@ final class HIIRegionSpectrumOps(val self: HIIRegionSpectrum) extends AnyVal {
 
   def ocs2Tag: String =
     self match {
-      case HIIRegionSpectrum.OrionNebula => "OrionNebula"
+      case HIIRegionSpectrum.OrionNebula => "Orion-nebula"
     }
 
 }

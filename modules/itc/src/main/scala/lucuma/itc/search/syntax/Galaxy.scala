@@ -12,8 +12,8 @@ final class GalaxySpectrumOps(val self: GalaxySpectrum) extends AnyVal {
 
   def ocs2Tag: String =
     self match {
-      case GalaxySpectrum.Elliptical => "EllipticalGalaxy"
-      case GalaxySpectrum.Spiral     => "SpiralGalaxy"
+      case GalaxySpectrum.Elliptical => "elliptical-galaxy"
+      case GalaxySpectrum.Spiral     => "spiral-galaxy"
     }
 
 }
