@@ -219,9 +219,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
   }
 
   Enumerated[GmosSouthFpu].all
-    .filter(f =>
-      f =!= GmosSouthFpu.Bhros && f =!= GmosSouthFpu.IfuNSBlue && f =!= GmosSouthFpu.IfuNSRed
-    )
+    .filter(f => f =!= GmosSouthFpu.Bhros)
     .map { f =>
       val conf =
         if (f.isIfu)
@@ -374,6 +372,79 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodyIntMagUnits(
+              f.withValueTagged(BrightnessValue(5))
+            ).asJson.noSpaces
+          )
+        )
+    }
+  }
+
+  def bodySurfaceMagUnits(c: BrightnessMeasure[Surface]) =
+    ItcParameters(
+      sourceDefinition.copy(profile =
+        SourceProfile.Uniform(
+          SpectralDefinition.BandNormalized(
+            UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V),
+            SortedMap(
+              Band.R -> c
+            )
+          )
+        )
+      ),
+      obs,
+      conditions,
+      telescope,
+      instrument
+    )
+
+  Brightness.Surface.all.map { f =>
+    spec {
+      http("surface units")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(
+          StringBody(
+            bodySurfaceMagUnits(
+              f.withValueTagged(BrightnessValue(5))
+            ).asJson.noSpaces
+          )
+        )
+    }
+  }
+
+  def bodyIntGaussianMagUnits(c: BrightnessMeasure[Integrated]) =
+    ItcParameters(
+      sourceDefinition.copy(profile =
+        SourceProfile.Gaussian(
+          Angle.fromDoubleArcseconds(10),
+          SpectralDefinition.BandNormalized(
+            UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V),
+            SortedMap(
+              Band.R -> c
+            )
+          )
+        )
+      ),
+      obs,
+      conditions,
+      telescope,
+      instrument
+    )
+
+  Brightness.Integrated.all.map { f =>
+    spec {
+      http("gaussian integrated units")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(
+          StringBody(
+            bodyIntGaussianMagUnits(
               f.withValueTagged(BrightnessValue(5))
             ).asJson.noSpaces
           )
