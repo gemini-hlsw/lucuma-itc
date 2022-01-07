@@ -44,15 +44,12 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         // UnnormalizedSED.BlackBody(BigDecimal(50.1).withRefinedUnit[Positive, Kelvin])
         UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V),
         SortedMap(
-          Band.J -> BrightnessValue(5).withUnit[VegaMagnitude].toMeasureTagged,
-          Band.R -> VegaMagnitudeIsIntegratedBrightnessUnit.unit.withValueTagged(
-            BrightnessValue(5)
-          )
+          Band.R -> BrightnessValue(5).withUnit[VegaMagnitude].toMeasureTagged
         )
       )
     ),
     Band.R,
-    Redshift(0.1)
+    Redshift(0.03)
   )
 
   val lsAnalysisMethod  = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
@@ -242,32 +239,27 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       }
     }
 
-  // Enumerated[GmosSouthFilter].all.map { f =>
-  //   spec {
-  //     http("sanity_gn_filter")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200, 400))
-  //       .check(substring("decode").notExists)
-  //       // .check(substring("ItcSpectroscopyResult").exists)
-  //       .body(StringBody(bodyConf(gsConf.copy(filter = f.some)).asJson.noSpaces))
-  //   }
-  // }
+  Enumerated[GmosSouthFilter].all.map { f =>
+    spec {
+      http("sanity_gn_filter")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200, 400))
+        .check(substring("decode").notExists)
+        // .check(substring("ItcSpectroscopyResult").exists)
+        .body(StringBody(bodyConf(gsConf.copy(filter = f.some)).asJson.noSpaces))
+    }
+  }
 
   def bodySED(c: UnnormalizedSED) =
     ItcParameters(
-      sourceDefinition.copy(profile = SourceProfile.unnormalizedSED
-                              .modifyOption(_ => c)(sourceDefinition.profile)
-                              .getOrElse(sourceDefinition.profile),
-                            redshift = Redshift(0.03)
+      sourceDefinition.copy(profile =
+        SourceProfile.unnormalizedSED
+          .modifyOption(_ => c)(sourceDefinition.profile)
+          .getOrElse(sourceDefinition.profile)
       ),
       obs,
-      ItcObservingConditions(ImageQuality.PointEight,
-                             CloudExtinction.OnePointFive,
-                             WaterVapor.Median,
-                             SkyBackground.Dark,
-                             2
-      ),
+      conditions,
       telescope,
       instrument
     )
@@ -356,4 +348,36 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     }
   }
 
+  def bodyIntMagUnits(c: BrightnessMeasure[Integrated]) =
+    ItcParameters(
+      sourceDefinition.copy(profile =
+        SourceProfile
+          .integratedBrightnessIn(Band.R)
+          .replace(
+            c
+          )(sourceDefinition.profile)
+      ),
+      obs,
+      conditions,
+      telescope,
+      instrument
+    )
+
+  Brightness.Integrated.all.map { f =>
+    spec {
+      http("integrated units")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(
+          StringBody(
+            bodyIntMagUnits(
+              f.withValueTagged(BrightnessValue(5))
+            ).asJson.noSpaces
+          )
+        )
+    }
+  }
 }

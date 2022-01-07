@@ -108,8 +108,16 @@ object ItcSourceDefinition {
           case SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses))
               if brightnesses.contains(s.normBand) =>
             brightnesses.get(s.normBand).map(_.units.serialized) match {
-              case Some("VEGA_MAGNITUDE") => Json.obj("MagnitudeSystem" -> Json.fromString("Vega"))
-              case r                      => println(r); Json.Null
+              case Some("VEGA_MAGNITUDE")                  => Json.obj("MagnitudeSystem" -> Json.fromString("Vega"))
+              case Some("AB_MAGNITUDE")                    => Json.obj("MagnitudeSystem" -> Json.fromString("AB"))
+              case Some("JANSKY")                          => Json.obj("MagnitudeSystem" -> Json.fromString("Jy"))
+              case Some("W_PER_M_SQUARED_PER_UM")          =>
+                Json.obj("MagnitudeSystem" -> Json.fromString("W/m²/µm"))
+              case Some("ERG_PER_S_PER_CM_SQUARED_PER_A")  =>
+                Json.obj("MagnitudeSystem" -> Json.fromString("erg/s/cm²/Å"))
+              case Some("ERG_PER_S_PER_CM_SQUARED_PER_HZ") =>
+                Json.obj("MagnitudeSystem" -> Json.fromString("erg/s/cm²/Hz"))
+              case _                                       => Json.Null
             }
           case _ => Json.Null
         }
