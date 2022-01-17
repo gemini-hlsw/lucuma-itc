@@ -22,7 +22,7 @@ val natcchezHttp4sVersion       = "0.3.2"
 val natchezVersion              = "0.1.6"
 val munitVersion                = "0.7.29"
 val disciplineMunitVersion      = "1.0.9"
-val gatlingVersion              = "3.7.3"
+val gatlingVersion              = "3.7.4"
 
 inThisBuild(
   Seq(
