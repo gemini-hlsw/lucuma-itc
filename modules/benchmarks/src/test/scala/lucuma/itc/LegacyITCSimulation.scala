@@ -8,6 +8,8 @@ import coulomb._
 import coulomb.refined._
 import coulomb.si.Kelvin
 import eu.timepit.refined.numeric.Positive
+import eu.timepit.refined.types.numeric.PosBigDecimal
+import eu.timepit.refined.auto._
 import io.circe.Json
 import io.circe.syntax._
 import io.gatling.core.Predef._
@@ -447,6 +449,76 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
             bodyIntGaussianMagUnits(
               f.withValueTagged(BrightnessValue(5))
             ).asJson.noSpaces
+          )
+        )
+    }
+  }
+
+  def bodyPowerLaw(c: Int) =
+    ItcParameters(
+      sourceDefinition.copy(profile =
+        SourceProfile.Gaussian(
+          Angle.fromDoubleArcseconds(10),
+          SpectralDefinition.BandNormalized(
+            UnnormalizedSED.PowerLaw(c),
+            SortedMap(
+              Band.R -> BrightnessValue(5).withUnit[VegaMagnitude].toMeasureTagged
+            )
+          )
+        )
+      ),
+      obs,
+      conditions,
+      telescope,
+      instrument
+    )
+
+  List(-10, 0, 10, 100).map { f =>
+    spec {
+      http("power law")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(
+          StringBody(
+            bodyPowerLaw(f).asJson.noSpaces
+          )
+        )
+    }
+  }
+
+  def bodyBlackBody(c: PosBigDecimal) =
+    ItcParameters(
+      sourceDefinition.copy(profile =
+        SourceProfile.Gaussian(
+          Angle.fromDoubleArcseconds(10),
+          SpectralDefinition.BandNormalized(
+            UnnormalizedSED.BlackBody(c.withUnit[Kelvin]),
+            SortedMap(
+              Band.R -> BrightnessValue(5).withUnit[VegaMagnitude].toMeasureTagged
+            )
+          )
+        )
+      ),
+      obs,
+      conditions,
+      telescope,
+      instrument
+    )
+
+  List[PosBigDecimal](BigDecimal(0.1), BigDecimal(10), BigDecimal(100)).map { f =>
+    spec {
+      http("black body")
+        .post("/json")
+        .headers(headers_10)
+        .check(status.in(200))
+        .check(substring("decode").notExists)
+        .check(substring("ItcSpectroscopyResult").exists)
+        .body(
+          StringBody(
+            bodyBlackBody(f).asJson.noSpaces
           )
         )
     }

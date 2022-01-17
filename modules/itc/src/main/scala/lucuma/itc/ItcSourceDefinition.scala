@@ -37,7 +37,7 @@ object ItcSourceDefinition {
       def apply(a: SourceProfile): Json =
         a match {
           case _: Point    =>
-            Json.obj("PointSource" -> Json.obj(), "units" -> Json.fromString("AAAAA"))
+            Json.obj("PointSource" -> Json.obj())
           case _: Uniform  => Json.obj("UniformSource" -> Json.obj())
           case g: Gaussian =>
             Json.obj(
