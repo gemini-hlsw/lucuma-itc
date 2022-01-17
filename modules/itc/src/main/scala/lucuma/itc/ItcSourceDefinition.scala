@@ -163,14 +163,14 @@ object ItcSourceDefinition {
               if brightnesses.contains(s.normBand) =>
             brightnesses
               .get(s.normBand)
-              .map(_.value.toDoubleValue)
+              .map(_.value.toDouble)
               .flatMap(Json.fromDouble)
               .getOrElse(Json.Null)
           case SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses))
               if brightnesses.contains(s.normBand) =>
             brightnesses
               .get(s.normBand)
-              .map(_.value.toDoubleValue)
+              .map(_.value.toDouble)
               .flatMap(Json.fromDouble)
               .getOrElse(Json.Null)
           case _ => Json.Null
