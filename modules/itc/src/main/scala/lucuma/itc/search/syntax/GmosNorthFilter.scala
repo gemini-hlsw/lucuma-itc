@@ -64,15 +64,15 @@ final class GmosNorthFilterOps(val self: GmosNorthFilter) extends AnyVal {
       // ri -- not in OCS3 … need to add
 
       // Narrow Band Imaging Filters
-      case HeII  => cov(464000, 472000)
-      case HeIIC => cov(474000, 482000)
-      case OIII  => cov(496500, 501500)
-      case OIIIC => cov(509000, 519000)
-      case Ha    => cov(654000, 661000)
-      case HaC   => cov(659000, 665000)
-      case SII   => cov(669400, 673700)
+      case HeII   => cov(464000, 472000)
+      case HeIIC  => cov(474000, 482000)
+      case OIII   => cov(496500, 501500)
+      case OIIIC  => cov(509000, 519000)
+      case Ha     => cov(654000, 661000)
+      case HaC    => cov(659000, 665000)
+      case SII    => cov(669400, 673700)
       // OVIC? OVI? -- these aren't in OCS3 … need to add
-      case DS920 => cov(912800, 931400)
+      case DS920  => cov(912800, 931400)
 
       // Spectroscopy Blocking Filters
       case GG455 => cov(460000)

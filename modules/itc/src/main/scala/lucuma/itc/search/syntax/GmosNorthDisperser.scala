@@ -65,7 +65,7 @@ final class GmosNorthDisperserOps(val self: GmosNorthDisperser) extends AnyVal {
       case B480_G5309  => Wavelength(390000)
       case R150_G5306  =>
         Wavelength.fromNanometers(1071).get // obsolete, value with old e2v detector
-      case R150_G5308 => Wavelength.fromNanometers(1219).get
+      case R150_G5308  => Wavelength.fromNanometers(1219).get
     }
 
   /** Compute the coverage of this disperser, given a central wavelength. */
