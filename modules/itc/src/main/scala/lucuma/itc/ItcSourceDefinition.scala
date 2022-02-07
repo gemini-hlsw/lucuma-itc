@@ -120,6 +120,23 @@ object ItcSourceDefinition {
               case _                                       =>
                 Json.Null
             }
+          // FIXME Support emision lines
+          // case SourceProfile.Point(SpectralDefinition.EmissionLines(_, brightnesses)) =>
+          //   Json.Null
+          //     if brightnesses.contains(s.normBand) =>
+          //   brightnesses.get(s.normBand).map(_.units.serialized) match {
+          //     case Some("VEGA_MAGNITUDE")                  => Json.obj("MagnitudeSystem" -> Json.fromString("Vega"))
+          //     case Some("AB_MAGNITUDE")                    => Json.obj("MagnitudeSystem" -> Json.fromString("AB"))
+          //     case Some("JANSKY")                          => Json.obj("MagnitudeSystem" -> Json.fromString("Jy"))
+          //     case Some("W_PER_M_SQUARED_PER_UM")          =>
+          //       Json.obj("MagnitudeSystem" -> Json.fromString("W/m²/µm"))
+          //     case Some("ERG_PER_S_PER_CM_SQUARED_PER_A")  =>
+          //       Json.obj("MagnitudeSystem" -> Json.fromString("erg/s/cm²/Å"))
+          //     case Some("ERG_PER_S_PER_CM_SQUARED_PER_HZ") =>
+          //       Json.obj("MagnitudeSystem" -> Json.fromString("erg/s/cm²/Hz"))
+          //     case _                                       =>
+          //       Json.Null
+          //   }
           case SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses))
               if brightnesses.contains(s.normBand) =>
             brightnesses.get(s.normBand).map(_.units.serialized) match {
@@ -153,9 +170,9 @@ object ItcSourceDefinition {
               case _                                       =>
                 Json.Null
             }
-          // case u =>
-          //   println(u)
-          //   Json.Null
+
+          // FIXME Support emision lines
+          case _ => Json.Null
         }
 
         val value: Json = s.profile match {
@@ -173,16 +190,29 @@ object ItcSourceDefinition {
               .map(_.value.toDouble)
               .flatMap(Json.fromDouble)
               .getOrElse(Json.Null)
+          case SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses))
+              if brightnesses.contains(s.normBand) =>
+            brightnesses
+              .get(s.normBand)
+              .map(_.value.toDouble)
+              .flatMap(Json.fromDouble)
+              .getOrElse(Json.Null)
+          // FIXME: Handle emission line
           case _ => Json.Null
         }
 
         val distribution = s.profile match {
           case SourceProfile.Point(SpectralDefinition.BandNormalized(sed, _))       =>
             sed.asJson
+          // FIXME support emmision lines
+          // case SourceProfile.Point(SpectralDefinition.EmissionLines(sed, _))        =>
+          //   Json.Null
           case SourceProfile.Uniform(SpectralDefinition.BandNormalized(sed, _))     =>
             sed.asJson
           case SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(sed, _)) =>
             sed.asJson
+          // FIXME: Handle emission line
+          case _ => Json.Null
         }
 
         Json.obj("profile"      -> source,

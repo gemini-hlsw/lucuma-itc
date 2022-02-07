@@ -3,14 +3,12 @@
 
 package lucuma.itc
 
-import cats.syntax.all._
+// import cats.syntax.all._
+import cats.implicits._
 import coulomb._
-import coulomb.refined._
 import coulomb.si.Kelvin
-import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.auto._
-import io.circe.Json
 import io.circe.syntax._
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
@@ -523,4 +521,47 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         )
     }
   }
+
+  // def bodyEmissionLine(c: PosBigDecimal) =
+  //   ItcParameters(
+  //     sourceDefinition.copy(profile =
+  //       SourceProfile.Point(
+  //         SpectralDefinition.EmissionLines(
+  //           SortedMap(
+  //             Wavelength.decimalNanometers.getOption(600).get -> EmissionLine(
+  //               c.withUnit[KilometersPerSecond],
+  //               c
+  //                 .withUnit[WattsPerMeter2]
+  //                 .toMeasureTagged
+  //             )
+  //           ),
+  //           BigDecimal(5)
+  //             .withRefinedUnit[Positive, WattsPerMeter2Micrometer]
+  //             .toMeasureTagged
+  //         )
+  //       )
+  //     ),
+  //     obs,
+  //     conditions,
+  //     telescope,
+  //     instrument
+  //   )
+  //
+  // List[PosBigDecimal](BigDecimal(0.1), BigDecimal(10), BigDecimal(100)).map { f =>
+  //   println(bodyEmissionLine(f).asJson)
+  //   spec {
+  //     http("emission line")
+  //       .post("/json")
+  //       .headers(headers_10)
+  //       .check(status.in(200))
+  //       .check(substring("decode").notExists)
+  //       .check(substring("ItcSpectroscopyResult").exists)
+  //       .body(
+  //         StringBody(
+  //           bodyEmissionLine(f).asJson.noSpaces
+  //         )
+  //       )
+  //   }
+  // }
+
 }

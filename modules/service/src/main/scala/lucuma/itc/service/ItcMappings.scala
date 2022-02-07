@@ -54,6 +54,8 @@ import Value._
 import QueryCompiler._
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.UnnormalizedSED
+import lucuma.core.model.SpectralDefinition
+import lucuma.core.model.UnnormalizedSED._
 
 trait Encoders {
   import io.circe.generic.semiauto._
@@ -181,9 +183,10 @@ object ItcMapping extends Encoders {
   val sbItems = enumTags[SkyBackground]
 
   val stellarLibraryItems  = enumTags[StellarLibrarySpectrum]
+  val coolStarItems        = enumTags[CoolStarTemperature]
   val galaxyItems          = enumTags[GalaxySpectrum]
   val planetItems          = enumTags[PlanetSpectrum]
-  val hiiItems             = enumTags[HIIRegionSpectrum]
+  val hiiRegionItems       = enumTags[HIIRegionSpectrum]
   val planetaryNebulaItems = enumTags[PlanetaryNebulaSpectrum]
   val quasarItems          = enumTags[QuasarSpectrum]
 
@@ -436,22 +439,197 @@ object ItcMapping extends Encoders {
                                                   IorNec[Problem, Environment]
         ] = {
           // sourceProfile
-          case (i, ("sourceProfile", ObjectValue(v))) if v.length === 1 || v.length === 2 =>
+          // case (i, ("sourceProfile", ObjectValue(v))) if v.length === 1 || v.length === 2 =>
+          //   println(v)
+          //   (v match {
+          //     case ("sourceType", TypedEnumValue(EnumValue("POINT_SOURCE", _, _, _))) ::
+          //         ("fwhm", NullValue | AbsentValue) :: Nil =>
+          //       SourceProfile.Point.some
+          //     case ("sourceType", TypedEnumValue(EnumValue("UNIFORM_SOURCE", _, _, _))) ::
+          //         ("fwhm", NullValue | AbsentValue) :: Nil =>
+          //       SourceProfile.Uniform.some
+          //     case ("sourceType", TypedEnumValue(EnumValue("GAUSSIAN_SOURCE", _, _, _))) ::
+          //         ("fwhm", ObjectValue(fwhm)) :: Nil
+          //         if fwhm.filter(_._2 != Value.AbsentValue).length === 1 =>
+          //       parseFwhw(fwhm).map(SourceProfile.Gaussian(_, null))
+          //     case _ => none
+          //   }).map(sp => cursorEnvAdd("sourceProfile", sp)(i))
+          //     .getOrElse(i.addProblem("Cannot parse sourceProfile"))
+          case (i, ("sourceProfile", ObjectValue(v))) if v.length === 3 =>
             (v match {
-              case ("sourceType", TypedEnumValue(EnumValue("POINT_SOURCE", _, _, _))) ::
-                  ("fwhm", NullValue | AbsentValue) :: Nil =>
-                SourceProfile.Point.some
-              case ("sourceType", TypedEnumValue(EnumValue("UNIFORM_SOURCE", _, _, _))) ::
-                  ("fwhm", NullValue | AbsentValue) :: Nil =>
-                SourceProfile.Uniform.some
-              case ("sourceType", TypedEnumValue(EnumValue("GAUSSIAN_SOURCE", _, _, _))) ::
-                  ("fwhm", ObjectValue(fwhm)) :: Nil
-                  if fwhm.filter(_._2 != Value.AbsentValue).length === 1 =>
-                parseFwhw(fwhm).map(SourceProfile.Gaussian(_, null))
-              case _ => none
-            }).map(sp => cursorEnvAdd("sourceProfile", sp)(i))
-              .getOrElse(i.addProblem("Cannot parse sourceProfile"))
-          case (i, ("sourceProfile", _))                                                  =>
+              case ("point", ObjectValue(ov)) :: ("uniform", AbsentValue) :: ("gaussian",
+                                                                              AbsentValue
+                  ) :: Nil =>
+                (ov match {
+                  case ("bandNormalized", ObjectValue(bn)) :: ("emissionLines",
+                                                               AbsentValue
+                      ) :: Nil =>
+                    val s = bn match {
+                      case ("sed", ObjectValue(sed)) ::
+                          ("brightnesses", ListValue(br)) ::
+                          ("editBrightnesses", AbsentValue) ::
+                          ("deleteBrightnesses", AbsentValue) :: Nil =>
+                        val sedResult: IorNec[String, UnnormalizedSED] = sed match {
+                          case ("stellarLibrary", TypedEnumValue(EnumValue(s, _, _, _))) ::
+                              ("coolStar", AbsentValue) ::
+                              ("galaxy", AbsentValue) ::
+                              ("planet", AbsentValue) ::
+                              ("quasar", AbsentValue) ::
+                              ("hiiRegion", AbsentValue) ::
+                              ("planetaryNebula", AbsentValue) ::
+                              ("powerLaw", AbsentValue) ::
+                              ("blackBodyTempK", AbsentValue) ::
+                              ("fluxDensities", AbsentValue) :: Nil =>
+                            stellarLibraryItems
+                              .get(s)
+                              .map(StellarLibrary(_))
+                              .toRightIorNec(s"Invalid stellar library value $s")
+                          case ("stellarLibrary", AbsentValue) ::
+                              ("coolStar", TypedEnumValue(EnumValue(s, _, _, _))) ::
+                              ("galaxy", AbsentValue) ::
+                              ("planet", AbsentValue) ::
+                              ("quasar", AbsentValue) ::
+                              ("hiiRegion", AbsentValue) ::
+                              ("planetaryNebula", AbsentValue) ::
+                              ("powerLaw", AbsentValue) ::
+                              ("blackBodyTempK", AbsentValue) ::
+                              ("fluxDensities", AbsentValue) :: Nil =>
+                            coolStarItems
+                              .get(s)
+                              .map(CoolStarModel(_))
+                              .toRightIorNec(s"Invalid coolstar value $s")
+                          case ("stellarLibrary", AbsentValue) ::
+                              ("coolStar", AbsentValue) ::
+                              ("galaxy", TypedEnumValue(EnumValue(s, _, _, _))) ::
+                              ("planet", AbsentValue) ::
+                              ("quasar", AbsentValue) ::
+                              ("hiiRegion", AbsentValue) ::
+                              ("planetaryNebula", AbsentValue) ::
+                              ("powerLaw", AbsentValue) ::
+                              ("blackBodyTempK", AbsentValue) ::
+                              ("fluxDensities", AbsentValue) :: Nil =>
+                            galaxyItems
+                              .get(s)
+                              .map(Galaxy(_))
+                              .toRightIorNec(s"Invalid galaxy value $s")
+                          case ("stellarLibrary", AbsentValue) ::
+                              ("coolStar", AbsentValue) ::
+                              ("galaxy", AbsentValue) ::
+                              ("planet", TypedEnumValue(EnumValue(s, _, _, _))) ::
+                              ("quasar", AbsentValue) ::
+                              ("hiiRegion", AbsentValue) ::
+                              ("planetaryNebula", AbsentValue) ::
+                              ("powerLaw", AbsentValue) ::
+                              ("blackBodyTempK", AbsentValue) ::
+                              ("fluxDensities", AbsentValue) :: Nil =>
+                            planetItems
+                              .get(s)
+                              .map(Planet(_))
+                              .toRightIorNec(s"Invalid planet value $s")
+                          case ("stellarLibrary", AbsentValue) ::
+                              ("coolStar", AbsentValue) ::
+                              ("galaxy", AbsentValue) ::
+                              ("planet", AbsentValue) ::
+                              ("quasar", TypedEnumValue(EnumValue(s, _, _, _))) ::
+                              ("hiiRegion", AbsentValue) ::
+                              ("planetaryNebula", AbsentValue) ::
+                              ("powerLaw", AbsentValue) ::
+                              ("blackBodyTempK", AbsentValue) ::
+                              ("fluxDensities", AbsentValue) :: Nil =>
+                            quasarItems
+                              .get(s)
+                              .map(Quasar(_))
+                              .toRightIorNec(s"Invalid quasar value $s")
+                          case ("stellarLibrary", AbsentValue) ::
+                              ("coolStar", AbsentValue) ::
+                              ("galaxy", AbsentValue) ::
+                              ("planet", AbsentValue) ::
+                              ("quasar", AbsentValue) ::
+                              ("hiiRegion", TypedEnumValue(EnumValue(s, _, _, _))) ::
+                              ("planetaryNebula", AbsentValue) ::
+                              ("powerLaw", AbsentValue) ::
+                              ("blackBodyTempK", AbsentValue) ::
+                              ("fluxDensities", AbsentValue) :: Nil =>
+                            hiiRegionItems
+                              .get(s)
+                              .map(HIIRegion(_))
+                              .toRightIorNec(s"Invalid hii region value $s")
+                          case ("stellarLibrary", AbsentValue) ::
+                              ("coolStar", AbsentValue) ::
+                              ("galaxy", AbsentValue) ::
+                              ("planet", AbsentValue) ::
+                              ("quasar", AbsentValue) ::
+                              ("hiiRegion", AbsentValue) ::
+                              ("planetaryNebula", TypedEnumValue(EnumValue(s, _, _, _))) ::
+                              ("powerLaw", AbsentValue) ::
+                              ("blackBodyTempK", AbsentValue) ::
+                              ("fluxDensities", AbsentValue) :: Nil =>
+                            planetaryNebulaItems
+                              .get(s)
+                              .map(PlanetaryNebula(_))
+                              .toRightIorNec(s"Invalid planetary nebula value $s")
+                          case ("stellarLibrary", AbsentValue) ::
+                              ("coolStar", AbsentValue) ::
+                              ("galaxy", AbsentValue) ::
+                              ("planet", AbsentValue) ::
+                              ("quasar", AbsentValue) ::
+                              ("hiiRegion", AbsentValue) ::
+                              ("planetaryNebula", AbsentValue) ::
+                              ("powerLaw", r) ::
+                              ("blackBodyTempK", AbsentValue) ::
+                              ("fluxDensities", AbsentValue) :: Nil =>
+                            bigDecimalValue(r) match {
+                              case Some(r) =>
+                                val powerLaw = UnnormalizedSED.PowerLaw(r)
+                                powerLaw.rightIorNec
+                              case _       =>
+                                s"Not a valid power law value $r".leftIorNec
+                            }
+                          case ("stellarLibrary", AbsentValue) ::
+                              ("coolStar", AbsentValue) ::
+                              ("galaxy", AbsentValue) ::
+                              ("planet", AbsentValue) ::
+                              ("quasar", AbsentValue) ::
+                              ("hiiRegion", AbsentValue) ::
+                              ("planetaryNebula", AbsentValue) ::
+                              ("powerLaw", AbsentValue) ::
+                              ("blackBodyTempK", r) ::
+                              ("fluxDensities", AbsentValue) :: Nil =>
+                            bigDecimalValue(r) match {
+                              case Some(r) if r > 0 =>
+                                val blackBody = refineV[Positive](r)
+                                  .map(k => UnnormalizedSED.BlackBody(k.withUnit[Kelvin])).toOption
+                                blackBody.toRightIorNec(s"Not a valid black body value $r")
+                              case Some(r)          =>
+                                s"black body value $r must be positive".leftIorNec
+                              case _                =>
+                                s"Not a valid black body value $r".leftIorNec
+                            }
+                          case ("stellarLibrary", AbsentValue) ::
+                              ("coolStar", AbsentValue) ::
+                              ("galaxy", AbsentValue) ::
+                              ("planet", AbsentValue) ::
+                              ("quasar", AbsentValue) ::
+                              ("hiiRegion", AbsentValue) ::
+                              ("planetaryNebula", AbsentValue) ::
+                              ("powerLaw", AbsentValue) ::
+                              ("blackBodyTempK", AbsentValue) ::
+                              ("fluxDensities", fd) :: Nil =>
+                                s"Flux densities not yet supported $fd".leftIorNec
+                          case _ =>
+                                s"Error on spectral definition parameter".leftIorNec
+                        }
+                    println(sedResult)
+                    sedResult.map( s=>
+                    SourceProfile.Point(
+                      SpectralDefinition.BandNormalized(s, null)
+                    )
+                  )
+                    }
+                })
+            })
+            i.addProblem("Cannot parse sourceProfile")
+          case (i, ("sourceProfile", v))                                =>
             i.addProblem("Cannot parse sourceProfile")
         }
 
@@ -502,7 +680,7 @@ object ItcMapping extends Encoders {
                   .leftProblems
                   .flatten
               case ("hiiRegion", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil      =>
-                val l = hiiItems.get(s).toRightIorNec("Cannot parse hii region")
+                val l = hiiRegionItems.get(s).toRightIorNec("Cannot parse hii region")
                 l.map(s => cursorEnvAdd("spectralDistribution", UnnormalizedSED.HIIRegion(s))(i))
                   .leftProblems
                   .flatten
@@ -716,8 +894,8 @@ object ItcMapping extends Encoders {
                         .orElse(radialVelocityPartial)
                         .orElse(signalToNoisePartial)
                         .orElse(sourceProfilePartial)
-                        .orElse(spectralDistributionPartial)
-                        .orElse(magnitudePartial)
+                        // .orElse(spectralDistributionPartial)
+                        // .orElse(magnitudePartial)
                         .orElse(instrumentModesPartial)
                         .orElse(constraintsPartial)
                         .applyOrElse(
@@ -733,9 +911,9 @@ object ItcMapping extends Encoders {
                         .orElse(resolutionPartial)
                         .orElse(signalToNoisePartial)
                         .orElse(sourceProfilePartial)
-                        .orElse(spectralDistributionPartial)
+                        // .orElse(spectralDistributionPartial)
                         .orElse(radialVelocityPartial)
-                        .orElse(magnitudePartial)
+                        // .orElse(magnitudePartial)
                         .applyOrElse(
                           (e, c),
                           fallback

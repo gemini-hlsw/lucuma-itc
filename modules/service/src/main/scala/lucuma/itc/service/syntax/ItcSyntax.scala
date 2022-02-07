@@ -17,12 +17,16 @@ trait ItcSyntax {
         case Some(a) => Ior.Right(a)
         case None    => Ior.Left(NonEmptyChain.of(e))
       }
+
   }
 
   implicit class MoreIdOps[A](self: A) {
 
     def leftIorNec[B]: Ior[NonEmptyChain[A], B] =
       Ior.Left(NonEmptyChain.of(self))
+
+    def rightIorNec[E]: Ior[NonEmptyChain[E], A] =
+      Ior.Right(self)
   }
 
   implicit class IorOps[A](self: IorNec[Problem, A]) {
