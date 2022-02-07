@@ -24,15 +24,7 @@ val munitVersion                = "0.7.29"
 val disciplineMunitVersion      = "1.0.9"
 val gatlingVersion              = "3.7.4"
 
-inThisBuild(
-  Seq(
-    homepage                      := Some(url("https://github.com/gemini-hlsw/lucuma-itc")),
-    Global / onChangedBuildSource := ReloadOnSourceChanges,
-    addCompilerPlugin(
-      ("org.typelevel"             % "kind-projector" % kindProjectorVersion).cross(CrossVersion.full)
-    )
-  ) ++ lucumaPublishSettings
-)
+Global / onChangedBuildSource := ReloadOnSourceChanges
 
 addCommandAlias(
   "fixImports",
@@ -44,9 +36,7 @@ lazy val commonSettings = lucumaGlobalSettings ++ Seq(
     "org.typelevel" %% "cats-testkit"           % catsVersion                 % "test",
     "org.typelevel" %% "cats-testkit-scalatest" % catsTestkitScalaTestVersion % "test"
   ),
-  testFrameworks += new TestFramework("munit.Framework"),
   Test / parallelExecution := false, // tests run fine in parallel but output is nicer this way
-  scalacOptions --= Seq("-Xfatal-warnings").filterNot(_ => insideCI.value),
   scalacOptions ++= Seq(
     "-Ymacro-annotations",
     "-Ywarn-macros:after"
@@ -55,7 +45,6 @@ lazy val commonSettings = lucumaGlobalSettings ++ Seq(
 
 lazy val itc = project
   .in(file("modules/itc"))
-  .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings)
   .settings(
     name := "lucuma-itc",
@@ -79,14 +68,10 @@ lazy val itc = project
 
 lazy val service = project
   .in(file("modules/service"))
-  .enablePlugins(AutomateHeaderPlugin)
   .dependsOn(itc)
   .settings(commonSettings)
   .settings(
     name              := "lucuma-itc-service",
-    scalacOptions ++= Seq(
-      "-Ymacro-annotations"
-    ),
     scalacOptions -= "-Vtype-diffs",
     reStart / envVars := Map("ITC_URL" -> "https://gemini-new-itc.herokuapp.com/json"),
     libraryDependencies ++= Seq(
