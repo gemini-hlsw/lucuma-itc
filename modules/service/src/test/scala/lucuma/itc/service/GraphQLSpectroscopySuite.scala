@@ -40,13 +40,16 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   brightnesses: [ {
                     band: R
                     value: 3
+                    units: ERG_PER_S_PER_CM_SQUARED_PER_A
                   }, {
                     band: J
                     value: 2.1
+                    units: AB_MAGNITUDE
                   }]
                 }
               }
             },
+            band: J,
             constraints: {
               imageQuality: POINT_THREE,
               cloudExtinction: POINT_FIVE,

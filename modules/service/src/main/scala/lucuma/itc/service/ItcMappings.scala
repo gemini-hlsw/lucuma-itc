@@ -26,7 +26,10 @@ import lucuma.core.enum._
 import lucuma.core.math.Angle
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
+import lucuma.core.math.BrightnessUnits._
 import lucuma.core.math.units._
+import lucuma.core.math.dimensional._
+import lucuma.core.math.dimensional.Units._
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
@@ -56,6 +59,8 @@ import scala.util.Using
 import Query._
 import Value._
 import QueryCompiler._
+import scala.collection.immutable.SortedMap
+import lucuma.core.math.BrightnessValue
 
 trait Encoders {
   import io.circe.generic.semiauto._
@@ -190,6 +195,9 @@ object ItcMapping extends Encoders {
   val planetaryNebulaItems = enumTags[PlanetaryNebulaSpectrum]
   val quasarItems          = enumTags[QuasarSpectrum]
 
+  val bandItems            = enumTags[Band]
+  val integratedUnitsItems = enumTags[Units Of Brightness[Integrated]]
+
   // In principle this is a pure operation because resources are constant values, but the potential
   // for error in dev is high and it's nice to handle failures in `F`.
   def loadSchema[F[_]: Sync]: F[Schema] =
@@ -246,7 +254,13 @@ object ItcMapping extends Encoders {
 
   def spectroscopy[F[_]: ApplicativeError[*[_], Throwable]: Logger: Parallel: Trace](
     itc: Itc[F]
-  )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] =
+  )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] = {
+    println(env.get[SourceProfile]("sourceProfile"))
+    println(env.get[ItcObservingConditions]("constraints"))
+    println(env.get[Wavelength]("wavelength"))
+    println(env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift))
+    println(env.get[PosBigDecimal]("signalToNoise"))
+    println(env.get[Band]("band"))
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[PosBigDecimal]("signalToNoise"),
@@ -284,6 +298,7 @@ object ItcMapping extends Encoders {
           Problem(s"Error calculating itc $x").leftIorNec.pure[F]
         }
     }.map(_.getOrElse((Problem("Missing parameters for spectroscopy")).leftIorNec))
+  }
 
   def bigDecimalValue(v: Value): Option[BigDecimal] = v match {
     case IntValue(r)    => BigDecimal(r).some
@@ -460,16 +475,38 @@ object ItcMapping extends Encoders {
               case ("point", ObjectValue(ov)) :: ("uniform", AbsentValue) :: ("gaussian",
                                                                               AbsentValue
                   ) :: Nil =>
-                (ov match {
+                val point: IorNec[String, SourceProfile] = ov match {
                   case ("bandNormalized", ObjectValue(bn)) :: ("emissionLines",
                                                                AbsentValue
                       ) :: Nil =>
-                    val s = bn match {
+                    val s: IorNec[String, SourceProfile.Point] = bn match {
                       case ("sed", ObjectValue(sed)) ::
-                          ("brightnesses", ListValue(List(ObjectValue(br)))) ::
+                          ("brightnesses", ListValue(br)) ::
                           ("editBrightnesses", AbsentValue) ::
                           ("deleteBrightnesses", AbsentValue) :: Nil =>
-                            println(br)
+                        // println(br)
+                        // SortedMap(
+                        val brightesses                                = br
+                          .map {
+                            case ObjectValue(
+                                  List(("band", TypedEnumValue(EnumValue(b, _, _, _))),
+                                       ("value", v),
+                                       ("units", TypedEnumValue(EnumValue(u, _, _, _))),
+                                       ("error", _)
+                                  )
+                                ) =>
+                              val band  = bandItems.get(b)
+                              val value = bigDecimalValue(v)
+                              val units = integratedUnitsItems.get(u)
+                              (band, value, units)
+                                .mapN { (b, v, u) =>
+                                  b -> u.withValueTagged(BrightnessValue(v.toInt * 1000))
+                                }
+                                .toRightIorNec("Invalid magnitude")
+                          }
+                          .sequence
+                          .map(v => SortedMap(v: _*))
+                        // )
                         val sedResult: IorNec[String, UnnormalizedSED] = sed match {
                           case ("stellarLibrary", TypedEnumValue(EnumValue(s, _, _, _))) ::
                               ("coolStar", AbsentValue) ::
@@ -621,16 +658,17 @@ object ItcMapping extends Encoders {
                           case _ =>
                             s"Error on spectral definition parameter".leftIorNec
                         }
-                        println(sedResult)
-                        sedResult.map(s =>
+                        (sedResult, brightesses).mapN((s, b) =>
                           SourceProfile.Point(
-                            SpectralDefinition.BandNormalized(s, null)
+                            SpectralDefinition.BandNormalized(s, b)
                           )
                         )
                     }
-                })
+                    s
+                }
+                point.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
             })
-            i.addProblem("Cannot parse sourceProfile")
+          // i.addProblem("Cannot parse sourceProfile")
           case (i, ("sourceProfile", v))                                =>
             i.addProblem("Cannot parse sourceProfile")
         }
@@ -706,40 +744,13 @@ object ItcMapping extends Encoders {
             i.addProblem(s"Spectral distribution value is not valid $v")
         }
 
-        def magnitudePartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
-                                              IorNec[Problem, Environment]
+        def bandPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
+                                         IorNec[Problem, Environment]
         ] = {
           // magnitude
-          case (i,
-                ("magnitude",
-                 ObjectValue(
-                   List(("band", TypedEnumValue(EnumValue(band, _, _, _))),
-                        ("value", value),
-                        ("error", error),
-                        ("system", sys)
-                   )
-                 )
-                )
-              ) =>
-            // val b = MagnitudeBand.fromTag(band.fromScreamingSnakeCase)
-            // val v = bigDecimalValue(value).flatMap(MagnitudeValue.fromBigDecimal.getOption)
-            // val e = bigDecimalValue(error).flatMap(MagnitudeValue.fromBigDecimal.getOption)
-            // val s = sys match {
-            //   case TypedEnumValue(EnumValue(s, _, _, _)) =>
-            //     MagnitudeSystem
-            //       .fromTag(s.fromScreamingSnakeCase)
-            //       .orElse(MagnitudeSystem.fromTag(s))
-            //   case UntypedEnumValue(s)                   =>
-            //     MagnitudeSystem
-            //       .fromTag(s.fromScreamingSnakeCase)
-            //       .orElse(MagnitudeSystem.fromTag(s))
-            //   case _                                     => none
-            // }
-            // (v, b, s)
-            //   .mapN(Magnitude(_, _, e, _))
-            //   .map(cursorEnvAdd("magnitude", _)(i))
-            //   .getOrElse(i.addProblem("Cannot parse magnitude"))
-            i.addProblem("Cannot parse magnitude")
+          case (i, ("band", TypedEnumValue(EnumValue(b, _, _, _)))) =>
+            bandItems.get(b).map(b => cursorEnvAdd("band", b)(i)).getOrElse(
+            i.addProblem("Cannot parse band"))
         }
 
         def instrumentModesPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
@@ -897,7 +908,7 @@ object ItcMapping extends Encoders {
                         .orElse(signalToNoisePartial)
                         .orElse(sourceProfilePartial)
                         // .orElse(spectralDistributionPartial)
-                        // .orElse(magnitudePartial)
+                        .orElse(bandPartial)
                         .orElse(instrumentModesPartial)
                         .orElse(constraintsPartial)
                         .applyOrElse(

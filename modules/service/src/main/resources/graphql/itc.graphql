@@ -4412,6 +4412,9 @@ input SpectroscopyModeInput {
   # Spatial profile PointSource/UniformSource/GaussianSource.
   sourceProfile: SourceProfileInput!
 
+  # band
+  band: Band!
+
   # Spectral distribution variant BlacBode/PowerLaw/Stellar/NonStellar.
   # spectralDistribution: SpectralDistributionInput!
 
