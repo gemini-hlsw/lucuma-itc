@@ -4415,12 +4415,6 @@ input SpectroscopyModeInput {
   # band
   band: Band!
 
-  # Spectral distribution variant BlacBode/PowerLaw/Stellar/NonStellar.
-  # spectralDistribution: SpectralDistributionInput!
-
-  # Target magnitude/system/band.
-  # magnitude: MagnitudeCreateInput!
-
   # Target radial velocity
   radialVelocity: RadialVelocityInput!
 

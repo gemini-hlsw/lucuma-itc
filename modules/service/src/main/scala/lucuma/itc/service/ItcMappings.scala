@@ -8,7 +8,6 @@ import cats.data._
 import cats.effect.{ Unique => _, _ }
 import cats.syntax.all._
 import coulomb._
-import coulomb.refined._
 import coulomb.si.Kelvin
 import coulomb.si._
 import coulomb.siprefix._
@@ -255,12 +254,6 @@ object ItcMapping extends Encoders {
   def spectroscopy[F[_]: ApplicativeError[*[_], Throwable]: Logger: Parallel: Trace](
     itc: Itc[F]
   )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] = {
-    println(env.get[SourceProfile]("sourceProfile"))
-    println(env.get[ItcObservingConditions]("constraints"))
-    println(env.get[Wavelength]("wavelength"))
-    println(env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift))
-    println(env.get[PosBigDecimal]("signalToNoise"))
-    println(env.get[Band]("band"))
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[PosBigDecimal]("signalToNoise"),
@@ -472,9 +465,9 @@ object ItcMapping extends Encoders {
           //     .getOrElse(i.addProblem("Cannot parse sourceProfile"))
           case (i, ("sourceProfile", ObjectValue(v))) if v.length === 3 =>
             (v match {
-              case ("point", ObjectValue(ov)) :: ("uniform", AbsentValue) :: ("gaussian",
-                                                                              AbsentValue
-                  ) :: Nil =>
+              case ("point", ObjectValue(ov)) ::
+              ("uniform", AbsentValue) ::
+              ("gaussian", AbsentValue) :: Nil =>
                 val point: IorNec[String, SourceProfile] = ov match {
                   case ("bandNormalized", ObjectValue(bn)) :: ("emissionLines",
                                                                AbsentValue
@@ -484,8 +477,6 @@ object ItcMapping extends Encoders {
                           ("brightnesses", ListValue(br)) ::
                           ("editBrightnesses", AbsentValue) ::
                           ("deleteBrightnesses", AbsentValue) :: Nil =>
-                        // println(br)
-                        // SortedMap(
                         val brightesses                                = br
                           .map {
                             case ObjectValue(
@@ -502,7 +493,8 @@ object ItcMapping extends Encoders {
                                 .mapN { (b, v, u) =>
                                   b -> u.withValueTagged(BrightnessValue(v.toInt * 1000))
                                 }
-                                .toRightIorNec("Invalid magnitude")
+                                .toRightIorNec("Invalid brightness")
+                            case e => s"Invalid brighness entry $e".leftIorNec
                           }
                           .sequence
                           .map(v => SortedMap(v: _*))
@@ -663,85 +655,15 @@ object ItcMapping extends Encoders {
                             SpectralDefinition.BandNormalized(s, b)
                           )
                         )
-                    }
+                          case _ => "Error parsing point profile".leftIorNec}
                     s
+                  case _ => "Error parsing point profile".leftIorNec
                 }
                 point.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
+                  case _ => i.addProblem("Unsupported source profile")
             })
-          // i.addProblem("Cannot parse sourceProfile")
           case (i, ("sourceProfile", v))                                =>
-            i.addProblem("Cannot parse sourceProfile")
-        }
-
-        def spectralDistributionPartial
-          : PartialFunction[(IorNec[Problem, Environment], (String, Value)),
-                            IorNec[Problem, Environment]
-          ] = {
-          // spectralDistribution
-          case (i, ("spectralDistribution", ObjectValue(sd)))
-              if sd.filter(_._2 != Value.AbsentValue).length === 1 =>
-            sd.filter(_._2 != Value.AbsentValue) match {
-              case ("blackBody", ObjectValue(List(("temperature", r)))) :: Nil      =>
-                bigDecimalValue(r) match {
-                  case Some(r) if r > 0 =>
-                    val blackBody = UnnormalizedSED.BlackBody(
-                      r.withRefinedUnit[Positive, Kelvin]
-                    )
-                    cursorEnvAdd("spectralDistribution", blackBody)(i)
-                  case Some(r)          =>
-                    i.addProblem(s"black body temperature value $r must be positive")
-                  case _                =>
-                    i.addProblem(s"Not a valid temperature value $r")
-                }
-              case ("powerLaw", ObjectValue(List(("temperature", r)))) :: Nil       =>
-                bigDecimalValue(r) match {
-                  case Some(r) if r > 0 =>
-                    val powerLaw = UnnormalizedSED.PowerLaw(r)
-                    cursorEnvAdd("spectralDistribution", powerLaw)(i)
-                  case Some(r)          =>
-                    i.addProblem(s"power law value $r must be positive")
-                  case _                =>
-                    i.addProblem(s"Not a valid power law value $r")
-                }
-              case ("stellar", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil        =>
-                val l = stellarLibraryItems.get(s).toRightIorNec("Cannot parse stellar library")
-                l.map(s =>
-                  cursorEnvAdd("spectralDistribution", UnnormalizedSED.StellarLibrary(s))(i)
-                ).leftProblems
-                  .flatten
-              case ("gallaxy", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil        =>
-                val l = galaxyItems.get(s).toRightIorNec("Cannot parse galaxy")
-                l.map(s => cursorEnvAdd("spectralDistribution", UnnormalizedSED.Galaxy(s))(i))
-                  .leftProblems
-                  .flatten
-              case ("planet", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil         =>
-                val l = planetItems.get(s).toRightIorNec("Cannot parse planet")
-                l.map(s => cursorEnvAdd("spectralDistribution", UnnormalizedSED.Planet(s))(i))
-                  .leftProblems
-                  .flatten
-              case ("hiiRegion", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil      =>
-                val l = hiiRegionItems.get(s).toRightIorNec("Cannot parse hii region")
-                l.map(s => cursorEnvAdd("spectralDistribution", UnnormalizedSED.HIIRegion(s))(i))
-                  .leftProblems
-                  .flatten
-              case ("plantaryNebula", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil =>
-                val l = planetaryNebulaItems.get(s).toRightIorNec("Cannot parse planetary nebula")
-                l.map(s =>
-                  cursorEnvAdd("spectralDistribution", UnnormalizedSED.PlanetaryNebula(s))(i)
-                ).leftProblems
-                  .flatten
-              case ("quasar", TypedEnumValue(EnumValue(s, _, _, _))) :: Nil         =>
-                val l = quasarItems.get(s).toRightIorNec("Cannot parse quasar")
-                l.map(s => cursorEnvAdd("spectralDistribution", UnnormalizedSED.Quasar(s))(i))
-                  .leftProblems
-                  .flatten
-              case _                                                                =>
-                i.addProblem("Cannot parse spatialDistribution")
-            }
-          case (i, ("spectralDistribution", ObjectValue(sd))) =>
-            val v =
-              sd.filter(_._2 != Value.AbsentValue).map(_._1).mkString("{", ", ", "}")
-            i.addProblem(s"Spectral distribution value is not valid $v")
+            i.addProblem(s"Cannot parse sourceProfile $v")
         }
 
         def bandPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
@@ -749,8 +671,10 @@ object ItcMapping extends Encoders {
         ] = {
           // magnitude
           case (i, ("band", TypedEnumValue(EnumValue(b, _, _, _)))) =>
-            bandItems.get(b).map(b => cursorEnvAdd("band", b)(i)).getOrElse(
-            i.addProblem("Cannot parse band"))
+            bandItems
+              .get(b)
+              .map(b => cursorEnvAdd("band", b)(i))
+              .getOrElse(i.addProblem("Cannot parse band"))
         }
 
         def instrumentModesPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),

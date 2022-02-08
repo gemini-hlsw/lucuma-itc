@@ -7,18 +7,6 @@ import io.circe.literal._
 
 class GraphQLSpectroscopySuite extends GraphQLSuite {
 
-  // spectralDistribution: {
-  //   blackBody: {
-  //     temperature: 50.1
-  //   }
-  // },
-  // magnitude: {
-  //   band: AP,
-  //   value: 5,
-  //   error: 1.2,
-  //   system: JY
-  // sourceType: POINT_SOURCE
-  // },
   test("gmos north case") {
     query(
       """
@@ -157,138 +145,144 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
     )
   }
 
-//   test("gmos south case") {
-//     query(
-//       """
-//         query {
-//           spectroscopy(input: {
-//             wavelength: {
-//               nanometers: 60,
-//             },
-//             radialVelocity: {
-//               kilometersPerSecond: 1000
-//             },
-//             signalToNoise: 2,
-//             spatialProfile: {
-//               sourceType: POINT_SOURCE
-//             },
-//             spectralDistribution: {
-//               blackBody: {
-//                 temperature: 50.1
-//               }
-//             },
-//             magnitude: {
-//               band: AP,
-//               value: 5,
-//               error: 1.2,
-//               system: JY
-//             },
-//             constraints: {
-//               imageQuality: POINT_THREE,
-//               cloudExtinction: POINT_FIVE,
-//               skyBackground: DARK,
-//               waterVapor: DRY,
-//               elevationRange: {
-//                 airmassRange: {
-//                   min: 1,
-//                   max: 2
-//                 }
-//               }
-//             },
-//             modes: [{
-//               gmosS: {
-//                 filter: RG610,
-//                 fpu: LONG_SLIT_0_25,
-//                 disperser: B1200_G5321
-//               }
-//             }, {
-//               gmosS: {
-//                 filter: SII,
-//                 fpu: LONG_SLIT_0_25,
-//                 disperser: B1200_G5321
-//               }
-//             }
-//             ]
-//           }) {
-//             results {
-//                 mode {
-//                   instrument
-//                   resolution
-//                   params {
-//                     ... on GmosSITCParams {
-//                       disperser
-//                     }
-//                   }
-//                   wavelength {
-//                     nanometers
-//                   }
-//                 }
-//                 itc {
-//                   ... on ItcSuccess {
-//                     exposures
-//                     exposureTime {
-//                       seconds
-//                     }
-//                   }
-//                 }
-//             }
-//           }
-//         }
-//         """,
-//       json"""
-//         {
-//           "data": {
-//             "spectroscopy" : [
-//               {
-//                 "results" : [
-//                   {
-//                     "mode" : {
-//                       "instrument" : "GMOS_SOUTH",
-//                       "resolution" : 970,
-//                       "params": {
-//                         "disperser": "B1200_G5321"
-//                       },
-//                       "wavelength" : {
-//                         "nanometers" : 60.00
-//                       }
-//                     },
-//                     "itc" : {
-//                       "exposures" : 10,
-//                       "exposureTime" : {
-//                         "seconds" : 1
-//                       }
-//                     }
-//                   }
-//                 ]
-//               },
-//               {
-//                 "results" : [
-//                   {
-//                     "mode" : {
-//                       "instrument" : "GMOS_SOUTH",
-//                       "resolution" : 970,
-//                       "params": {
-//                         "disperser": "B1200_G5321"
-//                       },
-//                       "wavelength" : {
-//                         "nanometers" : 60.00
-//                       }
-//                     },
-//                     "itc" : {
-//                       "exposures" : 10,
-//                       "exposureTime" : {
-//                         "seconds" : 1
-//                       }
-//                     }
-//                   }
-//                 ]
-//               }
-//             ]
-//           }
-//         }
-//         """
-//     )
-//   }
+  test("gmos south case") {
+    query(
+      """
+        query {
+          spectroscopy(input: {
+            wavelength: {
+              nanometers: 60,
+            },
+            radialVelocity: {
+              kilometersPerSecond: 1000
+            },
+            signalToNoise: 2,
+            sourceProfile: {
+              point: {
+                bandNormalized: {
+                  sed: {
+                    planet: JUPITER
+                  }
+                  brightnesses: [ {
+                    band: R
+                    value: 3
+                    units: ERG_PER_S_PER_CM_SQUARED_PER_A
+                    error: 0.2
+                  }, {
+                    band: J
+                    value: 2.1
+                    units: AB_MAGNITUDE
+                  }]
+                }
+              }
+            },
+            band: J,
+            constraints: {
+              imageQuality: POINT_THREE,
+              cloudExtinction: POINT_FIVE,
+              skyBackground: DARK,
+              waterVapor: DRY,
+              elevationRange: {
+                airmassRange: {
+                  min: 1,
+                  max: 2
+                }
+              }
+            },
+            modes: [{
+              gmosS: {
+                filter: RG610,
+                fpu: LONG_SLIT_0_25,
+                disperser: B1200_G5321
+              }
+            }, {
+              gmosS: {
+                filter: SII,
+                fpu: LONG_SLIT_0_25,
+                disperser: B1200_G5321
+              }
+            }
+            ]
+          }) {
+            results {
+                mode {
+                  instrument
+                  resolution
+                  params {
+                    ... on GmosSITCParams {
+                      disperser
+                    }
+                  }
+                  wavelength {
+                    nanometers
+                  }
+                }
+                itc {
+                  ... on ItcSuccess {
+                    exposures
+                    exposureTime {
+                      seconds
+                    }
+                  }
+                }
+            }
+          }
+        }
+        """,
+      json"""
+        {
+          "data": {
+            "spectroscopy" : [
+              {
+                "results" : [
+                  {
+                    "mode" : {
+                      "instrument" : "GMOS_SOUTH",
+                      "resolution" : 970,
+                      "params": {
+                        "disperser": "B1200_G5321"
+                      },
+                      "wavelength" : {
+                        "nanometers" : 60.00
+                      }
+                    },
+                    "itc" : {
+                      "exposures" : 10,
+                      "exposureTime" : {
+                        "seconds" : 1
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "results" : [
+                  {
+                    "mode" : {
+                      "instrument" : "GMOS_SOUTH",
+                      "resolution" : 970,
+                      "params": {
+                        "disperser": "B1200_G5321"
+                      },
+                      "wavelength" : {
+                        "nanometers" : 60.00
+                      }
+                    },
+                    "itc" : {
+                      "exposures" : 10,
+                      "exposureTime" : {
+                        "seconds" : 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        """
+    )
+  }
 //
 //   test("gmos north case with variables") {
 //     query(
