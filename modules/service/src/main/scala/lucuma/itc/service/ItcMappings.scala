@@ -23,12 +23,13 @@ import lucuma.core.enum.SkyBackground
 import lucuma.core.enum.WaterVapor
 import lucuma.core.enum._
 import lucuma.core.math.Angle
+import lucuma.core.math.BrightnessUnits._
+import lucuma.core.math.BrightnessValue
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
-import lucuma.core.math.BrightnessUnits._
-import lucuma.core.math.units._
-import lucuma.core.math.dimensional._
 import lucuma.core.math.dimensional.Units._
+import lucuma.core.math.dimensional._
+import lucuma.core.math.units._
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
@@ -47,10 +48,9 @@ import lucuma.itc.search.TargetProfile
 import lucuma.itc.service.syntax.all._
 import natchez.Trace
 import org.typelevel.log4cats.Logger
-import spire.math.Rational
 
 import java.math.RoundingMode
-import scala.annotation.nowarn
+import scala.collection.immutable.SortedMap
 import scala.concurrent.duration._
 import scala.io.Source
 import scala.util.Using
@@ -58,8 +58,6 @@ import scala.util.Using
 import Query._
 import Value._
 import QueryCompiler._
-import scala.collection.immutable.SortedMap
-import lucuma.core.math.BrightnessValue
 
 trait Encoders {
   import io.circe.generic.semiauto._
@@ -206,54 +204,9 @@ object ItcMapping extends Encoders {
       }.liftTo[F]
     }
 
-  @nowarn
-  def basicCase[F[_]: ApplicativeError[*[_], Throwable]](
-    itc: Itc[F]
-  )(env: Cursor.Env): F[Result[SpectroscopyResults]] =
-    (env.get[Wavelength]("wavelength"),
-     env.get[Wavelength]("simultaneousCoverage"),
-     env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
-     env.get[Rational]("resolution"),
-     env.get[types.numeric.PosBigDecimal]("signalToNoise"),
-     env.get[SourceProfile]("sourceProfile"),
-     env.get[Band]("band")
-    ).traverseN { (wv, sc, rs, r, sn, sp, b) =>
-      itc
-        .calculate(
-          TargetProfile(sp, b, rs),
-          ObservingMode.Spectroscopy
-            .GmosNorth(wv, GmosNorthDisperser.B480_G5309, GmosNorthFpu.Ifu2Slits, none),
-          ItcObservingConditions(
-            iq = ImageQuality.OnePointZero,    // Orginially 0.85
-            cc = CloudExtinction.OnePointZero, // Originally 0.7
-            wv = WaterVapor.Wet,               // Orginally Any
-            sb = SkyBackground.Dark,           // Originally 0.5
-            airmass = 1.5
-          ),
-          sn.value
-        )
-        .map(r =>
-          SpectroscopyResults(
-            List(
-              Spectroscopy(
-                ObservingMode.Spectroscopy.GmosNorth(Wavelength.unsafeFromInt(1000),
-                                                     GmosNorthDisperser.B480_G5309,
-                                                     GmosNorthFpu.Ifu2Slits,
-                                                     None
-                ),
-                r
-              )
-            )
-          ).rightIor[NonEmptyChain[Problem]]
-        )
-        .handleError { case x =>
-          Problem(s"Error calculating itc $x").leftIorNec
-        }
-    }.map(_.getOrElse((Problem("Error calculating itc")).leftIorNec))
-
   def spectroscopy[F[_]: ApplicativeError[*[_], Throwable]: Logger: Parallel: Trace](
     itc: Itc[F]
-  )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] = {
+  )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[PosBigDecimal]("signalToNoise"),
@@ -291,7 +244,6 @@ object ItcMapping extends Encoders {
           Problem(s"Error calculating itc $x").leftIorNec.pure[F]
         }
     }.map(_.getOrElse((Problem("Missing parameters for spectroscopy")).leftIorNec))
-  }
 
   def bigDecimalValue(v: Value): Option[BigDecimal] = v match {
     case IntValue(r)    => BigDecimal(r).some
@@ -350,10 +302,6 @@ object ItcMapping extends Encoders {
             ObjectMapping(
               tpe = QueryType,
               fieldMappings = List(
-                ComputeRoot[SpectroscopyResults]("basiccase",
-                                                 SpectroscopyResultType,
-                                                 basicCase[F](itc)
-                ),
                 ComputeRoot[List[SpectroscopyResults]]("spectroscopy",
                                                        ListType(SpectroscopyResultType),
                                                        spectroscopy[F](itc)
@@ -380,38 +328,6 @@ object ItcMapping extends Encoders {
             wavelength
               .map(w => cursorEnvAdd("wavelength", w)(i))
               .getOrElse(i.addProblem("Wavelength couldn't be parsed"))
-        }
-
-        def resolutionPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
-                                               IorNec[Problem, Environment]
-        ] = {
-          // resolution
-          case (i, ("resolution", r)) =>
-            bigDecimalValue(r) match {
-              case Some(r) if r > 0 =>
-                cursorEnvAdd("resolution", Rational(r))(i)
-              case _                =>
-                i.addProblem(s"Resolution value not valid $r")
-            }
-        }
-
-        def simultaneousCoveragePartial
-          : PartialFunction[(IorNec[Problem, Environment], (String, Value)),
-                            IorNec[Problem, Environment]
-          ] = {
-          // simultaneousCoverage
-          case (i, ("simultaneousCoverage", ObjectValue(units)))
-              if units.filter(_._2 != Value.AbsentValue).length != 1 =>
-            val presentUnits =
-              units.filter(_._2 != Value.AbsentValue).map(_._1).mkString("{", ", ", "}")
-            i.addProblem(
-              s"Simultaneous coverage defined with multiple units $presentUnits"
-            )
-          case (i, ("simultaneousCoverage", ObjectValue(units))) =>
-            val wavelength: Option[Wavelength] = parseWavelength(units)
-            wavelength
-              .map(w => cursorEnvAdd("simultaneousCoverage", w)(i))
-              .getOrElse(i.addProblem("Simultaneous coverage couldn't be parsed"))
         }
 
         def radialVelocityPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
@@ -446,28 +362,11 @@ object ItcMapping extends Encoders {
         def sourceProfilePartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
                                                   IorNec[Problem, Environment]
         ] = {
-          // sourceProfile
-          // case (i, ("sourceProfile", ObjectValue(v))) if v.length === 1 || v.length === 2 =>
-          //   println(v)
-          //   (v match {
-          //     case ("sourceType", TypedEnumValue(EnumValue("POINT_SOURCE", _, _, _))) ::
-          //         ("fwhm", NullValue | AbsentValue) :: Nil =>
-          //       SourceProfile.Point.some
-          //     case ("sourceType", TypedEnumValue(EnumValue("UNIFORM_SOURCE", _, _, _))) ::
-          //         ("fwhm", NullValue | AbsentValue) :: Nil =>
-          //       SourceProfile.Uniform.some
-          //     case ("sourceType", TypedEnumValue(EnumValue("GAUSSIAN_SOURCE", _, _, _))) ::
-          //         ("fwhm", ObjectValue(fwhm)) :: Nil
-          //         if fwhm.filter(_._2 != Value.AbsentValue).length === 1 =>
-          //       parseFwhw(fwhm).map(SourceProfile.Gaussian(_, null))
-          //     case _ => none
-          //   }).map(sp => cursorEnvAdd("sourceProfile", sp)(i))
-          //     .getOrElse(i.addProblem("Cannot parse sourceProfile"))
           case (i, ("sourceProfile", ObjectValue(v))) if v.length === 3 =>
             (v match {
               case ("point", ObjectValue(ov)) ::
-              ("uniform", AbsentValue) ::
-              ("gaussian", AbsentValue) :: Nil =>
+                  ("uniform", AbsentValue) ::
+                  ("gaussian", AbsentValue) :: Nil =>
                 val point: IorNec[String, SourceProfile] = ov match {
                   case ("bandNormalized", ObjectValue(bn)) :: ("emissionLines",
                                                                AbsentValue
@@ -655,12 +554,13 @@ object ItcMapping extends Encoders {
                             SpectralDefinition.BandNormalized(s, b)
                           )
                         )
-                          case _ => "Error parsing point profile".leftIorNec}
+                      case _ => "Error parsing point profile".leftIorNec
+                    }
                     s
                   case _ => "Error parsing point profile".leftIorNec
                 }
                 point.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
-                  case _ => i.addProblem("Unsupported source profile")
+              case _ => i.addProblem("Unsupported source profile")
             })
           case (i, ("sourceProfile", v))                                =>
             i.addProblem(s"Cannot parse sourceProfile $v")
@@ -831,7 +731,6 @@ object ItcMapping extends Encoders {
                         .orElse(radialVelocityPartial)
                         .orElse(signalToNoisePartial)
                         .orElse(sourceProfilePartial)
-                        // .orElse(spectralDistributionPartial)
                         .orElse(bandPartial)
                         .orElse(instrumentModesPartial)
                         .orElse(constraintsPartial)
@@ -840,23 +739,6 @@ object ItcMapping extends Encoders {
                           fallback
                         )
                   }.map(e => e.copy(child = Select("spectroscopy", Nil, child)))
-                case Select("basiccase", List(Binding("input", ObjectValue(wv))), child)    =>
-                  wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
-                    case (e, c) =>
-                      wavelengthPartial
-                        .orElse(simultaneousCoveragePartial)
-                        .orElse(resolutionPartial)
-                        .orElse(signalToNoisePartial)
-                        .orElse(sourceProfilePartial)
-                        // .orElse(spectralDistributionPartial)
-                        .orElse(radialVelocityPartial)
-                        // .orElse(magnitudePartial)
-                        .applyOrElse(
-                          (e, c),
-                          fallback
-                        )
-
-                  }.map(e => e.copy(child = Select("basiccase", Nil, child)))
               }
             )
           )

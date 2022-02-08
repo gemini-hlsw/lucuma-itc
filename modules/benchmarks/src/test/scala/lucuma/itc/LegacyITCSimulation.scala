@@ -3,7 +3,6 @@
 
 package lucuma.itc
 
-// import cats.syntax.all._
 import cats.implicits._
 import coulomb._
 import coulomb.si.Kelvin
@@ -42,7 +41,6 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
   val sourceDefinition = ItcSourceDefinition(
     SourceProfile.Point(
       SpectralDefinition.BandNormalized(
-        // UnnormalizedSED.BlackBody(BigDecimal(50.1).withRefinedUnit[Positive, Kelvin])
         UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V),
         SortedMap(
           Band.R -> BrightnessValue(5).withUnit[VegaMagnitude].toMeasureTagged
