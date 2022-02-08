@@ -13,4 +13,12 @@ package object syntax {
       with ToGmosSouthFpuOps
       with ToConditionsOps
 
+  object sed
+      extends ToStellarLibrarySpectrumOps
+      with ToGalaxySpectrumOps
+      with ToPlanetSpectrumOps
+      with ToHIIRegionSpectrumOps
+      with ToPlanetaryNebulaSpectrumOps
+      with ToQuasarSpectrumOps
+      with ToCoolStarModelOps
 }

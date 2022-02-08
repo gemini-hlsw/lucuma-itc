@@ -3,15 +3,13 @@
 
 package lucuma.itc.search
 
+import lucuma.core.enum.Band
 import lucuma.core.math.Redshift
-import lucuma.core.model.Magnitude
-import lucuma.core.model.SpatialProfile
-import lucuma.core.model.SpectralDistribution
+import lucuma.core.model.SourceProfile
 
 /** Target properties we need to know at phase zero. */
 final case class TargetProfile(
-  spatialProfile:       SpatialProfile,
-  spectralDistribution: SpectralDistribution,
-  magnitude:            Magnitude,
-  redshift:             Redshift
+  sourceProfile: SourceProfile,
+  band:          Band,
+  redshift:      Redshift
 )

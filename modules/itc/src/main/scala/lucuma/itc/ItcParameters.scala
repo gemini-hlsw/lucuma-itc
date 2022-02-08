@@ -15,5 +15,6 @@ case class ItcParameters(
 )
 
 object ItcParameters {
-  implicit val encoder: Encoder[ItcParameters] = deriveEncoder
+  implicit val encoder: Encoder[ItcParameters] =
+    deriveEncoder[ItcParameters]
 }
