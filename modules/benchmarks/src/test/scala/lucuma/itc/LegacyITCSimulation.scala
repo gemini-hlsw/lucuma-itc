@@ -7,27 +7,28 @@ package lucuma.itc
 import cats.implicits._
 import coulomb._
 import coulomb.si.Kelvin
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.auto._
+import eu.timepit.refined.types.numeric.PosBigDecimal
 import io.circe.syntax._
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import io.gatling.http.funspec.GatlingHttpFunSpec
 import lucuma.core.enum._
 import lucuma.core.math.Angle
+import lucuma.core.math.BrightnessUnits._
+import lucuma.core.math.BrightnessValue
 import lucuma.core.math.Redshift
 import lucuma.core.math.Wavelength
-import lucuma.core.util.Enumerated
-import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.syntax.gmossouthfpu._
+import lucuma.core.math.dimensional._
+import lucuma.core.math.units._
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
+import lucuma.core.util.Enumerated
+import lucuma.itc.search.ObservingMode
+import lucuma.itc.search.syntax.gmossouthfpu._
+
 import scala.collection.immutable.SortedMap
-import lucuma.core.math.BrightnessUnits._
-import lucuma.core.math.BrightnessValue
-import lucuma.core.math.dimensional._
-import lucuma.core.math.units._
 
 /**
  * This is a unit test mostly to ensure all possible combination of params can be parsed by the

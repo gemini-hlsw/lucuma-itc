@@ -4,7 +4,6 @@
 package lucuma.itc.service
 
 import cats.effect._
-import io.circe.literal._
 import org.http4s._
 import org.http4s.syntax.all._
 

@@ -8,13 +8,13 @@ import io.circe.Json
 import io.circe.syntax._
 import lucuma.core.enum._
 import lucuma.core.math.Angle
+import lucuma.core.math.BrightnessValue
 import lucuma.core.math.Redshift
+import lucuma.core.model.SourceProfile
+import lucuma.core.model.SpectralDefinition
+import lucuma.core.model.UnnormalizedSED
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.search.syntax.sed._
-import lucuma.core.math.BrightnessValue
-import lucuma.core.model.SourceProfile
-import lucuma.core.model.UnnormalizedSED
-import lucuma.core.model.SpectralDefinition
 
 final case class ItcSourceDefinition(
   profile:  SourceProfile,
@@ -212,7 +212,7 @@ object ItcSourceDefinition {
           case SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(sed, _)) =>
             sed.asJson
           // FIXME: Handle emission line
-          case _ => Json.Null
+          case _                                                                    => Json.Null
         }
 
         Json.obj("profile"      -> source,

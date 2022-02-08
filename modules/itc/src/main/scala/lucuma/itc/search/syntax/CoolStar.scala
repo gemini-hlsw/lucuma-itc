@@ -3,8 +3,8 @@
 
 package lucuma.itc.search.syntax
 
-import lucuma.core.model.UnnormalizedSED.CoolStarModel
 import lucuma.core.enum.CoolStarTemperature
+import lucuma.core.model.UnnormalizedSED.CoolStarModel
 
 /**
  * Syntax extensions for missing ocs2Tag items

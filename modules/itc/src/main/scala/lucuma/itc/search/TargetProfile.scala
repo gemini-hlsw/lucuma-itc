@@ -3,10 +3,9 @@
 
 package lucuma.itc.search
 
+import lucuma.core.enum.Band
 import lucuma.core.math.Redshift
 import lucuma.core.model.SourceProfile
-import lucuma.core.enum.Band
-import lucuma.core.math.BrightnessValue
 // import lucuma.core.model.BandBrightness
 // import lucuma.core.math.BrightnessUnits
 // import coulomb.define.UnitDefinition

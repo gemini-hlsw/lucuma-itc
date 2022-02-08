@@ -27,6 +27,10 @@ import lucuma.core.math.Angle
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
 import lucuma.core.math.units._
+import lucuma.core.model.SourceProfile
+import lucuma.core.model.SpectralDefinition
+import lucuma.core.model.UnnormalizedSED
+import lucuma.core.model.UnnormalizedSED._
 import lucuma.core.syntax.enumerated._
 import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
@@ -52,10 +56,6 @@ import scala.util.Using
 import Query._
 import Value._
 import QueryCompiler._
-import lucuma.core.model.SourceProfile
-import lucuma.core.model.UnnormalizedSED
-import lucuma.core.model.SpectralDefinition
-import lucuma.core.model.UnnormalizedSED._
 
 trait Encoders {
   import io.circe.generic.semiauto._
@@ -466,9 +466,10 @@ object ItcMapping extends Encoders {
                       ) :: Nil =>
                     val s = bn match {
                       case ("sed", ObjectValue(sed)) ::
-                          ("brightnesses", ListValue(br)) ::
+                          ("brightnesses", ListValue(List(ObjectValue(br)))) ::
                           ("editBrightnesses", AbsentValue) ::
                           ("deleteBrightnesses", AbsentValue) :: Nil =>
+                            println(br)
                         val sedResult: IorNec[String, UnnormalizedSED] = sed match {
                           case ("stellarLibrary", TypedEnumValue(EnumValue(s, _, _, _))) ::
                               ("coolStar", AbsentValue) ::
@@ -598,7 +599,8 @@ object ItcMapping extends Encoders {
                             bigDecimalValue(r) match {
                               case Some(r) if r > 0 =>
                                 val blackBody = refineV[Positive](r)
-                                  .map(k => UnnormalizedSED.BlackBody(k.withUnit[Kelvin])).toOption
+                                  .map(k => UnnormalizedSED.BlackBody(k.withUnit[Kelvin]))
+                                  .toOption
                                 blackBody.toRightIorNec(s"Not a valid black body value $r")
                               case Some(r)          =>
                                 s"black body value $r must be positive".leftIorNec
@@ -615,16 +617,16 @@ object ItcMapping extends Encoders {
                               ("powerLaw", AbsentValue) ::
                               ("blackBodyTempK", AbsentValue) ::
                               ("fluxDensities", fd) :: Nil =>
-                                s"Flux densities not yet supported $fd".leftIorNec
+                            s"Flux densities not yet supported $fd".leftIorNec
                           case _ =>
-                                s"Error on spectral definition parameter".leftIorNec
+                            s"Error on spectral definition parameter".leftIorNec
                         }
-                    println(sedResult)
-                    sedResult.map( s=>
-                    SourceProfile.Point(
-                      SpectralDefinition.BandNormalized(s, null)
-                    )
-                  )
+                        println(sedResult)
+                        sedResult.map(s =>
+                          SourceProfile.Point(
+                            SpectralDefinition.BandNormalized(s, null)
+                          )
+                        )
                     }
                 })
             })

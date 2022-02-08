@@ -3,22 +3,7 @@
 
 package lucuma.itc.service
 
-import cats.syntax.all._
 import io.circe.literal._
-import lucuma.core.enum.CloudExtinction
-import lucuma.core.enum.GmosNorthDisperser
-import lucuma.core.enum.GmosNorthFilter
-import lucuma.core.enum.GmosNorthFpu
-import lucuma.core.enum.GmosSouthDisperser
-import lucuma.core.enum.GmosSouthFilter
-import lucuma.core.enum.GmosSouthFpu
-import lucuma.core.enum.ImageQuality
-import lucuma.core.enum.SkyBackground
-import lucuma.core.enum.WaterVapor
-import lucuma.core.syntax.enumerated._
-import lucuma.core.syntax.string._
-import lucuma.core.util.Enumerated
-import lucuma.itc.ItcObservingConditions
 
 class GraphQLSpectroscopySuite extends GraphQLSuite {
 
