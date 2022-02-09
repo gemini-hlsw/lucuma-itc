@@ -544,7 +544,7 @@ object ItcMapping extends Encoders {
               case ("point", AbsentValue) ::
                   ("uniform", ObjectValue(ov)) ::
                   ("gaussian", AbsentValue) :: Nil =>
-                val surface: IorNec[String, SourceProfile] = ov match {
+                val uniform: IorNec[String, SourceProfile] = ov match {
                   case ("bandNormalized", ObjectValue(bn)) ::
                       ("emissionLines", AbsentValue) ::
                       Nil =>
@@ -565,7 +565,7 @@ object ItcMapping extends Encoders {
                     s
                   case _ => "Emission lines are not supported yet".leftIorNec
                 }
-                surface.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
+                uniform.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
               case ("point", ObjectValue(ov)) ::
                   ("uniform", AbsentValue) ::
                   ("gaussian", AbsentValue) :: Nil =>
@@ -595,7 +595,7 @@ object ItcMapping extends Encoders {
               case ("point", AbsentValue) ::
                   ("uniform", AbsentValue) ::
                   ("gaussian", ObjectValue(ov)) :: Nil =>
-                val point: IorNec[String, SourceProfile] = ov match {
+                val gaussian: IorNec[String, SourceProfile] = ov match {
                   case ("fwhm", ObjectValue(fw)) ::
                       ("spectralDefinition", ObjectValue(sd)) ::
                       Nil =>
@@ -624,9 +624,9 @@ object ItcMapping extends Encoders {
                       case _ => "Emission lines are not supported yet".leftIorNec
                     }
                     s
-                  case _ => "Cannot pacne guassian profile input".leftIorNec
+                  case _ => "Cannot parse gaussian profile input".leftIorNec
                 }
-                point.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
+                gaussian.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
               case _ => i.addProblem("Unsupported source profile")
             })
           case (i, ("sourceProfile", v))                                =>
