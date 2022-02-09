@@ -4132,13 +4132,6 @@ scalar Long
 # ITC schema
 ##############
 
-# Gaussian source angle in appropriate units
-input GaussianSourceAngleInput {
-  microarcseconds: Long
-  milliarcseconds: BigDecimal
-  arcseconds: BigDecimal
-}
-
 # ITC error result
 type ItcError implements ItcResult {
   # Message
@@ -4257,7 +4250,7 @@ input SpectroscopyModeInput {
   # Spatial profile PointSource/UniformSource/GaussianSource.
   sourceProfile: SourceProfileInput!
 
-  # band
+  # Observing Band
   band: Band!
 
   # Target radial velocity
