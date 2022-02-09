@@ -9,8 +9,5 @@ project/metals.sbt
 # We ignore the lib/ directory because we copy stuff over
 lib
 .env
-.envrc
 .direnv
-*.nix
-nix/
 
