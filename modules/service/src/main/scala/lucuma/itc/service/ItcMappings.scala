@@ -376,7 +376,7 @@ object ItcMapping extends Encoders {
               val units = unitsItems.get(u)
               (band, value, units)
                 .mapN { (b, v, u) =>
-                  b -> u.withValueTagged(BrightnessValue(v.toInt * 1000))
+                  b -> u.withValueTagged(BrightnessValue(v.toInt))
                 }
                 .toRightIorNec("Invalid brightness")
             case e => s"Invalid brighness entry $e".leftIorNec

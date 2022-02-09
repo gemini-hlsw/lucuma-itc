@@ -78,7 +78,6 @@ object ItcImpl {
                                constraints,
                                exposures
             ).asJson
-          println(json.spaces2)
           L.debug(s"ITC remote query ${json.noSpaces}") *>
             Trace[F].put("itc.query" -> json.spaces2) *>
             Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
@@ -113,48 +112,50 @@ object ItcImpl {
           maxTime:    Quantity[BigDecimal, Second],
           s:          ItcResult,
           counter:    NonNegInt
-        ): F[Itc.Result] = {
-          val totalTime: Quantity[BigDecimal, Second] =
-            expTime * nExp.withUnit[Unitless] * pow(requestedSN / snr, 2).withUnit[Unitless]
-          val newNExp: BigDecimal                     = (totalTime / maxTime).value.ceil
-          val newExpTime: BigDecimal                  = (totalTime / newNExp.withUnit[Unitless]).value.ceil
-          val next                                    = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
-          L.info(s"Total time: $totalTime maxTime: $maxTime") *>
-            L.info(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
-              if (
-                nExp != oldNExp ||
-                ((expTime - oldExpTime) > 1.withUnit[Second] || (oldExpTime - expTime) > 1
-                  .withUnit[Second]) &&
-                counter < MaxIterations &&
-                newExpTime < (pow(2, 63) - 1)
-              ) {
-                itc(targetProfile,
-                    observingMode,
-                    constraints,
-                    newExpTime.withUnit[Second],
-                    newNExp.toInt,
-                    next
-                )
-                  .flatMap { s =>
-                    L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *>
-                      itcStep(newNExp.toInt,
-                              nExp,
-                              newExpTime.withUnit[Second],
-                              expTime,
-                              s.maxTotalSNRatio,
-                              maxTime,
-                              s,
-                              next
-                      )
-                  }
-              } else
-                Itc.Result
-                  .Success(newExpTime.toDouble.seconds, newNExp.toInt, s.maxTotalSNRatio)
-                  .pure[F]
-                  .widen[Itc.Result]
-            }
-
-        }
+        ): F[Itc.Result] =
+          if (snr === 0.0) {
+            Concurrent[F].raiseError(new ItcCalculationError("S/N obtained is 0"))
+          } else {
+            val totalTime: Quantity[BigDecimal, Second] =
+              expTime * nExp.withUnit[Unitless] * pow(requestedSN / snr, 2).withUnit[Unitless]
+            val newNExp: BigDecimal                     = (totalTime / maxTime).value.ceil
+            val newExpTime: BigDecimal                  = (totalTime / newNExp.withUnit[Unitless]).value.ceil
+            val next                                    = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
+            L.info(s"Total time: $totalTime maxTime: $maxTime") *>
+              L.info(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
+                if (
+                  nExp != oldNExp ||
+                  ((expTime - oldExpTime) > 1.withUnit[Second] || (oldExpTime - expTime) > 1
+                    .withUnit[Second]) &&
+                  counter < MaxIterations &&
+                  newExpTime < (pow(2, 63) - 1)
+                ) {
+                  itc(targetProfile,
+                      observingMode,
+                      constraints,
+                      newExpTime.withUnit[Second],
+                      newNExp.toInt,
+                      next
+                  )
+                    .flatMap { s =>
+                      L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *>
+                        itcStep(newNExp.toInt,
+                                nExp,
+                                newExpTime.withUnit[Second],
+                                expTime,
+                                s.maxTotalSNRatio,
+                                maxTime,
+                                s,
+                                next
+                        )
+                    }
+                } else
+                  Itc.Result
+                    .Success(newExpTime.toDouble.seconds, newNExp.toInt, s.maxTotalSNRatio)
+                    .pure[F]
+                    .widen[Itc.Result]
+              }
+          }
 
         L.info(s"Desired S/N $signalToNoise") *>
           L.info(
