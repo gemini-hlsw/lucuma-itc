@@ -16,7 +16,9 @@
       {
         devShell = pkgs.devshell.mkShell {
           imports = [ typelevel-nix.typelevelShell ];
+          packages = [ pkgs.nodePackages.graphqurl ];
           typelevelShell = {
+            nodejs.enable = true;
             jdk.package = pkgs.jdk17;
           };
         };
