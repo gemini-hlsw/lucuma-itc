@@ -563,7 +563,7 @@ object ItcMapping extends Encoders {
                       case _ => "Error parsing uniform profile".leftIorNec
                     }
                     s
-                  case _ => "Error parsing uniform profile".leftIorNec
+                  case _ => "Emission lines are not supported yet".leftIorNec
                 }
                 surface.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
               case ("point", ObjectValue(ov)) ::
@@ -589,7 +589,42 @@ object ItcMapping extends Encoders {
                       case _ => "Error parsing point profile".leftIorNec
                     }
                     s
-                  case _ => "Error parsing point profile".leftIorNec
+                  case _ => "Emission lines are not supported yet".leftIorNec
+                }
+                point.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
+              case ("point", AbsentValue) ::
+                  ("uniform", AbsentValue) ::
+                  ("gaussian", ObjectValue(ov)) :: Nil =>
+                val point: IorNec[String, SourceProfile] = ov match {
+                  case ("fwhm", ObjectValue(fw)) ::
+                      ("spectralDefinition", ObjectValue(sd)) ::
+                      Nil =>
+                    val fwhmResult = parseFwhw(fw).toRightIorNec(s"Cannot parse fwhm $fw")
+
+                    val s: IorNec[String, SourceProfile.Gaussian] = sd match {
+                      case ("bandNormalized", ObjectValue(bn)) ::
+                          ("emissionLines", AbsentValue) ::
+                          Nil =>
+                        bn match {
+                          case ("sed", ObjectValue(sed)) ::
+                              ("brightnesses", ListValue(br)) ::
+                              ("editBrightnesses", AbsentValue) ::
+                              ("deleteBrightnesses", AbsentValue) :: Nil =>
+                            val brightesses = brightnessesReader(br, integratedUnitsItems)
+                            val sedResult   = sedReader(sed)
+
+                            (fwhmResult, sedResult, brightesses).mapN((f, s, b) =>
+                              SourceProfile.Gaussian(
+                                f,
+                                SpectralDefinition.BandNormalized(s, b)
+                              )
+                            )
+                          case _ => "Error parsing band normalized values".leftIorNec
+                        }
+                      case _ => "Emission lines are not supported yet".leftIorNec
+                    }
+                    s
+                  case _ => "Cannot pacne guassian profile input".leftIorNec
                 }
                 point.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
               case _ => i.addProblem("Unsupported source profile")

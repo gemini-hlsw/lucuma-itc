@@ -742,529 +742,564 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
     }
   }
 
-//   test("gmosS_dispersers") {
-//     Enumerated[GmosSouthDisperser].all.traverse { d =>
-//       query(
-//         s"""
-//         query {
-//           spectroscopy(input: {
-//             wavelength: {
-//               nanometers: 60,
-//             },
-//             radialVelocity: {
-//               centimetersPerSecond: 1000
-//             },
-//             signalToNoise: 2,
-//             spatialProfile: {
-//               sourceType: POINT_SOURCE
-//             },
-//             spectralDistribution: {
-//               blackBody: {
-//                 temperature: 50.1
-//               }
-//             },
-//             magnitude: {
-//               band: AP,
-//               value: 5,
-//               error: 1.2,
-//               system: JY
-//             },
-//             constraints: {
-//               imageQuality: POINT_THREE,
-//               cloudExtinction: POINT_FIVE,
-//               skyBackground: DARK,
-//               waterVapor: DRY,
-//               elevationRange: {
-//                 airmassRange: {
-//                   min: 1,
-//                   max: 2
-//                 }
-//               }
-//             },
-//             modes: [{
-//               gmosS: {
-//                 filter: G_PRIME,
-//                 fpu: LONG_SLIT_0_25,
-//                 disperser: ${d.tag.toScreamingSnakeCase}
-//               }
-//             }
-//             ]
-//           }) {
-//             results {
-//                 mode {
-//                   instrument
-//                   params {
-//                     ... on GmosSITCParams {
-//                       disperser
-//                     }
-//                   }
-//                   wavelength {
-//                     nanometers
-//                   }
-//                 }
-//                 itc {
-//                   ... on ItcSuccess {
-//                     exposures
-//                     exposureTime {
-//                       seconds
-//                     }
-//                   }
-//                 }
-//             }
-//           }
-//         }
-//         """,
-//         json"""
-//         {
-//           "data": {
-//             "spectroscopy" : [
-//               {
-//                 "results" : [
-//                   {
-//                     "mode" : {
-//                       "instrument" : "GMOS_SOUTH",
-//                       "params": {
-//                         "disperser": ${d.tag.toScreamingSnakeCase}
-//                       },
-//                       "wavelength" : {
-//                         "nanometers" : 60.00
-//                       }
-//                     },
-//                     "itc" : {
-//                       "exposures" : 10,
-//                       "exposureTime" : {
-//                         "seconds" : 1
-//                       }
-//                     }
-//                   }
-//                 ]
-//               }
-//             ]
-//           }
-//         }
-//         """
-//       )
-//     }
-//   }
-//
-//   test("gmosN_fpu") {
-//     Enumerated[GmosNorthFpu].all.traverse { d =>
-//       query(
-//         s"""
-//         query {
-//           spectroscopy(input: {
-//             wavelength: {
-//               nanometers: 60,
-//             },
-//             radialVelocity: {
-//               centimetersPerSecond: 1000
-//             },
-//             signalToNoise: 2,
-//             spatialProfile: {
-//               sourceType: POINT_SOURCE
-//             },
-//             spectralDistribution: {
-//               blackBody: {
-//                 temperature: 50.1
-//               }
-//             },
-//             magnitude: {
-//               band: AP,
-//               value: 5,
-//               error: 1.2,
-//               system: JY
-//             },
-//             constraints: {
-//               imageQuality: POINT_THREE,
-//               cloudExtinction: POINT_FIVE,
-//               skyBackground: DARK,
-//               waterVapor: DRY,
-//               elevationRange: {
-//                 airmassRange: {
-//                   min: 1,
-//                   max: 2
-//                 }
-//               }
-//             },
-//             modes: [{
-//               gmosN: {
-//                 filter: G_PRIME,
-//                 fpu: ${d.tag.toScreamingSnakeCase}
-//                 disperser: B1200_G5301
-//               }
-//             }
-//             ]
-//           }) {
-//             results {
-//                 mode {
-//                   instrument
-//                   params {
-//                     ... on GmosNITCParams {
-//                       fpu
-//                     }
-//                   }
-//                   wavelength {
-//                     nanometers
-//                   }
-//                 }
-//                 itc {
-//                   ... on ItcSuccess {
-//                     exposures
-//                     exposureTime {
-//                       seconds
-//                     }
-//                   }
-//                 }
-//             }
-//           }
-//         }
-//         """,
-//         json"""
-//         {
-//           "data": {
-//             "spectroscopy" : [
-//               {
-//                 "results" : [
-//                   {
-//                     "mode" : {
-//                       "instrument" : "GMOS_NORTH",
-//                       "params": {
-//                         "fpu": ${d.tag.toScreamingSnakeCase}
-//                       },
-//                       "wavelength" : {
-//                         "nanometers" : 60.00
-//                       }
-//                     },
-//                     "itc" : {
-//                       "exposures" : 10,
-//                       "exposureTime" : {
-//                         "seconds" : 1
-//                       }
-//                     }
-//                   }
-//                 ]
-//               }
-//             ]
-//           }
-//         }
-//         """
-//       )
-//     }
-//   }
-//
-//   test("gmosS_fpu") {
-//     Enumerated[GmosSouthFpu].all.filter(_ =!= GmosSouthFpu.Bhros).traverse { d =>
-//       query(
-//         s"""
-//         query {
-//           spectroscopy(input: {
-//             wavelength: {
-//               nanometers: 60,
-//             },
-//             radialVelocity: {
-//               centimetersPerSecond: 1000
-//             },
-//             signalToNoise: 2,
-//             spatialProfile: {
-//               sourceType: POINT_SOURCE
-//             },
-//             spectralDistribution: {
-//               blackBody: {
-//                 temperature: 50.1
-//               }
-//             },
-//             magnitude: {
-//               band: AP,
-//               value: 5,
-//               error: 1.2,
-//               system: JY
-//             },
-//             constraints: {
-//               imageQuality: POINT_THREE,
-//               cloudExtinction: POINT_FIVE,
-//               skyBackground: DARK,
-//               waterVapor: DRY,
-//               elevationRange: {
-//                 airmassRange: {
-//                   min: 1,
-//                   max: 2
-//                 }
-//               }
-//             },
-//             modes: [{
-//               gmosS: {
-//                 filter: G_PRIME,
-//                 fpu: ${d.tag.toScreamingSnakeCase}
-//                 disperser: B1200_G5321
-//               }
-//             }
-//             ]
-//           }) {
-//             results {
-//                 mode {
-//                   instrument
-//                   params {
-//                     ... on GmosSITCParams {
-//                       fpu
-//                     }
-//                   }
-//                   wavelength {
-//                     nanometers
-//                   }
-//                 }
-//                 itc {
-//                   ... on ItcSuccess {
-//                     exposures
-//                     exposureTime {
-//                       seconds
-//                     }
-//                   }
-//                 }
-//             }
-//           }
-//         }
-//         """,
-//         json"""
-//         {
-//           "data": {
-//             "spectroscopy" : [
-//               {
-//                 "results" : [
-//                   {
-//                     "mode" : {
-//                       "instrument" : "GMOS_SOUTH",
-//                       "params": {
-//                         "fpu": ${d.tag.toScreamingSnakeCase}
-//                       },
-//                       "wavelength" : {
-//                         "nanometers" : 60.00
-//                       }
-//                     },
-//                     "itc" : {
-//                       "exposures" : 10,
-//                       "exposureTime" : {
-//                         "seconds" : 1
-//                       }
-//                     }
-//                   }
-//                 ]
-//               }
-//             ]
-//           }
-//         }
-//         """
-//       )
-//     }
-//   }
-//
-//   test("gmosN_filter") {
-//     Enumerated[GmosNorthFilter].all.traverse { d =>
-//       query(
-//         s"""
-//         query {
-//           spectroscopy(input: {
-//             wavelength: {
-//               nanometers: 60,
-//             },
-//             radialVelocity: {
-//               centimetersPerSecond: 1000
-//             },
-//             signalToNoise: 2,
-//             spatialProfile: {
-//               sourceType: POINT_SOURCE
-//             },
-//             spectralDistribution: {
-//               blackBody: {
-//                 temperature: 50.1
-//               }
-//             },
-//             magnitude: {
-//               band: AP,
-//               value: 5,
-//               error: 1.2,
-//               system: JY
-//             },
-//             constraints: {
-//               imageQuality: POINT_THREE,
-//               cloudExtinction: POINT_FIVE,
-//               skyBackground: DARK,
-//               waterVapor: DRY,
-//               elevationRange: {
-//                 airmassRange: {
-//                   min: 1,
-//                   max: 2
-//                 }
-//               }
-//             },
-//             modes: [{
-//               gmosN: {
-//                 filter: ${d.tag.toScreamingSnakeCase}
-//                 fpu: LONG_SLIT_0_25,
-//                 disperser: B1200_G5301
-//               }
-//             }
-//             ]
-//           }) {
-//             results {
-//                 mode {
-//                   instrument
-//                   params {
-//                     ... on GmosNITCParams {
-//                       filter
-//                     }
-//                   }
-//                   wavelength {
-//                     nanometers
-//                   }
-//                 }
-//                 itc {
-//                   ... on ItcSuccess {
-//                     exposures
-//                     exposureTime {
-//                       seconds
-//                     }
-//                   }
-//                 }
-//             }
-//           }
-//         }
-//         """,
-//         json"""
-//         {
-//           "data": {
-//             "spectroscopy" : [
-//               {
-//                 "results" : [
-//                   {
-//                     "mode" : {
-//                       "instrument" : "GMOS_NORTH",
-//                       "params": {
-//                         "filter": ${d.tag.toScreamingSnakeCase}
-//                       },
-//                       "wavelength" : {
-//                         "nanometers" : 60.00
-//                       }
-//                     },
-//                     "itc" : {
-//                       "exposures" : 10,
-//                       "exposureTime" : {
-//                         "seconds" : 1
-//                       }
-//                     }
-//                   }
-//                 ]
-//               }
-//             ]
-//           }
-//         }
-//         """
-//       )
-//     }
-//   }
-//
-//   test("gmosS_filter") {
-//     Enumerated[GmosSouthFilter].all.traverse { d =>
-//       println(d)
-//       query(
-//         s"""
-//         query {
-//           spectroscopy(input: {
-//             wavelength: {
-//               nanometers: 60,
-//             },
-//             radialVelocity: {
-//               centimetersPerSecond: 1000
-//             },
-//             signalToNoise: 2,
-//             spatialProfile: {
-//               sourceType: POINT_SOURCE
-//             },
-//             spectralDistribution: {
-//               blackBody: {
-//                 temperature: 50.1
-//               }
-//             },
-//             magnitude: {
-//               band: AP,
-//               value: 5,
-//               error: 1.2,
-//               system: JY
-//             },
-//             constraints: {
-//               imageQuality: POINT_THREE,
-//               cloudExtinction: POINT_FIVE,
-//               skyBackground: DARK,
-//               waterVapor: DRY,
-//               elevationRange: {
-//                 airmassRange: {
-//                   min: 1,
-//                   max: 2
-//                 }
-//               }
-//             },
-//             modes: [{
-//               gmosS: {
-//                 filter: ${d.tag.toScreamingSnakeCase}
-//                 fpu: LONG_SLIT_0_25,
-//                 disperser: B1200_G5321
-//               }
-//             }
-//             ]
-//           }) {
-//             results {
-//                 mode {
-//                   instrument
-//                   params {
-//                     ... on GmosSITCParams {
-//                       filter
-//                     }
-//                   }
-//                   wavelength {
-//                     nanometers
-//                   }
-//                 }
-//                 itc {
-//                   ... on ItcSuccess {
-//                     exposures
-//                     exposureTime {
-//                       seconds
-//                     }
-//                   }
-//                 }
-//             }
-//           }
-//         }
-//         """,
-//         json"""
-//         {
-//           "data": {
-//             "spectroscopy" : [
-//               {
-//                 "results" : [
-//                   {
-//                     "mode" : {
-//                       "instrument" : "GMOS_SOUTH",
-//                       "params": {
-//                         "filter": ${d.tag.toScreamingSnakeCase}
-//                       },
-//                       "wavelength" : {
-//                         "nanometers" : 60.00
-//                       }
-//                     },
-//                     "itc" : {
-//                       "exposures" : 10,
-//                       "exposureTime" : {
-//                         "seconds" : 1
-//                       }
-//                     }
-//                   }
-//                 ]
-//               }
-//             ]
-//           }
-//         }
-//         """
-//       )
-//     }
-//   }
+  test("gmosS_dispersers") {
+    Enumerated[GmosSouthDisperser].all.traverse { d =>
+      query(
+        s"""
+        query {
+          spectroscopy(input: {
+            wavelength: {
+              nanometers: 60,
+            },
+            radialVelocity: {
+              centimetersPerSecond: 1000
+            },
+            signalToNoise: 2,
+            sourceProfile: {
+              gaussian: {
+                fwhm: {
+                  microarcseconds: 100
+                }
+                spectralDefinition: {
+                  bandNormalized: {
+                    sed: {
+                      blackBodyTempK: 100
+                    },
+                    brightnesses: [ {
+                      band: R,
+                      value: 3,
+                      units: VEGA_MAGNITUDE
+                    }, {
+                      band: K,
+                      value: 2.1,
+                      units: JANSKY
+                    }]
+                  }
+                }
+              }
+            },
+            band: K
+            constraints: {
+              imageQuality: POINT_THREE,
+              cloudExtinction: POINT_FIVE,
+              skyBackground: DARK,
+              waterVapor: DRY,
+              elevationRange: {
+                airmassRange: {
+                  min: 1,
+                  max: 2
+                }
+              }
+            },
+            modes: [{
+              gmosS: {
+                filter: G_PRIME,
+                fpu: LONG_SLIT_0_25,
+                disperser: ${d.tag.toScreamingSnakeCase}
+              }
+            }
+            ]
+          }) {
+            results {
+                mode {
+                  instrument
+                  params {
+                    ... on GmosSITCParams {
+                      disperser
+                    }
+                  }
+                  wavelength {
+                    nanometers
+                  }
+                }
+                itc {
+                  ... on ItcSuccess {
+                    exposures
+                    exposureTime {
+                      seconds
+                    }
+                  }
+                }
+            }
+          }
+        }
+        """,
+        json"""
+        {
+          "data": {
+            "spectroscopy" : [
+              {
+                "results" : [
+                  {
+                    "mode" : {
+                      "instrument" : "GMOS_SOUTH",
+                      "params": {
+                        "disperser": ${d.tag.toScreamingSnakeCase}
+                      },
+                      "wavelength" : {
+                        "nanometers" : 60.00
+                      }
+                    },
+                    "itc" : {
+                      "exposures" : 10,
+                      "exposureTime" : {
+                        "seconds" : 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        """
+      )
+    }
+  }
+
+  test("gmosN_fpu") {
+    Enumerated[GmosNorthFpu].all.traverse { d =>
+      query(
+        s"""
+          query {
+            spectroscopy(input: {
+              wavelength: {
+                nanometers: 60,
+              },
+              radialVelocity: {
+                centimetersPerSecond: 1000
+              },
+              signalToNoise: 2,
+              sourceProfile: {
+                gaussian: {
+                  fwhm: {
+                    microarcseconds: 100
+                  }
+                  spectralDefinition: {
+                    bandNormalized: {
+                      sed: {
+                        blackBodyTempK: 100
+                      },
+                      brightnesses: [ {
+                        band: R,
+                        value: 3,
+                        units: VEGA_MAGNITUDE
+                      }, {
+                        band: K,
+                        value: 2.1,
+                        units: JANSKY
+                      }]
+                    }
+                  }
+                }
+              },
+              band: AP
+              constraints: {
+                imageQuality: POINT_THREE,
+                cloudExtinction: POINT_FIVE,
+                skyBackground: DARK,
+                waterVapor: DRY,
+                elevationRange: {
+                  airmassRange: {
+                    min: 1,
+                    max: 2
+                  }
+                }
+              },
+              modes: [{
+                gmosN: {
+                  filter: G_PRIME,
+                  fpu: ${d.tag.toScreamingSnakeCase}
+                  disperser: B1200_G5301
+                }
+              }
+              ]
+            }) {
+              results {
+                  mode {
+                    instrument
+                    params {
+                      ... on GmosNITCParams {
+                        fpu
+                      }
+                    }
+                    wavelength {
+                      nanometers
+                    }
+                  }
+                  itc {
+                    ... on ItcSuccess {
+                      exposures
+                      exposureTime {
+                        seconds
+                      }
+                    }
+                  }
+              }
+            }
+          }
+      """,
+        json"""
+      {
+        "data": {
+          "spectroscopy" : [
+            {
+              "results" : [
+                {
+                  "mode" : {
+                    "instrument" : "GMOS_NORTH",
+                    "params": {
+                      "fpu": ${d.tag.toScreamingSnakeCase}
+                    },
+                    "wavelength" : {
+                      "nanometers" : 60.00
+                    }
+                  },
+                  "itc" : {
+                    "exposures" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+      """
+      )
+    }
+  }
+
+  test("gmosS_fpu") {
+    Enumerated[GmosSouthFpu].all.filter(_ =!= GmosSouthFpu.Bhros).traverse { d =>
+      query(
+        s"""
+        query {
+          spectroscopy(input: {
+            wavelength: {
+              nanometers: 60,
+            },
+            radialVelocity: {
+              centimetersPerSecond: 1000
+            },
+            signalToNoise: 2,
+            sourceProfile: {
+              uniform: {
+                bandNormalized: {
+                  sed: {
+                    blackBodyTempK: 100
+                  },
+                  brightnesses: [ {
+                    band: R,
+                    value: 3,
+                    units: VEGA_MAG_PER_ARCSEC_SQUARED
+                  }, {
+                    band: K,
+                    value: 2.1,
+                    units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
+                  }]
+                }
+              }
+            },
+            band: K
+            constraints: {
+              imageQuality: POINT_THREE,
+              cloudExtinction: POINT_FIVE,
+              skyBackground: DARK,
+              waterVapor: DRY,
+              elevationRange: {
+                airmassRange: {
+                  min: 1,
+                  max: 2
+                }
+              }
+            },
+            modes: [{
+              gmosS: {
+                filter: G_PRIME,
+                fpu: ${d.tag.toScreamingSnakeCase}
+                disperser: B1200_G5321
+              }
+            }
+            ]
+          }) {
+            results {
+                mode {
+                  instrument
+                  params {
+                    ... on GmosSITCParams {
+                      fpu
+                    }
+                  }
+                  wavelength {
+                    nanometers
+                  }
+                }
+                itc {
+                  ... on ItcSuccess {
+                    exposures
+                    exposureTime {
+                      seconds
+                    }
+                  }
+                }
+            }
+          }
+        }
+        """,
+        json"""
+        {
+          "data": {
+            "spectroscopy" : [
+              {
+                "results" : [
+                  {
+                    "mode" : {
+                      "instrument" : "GMOS_SOUTH",
+                      "params": {
+                        "fpu": ${d.tag.toScreamingSnakeCase}
+                      },
+                      "wavelength" : {
+                        "nanometers" : 60.00
+                      }
+                    },
+                    "itc" : {
+                      "exposures" : 10,
+                      "exposureTime" : {
+                        "seconds" : 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        """
+      )
+    }
+  }
+
+  test("gmosN_filter") {
+    Enumerated[GmosNorthFilter].all.traverse { d =>
+      query(
+        s"""
+        query {
+          spectroscopy(input: {
+            wavelength: {
+              nanometers: 60,
+            },
+            radialVelocity: {
+              centimetersPerSecond: 1000
+            },
+            signalToNoise: 2,
+            sourceProfile: {
+              uniform: {
+                bandNormalized: {
+                  sed: {
+                    blackBodyTempK: 100
+                  },
+                  brightnesses: [ {
+                    band: R,
+                    value: 3,
+                    units: VEGA_MAG_PER_ARCSEC_SQUARED
+                  }, {
+                    band: K,
+                    value: 2.1,
+                    units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
+                  }]
+                }
+              }
+            },
+            band: K
+            constraints: {
+              imageQuality: POINT_THREE,
+              cloudExtinction: POINT_FIVE,
+              skyBackground: DARK,
+              waterVapor: DRY,
+              elevationRange: {
+                airmassRange: {
+                  min: 1,
+                  max: 2
+                }
+              }
+            },
+            modes: [{
+              gmosN: {
+                filter: ${d.tag.toScreamingSnakeCase}
+                fpu: LONG_SLIT_0_25,
+                disperser: B1200_G5301
+              }
+            }
+            ]
+          }) {
+            results {
+                mode {
+                  instrument
+                  params {
+                    ... on GmosNITCParams {
+                      filter
+                    }
+                  }
+                  wavelength {
+                    nanometers
+                  }
+                }
+                itc {
+                  ... on ItcSuccess {
+                    exposures
+                    exposureTime {
+                      seconds
+                    }
+                  }
+                }
+            }
+          }
+        }
+        """,
+        json"""
+        {
+          "data": {
+            "spectroscopy" : [
+              {
+                "results" : [
+                  {
+                    "mode" : {
+                      "instrument" : "GMOS_NORTH",
+                      "params": {
+                        "filter": ${d.tag.toScreamingSnakeCase}
+                      },
+                      "wavelength" : {
+                        "nanometers" : 60.00
+                      }
+                    },
+                    "itc" : {
+                      "exposures" : 10,
+                      "exposureTime" : {
+                        "seconds" : 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        """
+      )
+    }
+  }
+
+  test("gmosS_filter") {
+    Enumerated[GmosSouthFilter].all.traverse { d =>
+      println(d)
+      query(
+        s"""
+        query {
+          spectroscopy(input: {
+            wavelength: {
+              nanometers: 60,
+            },
+            radialVelocity: {
+              centimetersPerSecond: 1000
+            },
+            signalToNoise: 2,
+            sourceProfile: {
+              uniform: {
+                bandNormalized: {
+                  sed: {
+                    blackBodyTempK: 100
+                  },
+                  brightnesses: [ {
+                    band: R,
+                    value: 3,
+                    units: VEGA_MAG_PER_ARCSEC_SQUARED
+                  }, {
+                    band: K,
+                    value: 2.1,
+                    units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
+                  }]
+                }
+              }
+            },
+            band: K
+            constraints: {
+              imageQuality: POINT_THREE,
+              cloudExtinction: POINT_FIVE,
+              skyBackground: DARK,
+              waterVapor: DRY,
+              elevationRange: {
+                airmassRange: {
+                  min: 1,
+                  max: 2
+                }
+              }
+            },
+            modes: [{
+              gmosS: {
+                filter: ${d.tag.toScreamingSnakeCase}
+                fpu: LONG_SLIT_0_25,
+                disperser: B1200_G5321
+              }
+            }
+            ]
+          }) {
+            results {
+                mode {
+                  instrument
+                  params {
+                    ... on GmosSITCParams {
+                      filter
+                    }
+                  }
+                  wavelength {
+                    nanometers
+                  }
+                }
+                itc {
+                  ... on ItcSuccess {
+                    exposures
+                    exposureTime {
+                      seconds
+                    }
+                  }
+                }
+            }
+          }
+        }
+        """,
+        json"""
+        {
+          "data": {
+            "spectroscopy" : [
+              {
+                "results" : [
+                  {
+                    "mode" : {
+                      "instrument" : "GMOS_SOUTH",
+                      "params": {
+                        "filter": ${d.tag.toScreamingSnakeCase}
+                      },
+                      "wavelength" : {
+                        "nanometers" : 60.00
+                      }
+                    },
+                    "itc" : {
+                      "exposures" : 10,
+                      "exposureTime" : {
+                        "seconds" : 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        """
+      )
+    }
+  }
 }
