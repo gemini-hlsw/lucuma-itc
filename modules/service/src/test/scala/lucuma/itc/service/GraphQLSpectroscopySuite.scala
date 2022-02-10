@@ -1194,7 +1194,6 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
 
   test("gmosS_filter") {
     Enumerated[GmosSouthFilter].all.traverse { d =>
-      println(d)
       query(
         s"""
         query {
