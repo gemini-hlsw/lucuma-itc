@@ -3142,6 +3142,12 @@ enum InstrumentType {
   ZORRO
 }
 
+type ItcSuccess {
+  exposureTime: Duration!
+  exposures: Int!
+  signalToNoise: PosBigDecimal!
+}
+
 type LineFluxIntegrated {
   value: BigDecimal!
   units: LineFluxIntegratedUnits!
@@ -3264,6 +3270,9 @@ type Observation {
     """Set to true to include deleted values"""
     includeDeleted: Boolean! = false
   ): ScienceConfiguration
+
+  """ITC execution results"""
+  itc: ItcSuccess
 
   """Manual instrument configuration"""
   manualConfig: Config
