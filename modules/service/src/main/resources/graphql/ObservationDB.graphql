@@ -1,8 +1,7 @@
 """DatasetEvent creation parameters"""
 input AddDatasetEventInput {
-  eventId: ExecutionEventId
   observationId: ObservationId!
-  generated: Instant!
+  visitId: VisitId!
   stepId: StepId!
   datasetIndex: Int!
   filename: DatasetFilename
@@ -11,24 +10,22 @@ input AddDatasetEventInput {
 
 """SequenceEvent creation parameters"""
 input AddSequenceEventInput {
-  eventId: ExecutionEventId
   observationId: ObservationId!
-  generated: Instant!
+  visitId: VisitId!
   command: SequenceCommand!
 }
 
 """StepEvent creation parameters"""
 input AddStepEventInput {
-  eventId: ExecutionEventId
   observationId: ObservationId!
-  generated: Instant!
+  visitId: VisitId!
   stepId: StepId!
   sequenceType: SequenceType!
   stage: StepStage!
 }
 
-"""Airmass range creation and edit parameters"""
-input AirmassRangeInput {
+"""Air mass range creation and edit parameters"""
+input AirMassRangeInput {
   min: BigDecimal
   max: BigDecimal
 }
@@ -85,6 +82,17 @@ enum AngleUnits {
   """AngleUnits Hours"""
   HOURS
 }
+
+"""Sequence atom"""
+interface Atom {
+  """Atom id"""
+  id: AtomId!
+}
+
+"""
+AtomId id formatted as `a-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
+"""
+scalar AtomId
 
 """
 Create or edit a band brightness value with integrated magnitude units.  When creating a new value, all fields except "error" are required.
@@ -176,6 +184,21 @@ input BandNormalizedSurfaceInput {
   deleteBrightnesses: [Band!]
 }
 
+"""Bias calibration step"""
+type Bias implements StepConfig {
+  """Step type"""
+  stepType: StepType!
+}
+
+"""Stopping point in a series of steps"""
+enum Breakpoint {
+  """Breakpoint Enabled"""
+  ENABLED
+
+  """Breakpoint Disabled"""
+  DISABLED
+}
+
 """Input for bulk editing multiple observations"""
 input BulkEditAsterismInput {
   selectProgram: ProgramId
@@ -262,7 +285,7 @@ input CoordinatesInput {
 input CreateObservationInput {
   observationId: ObservationId
   programId: ProgramId!
-  name: NonEmptyString
+  subtitle: NonEmptyString
   status: ObsStatus
   activeStatus: ObsActiveStatus
   targetEnvironment: TargetEnvironmentInput
@@ -284,6 +307,36 @@ input CreateTargetInput {
   sidereal: SiderealInput
   nonsidereal: NonsiderealInput
   sourceProfile: SourceProfileInput!
+}
+
+"""Dark calibration step"""
+type Dark implements StepConfig {
+  """Step type"""
+  stepType: StepType!
+}
+
+"""Dataset ExecutionEvents in the current page"""
+type DatasetEventConnection {
+  """The nodes in all the edges from the current page"""
+  nodes: [DatasetEvent!]!
+
+  """Edges in the current page"""
+  edges: [DatasetEventEdge!]!
+
+  """Count of all nodes in all pages"""
+  totalCount: Int!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+"""A dataset ExecutionEvent and its cursor"""
+type DatasetEventEdge {
+  """DatasetEventEdge element"""
+  node: DatasetEvent!
+
+  """DatasetEventEdge element cursor"""
+  cursor: Cursor!
 }
 
 """Create an angle from a signed decimal value and its units."""
@@ -328,6 +381,24 @@ enum DeclinationUnits {
   DEGREES
 }
 
+"""Time duration input"""
+input DurationInput {
+  """Time duration in µs"""
+  microseconds: Long
+
+  """Time duration in ms"""
+  milliseconds: BigDecimal
+
+  """Time duration in seconds"""
+  seconds: BigDecimal
+
+  """Time duration in minutes"""
+  minutes: BigDecimal
+
+  """Time duration in hours"""
+  hours: BigDecimal
+}
+
 """Add or delete targets in an asterism"""
 input EditAsterismInput {
   add: TargetId
@@ -344,9 +415,9 @@ input EditObservationInput {
   existence: Existence
 
   """
-  The name field may be unset by assigning a null value, or ignored by skipping it altogether
+  The subtitle field may be unset by assigning a null value, or ignored by skipping it altogether
   """
-  name: NonEmptyString
+  subtitle: NonEmptyString
 
   """
   The status field must be either specified or skipped altogether.  It cannot be unset with a null value.
@@ -414,11 +485,11 @@ enum EditType {
 }
 
 """
-Elevation range creation and edit parameters.  Choose one of airmass or hour angle constraints.
+Elevation range creation and edit parameters.  Choose one of airMass or hourAngle constraints.
 """
 input ElevationRangeInput {
-  airmassRange: AirmassRangeInput
-  hourAngleRange: HourAngleRangeInput
+  airMass: AirMassRangeInput
+  hourAngle: HourAngleRangeInput
 }
 
 """
@@ -430,7 +501,7 @@ input EmissionLineIntegratedInput {
   """
   The lineWidth field is required when creating a new instance of EmissionLineIntegrated, but optional when editing
   """
-  lineWidth: BigDecimal
+  lineWidth: PosBigDecimal
 
   """
   The lineFlux field is required when creating a new instance of EmissionLineIntegrated, but optional when editing
@@ -447,7 +518,7 @@ input EmissionLineSurfaceInput {
   """
   The lineWidth field is required when creating a new instance of EmissionLineSurface, but optional when editing
   """
-  lineWidth: BigDecimal
+  lineWidth: PosBigDecimal
 
   """
   The lineFlux field is required when creating a new instance of EmissionLineSurface, but optional when editing
@@ -513,18 +584,18 @@ interface Event {
 """Flux density entry"""
 input FluxDensity {
   wavelength: WavelengthInput!
-  density: BigDecimal!
+  density: PosBigDecimal!
 }
 
 """A flux density continuum value with integrated units"""
 input FluxDensityContinuumIntegratedInput {
-  value: BigDecimal!
+  value: PosBigDecimal!
   units: FluxDensityContinuumIntegratedUnits!
 }
 
 """A flux density continuum value with surface units"""
 input FluxDensityContinuumSurfaceInput {
-  value: BigDecimal!
+  value: PosBigDecimal!
   units: FluxDensityContinuumSurfaceUnits!
 }
 
@@ -548,6 +619,116 @@ input GaussianInput {
   The spectralDefinition field is required when creating a new instance of Gaussian, but optional when editing
   """
   spectralDefinition: SpectralDefinitionIntegratedInput
+}
+
+"""GCAL calibration step (flat / arc)"""
+type Gcal implements StepConfig {
+  """GCAL continuum, present if no arcs are used"""
+  continuum: GcalContinuum
+
+  """GCAL arcs, one or more present if no continuum is used"""
+  arcs: [GcalArc!]!
+
+  """GCAL filter"""
+  filter: GcalFilter!
+
+  """GCAL diffuser"""
+  diffuser: GcalDiffuser!
+
+  """GCAL shutter"""
+  shutter: GcalShutter!
+
+  """Step type"""
+  stepType: StepType!
+}
+
+"""GCAL arc"""
+enum GcalArc {
+  """GcalArc ArArc"""
+  AR_ARC
+
+  """GcalArc ThArArc"""
+  TH_AR_ARC
+
+  """GcalArc CuArArc"""
+  CU_AR_ARC
+
+  """GcalArc XeArc"""
+  XE_ARC
+}
+
+"""GCAL configuration creation input"""
+input GcalConfigurationInput {
+  continuum: GcalContinuum
+  arcs: [GcalArc!]!
+  diffuser: GcalDiffuser!
+  shutter: GcalShutter!
+}
+
+"""GCAL continuum"""
+enum GcalContinuum {
+  """GcalContinuum IrGreyBodyLow"""
+  IR_GREY_BODY_LOW
+
+  """GcalContinuum IrGreyBodyHigh"""
+  IR_GREY_BODY_HIGH
+
+  """GcalContinuum QuartzHalogen"""
+  QUARTZ_HALOGEN
+}
+
+"""GCAL diffuser"""
+enum GcalDiffuser {
+  """GcalDiffuser Ir"""
+  IR
+
+  """GcalDiffuser Visible"""
+  VISIBLE
+}
+
+"""GCAL filter"""
+enum GcalFilter {
+  """GcalFilter None"""
+  NONE
+
+  """GcalFilter Gmos"""
+  GMOS
+
+  """GcalFilter Hros"""
+  HROS
+
+  """GcalFilter Nir"""
+  NIR
+
+  """GcalFilter Nd10"""
+  ND10
+
+  """GcalFilter Nd16"""
+  ND16
+
+  """GcalFilter Nd20"""
+  ND20
+
+  """GcalFilter Nd30"""
+  ND30
+
+  """GcalFilter Nd40"""
+  ND40
+
+  """GcalFilter Nd45"""
+  ND45
+
+  """GcalFilter Nd50"""
+  ND50
+}
+
+"""GCAL shutter"""
+enum GcalShutter {
+  """GcalShutter Open"""
+  OPEN
+
+  """GcalShutter Closed"""
+  CLOSED
 }
 
 """GMOS amp count"""
@@ -598,12 +779,39 @@ type GmosCcdMode {
   ampReadMode: GmosAmpReadMode!
 }
 
+"""GMOS CCD readout input parameters"""
+input GmosCcdReadoutInput {
+  """X Binning"""
+  xBin: GmosXBinning! = ONE
+
+  """Y Binning"""
+  yBin: GmosYBinning! = ONE
+
+  """Amp Count"""
+  ampCount: GmosAmpCount! = TWELVE
+
+  """Amp Gain"""
+  ampGain: GmosAmpGain! = LOW
+
+  """Amp Read Mode"""
+  ampRead: GmosAmpReadMode! = SLOW
+}
+
 """GMOS Custom Mask"""
 type GmosCustomMask {
   """Custom Mask Filename"""
   filename: String!
 
   """Custom Slit Width"""
+  slitWidth: GmosCustomSlitWidth!
+}
+
+"""GMOS custom mask input parameters"""
+input GmosCustomMaskInput {
+  """Custom mask file name"""
+  filename: String!
+
+  """Custom mask slit width"""
   slitWidth: GmosCustomSlitWidth!
 }
 
@@ -711,6 +919,24 @@ type GmosNodAndShuffle {
   shuffleCycles: Int!
 }
 
+"""Creation input parameters for GMOS nod and shuffle"""
+input GmosNodAndShuffleInput {
+  """Offset position A"""
+  posA: OffsetInput!
+
+  """Offset position B"""
+  posB: OffsetInput!
+
+  """Electronic offsetting"""
+  eOffset: GmosEOffsetting!
+
+  """Shuffle offset"""
+  shuffleOffset: Int!
+
+  """Suffle cycles"""
+  shuffleCycles: Int!
+}
+
 """
 GmosNorth atom, a collection of steps that should be executed in their entirety
 """
@@ -725,31 +951,16 @@ type GmosNorthAtom implements Atom {
   id: AtomId!
 }
 
-"""GMOS North builtin-in FPU"""
-type GmosNorthBuiltinFpu {
-  """GMOS North builtin-fpu"""
-  builtin: GmosNorthFpu!
+"""GmosNorth bias step creation input"""
+input GmosNorthBiasInput {
+  """instrument configuration"""
+  config: GmosNorthDynamicInput!
 }
 
-"""GMOS North Configuration"""
-type GmosNorthConfig implements Config {
-  """Static/unchanging configuration"""
-  static: GmosNorthStatic!
-
-  """Acquisition sequence."""
-  acquisition: GmosNorthSequence!
-
-  """Science sequence."""
-  science: GmosNorthSequence!
-
-  """Instrument type"""
-  instrument: InstrumentType!
-
-  """Planned time for this configuration"""
-  plannedTime: PlannedTime!
-
-  """Estimated setup time"""
-  setupTime: Duration!
+"""GmosNorth dark step creation input"""
+input GmosNorthDarkInput {
+  """instrument configuration"""
+  config: GmosNorthDynamicInput!
 }
 
 """GmosNorth Detector type"""
@@ -782,7 +993,31 @@ type GmosNorthDynamic {
   filter: GmosNorthFilter
 
   """GMOS North FPU"""
-  fpu: GmosNorthFpuUnion
+  fpu: GmosNorthFpu
+}
+
+"""GMOS North instrument configuration input"""
+input GmosNorthDynamicInput {
+  """Exposure time"""
+  exposure: DurationInput!
+
+  """GMOS CCD readout"""
+  readout: GmosCcdReadoutInput!
+
+  """GMOS detector x offset"""
+  dtax: GmosDtax!
+
+  """GMOS region of interest"""
+  roi: GmosRoi!
+
+  """GMOS North grating"""
+  grating: GmosNorthGratingInput
+
+  """GMOS North filter"""
+  filter: GmosNorthFilter
+
+  """GMOS North FPU"""
+  fpu: GmosNorthFpuInput
 }
 
 """GMOS North Execution Config"""
@@ -795,6 +1030,13 @@ type GmosNorthExecutionConfig implements ExecutionConfig {
 
   """GMOS North science execution"""
   science: GmosNorthExecutionSequence!
+  visits(
+    """Retrieve `first` values after the given cursor"""
+    first: Int
+
+    """Retrieve values after the one associated with this cursor"""
+    after: Cursor
+  ): GmosNorthVisitRecordConnection!
 
   """Instrument type"""
   instrument: InstrumentType!
@@ -809,8 +1051,32 @@ type GmosNorthExecutionSequence {
   possibleFuture: [GmosNorthAtom!]!
 }
 
-"""Either custom mask or builtin-FPU"""
-union GmosNorthFpuUnion = GmosCustomMask | GmosNorthBuiltinFpu
+"""GMOS North FPU option, either builtin or custom mask"""
+type GmosNorthFpu {
+  """The custom mask, if in use"""
+  customMask: GmosCustomMask
+
+  """GMOS North builtin FPU, if in use"""
+  builtin: GmosNorthBuiltinFpu
+}
+
+"""GMOS North FPU input parameters (choose custom or builtin)."""
+input GmosNorthFpuInput {
+  """Custom mask FPU option"""
+  customMask: GmosCustomMaskInput
+
+  """Builtin FPU option"""
+  builtin: GmosNorthBuiltinFpu
+}
+
+"""GmosNorth GCAL step creation input"""
+input GmosNorthGcalInput {
+  """instrument configuration"""
+  config: GmosNorthDynamicInput!
+
+  """GCAL configuration"""
+  gcalConfig: GcalConfigurationInput!
+}
 
 """GMOS North Grating"""
 type GmosNorthGrating {
@@ -822,6 +1088,18 @@ type GmosNorthGrating {
 
   """Grating wavelength"""
   wavelength: Wavelength!
+}
+
+"""GMOS North grating input parameters"""
+input GmosNorthGratingInput {
+  """GmosGmosNorth disperser"""
+  disperser: GmosNorthDisperser!
+
+  """GMOS disperser order"""
+  order: GmosDisperserOrder!
+
+  """Grating wavelength"""
+  wavelength: WavelengthInput!
 }
 
 """Edit or create GMOS North Long Slit configuration"""
@@ -839,12 +1117,42 @@ input GmosNorthLongSlitInput {
   """
   The fpu field must be either specified or skipped altogether.  It cannot be unset with a null value.
   """
-  fpu: GmosNorthFpu
+  fpu: GmosNorthBuiltinFpu
 
   """
   The slitWidth field must be either specified or skipped altogether.  It cannot be unset with a null value.
   """
   slitWidth: SlitWidthInput
+}
+
+"""GMOS North Manual Configuration"""
+type GmosNorthManualConfig implements ManualConfig {
+  """Static/unchanging configuration"""
+  static: GmosNorthStatic!
+
+  """Acquisition sequence."""
+  acquisition: GmosNorthSequence!
+
+  """Science sequence."""
+  science: GmosNorthSequence!
+
+  """Instrument type"""
+  instrument: InstrumentType!
+
+  """Planned time for this configuration"""
+  plannedTime: PlannedTime!
+
+  """Estimated setup time"""
+  setupTime: Duration!
+}
+
+"""GmosNorth science step creation input"""
+input GmosNorthScienceInput {
+  """instrument configuration"""
+  config: GmosNorthDynamicInput!
+
+  """offset position"""
+  offset: OffsetInput!
 }
 
 """A series of GmosNorth atoms that comprise the sequence"""
@@ -886,6 +1194,21 @@ type GmosNorthStatic {
   nodAndShuffle: GmosNodAndShuffle
 }
 
+"""GMOS North static configuration input parameters"""
+input GmosNorthStaticInput {
+  """GMOS North Detector option"""
+  detector: GmosNorthDetector! = HAMAMATSU
+
+  """Whether this is a MOS pre-imaging observation"""
+  mosPreImaging: MosPreImaging! = IS_NOT_MOS_PRE_IMAGING
+
+  """GMOS Nod And Shuffle configuration"""
+  nodAndShuffle: GmosNodAndShuffleInput
+
+  """GMOS North Stage Mode"""
+  stageMode: GmosNorthStageMode! = FOLLOW_XY
+}
+
 """GmosNorth step with potential breakpoint"""
 type GmosNorthStep implements Step {
   """Instrument configuration for this step"""
@@ -897,14 +1220,180 @@ type GmosNorthStep implements Step {
   """Whether to pause before the execution of this step"""
   breakpoint: Breakpoint!
 
-  """Step type"""
-  stepType: StepType!
-
   """The sequence step itself"""
   stepConfig: StepConfig!
 
   """Time estimate for this step's execution"""
   time: StepTime!
+}
+
+"""GmosNorth step creation input.  Choose exactly one step type."""
+input GmosNorthStepInput {
+  """Bias step creation option"""
+  bias: GmosNorthBiasInput
+
+  """Dark step creation option"""
+  dark: GmosNorthDarkInput
+
+  """GCAL step creation option"""
+  gcal: GmosNorthGcalInput
+
+  """Science step creation option"""
+  science: GmosNorthScienceInput
+}
+
+"""A GmosNorth step configuration as recorded by Observe"""
+type GmosNorthStepRecord {
+  """Step id"""
+  id: StepId!
+
+  """Visit id"""
+  visitId: VisitId!
+
+  """Created by Observe at time"""
+  created: Instant!
+
+  """Started at time"""
+  startTime: Instant
+
+  """Ended at time"""
+  endTime: Instant
+
+  """Step duration"""
+  duration: Duration!
+
+  """GmosNorth configuration for this step"""
+  instrumentConfig: GmosNorthDynamic!
+
+  """The executed step itself"""
+  stepConfig: StepConfig!
+
+  """Step events associated with this step"""
+  stepEvents(
+    """Retrieve `first` values after the given cursor"""
+    first: Int
+
+    """Retrieve values after the one associated with this cursor"""
+    after: Cursor
+  ): StepEventConnection!
+
+  """Dataset events associated with this step"""
+  datasetEvents(
+    """Retrieve `first` values after the given cursor"""
+    first: Int
+
+    """Retrieve values after the one associated with this cursor"""
+    after: Cursor
+  ): DatasetEventConnection!
+
+  """Datasets associated with this step"""
+  datasets(
+    """Retrieve `first` values after the given cursor"""
+    first: Int
+
+    """Retrieve values after the one associated with this cursor"""
+    after: Cursor
+  ): DatasetConnection!
+}
+
+"""Steps recorded by Observe in the current page"""
+type GmosNorthStepRecordConnection {
+  """The nodes in all the edges from the current page"""
+  nodes: [GmosNorthStepRecord!]!
+
+  """Edges in the current page"""
+  edges: [GmosNorthStepRecordEdge!]!
+
+  """Count of all nodes in all pages"""
+  totalCount: Int!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+"""A step recorded by Observe and its cursor"""
+type GmosNorthStepRecordEdge {
+  """GmosNorthStepRecordEdge element"""
+  node: GmosNorthStepRecord!
+
+  """GmosNorthStepRecordEdge element cursor"""
+  cursor: Cursor!
+}
+
+"""Input parameters for creating a new GmosNorth StepRecord"""
+input GmosNorthStepRecordInput {
+  observationId: ObservationId!
+  visitId: VisitId!
+  stepConfig: GmosNorthStepInput!
+}
+
+"""A GmosNorth visit as recorded by Observe"""
+type GmosNorthVisitRecord {
+  """Visit id"""
+  id: VisitId!
+
+  """Created by Observe at time"""
+  created: Instant!
+
+  """Started at time"""
+  startTime: Instant
+
+  """Ended at time"""
+  endTime: Instant
+
+  """Step duration"""
+  duration: Duration!
+
+  """GmosNorth static instrument configuration"""
+  staticConfig: GmosNorthStatic!
+
+  """GmosNorth recorded steps"""
+  steps(
+    """Retrieve `first` values after the given cursor"""
+    first: Int
+
+    """Retrieve values after the one associated with this cursor"""
+    after: Cursor
+  ): GmosNorthStepRecordConnection!
+
+  """Sequence events associated with this visit"""
+  sequenceEvents(
+    """Retrieve `first` values after the given cursor"""
+    first: Int
+
+    """Retrieve values after the one associated with this cursor"""
+    after: Cursor
+  ): SequenceEventConnection!
+}
+
+"""Visits as recorded by Observe"""
+type GmosNorthVisitRecordConnection {
+  """The nodes in all the edges from the current page"""
+  nodes: [GmosNorthVisitRecord!]!
+
+  """Edges in the current page"""
+  edges: [GmosNorthVisitRecordEdge!]!
+
+  """Count of all nodes in all pages"""
+  totalCount: Int!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+"""A visit (and its cursor) as recorded by Observe"""
+type GmosNorthVisitRecordEdge {
+  """GmosNorthVisitRecordEdge element"""
+  node: GmosNorthVisitRecord!
+
+  """GmosNorthVisitRecordEdge element cursor"""
+  cursor: Cursor!
+}
+
+"""Input parameters for creating a new GmosNorth VisitRecord"""
+input GmosNorthVisitRecordInput {
+  observationId: ObservationId!
+  static: GmosNorthStaticInput!
 }
 
 """GMOS Region Of Interest"""
@@ -945,31 +1434,16 @@ type GmosSouthAtom implements Atom {
   id: AtomId!
 }
 
-"""GMOS South builtin-in FPU"""
-type GmosSouthBuiltinFpu {
-  """GMOS South builtin-fpu"""
-  builtin: GmosSouthFpu!
+"""GmosSouth bias step creation input"""
+input GmosSouthBiasInput {
+  """instrument configuration"""
+  config: GmosSouthDynamicInput!
 }
 
-"""GMOS South Configuration"""
-type GmosSouthConfig implements Config {
-  """Static/unchanging configuration"""
-  static: GmosSouthStatic!
-
-  """Acquisition sequence."""
-  acquisition: GmosSouthSequence!
-
-  """Science sequence."""
-  science: GmosSouthSequence!
-
-  """Instrument type"""
-  instrument: InstrumentType!
-
-  """Planned time for this configuration"""
-  plannedTime: PlannedTime!
-
-  """Estimated setup time"""
-  setupTime: Duration!
+"""GmosSouth dark step creation input"""
+input GmosSouthDarkInput {
+  """instrument configuration"""
+  config: GmosSouthDynamicInput!
 }
 
 """GmosSouth Detector type"""
@@ -1002,7 +1476,31 @@ type GmosSouthDynamic {
   filter: GmosSouthFilter
 
   """GMOS South FPU"""
-  fpu: GmosSouthFpuUnion
+  fpu: GmosSouthFpu
+}
+
+"""GMOS South instrument configuration input"""
+input GmosSouthDynamicInput {
+  """Exposure time"""
+  exposure: DurationInput!
+
+  """GMOS CCD readout"""
+  readout: GmosCcdReadoutInput!
+
+  """GMOS detector x offset"""
+  dtax: GmosDtax!
+
+  """GMOS region of interest"""
+  roi: GmosRoi!
+
+  """GMOS South grating"""
+  grating: GmosSouthGratingInput
+
+  """GMOS South filter"""
+  filter: GmosSouthFilter
+
+  """GMOS South FPU"""
+  fpu: GmosSouthFpuInput
 }
 
 """GMOS South Execution Config"""
@@ -1015,6 +1513,13 @@ type GmosSouthExecutionConfig implements ExecutionConfig {
 
   """GMOS South science execution"""
   science: GmosSouthExecutionSequence!
+  visits(
+    """Retrieve `first` values after the given cursor"""
+    first: Int
+
+    """Retrieve values after the one associated with this cursor"""
+    after: Cursor
+  ): GmosSouthVisitRecordConnection!
 
   """Instrument type"""
   instrument: InstrumentType!
@@ -1029,8 +1534,32 @@ type GmosSouthExecutionSequence {
   possibleFuture: [GmosSouthAtom!]!
 }
 
-"""Either custom mask or builtin-FPU"""
-union GmosSouthFpuUnion = GmosCustomMask | GmosSouthBuiltinFpu
+"""GMOS South FPU option, either builtin or custom mask"""
+type GmosSouthFpu {
+  """The custom mask, if in use"""
+  customMask: GmosCustomMask
+
+  """GMOS South builtin FPU, if in use"""
+  builtin: GmosSouthBuiltinFpu
+}
+
+"""GMOS South FPU input parameters (choose custom or builtin)."""
+input GmosSouthFpuInput {
+  """Custom mask FPU option"""
+  customMask: GmosCustomMaskInput
+
+  """Builtin FPU option"""
+  builtin: GmosSouthBuiltinFpu
+}
+
+"""GmosSouth GCAL step creation input"""
+input GmosSouthGcalInput {
+  """instrument configuration"""
+  config: GmosSouthDynamicInput!
+
+  """GCAL configuration"""
+  gcalConfig: GcalConfigurationInput!
+}
 
 """GMOS South Grating"""
 type GmosSouthGrating {
@@ -1042,6 +1571,18 @@ type GmosSouthGrating {
 
   """Grating wavelength"""
   wavelength: Wavelength!
+}
+
+"""GMOS South grating input parameters"""
+input GmosSouthGratingInput {
+  """GmosGmosSouth disperser"""
+  disperser: GmosSouthDisperser!
+
+  """GMOS disperser order"""
+  order: GmosDisperserOrder!
+
+  """Grating wavelength"""
+  wavelength: WavelengthInput!
 }
 
 """Edit or create GMOS South Long Slit configuration"""
@@ -1059,12 +1600,42 @@ input GmosSouthLongSlitInput {
   """
   The fpu field must be either specified or skipped altogether.  It cannot be unset with a null value.
   """
-  fpu: GmosSouthFpu
+  fpu: GmosSouthBuiltinFpu
 
   """
   The slitWidth field must be either specified or skipped altogether.  It cannot be unset with a null value.
   """
   slitWidth: SlitWidthInput
+}
+
+"""GMOS South Manual Configuration"""
+type GmosSouthManualConfig implements ManualConfig {
+  """Static/unchanging configuration"""
+  static: GmosSouthStatic!
+
+  """Acquisition sequence."""
+  acquisition: GmosSouthSequence!
+
+  """Science sequence."""
+  science: GmosSouthSequence!
+
+  """Instrument type"""
+  instrument: InstrumentType!
+
+  """Planned time for this configuration"""
+  plannedTime: PlannedTime!
+
+  """Estimated setup time"""
+  setupTime: Duration!
+}
+
+"""GmosSouth science step creation input"""
+input GmosSouthScienceInput {
+  """instrument configuration"""
+  config: GmosSouthDynamicInput!
+
+  """offset position"""
+  offset: OffsetInput!
 }
 
 """A series of GmosSouth atoms that comprise the sequence"""
@@ -1106,6 +1677,21 @@ type GmosSouthStatic {
   nodAndShuffle: GmosNodAndShuffle
 }
 
+"""GMOS South static configuration input parameters"""
+input GmosSouthStaticInput {
+  """GMOS North Detector option"""
+  detector: GmosNorthDetector! = HAMAMATSU
+
+  """Whether this is a MOS pre-imaging observation"""
+  mosPreImaging: MosPreImaging! = IS_NOT_MOS_PRE_IMAGING
+
+  """GMOS Nod And Shuffle configuration"""
+  nodAndShuffle: GmosNodAndShuffleInput
+
+  """GMOS North Stage Mode"""
+  stageMode: GmosSouthStageMode! = FOLLOW_XY
+}
+
 """GmosSouth step with potential breakpoint"""
 type GmosSouthStep implements Step {
   """Instrument configuration for this step"""
@@ -1117,14 +1703,180 @@ type GmosSouthStep implements Step {
   """Whether to pause before the execution of this step"""
   breakpoint: Breakpoint!
 
-  """Step type"""
-  stepType: StepType!
-
   """The sequence step itself"""
   stepConfig: StepConfig!
 
   """Time estimate for this step's execution"""
   time: StepTime!
+}
+
+"""GmosSouth step creation input.  Choose exactly one step type."""
+input GmosSouthStepInput {
+  """Bias step creation option"""
+  bias: GmosSouthBiasInput
+
+  """Dark step creation option"""
+  dark: GmosSouthDarkInput
+
+  """GCAL step creation option"""
+  gcal: GmosSouthGcalInput
+
+  """Science step creation option"""
+  science: GmosSouthScienceInput
+}
+
+"""A GmosSouth step configuration as recorded by Observe"""
+type GmosSouthStepRecord {
+  """Step id"""
+  id: StepId!
+
+  """Visit id"""
+  visitId: VisitId!
+
+  """Created by Observe at time"""
+  created: Instant!
+
+  """Started at time"""
+  startTime: Instant
+
+  """Ended at time"""
+  endTime: Instant
+
+  """Step duration"""
+  duration: Duration!
+
+  """GmosSouth configuration for this step"""
+  instrumentConfig: GmosSouthDynamic!
+
+  """The executed step itself"""
+  stepConfig: StepConfig!
+
+  """Step events associated with this step"""
+  stepEvents(
+    """Retrieve `first` values after the given cursor"""
+    first: Int
+
+    """Retrieve values after the one associated with this cursor"""
+    after: Cursor
+  ): StepEventConnection!
+
+  """Dataset events associated with this step"""
+  datasetEvents(
+    """Retrieve `first` values after the given cursor"""
+    first: Int
+
+    """Retrieve values after the one associated with this cursor"""
+    after: Cursor
+  ): DatasetEventConnection!
+
+  """Datasets associated with this step"""
+  datasets(
+    """Retrieve `first` values after the given cursor"""
+    first: Int
+
+    """Retrieve values after the one associated with this cursor"""
+    after: Cursor
+  ): DatasetConnection!
+}
+
+"""Steps recorded by Observe in the current page"""
+type GmosSouthStepRecordConnection {
+  """The nodes in all the edges from the current page"""
+  nodes: [GmosSouthStepRecord!]!
+
+  """Edges in the current page"""
+  edges: [GmosSouthStepRecordEdge!]!
+
+  """Count of all nodes in all pages"""
+  totalCount: Int!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+"""A step recorded by Observe and its cursor"""
+type GmosSouthStepRecordEdge {
+  """GmosSouthStepRecordEdge element"""
+  node: GmosSouthStepRecord!
+
+  """GmosSouthStepRecordEdge element cursor"""
+  cursor: Cursor!
+}
+
+"""Input parameters for creating a new GmosSouth StepRecord"""
+input GmosSouthStepRecordInput {
+  observationId: ObservationId!
+  visitId: VisitId!
+  stepConfig: GmosSouthStepInput!
+}
+
+"""A GmosSouth visit as recorded by Observe"""
+type GmosSouthVisitRecord {
+  """Visit id"""
+  id: VisitId!
+
+  """Created by Observe at time"""
+  created: Instant!
+
+  """Started at time"""
+  startTime: Instant
+
+  """Ended at time"""
+  endTime: Instant
+
+  """Step duration"""
+  duration: Duration!
+
+  """GmosSouth static instrument configuration"""
+  staticConfig: GmosSouthStatic!
+
+  """GmosSouth recorded steps"""
+  steps(
+    """Retrieve `first` values after the given cursor"""
+    first: Int
+
+    """Retrieve values after the one associated with this cursor"""
+    after: Cursor
+  ): GmosSouthStepRecordConnection!
+
+  """Sequence events associated with this visit"""
+  sequenceEvents(
+    """Retrieve `first` values after the given cursor"""
+    first: Int
+
+    """Retrieve values after the one associated with this cursor"""
+    after: Cursor
+  ): SequenceEventConnection!
+}
+
+"""Visits as recorded by Observe"""
+type GmosSouthVisitRecordConnection {
+  """The nodes in all the edges from the current page"""
+  nodes: [GmosSouthVisitRecord!]!
+
+  """Edges in the current page"""
+  edges: [GmosSouthVisitRecordEdge!]!
+
+  """Count of all nodes in all pages"""
+  totalCount: Int!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+"""A visit (and its cursor) as recorded by Observe"""
+type GmosSouthVisitRecordEdge {
+  """GmosSouthVisitRecordEdge element"""
+  node: GmosSouthVisitRecord!
+
+  """GmosSouthVisitRecordEdge element cursor"""
+  cursor: Cursor!
+}
+
+"""Input parameters for creating a new GmosSouth VisitRecord"""
+input GmosSouthVisitRecordInput {
+  observationId: ObservationId!
+  static: GmosSouthStaticInput!
 }
 
 """GMOS X Binning"""
@@ -1159,13 +1911,13 @@ input HourAngleRangeInput {
 
 """A line flux value with integrated units"""
 input LineFluxIntegratedInput {
-  value: BigDecimal!
+  value: PosBigDecimal!
   units: LineFluxIntegratedUnits!
 }
 
 """A line flux value with surface units"""
 input LineFluxSurfaceInput {
-  value: BigDecimal!
+  value: PosBigDecimal!
   units: LineFluxSurfaceUnits!
 }
 
@@ -1284,6 +2036,30 @@ type Mutation {
     """Dataset event description"""
     input: AddDatasetEventInput!
   ): DatasetEvent!
+
+  """Record a new visit"""
+  recordGmosNorthVisit(
+    """VisitRecord creation parameters"""
+    input: GmosNorthVisitRecordInput!
+  ): GmosNorthVisitRecord!
+
+  """Record a new step"""
+  recordGmosNorthStep(
+    """GmosNorth step configuration parameters"""
+    input: GmosNorthStepRecordInput!
+  ): GmosNorthStepRecord!
+
+  """Record a new visit"""
+  recordGmosSouthVisit(
+    """VisitRecord creation parameters"""
+    input: GmosSouthVisitRecordInput!
+  ): GmosSouthVisitRecord!
+
+  """Record a new step"""
+  recordGmosSouthStep(
+    """GmosSouth step configuration parameters"""
+    input: GmosSouthStepRecordInput!
+  ): GmosSouthStepRecord!
 }
 
 """Nonsidereal target parameters.  Supply `keyType` and `des` or `key`"""
@@ -1314,6 +2090,37 @@ type ObservationEdit implements Event {
   id: Long!
 }
 
+type Offset {
+  """Offset in p"""
+  p: p!
+
+  """Offset in q"""
+  q: q!
+}
+
+"""
+Offset component (p or q) input parameters. Choose one angle units definition.
+"""
+input OffsetComponentInput {
+  """Angle in µas"""
+  microarcseconds: Long
+
+  """Angle in mas"""
+  milliarcseconds: BigDecimal
+
+  """Angle in arcsec"""
+  arcseconds: BigDecimal
+}
+
+"""Offset input.  Define offset in p and q."""
+input OffsetInput {
+  """Offset in p"""
+  p: OffsetComponentInput!
+
+  """Offset in q"""
+  q: OffsetComponentInput!
+}
+
 """Decimal value in Parallax"""
 input ParallaxDecimalInput {
   """decimal value in associated units"""
@@ -1323,6 +2130,14 @@ input ParallaxDecimalInput {
   units: ParallaxUnits!
 }
 
+"""Parallax, choose one of the available units"""
+input ParallaxInput {
+  microarcseconds: Long
+  milliarcseconds: BigDecimal
+  fromLong: ParallaxLongInput
+  fromDecimal: ParallaxDecimalInput
+}
+
 """Integral value in Parallax"""
 input ParallaxLongInput {
   """integral value in associated units"""
@@ -1330,14 +2145,6 @@ input ParallaxLongInput {
 
   """units for associated value"""
   units: ParallaxUnits!
-}
-
-"""Parallax, choose one of the available units"""
-input ParallaxModelInput {
-  microarcseconds: Long
-  milliarcseconds: BigDecimal
-  fromLong: ParallaxLongInput
-  fromDecimal: ParallaxDecimalInput
 }
 
 """Unit options for parallax values"""
@@ -1479,6 +2286,15 @@ enum RightAscensionUnits {
   HOURS
 }
 
+"""Science step"""
+type Science implements StepConfig {
+  """Offset"""
+  offset: Offset!
+
+  """Step type"""
+  stepType: StepType!
+}
+
 """Edit or create an observation's science configuration"""
 input ScienceConfigurationInput {
   """
@@ -1503,6 +2319,30 @@ input ScienceRequirementsInput {
   The spectroscopy field must be either specified or skipped altogether.  It cannot be unset with a null value.
   """
   spectroscopy: SpectroscopyScienceRequirementsInput
+}
+
+"""Sequence ExecutionEvents in the current page"""
+type SequenceEventConnection {
+  """The nodes in all the edges from the current page"""
+  nodes: [SequenceEvent!]!
+
+  """Edges in the current page"""
+  edges: [SequenceEventEdge!]!
+
+  """Count of all nodes in all pages"""
+  totalCount: Int!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+"""A sequence ExecutionEvent and its cursor"""
+type SequenceEventEdge {
+  """SequenceEventEdge element"""
+  node: SequenceEvent!
+
+  """SequenceEventEdge element cursor"""
+  cursor: Cursor!
 }
 
 """Sidereal target edit parameters"""
@@ -1535,7 +2375,7 @@ input SiderealInput {
   """
   The parallax field may be unset by assigning a null value, or ignored by skipping it altogether
   """
-  parallax: ParallaxModelInput
+  parallax: ParallaxInput
 
   """
   The catalogInfo field may be unset by assigning a null value, or ignored by skipping it altogether
@@ -1618,6 +2458,74 @@ input SpectroscopyScienceRequirementsInput {
   capabilities: SpectroscopyCapabilities
 }
 
+"""Sequence step"""
+interface Step {
+  """Step id"""
+  id: StepId!
+
+  """Whether to pause before the execution of this step"""
+  breakpoint: Breakpoint!
+
+  """The sequence step itself"""
+  stepConfig: StepConfig!
+
+  """Time estimate for this step's execution"""
+  time: StepTime!
+}
+
+"""Step (bias, dark, gcal, science, etc.)"""
+interface StepConfig {
+  """Step type"""
+  stepType: StepType!
+}
+
+"""Step ExecutionEvents in the current page"""
+type StepEventConnection {
+  """The nodes in all the edges from the current page"""
+  nodes: [StepEvent!]!
+
+  """Edges in the current page"""
+  edges: [StepEventEdge!]!
+
+  """Count of all nodes in all pages"""
+  totalCount: Int!
+
+  """Paging information"""
+  pageInfo: PageInfo!
+}
+
+"""A step ExecutionEvent and its cursor"""
+type StepEventEdge {
+  """StepEventEdge element"""
+  node: StepEvent!
+
+  """StepEventEdge element cursor"""
+  cursor: Cursor!
+}
+
+"""
+StepId id formatted as `s-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
+"""
+scalar StepId
+
+"""Step type"""
+enum StepType {
+  """StepType Bias"""
+  BIAS
+
+  """StepType Dark"""
+  DARK
+
+  """StepType Gcal"""
+  GCAL
+
+  """StepType Science"""
+  SCIENCE
+
+  """StepType SmartGcal"""
+  SMART_GCAL
+}
+
 type Subscription {
   """
   
@@ -1695,9 +2603,14 @@ input UnnormalizedSedInput {
   hiiRegion: HiiRegionSpectrum
   planetaryNebula: PlanetaryNebulaSpectrum
   powerLaw: BigDecimal
-  blackBodyTempK: BigDecimal
+  blackBodyTempK: PosInt
   fluxDensities: [FluxDensity!]
 }
+
+"""
+VisitId id formatted as `v-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
+"""
+scalar VisitId
 
 """Decimal value in Wavelength"""
 input WavelengthDecimalInput {
@@ -1742,11 +2655,33 @@ enum WavelengthUnits {
   MICROMETERS
 }
 
+type p {
+  """p offset in µas"""
+  microarcseconds: Long!
+
+  """p offset in mas"""
+  milliarcseconds: BigDecimal!
+
+  """p offset in arcsec"""
+  arcseconds: BigDecimal!
+}
+
+type q {
+  """q offset in µas"""
+  microarcseconds: Long!
+
+  """q offset in mas"""
+  milliarcseconds: BigDecimal!
+
+  """q offset in arcsec"""
+  arcseconds: BigDecimal!
+}
+
 type AirMassRange {
-  """Minimum Airmass (unitless)"""
+  """Minimum AirMass (unitless)"""
   min: BigDecimal!
 
-  """Maximum Airmass (unitless)"""
+  """Maximum AirMass (unitless)"""
   max: BigDecimal!
 }
 
@@ -1826,15 +2761,6 @@ type AsterismGroupEdge {
   cursor: Cursor!
 }
 
-"""Sequence atom"""
-interface Atom {
-  """Atom id"""
-  id: AtomId!
-}
-
-"""AtomId id formatted as `m-([1-9a-f][0-9a-f]*)`"""
-scalar AtomId
-
 """Brightness bands"""
 enum Band {
   """Band SloanU"""
@@ -1893,6 +2819,15 @@ enum Band {
 
   """Band Ap"""
   AP
+
+  """Band Gaia"""
+  GAIA
+
+  """Band GaiaBP"""
+  GAIA_BP
+
+  """Band GaiaRP"""
+  GAIA_RP
 }
 
 type BandBrightnessIntegrated {
@@ -1933,21 +2868,6 @@ type BandNormalizedSurface implements BandNormalized {
 
   """Un-normalized spectral energy distribution"""
   sed: UnnormalizedSed!
-}
-
-"""Bias calibration step"""
-type Bias implements StepConfig {
-  """Step type"""
-  stepType: StepType!
-}
-
-"""Stopping point in a series of steps"""
-enum Breakpoint {
-  """Breakpoint Enabled"""
-  ENABLED
-
-  """Breakpoint Disabled"""
-  DISABLED
 }
 
 """Brightness integrated units"""
@@ -2039,18 +2959,6 @@ enum CloudExtinction {
   THREE_POINT_ZERO
 }
 
-"""Instrument configuration"""
-interface Config {
-  """Instrument type"""
-  instrument: InstrumentType!
-
-  """Planned time for this configuration"""
-  plannedTime: PlannedTime!
-
-  """Estimated setup time"""
-  setupTime: Duration!
-}
-
 """ConfigurationMode"""
 enum ConfigurationModeType {
   """ConfigurationModeType GmosNorthLongSlit"""
@@ -2073,7 +2981,7 @@ type ConstraintSet {
   """Water vapor"""
   waterVapor: WaterVapor!
 
-  """Either airmass range or elevation range"""
+  """Either air mass range or elevation range"""
   elevationRange: ElevationRange!
 }
 
@@ -2177,18 +3085,9 @@ type Coordinates {
 """Opaque object cursor"""
 scalar Cursor
 
-"""Dark calibration step"""
-type Dark implements StepConfig {
-  """Step type"""
-  stepType: StepType!
-}
-
 type Dataset {
   """Observation associated with this dataset"""
   observation: Observation!
-
-  """Step that produced the dataset"""
-  step: Step!
 
   """Dataset index"""
   index: Int!
@@ -2223,9 +3122,6 @@ type DatasetEdge {
 
 """Dataset-level events"""
 type DatasetEvent implements ExecutionEvent {
-  """Step from which the dataset comes"""
-  step: Step!
-
   """Dataset filename, when known"""
   filename: DatasetFilename
 
@@ -2237,11 +3133,6 @@ type DatasetEvent implements ExecutionEvent {
 
   """Observation whose execution produced this event"""
   observation: Observation!
-
-  """
-  Time at which this event was generated, according to the caller (e.g., Observe)
-  """
-  generated: Instant!
 
   """Time at which this event was received"""
   received: Instant!
@@ -2305,20 +3196,20 @@ type Duration {
   hours: BigDecimal!
 }
 
-"""Either airmass range or elevation range"""
+"""Either air mass range or elevation range"""
 type ElevationRange {
-  """Airmass range if elevation range is an Airmass range"""
-  airmassRange: AirMassRange
+  """AirMass range if elevation range is an Airmass range"""
+  airMass: AirMassRange
 
   """Hour angle range if elevation range is an Hour angle range"""
-  hourAngleRange: HourAngleRange
+  hourAngle: HourAngleRange
 }
 
 type EmissionLineIntegrated {
   wavelength: Wavelength!
 
   """km/s"""
-  lineWidth: BigDecimal!
+  lineWidth: PosBigDecimal!
   lineFlux: LineFluxIntegrated!
 }
 
@@ -2326,7 +3217,7 @@ type EmissionLineSurface {
   wavelength: Wavelength!
 
   """km/s"""
-  lineWidth: BigDecimal!
+  lineWidth: PosBigDecimal!
   lineFlux: LineFluxSurface!
 }
 
@@ -2361,51 +3252,6 @@ enum EphemerisKeyType {
 """Reference observation epoch in format '[JB]YYYY.YYY'"""
 scalar EpochString
 
-"""Executed step"""
-type ExecutedStep {
-  """Step id"""
-  id: StepId!
-
-  """The executed step itself"""
-  step: Step!
-
-  """The atom containing the executed step"""
-  atom: Atom!
-
-  """Datasets associated with this step"""
-  datasets(
-    """Retrieve `first` values after the given cursor"""
-    first: Int
-
-    """Retrieve values after the one associated with this cursor"""
-    after: Cursor
-  ): DatasetConnection!
-}
-
-"""Executed steps in the current page"""
-type ExecutedStepConnection {
-  """The nodes in all the edges from the current page"""
-  nodes: [ExecutedStep!]!
-
-  """Edges in the current page"""
-  edges: [ExecutedStepEdge!]!
-
-  """Count of all nodes in all pages"""
-  totalCount: Int!
-
-  """Paging information"""
-  pageInfo: PageInfo!
-}
-
-"""An executed step and its cursor"""
-type ExecutedStepEdge {
-  """ExecutedStepEdge element"""
-  node: ExecutedStep!
-
-  """ExecutedStepEdge element cursor"""
-  cursor: Cursor!
-}
-
 type Execution {
   """Datasets associated with the observation"""
   datasets(
@@ -2425,15 +3271,6 @@ type Execution {
     after: Cursor
   ): ExecutionEventConnection!
 
-  """Executed steps associated with the observation"""
-  executedSteps(
-    """Retrieve `first` values after the given cursor"""
-    first: Int
-
-    """Retrieve values after the one associated with this cursor"""
-    after: Cursor
-  ): ExecutedStepConnection!
-
   """Execution config"""
   executionConfig: ExecutionConfig
 }
@@ -2451,11 +3288,6 @@ interface ExecutionEvent {
 
   """Observation whose execution produced this event"""
   observation: Observation!
-
-  """
-  Time at which this event was generated, according to the caller (e.g., Observe)
-  """
-  generated: Instant!
 
   """Time at which this event was received"""
   received: Instant!
@@ -2485,7 +3317,7 @@ type ExecutionEventEdge {
   cursor: Cursor!
 }
 
-"""ExecutionEventId id formatted as `e-([1-9a-f][0-9a-f]*)`"""
+"""ExecutionEventId id formatted as `e-[1-9a-f][0-9a-f]*`"""
 scalar ExecutionEventId
 
 """State of being: either Deleted or Present"""
@@ -2498,7 +3330,7 @@ enum Existence {
 }
 
 type FluxDensityContinuumIntegrated {
-  value: BigDecimal!
+  value: PosBigDecimal!
   units: FluxDensityContinuumIntegratedUnits!
 }
 
@@ -2512,7 +3344,7 @@ enum FluxDensityContinuumIntegratedUnits {
 }
 
 type FluxDensityContinuumSurface {
-  value: BigDecimal!
+  value: PosBigDecimal!
   units: FluxDensityContinuumSurfaceUnits!
 }
 
@@ -2527,7 +3359,7 @@ enum FluxDensityContinuumSurfaceUnits {
 
 type FluxDensityEntry {
   wavelength: Wavelength!
-  density: BigDecimal!
+  density: PosBigDecimal!
 }
 
 """Focal plane Single/Multi/IFU"""
@@ -2565,106 +3397,55 @@ type GaussianSource {
   emissionLines: EmissionLinesIntegrated
 }
 
-"""GCAL calibration step (flat / arc)"""
-type Gcal implements StepConfig {
-  """GCAL continuum, present if no arcs are used"""
-  continuum: GcalContinuum
+"""GMOS North FPU"""
+enum GmosNorthBuiltinFpu {
+  """GmosNorthBuiltinFpu Ns0"""
+  NS0
 
-  """GCAL arcs, one or more present if no continuum is used"""
-  arcs: [GcalArc!]!
+  """GmosNorthBuiltinFpu Ns1"""
+  NS1
 
-  """GCAL filter"""
-  filter: GcalFilter!
+  """GmosNorthBuiltinFpu Ns2"""
+  NS2
 
-  """GCAL diffuser"""
-  diffuser: GcalDiffuser!
+  """GmosNorthBuiltinFpu Ns3"""
+  NS3
 
-  """GCAL shutter"""
-  shutter: GcalShutter!
+  """GmosNorthBuiltinFpu Ns4"""
+  NS4
 
-  """Step type"""
-  stepType: StepType!
-}
+  """GmosNorthBuiltinFpu Ns5"""
+  NS5
 
-"""GCAL arc"""
-enum GcalArc {
-  """GcalArc ArArc"""
-  AR_ARC
+  """GmosNorthBuiltinFpu LongSlit_0_25"""
+  LONG_SLIT_0_25
 
-  """GcalArc ThArArc"""
-  TH_AR_ARC
+  """GmosNorthBuiltinFpu LongSlit_0_50"""
+  LONG_SLIT_0_50
 
-  """GcalArc CuArArc"""
-  CU_AR_ARC
+  """GmosNorthBuiltinFpu LongSlit_0_75"""
+  LONG_SLIT_0_75
 
-  """GcalArc XeArc"""
-  XE_ARC
-}
+  """GmosNorthBuiltinFpu LongSlit_1_00"""
+  LONG_SLIT_1_00
 
-"""GCAL continuum"""
-enum GcalContinuum {
-  """GcalContinuum IrGreyBodyLow"""
-  IR_GREY_BODY_LOW
+  """GmosNorthBuiltinFpu LongSlit_1_50"""
+  LONG_SLIT_1_50
 
-  """GcalContinuum IrGreyBodyHigh"""
-  IR_GREY_BODY_HIGH
+  """GmosNorthBuiltinFpu LongSlit_2_00"""
+  LONG_SLIT_2_00
 
-  """GcalContinuum QuartzHalogen"""
-  QUARTZ_HALOGEN
-}
+  """GmosNorthBuiltinFpu LongSlit_5_00"""
+  LONG_SLIT_5_00
 
-"""GCAL diffuser"""
-enum GcalDiffuser {
-  """GcalDiffuser Ir"""
-  IR
+  """GmosNorthBuiltinFpu Ifu2Slits"""
+  IFU2_SLITS
 
-  """GcalDiffuser Visible"""
-  VISIBLE
-}
+  """GmosNorthBuiltinFpu IfuBlue"""
+  IFU_BLUE
 
-"""GCAL filter"""
-enum GcalFilter {
-  """GcalFilter None"""
-  NONE
-
-  """GcalFilter Gmos"""
-  GMOS
-
-  """GcalFilter Hros"""
-  HROS
-
-  """GcalFilter Nir"""
-  NIR
-
-  """GcalFilter Nd10"""
-  ND10
-
-  """GcalFilter Nd16"""
-  ND16
-
-  """GcalFilter Nd20"""
-  ND20
-
-  """GcalFilter Nd30"""
-  ND30
-
-  """GcalFilter Nd40"""
-  ND40
-
-  """GcalFilter Nd45"""
-  ND45
-
-  """GcalFilter Nd50"""
-  ND50
-}
-
-"""GCAL shutter"""
-enum GcalShutter {
-  """GcalShutter Open"""
-  OPEN
-
-  """GcalShutter Closed"""
-  CLOSED
+  """GmosNorthBuiltinFpu IfuRed"""
+  IFU_RED
 }
 
 """GMOS North Disperser"""
@@ -2778,57 +3559,6 @@ enum GmosNorthFilter {
   U_PRIME
 }
 
-"""GMOS North FPU"""
-enum GmosNorthFpu {
-  """GmosNorthFpu Ns0"""
-  NS0
-
-  """GmosNorthFpu Ns1"""
-  NS1
-
-  """GmosNorthFpu Ns2"""
-  NS2
-
-  """GmosNorthFpu Ns3"""
-  NS3
-
-  """GmosNorthFpu Ns4"""
-  NS4
-
-  """GmosNorthFpu Ns5"""
-  NS5
-
-  """GmosNorthFpu LongSlit_0_25"""
-  LONG_SLIT_0_25
-
-  """GmosNorthFpu LongSlit_0_50"""
-  LONG_SLIT_0_50
-
-  """GmosNorthFpu LongSlit_0_75"""
-  LONG_SLIT_0_75
-
-  """GmosNorthFpu LongSlit_1_00"""
-  LONG_SLIT_1_00
-
-  """GmosNorthFpu LongSlit_1_50"""
-  LONG_SLIT_1_50
-
-  """GmosNorthFpu LongSlit_2_00"""
-  LONG_SLIT_2_00
-
-  """GmosNorthFpu LongSlit_5_00"""
-  LONG_SLIT_5_00
-
-  """GmosNorthFpu Ifu2Slits"""
-  IFU2_SLITS
-
-  """GmosNorthFpu IfuBlue"""
-  IFU_BLUE
-
-  """GmosNorthFpu IfuRed"""
-  IFU_RED
-}
-
 """Basic configuration for GMOS North Long Slit"""
 type GmosNorthLongSlit {
   """GMOS North Filter"""
@@ -2838,10 +3568,70 @@ type GmosNorthLongSlit {
   disperser: GmosNorthDisperser!
 
   """GMOS North FPU"""
-  fpu: GmosNorthFpu!
+  fpu: GmosNorthBuiltinFpu!
 
   """Slit width in appropriate units"""
   slitWidth: slitWidth!
+}
+
+"""GMOS South FPU"""
+enum GmosSouthBuiltinFpu {
+  """GmosSouthBuiltinFpu Bhros"""
+  BHROS
+
+  """GmosSouthBuiltinFpu Ns1"""
+  NS1
+
+  """GmosSouthBuiltinFpu Ns2"""
+  NS2
+
+  """GmosSouthBuiltinFpu Ns3"""
+  NS3
+
+  """GmosSouthBuiltinFpu Ns4"""
+  NS4
+
+  """GmosSouthBuiltinFpu Ns5"""
+  NS5
+
+  """GmosSouthBuiltinFpu LongSlit_0_25"""
+  LONG_SLIT_0_25
+
+  """GmosSouthBuiltinFpu LongSlit_0_50"""
+  LONG_SLIT_0_50
+
+  """GmosSouthBuiltinFpu LongSlit_0_75"""
+  LONG_SLIT_0_75
+
+  """GmosSouthBuiltinFpu LongSlit_1_00"""
+  LONG_SLIT_1_00
+
+  """GmosSouthBuiltinFpu LongSlit_1_50"""
+  LONG_SLIT_1_50
+
+  """GmosSouthBuiltinFpu LongSlit_2_00"""
+  LONG_SLIT_2_00
+
+  """GmosSouthBuiltinFpu LongSlit_5_00"""
+  LONG_SLIT_5_00
+
+  """GmosSouthBuiltinFpu Ifu2Slits"""
+  IFU2_SLITS
+
+  """GmosSouthBuiltinFpu IfuBlue"""
+  IFU_BLUE
+
+  """GmosSouthBuiltinFpu IfuRed"""
+  IFU_RED
+
+  """GmosSouthBuiltinFpu IfuNS2Slits"""
+  IFU_NS2_SLITS
+
+  """GmosSouthBuiltinFpu IfuNSBlue"""
+  IFU_NS_BLUE
+
+  """GmosSouthBuiltinFpu IfuNSRed"""
+  IFU_NS_RED
 }
 
 """GMOS South Disperser"""
@@ -2955,66 +3745,6 @@ enum GmosSouthFilter {
   LYA395
 }
 
-"""GMOS South FPU"""
-enum GmosSouthFpu {
-  """GmosSouthFpu Bhros"""
-  BHROS
-
-  """GmosSouthFpu Ns1"""
-  NS1
-
-  """GmosSouthFpu Ns2"""
-  NS2
-
-  """GmosSouthFpu Ns3"""
-  NS3
-
-  """GmosSouthFpu Ns4"""
-  NS4
-
-  """GmosSouthFpu Ns5"""
-  NS5
-
-  """GmosSouthFpu LongSlit_0_25"""
-  LONG_SLIT_0_25
-
-  """GmosSouthFpu LongSlit_0_50"""
-  LONG_SLIT_0_50
-
-  """GmosSouthFpu LongSlit_0_75"""
-  LONG_SLIT_0_75
-
-  """GmosSouthFpu LongSlit_1_00"""
-  LONG_SLIT_1_00
-
-  """GmosSouthFpu LongSlit_1_50"""
-  LONG_SLIT_1_50
-
-  """GmosSouthFpu LongSlit_2_00"""
-  LONG_SLIT_2_00
-
-  """GmosSouthFpu LongSlit_5_00"""
-  LONG_SLIT_5_00
-
-  """GmosSouthFpu Ifu2Slits"""
-  IFU2_SLITS
-
-  """GmosSouthFpu IfuBlue"""
-  IFU_BLUE
-
-  """GmosSouthFpu IfuRed"""
-  IFU_RED
-
-  """GmosSouthFpu IfuNS2Slits"""
-  IFU_NS2_SLITS
-
-  """GmosSouthFpu IfuNSBlue"""
-  IFU_NS_BLUE
-
-  """GmosSouthFpu IfuNSRed"""
-  IFU_NS_RED
-}
-
 """Basic configuration for GMOS South Long Slit"""
 type GmosSouthLongSlit {
   """GMOS South Filter"""
@@ -3024,7 +3754,7 @@ type GmosSouthLongSlit {
   disperser: GmosSouthDisperser!
 
   """GMOS South  FPU"""
-  fpu: GmosSouthFpu!
+  fpu: GmosSouthBuiltinFpu!
 
   """Slit width in appropriate units"""
   slitWidth: slitWidth!
@@ -3149,7 +3879,7 @@ type ItcSuccess {
 }
 
 type LineFluxIntegrated {
-  value: BigDecimal!
+  value: PosBigDecimal!
   units: LineFluxIntegratedUnits!
 }
 
@@ -3163,7 +3893,7 @@ enum LineFluxIntegratedUnits {
 }
 
 type LineFluxSurface {
-  value: BigDecimal!
+  value: PosBigDecimal!
   units: LineFluxSurfaceUnits!
 }
 
@@ -3174,6 +3904,18 @@ enum LineFluxSurfaceUnits {
 
   """erg/s/cm²/arcsec²"""
   ERG_PER_S_PER_CM_SQUARED_PER_ARCSEC_SQUARED
+}
+
+"""Manual observing sequence and instrument configuration"""
+interface ManualConfig {
+  """Instrument type"""
+  instrument: InstrumentType!
+
+  """Planned time for this configuration"""
+  plannedTime: PlannedTime!
+
+  """Estimated setup time"""
+  setupTime: Duration!
 }
 
 """A String value that cannot be empty"""
@@ -3235,8 +3977,11 @@ type Observation {
   """DELETED or PRESENT"""
   existence: Existence!
 
-  """Observation name"""
-  name: NonEmptyString
+  """Observation title generated from id and targets"""
+  title: String!
+
+  """User-supplied observation-identifying detail information"""
+  subtitle: NonEmptyString
 
   """Observation status"""
   status: ObsStatus!
@@ -3272,10 +4017,15 @@ type Observation {
   ): ScienceConfiguration
 
   """ITC execution results"""
-  itc: ItcSuccess
+  itc(
+    """
+    Whether to use cached results (true) or ignore the cache and make a remote ITC call (false).
+    """
+    useCache: Boolean! = true
+  ): ItcSuccess
 
   """Manual instrument configuration"""
-  manualConfig: Config
+  manualConfig: ManualConfig
 
   """Execution sequence and runtime artifacts"""
   execution: Execution!
@@ -3305,16 +4055,8 @@ type ObservationEdge {
   cursor: Cursor!
 }
 
-"""ObservationId id formatted as `o-([1-9a-f][0-9a-f]*)`"""
+"""ObservationId id formatted as `o-[1-9a-f][0-9a-f]*`"""
 scalar ObservationId
-
-type Offset {
-  """Offset in p"""
-  p: p!
-
-  """Offset in q"""
-  q: q!
-}
 
 """Information that supports paging through a list of elements"""
 type PageInfo {
@@ -3454,7 +4196,7 @@ type ProgramEdge {
   cursor: Cursor!
 }
 
-"""ProgramId id formatted as `p-([1-9a-f][0-9a-f]*)`"""
+"""ProgramId id formatted as `p-[1-9a-f][0-9a-f]*`"""
 scalar ProgramId
 
 type ProperMotion {
@@ -3704,15 +4446,6 @@ type RightAscension {
   microarcseconds: Long!
 }
 
-"""Science step"""
-type Science implements StepConfig {
-  """Offset"""
-  offset: Offset!
-
-  """Step type"""
-  stepType: StepType!
-}
-
 """Base science configuration"""
 type ScienceConfiguration {
   """Instrument"""
@@ -3820,11 +4553,6 @@ type SequenceEvent implements ExecutionEvent {
 
   """Observation whose execution produced this event"""
   observation: Observation!
-
-  """
-  Time at which this event was generated, according to the caller (e.g., Observe)
-  """
-  generated: Instant!
 
   """Time at which this event was received"""
   received: Instant!
@@ -4104,35 +4832,8 @@ enum StellarLibrarySpectrum {
   M9_III
 }
 
-"""Sequence step"""
-interface Step {
-  """Step id"""
-  id: StepId!
-
-  """Whether to pause before the execution of this step"""
-  breakpoint: Breakpoint!
-
-  """Step type"""
-  stepType: StepType!
-
-  """The sequence step itself"""
-  stepConfig: StepConfig!
-
-  """Time estimate for this step's execution"""
-  time: StepTime!
-}
-
-"""Step (bias, dark, gcal, science, etc.)"""
-interface StepConfig {
-  """Step type"""
-  stepType: StepType!
-}
-
 """Step-level events"""
 type StepEvent implements ExecutionEvent {
-  """Step to which the event applies"""
-  step: Step!
-
   """Sequence type"""
   sequenceType: SequenceType!
 
@@ -4145,17 +4846,9 @@ type StepEvent implements ExecutionEvent {
   """Observation whose execution produced this event"""
   observation: Observation!
 
-  """
-  Time at which this event was generated, according to the caller (e.g., Observe)
-  """
-  generated: Instant!
-
   """Time at which this event was received"""
   received: Instant!
 }
-
-"""StepId id formatted as `s-([1-9a-f][0-9a-f]*)`"""
-scalar StepId
 
 """Execution stage or phase of an individual step"""
 enum StepStage {
@@ -4194,24 +4887,6 @@ type StepTime {
 
   """Total time across all categories"""
   total: Duration!
-}
-
-"""Step type"""
-enum StepType {
-  """StepType Bias"""
-  BIAS
-
-  """StepType Dark"""
-  DARK
-
-  """StepType Gcal"""
-  GCAL
-
-  """StepType Science"""
-  SCIENCE
-
-  """StepType SmartGcal"""
-  SMART_GCAL
 }
 
 """Target description"""
@@ -4370,7 +5045,7 @@ type TargetGroupEdge {
   cursor: Cursor!
 }
 
-"""TargetId id formatted as `t-([1-9a-f][0-9a-f]*)`"""
+"""TargetId id formatted as `t-[1-9a-f][0-9a-f]*`"""
 scalar TargetId
 
 """
@@ -4385,7 +5060,7 @@ type UnnormalizedSed {
   hiiRegion: HiiRegionSpectrum
   planetaryNebula: PlanetaryNebulaSpectrum
   powerLaw: BigDecimal
-  blackBodyTempK: BigDecimal
+  blackBodyTempK: PosInt
   fluxDensities: [FluxDensityEntry!]
 }
 
@@ -4426,28 +5101,6 @@ type focalPlaneAngle {
   milliarcseconds: BigDecimal!
 
   """Focal plane angle in arcsec"""
-  arcseconds: BigDecimal!
-}
-
-type p {
-  """p offset in µas"""
-  microarcseconds: Long!
-
-  """p offset in mas"""
-  milliarcseconds: BigDecimal!
-
-  """p offset in arcsec"""
-  arcseconds: BigDecimal!
-}
-
-type q {
-  """q offset in µas"""
-  microarcseconds: Long!
-
-  """q offset in mas"""
-  milliarcseconds: BigDecimal!
-
-  """q offset in arcsec"""
   arcseconds: BigDecimal!
 }
 

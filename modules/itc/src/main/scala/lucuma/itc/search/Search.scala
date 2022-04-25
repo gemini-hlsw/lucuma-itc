@@ -45,7 +45,11 @@ object Search {
         disp   <- GmosNorthDisperser.all
         fpu    <- GmosNorthFpu.all.filterNot(excludedFPUs)
         filter <- GmosNorthFilterSelector.selectBlocking(disp, fpu, constraints.λ).toList
-      } yield ObservingMode.Spectroscopy.GmosNorth(constraints.λ, disp, fpu, filter)
+      } yield ObservingMode.Spectroscopy.GmosNorth(constraints.λ,
+                                                   disp,
+                                                   GmosNorthFpuParam(fpu),
+                                                   filter
+      )
 
     // more instruments ...
 

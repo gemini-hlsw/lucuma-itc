@@ -8,15 +8,18 @@
   outputs = { self, nixpkgs, flake-utils, typelevel-nix }:
     flake-utils.lib.eachDefaultSystem (system:
       let
+        pkgs-x86_64 = import nixpkgs { system = "x86_64-darwin"; };
+        scala-cli-overlay = final: prev: { scala-cli = pkgs-x86_64.scala-cli; };
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ typelevel-nix.overlay ];
+          overlays = [ typelevel-nix.overlay scala-cli-overlay ];
         };
-      in
-      {
+      in {
         devShell = pkgs.devshell.mkShell {
           imports = [ typelevel-nix.typelevelShell ];
-          packages = [ pkgs.nodePackages.graphqurl ];
+          packages = [
+            pkgs.nodePackages.graphqurl
+          ];
           typelevelShell = {
             nodejs.enable = true;
             jdk.package = pkgs.jdk17;

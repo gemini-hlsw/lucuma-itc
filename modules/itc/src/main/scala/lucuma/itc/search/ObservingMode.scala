@@ -4,6 +4,7 @@
 package lucuma.itc.search
 
 import lucuma.core.enum._
+import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import lucuma.itc.ItcObservationDetails
 import lucuma.itc.search.syntax.gmosnorthdisperser._
@@ -13,6 +14,20 @@ import lucuma.itc.search.syntax.gmossouthdisperser._
 import lucuma.itc.search.syntax.gmossouthfilter._
 import lucuma.itc.search.syntax.gmossouthfpu._
 import spire.math.Rational
+
+final case class GmosNorthFpuParam(
+  builtin: GmosNorthFpu
+) {
+  def isIfu: Boolean            = builtin.isIfu
+  def effectiveSlitWidth: Angle = builtin.effectiveSlitWidth
+}
+
+final case class GmosSouthFpuParam(
+  builtin: GmosSouthFpu
+) {
+  def isIfu: Boolean            = builtin.isIfu
+  def effectiveSlitWidth: Angle = builtin.effectiveSlitWidth
+}
 
 sealed trait ObservingMode {
   def instrument: Instrument
@@ -47,7 +62,7 @@ object ObservingMode {
     final case class GmosNorth(
       λ:         Wavelength,
       disperser: GmosNorthDisperser,
-      fpu:       GmosNorthFpu,
+      fpu:       GmosNorthFpuParam,
       filter:    Option[GmosNorthFilter]
     ) extends GmosSpectroscopy {
       val isIfu = fpu.isIfu
@@ -65,7 +80,7 @@ object ObservingMode {
     final case class GmosSouth(
       λ:         Wavelength,
       disperser: GmosSouthDisperser,
-      fpu:       GmosSouthFpu,
+      fpu:       GmosSouthFpuParam,
       filter:    Option[GmosSouthFilter]
     ) extends GmosSpectroscopy {
       val isIfu = fpu.isIfu
