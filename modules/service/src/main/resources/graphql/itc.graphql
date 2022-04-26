@@ -839,18 +839,6 @@ enum GmosCustomSlitWidth {
   CUSTOM_WIDTH_5_00
 }
 
-"""GMOS disperser order"""
-enum GmosDisperserOrder {
-  """GmosDisperserOrder Zero"""
-  ZERO
-
-  """GmosDisperserOrder One"""
-  ONE
-
-  """GmosDisperserOrder Two"""
-  TWO
-}
-
 """GMOS Detector Translation X Offset"""
 enum GmosDtax {
   """GmosDtax MinusSix"""
@@ -900,6 +888,18 @@ enum GmosEOffsetting {
 
   """GmosEOffsetting Off"""
   OFF
+}
+
+"""GMOS grating order"""
+enum GmosGratingOrder {
+  """GmosGratingOrder Zero"""
+  ZERO
+
+  """GmosGratingOrder One"""
+  ONE
+
+  """GmosGratingOrder Two"""
+  TWO
 }
 
 type GmosNodAndShuffle {
@@ -987,7 +987,7 @@ type GmosNorthDynamic {
   roi: GmosRoi!
 
   """GMOS North grating"""
-  grating: GmosNorthGrating
+  gratingConfig: GmosNorthGratingConfig
 
   """GMOS North filter"""
   filter: GmosNorthFilter
@@ -1011,7 +1011,7 @@ input GmosNorthDynamicInput {
   roi: GmosRoi!
 
   """GMOS North grating"""
-  grating: GmosNorthGratingInput
+  gratingConfig: GmosNorthGratingConfigInput
 
   """GMOS North filter"""
   filter: GmosNorthFilter
@@ -1078,25 +1078,25 @@ input GmosNorthGcalInput {
   gcalConfig: GcalConfigurationInput!
 }
 
-"""GMOS North Grating"""
-type GmosNorthGrating {
-  """GMOS North Disperser"""
-  disperser: GmosNorthDisperser!
+"""GMOS North Grating Configuration"""
+type GmosNorthGratingConfig {
+  """GMOS North Grating"""
+  grating: GmosNorthGrating!
 
-  """GMOS disperser order"""
-  order: GmosDisperserOrder!
+  """GMOS grating order"""
+  order: GmosGratingOrder!
 
   """Grating wavelength"""
   wavelength: Wavelength!
 }
 
 """GMOS North grating input parameters"""
-input GmosNorthGratingInput {
-  """GmosGmosNorth disperser"""
-  disperser: GmosNorthDisperser!
+input GmosNorthGratingConfigInput {
+  """GmosGmosNorth grating"""
+  grating: GmosNorthGrating!
 
-  """GMOS disperser order"""
-  order: GmosDisperserOrder!
+  """GMOS grating order"""
+  order: GmosGratingOrder!
 
   """Grating wavelength"""
   wavelength: WavelengthInput!
@@ -1110,9 +1110,9 @@ input GmosNorthLongSlitInput {
   filter: GmosNorthFilter
 
   """
-  The disperser field must be either specified or skipped altogether.  It cannot be unset with a null value.
+  The grating field must be either specified or skipped altogether.  It cannot be unset with a null value.
   """
-  disperser: GmosNorthDisperser
+  grating: GmosNorthGrating
 
   """
   The fpu field must be either specified or skipped altogether.  It cannot be unset with a null value.
@@ -1141,9 +1141,6 @@ type GmosNorthManualConfig implements ManualConfig {
 
   """Planned time for this configuration"""
   plannedTime: PlannedTime!
-
-  """Estimated setup time"""
-  setupTime: Duration!
 }
 
 """GmosNorth science step creation input"""
@@ -1470,7 +1467,7 @@ type GmosSouthDynamic {
   roi: GmosRoi!
 
   """GMOS South grating"""
-  grating: GmosSouthGrating
+  gratingConfig: GmosSouthGratingConfig
 
   """GMOS South filter"""
   filter: GmosSouthFilter
@@ -1494,7 +1491,7 @@ input GmosSouthDynamicInput {
   roi: GmosRoi!
 
   """GMOS South grating"""
-  grating: GmosSouthGratingInput
+  gratingConfig: GmosSouthGratingConfigInput
 
   """GMOS South filter"""
   filter: GmosSouthFilter
@@ -1561,25 +1558,25 @@ input GmosSouthGcalInput {
   gcalConfig: GcalConfigurationInput!
 }
 
-"""GMOS South Grating"""
-type GmosSouthGrating {
-  """GMOS South Disperser"""
-  disperser: GmosSouthDisperser!
+"""GMOS South Grating Configuration"""
+type GmosSouthGratingConfig {
+  """GMOS South Grating"""
+  grating: GmosSouthGrating!
 
-  """GMOS disperser order"""
-  order: GmosDisperserOrder!
+  """GMOS grating order"""
+  order: GmosGratingOrder!
 
   """Grating wavelength"""
   wavelength: Wavelength!
 }
 
 """GMOS South grating input parameters"""
-input GmosSouthGratingInput {
-  """GmosGmosSouth disperser"""
-  disperser: GmosSouthDisperser!
+input GmosSouthGratingConfigInput {
+  """GmosGmosSouth grating"""
+  grating: GmosSouthGrating!
 
-  """GMOS disperser order"""
-  order: GmosDisperserOrder!
+  """GMOS grating order"""
+  order: GmosGratingOrder!
 
   """Grating wavelength"""
   wavelength: WavelengthInput!
@@ -1593,9 +1590,9 @@ input GmosSouthLongSlitInput {
   filter: GmosSouthFilter
 
   """
-  The disperser field must be either specified or skipped altogether.  It cannot be unset with a null value.
+  The grating field must be either specified or skipped altogether.  It cannot be unset with a null value.
   """
-  disperser: GmosSouthDisperser
+  grating: GmosSouthGrating
 
   """
   The fpu field must be either specified or skipped altogether.  It cannot be unset with a null value.
@@ -1624,9 +1621,6 @@ type GmosSouthManualConfig implements ManualConfig {
 
   """Planned time for this configuration"""
   plannedTime: PlannedTime!
-
-  """Estimated setup time"""
-  setupTime: Duration!
 }
 
 """GmosSouth science step creation input"""
@@ -2274,7 +2268,7 @@ input SourceProfileInput {
 }
 
 """
-Spectral definition input with integrated units.  Specify exactly one of "bandNormalized" or "emissionLines"
+Spectral definition input with integrated units.  Specify exactly one of "bandNormalized" or "emissionLines" 
 """
 input SpectralDefinitionIntegratedInput {
   bandNormalized: BandNormalizedIntegratedInput
@@ -2282,7 +2276,7 @@ input SpectralDefinitionIntegratedInput {
 }
 
 """
-Spectral definition input with surface units.  Specify exactly one of "bandNormalized" or "emissionLines"
+Spectral definition input with surface units.  Specify exactly one of "bandNormalized" or "emissionLines" 
 """
 input SpectralDefinitionSurfaceInput {
   bandNormalized: BandNormalizedSurfaceInput
@@ -2398,6 +2392,16 @@ enum StepType {
 
   """StepType SmartGcal"""
   SMART_GCAL
+}
+
+"""Event sent when a new object is created or updated"""
+type TargetEdit implements Event {
+  """Type of edit"""
+  editType: EditType!
+
+  """Edited object"""
+  value: Target!
+  id: Long!
 }
 
 """Target environment editing and creation parameters"""
@@ -3264,36 +3268,6 @@ enum GmosNorthBuiltinFpu {
   IFU_RED
 }
 
-"""GMOS North Disperser"""
-enum GmosNorthDisperser {
-  """GmosNorthDisperser B1200_G5301"""
-  B1200_G5301
-
-  """GmosNorthDisperser R831_G5302"""
-  R831_G5302
-
-  """GmosNorthDisperser B600_G5303"""
-  B600_G5303
-
-  """GmosNorthDisperser B600_G5307"""
-  B600_G5307
-
-  """GmosNorthDisperser R600_G5304"""
-  R600_G5304
-
-  """GmosNorthDisperser B480_G5309"""
-  B480_G5309
-
-  """GmosNorthDisperser R400_G5305"""
-  R400_G5305
-
-  """GmosNorthDisperser R150_G5306"""
-  R150_G5306
-
-  """GmosNorthDisperser R150_G5308"""
-  R150_G5308
-}
-
 """GMOS North Filter"""
 enum GmosNorthFilter {
   """GmosNorthFilter GPrime"""
@@ -3375,13 +3349,43 @@ enum GmosNorthFilter {
   U_PRIME
 }
 
+"""GMOS North Grating"""
+enum GmosNorthGrating {
+  """GmosNorthGrating B1200_G5301"""
+  B1200_G5301
+
+  """GmosNorthGrating R831_G5302"""
+  R831_G5302
+
+  """GmosNorthGrating B600_G5303"""
+  B600_G5303
+
+  """GmosNorthGrating B600_G5307"""
+  B600_G5307
+
+  """GmosNorthGrating R600_G5304"""
+  R600_G5304
+
+  """GmosNorthGrating B480_G5309"""
+  B480_G5309
+
+  """GmosNorthGrating R400_G5305"""
+  R400_G5305
+
+  """GmosNorthGrating R150_G5306"""
+  R150_G5306
+
+  """GmosNorthGrating R150_G5308"""
+  R150_G5308
+}
+
 """Basic configuration for GMOS North Long Slit"""
 type GmosNorthLongSlit {
   """GMOS North Filter"""
   filter: GmosNorthFilter
 
-  """GMOS North Disperser"""
-  disperser: GmosNorthDisperser!
+  """GMOS North Grating"""
+  grating: GmosNorthGrating!
 
   """GMOS North FPU"""
   fpu: GmosNorthBuiltinFpu!
@@ -3448,30 +3452,6 @@ enum GmosSouthBuiltinFpu {
 
   """GmosSouthBuiltinFpu IfuNSRed"""
   IFU_NS_RED
-}
-
-"""GMOS South Disperser"""
-enum GmosSouthDisperser {
-  """GmosSouthDisperser B1200_G5321"""
-  B1200_G5321
-
-  """GmosSouthDisperser R831_G5322"""
-  R831_G5322
-
-  """GmosSouthDisperser B600_G5323"""
-  B600_G5323
-
-  """GmosSouthDisperser R600_G5324"""
-  R600_G5324
-
-  """GmosSouthDisperser B480_G5327"""
-  B480_G5327
-
-  """GmosSouthDisperser R400_G5325"""
-  R400_G5325
-
-  """GmosSouthDisperser R150_G5326"""
-  R150_G5326
 }
 
 """GMOS South Filter"""
@@ -3561,13 +3541,37 @@ enum GmosSouthFilter {
   LYA395
 }
 
+"""GMOS South Grating"""
+enum GmosSouthGrating {
+  """GmosSouthGrating B1200_G5321"""
+  B1200_G5321
+
+  """GmosSouthGrating R831_G5322"""
+  R831_G5322
+
+  """GmosSouthGrating B600_G5323"""
+  B600_G5323
+
+  """GmosSouthGrating R600_G5324"""
+  R600_G5324
+
+  """GmosSouthGrating B480_G5327"""
+  B480_G5327
+
+  """GmosSouthGrating R400_G5325"""
+  R400_G5325
+
+  """GmosSouthGrating R150_G5326"""
+  R150_G5326
+}
+
 """Basic configuration for GMOS South Long Slit"""
 type GmosSouthLongSlit {
   """GMOS South Filter"""
   filter: GmosSouthFilter
 
-  """GMOS South Disperser"""
-  disperser: GmosSouthDisperser!
+  """GMOS South Grating"""
+  grating: GmosSouthGrating!
 
   """GMOS South  FPU"""
   fpu: GmosSouthBuiltinFpu!
@@ -3723,9 +3727,6 @@ interface ManualConfig {
 
   """Planned time for this configuration"""
   plannedTime: PlannedTime!
-
-  """Estimated setup time"""
-  setupTime: Duration!
 }
 
 """A String value that cannot be empty"""
@@ -4803,7 +4804,7 @@ type Query {
 
 type GmosSITCParams {
   # Gmos South disperser
-  disperser: GmosSouthDisperser!
+  grating: GmosSouthGrating!
 
   # Gmos South Focal plane unit
   fpu: GmosSouthFpu
@@ -4814,7 +4815,7 @@ type GmosSITCParams {
 
 input GmosSITCInput {
   # Gmos South disperser
-  disperser: GmosSouthDisperser!
+  grating: GmosSouthGrating!
 
   # Gmos South Focal plane unit
   fpu: GmosSouthFpuInput!
@@ -4825,7 +4826,7 @@ input GmosSITCInput {
 
 type GmosNITCParams {
   # Gmos North disperser
-  disperser: GmosNorthDisperser!
+  grating: GmosNorthGrating!
 
   # Gmos North Focal plane unit
   customMask: GmosCustomMask
@@ -4838,7 +4839,7 @@ type GmosNITCParams {
 
 input GmosNITCInput {
   # Gmos North disperser
-  disperser: GmosNorthDisperser!
+  grating: GmosNorthGrating!
 
   # Gmos North Focal plane unit
   fpu: GmosNorthFpuInput!
