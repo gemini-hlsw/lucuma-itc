@@ -8,7 +8,6 @@ import io.circe.Json
 import io.circe.syntax._
 import lucuma.core.enum._
 import lucuma.core.math.Angle
-import lucuma.core.math.BrightnessValue
 import lucuma.core.math.Redshift
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
@@ -79,9 +78,6 @@ object ItcSourceDefinition {
             Json.obj("Library" -> Json.Null)
         }
     }
-
-  implicit val brightnessValueEncoder: Encoder[BrightnessValue] =
-    Encoder[BigDecimal].contramap(BrightnessValue.fromBigDecimal.reverseGet)
 
   implicit val bandEncoder: Encoder[Band] =
     Encoder[String].contramap(_.shortName)
