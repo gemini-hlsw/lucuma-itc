@@ -162,15 +162,15 @@ trait Encoders {
 sealed trait SpectroscopyParams
 
 final case class GmosNITCParams(
-  disperser: GmosNorthDisperser,
-  fpu:       GmosNorthFpuParam,
-  filter:    Option[GmosNorthFilter]
+  grating: GmosNorthDisperser,
+  fpu:     GmosNorthFpuParam,
+  filter:  Option[GmosNorthFilter]
 ) extends SpectroscopyParams
 
 final case class GmosSITCParams(
-  disperser: GmosSouthDisperser,
-  fpu:       GmosSouthFpuParam,
-  filter:    Option[GmosSouthFilter]
+  grating: GmosSouthDisperser,
+  fpu:     GmosSouthFpuParam,
+  filter:  Option[GmosSouthFilter]
 ) extends SpectroscopyParams
 
 object ItcMapping extends Encoders {
@@ -178,13 +178,13 @@ object ItcMapping extends Encoders {
   def enumTags[A: Enumerated] =
     Enumerated[A].all.fproductLeft(_.tag.toScreamingSnakeCase).toMap
 
-  val gnFilter    = enumTags[GmosNorthFilter]
-  val gnDisperser = enumTags[GmosNorthDisperser]
-  val gnFpu       = enumTags[GmosNorthFpu]
+  val gnFilter  = enumTags[GmosNorthFilter]
+  val gnGrating = enumTags[GmosNorthDisperser]
+  val gnFpu     = enumTags[GmosNorthFpu]
 
-  val gsFilter    = enumTags[GmosSouthFilter]
-  val gsDisperser = enumTags[GmosSouthDisperser]
-  val gsFpu       = enumTags[GmosSouthFpu]
+  val gsFilter  = enumTags[GmosSouthFilter]
+  val gsGrating = enumTags[GmosSouthDisperser]
+  val gsFpu     = enumTags[GmosSouthFpu]
 
   val iqItems = enumTags[ImageQuality]
   val ceItems = enumTags[CloudExtinction]
@@ -230,10 +230,10 @@ object ItcMapping extends Encoders {
           Logger[F].info(s"ITC calculate for $mode, conditions $c and profile $sp") *>
             Trace[F].put(("itc.modes_count", modes.length)) *> {
               val specMode = mode match {
-                case GmosNITCParams(disperser, fpu, filter) =>
-                  ObservingMode.Spectroscopy.GmosNorth(wv, disperser, fpu, filter)
-                case GmosSITCParams(disperser, fpu, filter) =>
-                  ObservingMode.Spectroscopy.GmosSouth(wv, disperser, fpu, filter)
+                case GmosNITCParams(grating, fpu, filter) =>
+                  ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
+                case GmosSITCParams(grating, fpu, filter) =>
+                  ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
               }
               itc
                 .calculate(
@@ -661,7 +661,7 @@ object ItcMapping extends Encoders {
             case ObjectValue(List(("gmosN", AbsentValue), ("gmosS", gmosS))) =>
               gmosS match {
                 case ObjectValue(
-                      List(("disperser", TypedEnumValue(EnumValue(d, _, _, _))),
+                      List(("grating", TypedEnumValue(EnumValue(d, _, _, _))),
                            ("fpu",
                             ObjectValue(
                               List(("customMask", AbsentValue),
@@ -677,7 +677,7 @@ object ItcMapping extends Encoders {
                       gsFilter.get(f)
                     case _                                     => none
                   }
-                  (gsDisperser.get(d), gsFpu.get(fpu)).mapN((a, b) =>
+                  (gsGrating.get(d), gsFpu.get(fpu)).mapN((a, b) =>
                     GmosSITCParams(a, GmosSouthFpuParam(b), filterOpt)
                   )
                 case _ =>
@@ -686,7 +686,7 @@ object ItcMapping extends Encoders {
             case ObjectValue(List(("gmosN", gmosN), ("gmosS", AbsentValue))) =>
               gmosN match {
                 case ObjectValue(
-                      List(("disperser", TypedEnumValue(EnumValue(d, _, _, _))),
+                      List(("grating", TypedEnumValue(EnumValue(d, _, _, _))),
                            ("fpu",
                             ObjectValue(
                               List(("customMask", AbsentValue),
@@ -702,7 +702,7 @@ object ItcMapping extends Encoders {
                       gnFilter.get(f)
                     case _                                     => none
                   }
-                  (gnDisperser.get(d), gnFpu.get(fpu)).mapN((a, b) =>
+                  (gnGrating.get(d), gnFpu.get(fpu)).mapN((a, b) =>
                     GmosNITCParams(a, GmosNorthFpuParam(b), filterOpt)
                   )
                 case _ =>

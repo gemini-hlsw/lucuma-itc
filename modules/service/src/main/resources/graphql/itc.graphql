@@ -4804,7 +4804,7 @@ type Query {
 
 type GmosSITCParams {
   # Gmos South disperser
-  disperser: GmosSouthDisperser!
+  grating: GmosSouthGrating!
 
   # Gmos South Focal plane unit
   fpu: GmosSouthFpu
@@ -4815,7 +4815,7 @@ type GmosSITCParams {
 
 input GmosSITCInput {
   # Gmos South disperser
-  disperser: GmosSouthDisperser!
+  grating: GmosSouthGrating!
 
   # Gmos South Focal plane unit
   fpu: GmosSouthFpuInput!
@@ -4826,7 +4826,7 @@ input GmosSITCInput {
 
 type GmosNITCParams {
   # Gmos North disperser
-  disperser: GmosNorthDisperser!
+  grating: GmosNorthGrating!
 
   # Gmos North Focal plane unit
   customMask: GmosCustomMask
@@ -4839,7 +4839,7 @@ type GmosNITCParams {
 
 input GmosNITCInput {
   # Gmos North disperser
-  disperser: GmosNorthDisperser!
+  grating: GmosNorthGrating!
 
   # Gmos North Focal plane unit
   fpu: GmosNorthFpuInput!

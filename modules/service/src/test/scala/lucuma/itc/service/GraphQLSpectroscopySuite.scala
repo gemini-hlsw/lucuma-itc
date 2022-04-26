@@ -62,7 +62,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
-                disperser: B1200_G5301
+                grating: B1200_G5301
               }
             }, {
               gmosN: {
@@ -70,7 +70,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
-                disperser: B1200_G5301
+                grating: B1200_G5301
               }
             }
             ]
@@ -81,7 +81,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   resolution
                   params {
                     ... on GmosNITCParams {
-                      disperser
+                      grating
                     }
                   }
                   wavelength {
@@ -111,7 +111,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                       "instrument" : "GMOS_NORTH",
                       "resolution" : 970,
                       "params": {
-                        "disperser": "B1200_G5301"
+                        "grating": "B1200_G5301"
                       },
                       "wavelength" : {
                         "nanometers" : 60.00
@@ -133,7 +133,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                       "instrument" : "GMOS_NORTH",
                       "resolution" : 970,
                       "params": {
-                        "disperser": "B1200_G5301"
+                        "grating": "B1200_G5301"
                       },
                       "wavelength" : {
                         "nanometers" : 60.00
@@ -205,7 +205,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
-                disperser: B1200_G5321
+                grating: B1200_G5321
               }
             }, {
               gmosS: {
@@ -213,7 +213,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
-                disperser: B1200_G5321
+                grating: B1200_G5321
               }
             }
             ]
@@ -224,7 +224,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   resolution
                   params {
                     ... on GmosSITCParams {
-                      disperser
+                      grating
                     }
                   }
                   wavelength {
@@ -254,7 +254,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                       "instrument" : "GMOS_SOUTH",
                       "resolution" : 970,
                       "params": {
-                        "disperser": "B1200_G5321"
+                        "grating": "B1200_G5321"
                       },
                       "wavelength" : {
                         "nanometers" : 60.00
@@ -276,7 +276,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                       "instrument" : "GMOS_SOUTH",
                       "resolution" : 970,
                       "params": {
-                        "disperser": "B1200_G5321"
+                        "grating": "B1200_G5321"
                       },
                       "wavelength" : {
                         "nanometers" : 60.00
@@ -350,7 +350,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                 "fpu": {
                   "builtin": "LONG_SLIT_0_25"
                 },
-                "disperser": "B1200_G5301"
+                "grating": "B1200_G5301"
               }
             }, {
               "gmosN": {
@@ -358,7 +358,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                 "fpu": {
                   "builtin": "LONG_SLIT_0_25"
                 },
-                "disperser": "B1200_G5301"
+                "grating": "B1200_G5301"
               }
             }
             ]
@@ -393,7 +393,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
         """
     )
   }
-//
+
   val allConditions =
     for {
       iq <- Enumerated[ImageQuality].all
@@ -459,7 +459,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
-                disperser: B1200_G5301
+                grating: B1200_G5301
               }
             }, {
               gmosN: {
@@ -467,7 +467,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
-                disperser: B1200_G5301
+                grating: B1200_G5301
               }
             }
             ]
@@ -478,7 +478,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   resolution
                   params {
                     ... on GmosNITCParams {
-                      disperser
+                      grating
                     }
                   }
                   wavelength {
@@ -508,7 +508,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                       "instrument" : "GMOS_NORTH",
                       "resolution" : 970,
                       "params": {
-                        "disperser": "B1200_G5301"
+                        "grating": "B1200_G5301"
                       },
                       "wavelength" : {
                         "nanometers" : 60.00
@@ -530,7 +530,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                       "instrument" : "GMOS_NORTH",
                       "resolution" : 970,
                       "params": {
-                        "disperser": "B1200_G5301"
+                        "grating": "B1200_G5301"
                       },
                       "wavelength" : {
                         "nanometers" : 60.00
@@ -602,7 +602,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
-                disperser: B1200_G5301
+                grating: B1200_G5301
               }
             }, {
               gmosN: {
@@ -610,7 +610,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
-                disperser: B1200_G5301
+                grating: B1200_G5301
               }
             }
             ]
@@ -621,7 +621,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   resolution
                   params {
                     ... on GmosNITCParams {
-                      disperser
+                      grating
                     }
                   }
                   wavelength {
@@ -652,7 +652,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
     )
   }
 
-  test("gmosN_dispersers") {
+  test("gmosN_gratings") {
     Enumerated[GmosNorthDisperser].all.traverse { d =>
       query(
         s"""
@@ -702,7 +702,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
-                disperser: ${d.tag.toScreamingSnakeCase}
+                grating: ${d.tag.toScreamingSnakeCase}
               }
             }
             ]
@@ -712,7 +712,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   instrument
                   params {
                     ... on GmosNITCParams {
-                      disperser
+                      grating
                     }
                   }
                   wavelength {
@@ -741,7 +741,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                     "mode" : {
                       "instrument" : "GMOS_NORTH",
                       "params": {
-                        "disperser": ${d.tag.toScreamingSnakeCase}
+                        "grating": ${d.tag.toScreamingSnakeCase}
                       },
                       "wavelength" : {
                         "nanometers" : 60.00
@@ -764,7 +764,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
     }
   }
 
-  test("gmosS_dispersers") {
+  test("gmosS_gratings") {
     Enumerated[GmosSouthDisperser].all.traverse { d =>
       query(
         s"""
@@ -819,7 +819,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
-                disperser: ${d.tag.toScreamingSnakeCase}
+                grating: ${d.tag.toScreamingSnakeCase}
               }
             }
             ]
@@ -829,7 +829,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   instrument
                   params {
                     ... on GmosSITCParams {
-                      disperser
+                      grating
                     }
                   }
                   wavelength {
@@ -858,7 +858,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                     "mode" : {
                       "instrument" : "GMOS_SOUTH",
                       "params": {
-                        "disperser": ${d.tag.toScreamingSnakeCase}
+                        "grating": ${d.tag.toScreamingSnakeCase}
                       },
                       "wavelength" : {
                         "nanometers" : 60.00
@@ -936,7 +936,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   fpu: {
                     builtin: ${d.tag.toScreamingSnakeCase}
                   },
-                  disperser: B1200_G5301
+                  grating: B1200_G5301
                 }
               }
               ]
@@ -1001,334 +1001,344 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
       )
     }
   }
-//
-//   test("gmosS_fpu") {
-//     Enumerated[GmosSouthFpu].all.filter(_ =!= GmosSouthFpu.Bhros).traverse { d =>
-//       query(
-//         s"""
-//         query {
-//           spectroscopy(input: {
-//             wavelength: {
-//               nanometers: 60,
-//             },
-//             radialVelocity: {
-//               centimetersPerSecond: 1000
-//             },
-//             signalToNoise: 2,
-//             sourceProfile: {
-//               uniform: {
-//                 bandNormalized: {
-//                   sed: {
-//                     blackBodyTempK: 100
-//                   },
-//                   brightnesses: [ {
-//                     band: R,
-//                     value: 3,
-//                     units: VEGA_MAG_PER_ARCSEC_SQUARED
-//                   }, {
-//                     band: K,
-//                     value: 2.1,
-//                     units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
-//                   }]
-//                 }
-//               }
-//             },
-//             band: K
-//             constraints: {
-//               imageQuality: POINT_THREE,
-//               cloudExtinction: POINT_FIVE,
-//               skyBackground: DARK,
-//               waterVapor: DRY,
-//               elevationRange: {
-//                 airMass: {
-//                   min: 1,
-//                   max: 2
-//                 }
-//               }
-//             },
-//             modes: [{
-//               gmosS: {
-//                 filter: G_PRIME,
-//                 fpu: ${d.tag.toScreamingSnakeCase}
-//                 disperser: B1200_G5321
-//               }
-//             }
-//             ]
-//           }) {
-//             results {
-//                 mode {
-//                   instrument
-//                   params {
-//                     ... on GmosSITCParams {
-//                       fpu
-//                     }
-//                   }
-//                   wavelength {
-//                     nanometers
-//                   }
-//                 }
-//                 itc {
-//                   ... on ItcSuccess {
-//                     exposures
-//                     exposureTime {
-//                       seconds
-//                     }
-//                   }
-//                 }
-//             }
-//           }
-//         }
-//         """,
-//         json"""
-//         {
-//           "data": {
-//             "spectroscopy" : [
-//               {
-//                 "results" : [
-//                   {
-//                     "mode" : {
-//                       "instrument" : "GMOS_SOUTH",
-//                       "params": {
-//                         "fpu": ${d.tag.toScreamingSnakeCase}
-//                       },
-//                       "wavelength" : {
-//                         "nanometers" : 60.00
-//                       }
-//                     },
-//                     "itc" : {
-//                       "exposures" : 10,
-//                       "exposureTime" : {
-//                         "seconds" : 1
-//                       }
-//                     }
-//                   }
-//                 ]
-//               }
-//             ]
-//           }
-//         }
-//         """
-//       )
-//     }
-//   }
-//
-//   test("gmosN_filter") {
-//     Enumerated[GmosNorthFilter].all.traverse { d =>
-//       query(
-//         s"""
-//         query {
-//           spectroscopy(input: {
-//             wavelength: {
-//               nanometers: 60,
-//             },
-//             radialVelocity: {
-//               centimetersPerSecond: 1000
-//             },
-//             signalToNoise: 2,
-//             sourceProfile: {
-//               uniform: {
-//                 bandNormalized: {
-//                   sed: {
-//                     blackBodyTempK: 100
-//                   },
-//                   brightnesses: [ {
-//                     band: R,
-//                     value: 3,
-//                     units: VEGA_MAG_PER_ARCSEC_SQUARED
-//                   }, {
-//                     band: K,
-//                     value: 2.1,
-//                     units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
-//                   }]
-//                 }
-//               }
-//             },
-//             band: K
-//             constraints: {
-//               imageQuality: POINT_THREE,
-//               cloudExtinction: POINT_FIVE,
-//               skyBackground: DARK,
-//               waterVapor: DRY,
-//               elevationRange: {
-//                 airMass: {
-//                   min: 1,
-//                   max: 2
-//                 }
-//               }
-//             },
-//             modes: [{
-//               gmosN: {
-//                 filter: ${d.tag.toScreamingSnakeCase}
-//                 fpu: LONG_SLIT_0_25,
-//                 disperser: B1200_G5301
-//               }
-//             }
-//             ]
-//           }) {
-//             results {
-//                 mode {
-//                   instrument
-//                   params {
-//                     ... on GmosNITCParams {
-//                       filter
-//                     }
-//                   }
-//                   wavelength {
-//                     nanometers
-//                   }
-//                 }
-//                 itc {
-//                   ... on ItcSuccess {
-//                     exposures
-//                     exposureTime {
-//                       seconds
-//                     }
-//                   }
-//                 }
-//             }
-//           }
-//         }
-//         """,
-//         json"""
-//         {
-//           "data": {
-//             "spectroscopy" : [
-//               {
-//                 "results" : [
-//                   {
-//                     "mode" : {
-//                       "instrument" : "GMOS_NORTH",
-//                       "params": {
-//                         "filter": ${d.tag.toScreamingSnakeCase}
-//                       },
-//                       "wavelength" : {
-//                         "nanometers" : 60.00
-//                       }
-//                     },
-//                     "itc" : {
-//                       "exposures" : 10,
-//                       "exposureTime" : {
-//                         "seconds" : 1
-//                       }
-//                     }
-//                   }
-//                 ]
-//               }
-//             ]
-//           }
-//         }
-//         """
-//       )
-//     }
-//   }
-//
-//   test("gmosS_filter") {
-//     Enumerated[GmosSouthFilter].all.traverse { d =>
-//       query(
-//         s"""
-//         query {
-//           spectroscopy(input: {
-//             wavelength: {
-//               nanometers: 60,
-//             },
-//             radialVelocity: {
-//               centimetersPerSecond: 1000
-//             },
-//             signalToNoise: 2,
-//             sourceProfile: {
-//               uniform: {
-//                 bandNormalized: {
-//                   sed: {
-//                     blackBodyTempK: 100
-//                   },
-//                   brightnesses: [ {
-//                     band: R,
-//                     value: 3,
-//                     units: VEGA_MAG_PER_ARCSEC_SQUARED
-//                   }, {
-//                     band: K,
-//                     value: 2.1,
-//                     units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
-//                   }]
-//                 }
-//               }
-//             },
-//             band: K
-//             constraints: {
-//               imageQuality: POINT_THREE,
-//               cloudExtinction: POINT_FIVE,
-//               skyBackground: DARK,
-//               waterVapor: DRY,
-//               elevationRange: {
-//                 airMass: {
-//                   min: 1,
-//                   max: 2
-//                 }
-//               }
-//             },
-//             modes: [{
-//               gmosS: {
-//                 filter: ${d.tag.toScreamingSnakeCase}
-//                 fpu: LONG_SLIT_0_25,
-//                 disperser: B1200_G5321
-//               }
-//             }
-//             ]
-//           }) {
-//             results {
-//                 mode {
-//                   instrument
-//                   params {
-//                     ... on GmosSITCParams {
-//                       filter
-//                     }
-//                   }
-//                   wavelength {
-//                     nanometers
-//                   }
-//                 }
-//                 itc {
-//                   ... on ItcSuccess {
-//                     exposures
-//                     exposureTime {
-//                       seconds
-//                     }
-//                   }
-//                 }
-//             }
-//           }
-//         }
-//         """,
-//         json"""
-//         {
-//           "data": {
-//             "spectroscopy" : [
-//               {
-//                 "results" : [
-//                   {
-//                     "mode" : {
-//                       "instrument" : "GMOS_SOUTH",
-//                       "params": {
-//                         "filter": ${d.tag.toScreamingSnakeCase}
-//                       },
-//                       "wavelength" : {
-//                         "nanometers" : 60.00
-//                       }
-//                     },
-//                     "itc" : {
-//                       "exposures" : 10,
-//                       "exposureTime" : {
-//                         "seconds" : 1
-//                       }
-//                     }
-//                   }
-//                 ]
-//               }
-//             ]
-//           }
-//         }
-//         """
-//       )
-//     }
-//   }
+
+  test("gmosS_fpu") {
+    Enumerated[GmosSouthFpu].all.filter(_ =!= GmosSouthFpu.Bhros).traverse { d =>
+      query(
+        s"""
+        query {
+          spectroscopy(input: {
+            wavelength: {
+              nanometers: 60,
+            },
+            radialVelocity: {
+              centimetersPerSecond: 1000
+            },
+            signalToNoise: 2,
+            sourceProfile: {
+              uniform: {
+                bandNormalized: {
+                  sed: {
+                    blackBodyTempK: 100
+                  },
+                  brightnesses: [ {
+                    band: R,
+                    value: 3,
+                    units: VEGA_MAG_PER_ARCSEC_SQUARED
+                  }, {
+                    band: K,
+                    value: 2.1,
+                    units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
+                  }]
+                }
+              }
+            },
+            band: K
+            constraints: {
+              imageQuality: POINT_THREE,
+              cloudExtinction: POINT_FIVE,
+              skyBackground: DARK,
+              waterVapor: DRY,
+              elevationRange: {
+                airMass: {
+                  min: 1,
+                  max: 2
+                }
+              }
+            },
+            modes: [{
+              gmosS: {
+                filter: G_PRIME,
+                fpu: {
+                  builtin: ${d.tag.toScreamingSnakeCase}
+                },
+                grating: B1200_G5321
+              }
+            }
+            ]
+          }) {
+            results {
+                mode {
+                  instrument
+                  params {
+                    ... on GmosSITCParams {
+                      fpu {
+                        builtin
+                      }
+                    }
+                  }
+                  wavelength {
+                    nanometers
+                  }
+                }
+                itc {
+                  ... on ItcSuccess {
+                    exposures
+                    exposureTime {
+                      seconds
+                    }
+                  }
+                }
+            }
+          }
+        }
+        """,
+        json"""
+        {
+          "data": {
+            "spectroscopy" : [
+              {
+                "results" : [
+                  {
+                    "mode" : {
+                      "instrument" : "GMOS_SOUTH",
+                      "params": {
+                        "fpu": {
+                          "builtin": ${d.tag.toScreamingSnakeCase}
+                        }
+                      },
+                      "wavelength" : {
+                        "nanometers" : 60.00
+                      }
+                    },
+                    "itc" : {
+                      "exposures" : 10,
+                      "exposureTime" : {
+                        "seconds" : 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        """
+      )
+    }
+  }
+
+  test("gmosN_filter") {
+    Enumerated[GmosNorthFilter].all.traverse { d =>
+      query(
+        s"""
+        query {
+          spectroscopy(input: {
+            wavelength: {
+              nanometers: 60,
+            },
+            radialVelocity: {
+              centimetersPerSecond: 1000
+            },
+            signalToNoise: 2,
+            sourceProfile: {
+              uniform: {
+                bandNormalized: {
+                  sed: {
+                    blackBodyTempK: 100
+                  },
+                  brightnesses: [ {
+                    band: R,
+                    value: 3,
+                    units: VEGA_MAG_PER_ARCSEC_SQUARED
+                  }, {
+                    band: K,
+                    value: 2.1,
+                    units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
+                  }]
+                }
+              }
+            },
+            band: K
+            constraints: {
+              imageQuality: POINT_THREE,
+              cloudExtinction: POINT_FIVE,
+              skyBackground: DARK,
+              waterVapor: DRY,
+              elevationRange: {
+                airMass: {
+                  min: 1,
+                  max: 2
+                }
+              }
+            },
+            modes: [{
+              gmosN: {
+                filter: ${d.tag.toScreamingSnakeCase}
+                fpu: {
+                  builtin: LONG_SLIT_0_25
+                },
+                grating: B1200_G5301
+              }
+            }
+            ]
+          }) {
+            results {
+                mode {
+                  instrument
+                  params {
+                    ... on GmosNITCParams {
+                      filter
+                    }
+                  }
+                  wavelength {
+                    nanometers
+                  }
+                }
+                itc {
+                  ... on ItcSuccess {
+                    exposures
+                    exposureTime {
+                      seconds
+                    }
+                  }
+                }
+            }
+          }
+        }
+        """,
+        json"""
+        {
+          "data": {
+            "spectroscopy" : [
+              {
+                "results" : [
+                  {
+                    "mode" : {
+                      "instrument" : "GMOS_NORTH",
+                      "params": {
+                        "filter": ${d.tag.toScreamingSnakeCase}
+                      },
+                      "wavelength" : {
+                        "nanometers" : 60.00
+                      }
+                    },
+                    "itc" : {
+                      "exposures" : 10,
+                      "exposureTime" : {
+                        "seconds" : 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        """
+      )
+    }
+  }
+
+  test("gmosS_filter") {
+    Enumerated[GmosSouthFilter].all.traverse { d =>
+      query(
+        s"""
+        query {
+          spectroscopy(input: {
+            wavelength: {
+              nanometers: 60,
+            },
+            radialVelocity: {
+              centimetersPerSecond: 1000
+            },
+            signalToNoise: 2,
+            sourceProfile: {
+              uniform: {
+                bandNormalized: {
+                  sed: {
+                    blackBodyTempK: 100
+                  },
+                  brightnesses: [ {
+                    band: R,
+                    value: 3,
+                    units: VEGA_MAG_PER_ARCSEC_SQUARED
+                  }, {
+                    band: K,
+                    value: 2.1,
+                    units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
+                  }]
+                }
+              }
+            },
+            band: K
+            constraints: {
+              imageQuality: POINT_THREE,
+              cloudExtinction: POINT_FIVE,
+              skyBackground: DARK,
+              waterVapor: DRY,
+              elevationRange: {
+                airMass: {
+                  min: 1,
+                  max: 2
+                }
+              }
+            },
+            modes: [{
+              gmosS: {
+                filter: ${d.tag.toScreamingSnakeCase}
+                fpu: {
+                  builtin: LONG_SLIT_0_25
+                },
+                grating: B1200_G5321
+              }
+            }
+            ]
+          }) {
+            results {
+                mode {
+                  instrument
+                  params {
+                    ... on GmosSITCParams {
+                      filter
+                    }
+                  }
+                  wavelength {
+                    nanometers
+                  }
+                }
+                itc {
+                  ... on ItcSuccess {
+                    exposures
+                    exposureTime {
+                      seconds
+                    }
+                  }
+                }
+            }
+          }
+        }
+        """,
+        json"""
+        {
+          "data": {
+            "spectroscopy" : [
+              {
+                "results" : [
+                  {
+                    "mode" : {
+                      "instrument" : "GMOS_SOUTH",
+                      "params": {
+                        "filter": ${d.tag.toScreamingSnakeCase}
+                      },
+                      "wavelength" : {
+                        "nanometers" : 60.00
+                      }
+                    },
+                    "itc" : {
+                      "exposures" : 10,
+                      "exposureTime" : {
+                        "seconds" : 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        """
+      )
+    }
+  }
 }
