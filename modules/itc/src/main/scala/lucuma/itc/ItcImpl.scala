@@ -18,7 +18,7 @@ import lucuma.itc.search.TargetProfile
 import natchez.Trace
 import natchez.http4s.NatchezMiddleware
 import org.http4s._
-import org.http4s.asynchttpclient.client.AsyncHttpClient
+import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.circe._
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
@@ -38,8 +38,7 @@ object ItcImpl {
     forUri(uri"https://gemini-itc.herokuapp.com/json")
 
   def forUri[F[_]: Async: Logger: Trace](uri: Uri): Resource[F, Itc[F]] =
-    AsyncHttpClient
-      .resource(AsyncHttpClient.configure(_.setRequestTimeout(30000)))
+    EmberClientBuilder.default.build
       .map(NatchezMiddleware.client[F])
       .map(RequestLogger(true, true))
       .map(ResponseLogger(true, true))
