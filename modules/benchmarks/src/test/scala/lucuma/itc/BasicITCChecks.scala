@@ -34,25 +34,32 @@ class BasicITCChecks extends Simulation {
               centimetersPerSecond: 0
             },
             signalToNoise: 5,
-            spatialProfile: {
-              sourceType: POINT_SOURCE
+            sourceProfile: {
+              point: {
+                bandNormalized: {
+                  sed: {
+                    stellarLibrary: A0_V
+                  }
+                  brightnesses: [ {
+                    band: R
+                    value: 3
+                    units: VEGA_MAGNITUDE
+                  }, {
+                    band: J
+                    value: 2.1
+                    units: AB_MAGNITUDE
+                  }]
+                }
+              }
             },
-            spectralDistribution: {
-              stellar: A0V
-            },
-            magnitude: {
-              band: R,
-              value: 15,
-              error: 1.2,
-              system: VEGA
-            },
+            band: R,
             constraints: {
               imageQuality: POINT_EIGHT,
               cloudExtinction: POINT_THREE,
               skyBackground: GRAY,
               waterVapor: WET,
               elevationRange: {
-                airmassRange: {
+                airMass: {
                   min: 1,
                   max: 1.5
                 }
@@ -60,7 +67,9 @@ class BasicITCChecks extends Simulation {
             },
             modes: [{
               gmosN: {
-                fpu: LONG_SLIT_1_00,
+                fpu: {
+                  builtin: LONG_SLIT_1_00
+                },
                 disperser: B600_G5307
               }
             }]
@@ -120,25 +129,32 @@ class BasicITCChecks extends Simulation {
               centimetersPerSecond: 0
             },
             signalToNoise: 35,
-            spatialProfile: {
-              sourceType: POINT_SOURCE
+            sourceProfile: {
+              point: {
+                bandNormalized: {
+                  sed: {
+                    stellarLibrary: O5_V
+                  }
+                  brightnesses: [ {
+                    band: R
+                    value: 3
+                    units: VEGA_MAGNITUDE
+                  }, {
+                    band: J
+                    value: 2.1
+                    units: AB_MAGNITUDE
+                  }]
+                }
+              }
             },
-            spectralDistribution: {
-              stellar: A0V
-            },
-            magnitude: {
-              band: R,
-              value: 20,
-              error: 1.2,
-              system: VEGA
-            },
+            band: J,
             constraints: {
               imageQuality: POINT_EIGHT,
               cloudExtinction: POINT_THREE,
               skyBackground: GRAY,
               waterVapor: WET,
               elevationRange: {
-                airmassRange: {
+                airMass: {
                   min: 1,
                   max: 1.5
                 }
@@ -146,7 +162,9 @@ class BasicITCChecks extends Simulation {
             },
             modes: [{
               gmosN: {
-                fpu: LONG_SLIT_0_25,
+                fpu: {
+                  builtin: LONG_SLIT_0_25
+                },
                 disperser: R831_G5302
               }
             }]

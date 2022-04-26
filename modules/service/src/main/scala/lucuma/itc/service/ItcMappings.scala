@@ -39,6 +39,8 @@ import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
 import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
+import lucuma.itc.search.GmosNorthFpuParam
+import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosNorth
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
@@ -111,6 +113,12 @@ trait Encoders {
     )
   }
 
+  implicit val encoderGmosNFpuParam: Encoder[GmosNorthFpuParam] =
+    deriveEncoder[GmosNorthFpuParam]
+
+  implicit val encoderGmosSFpuParam: Encoder[GmosSouthFpuParam] =
+    deriveEncoder[GmosSouthFpuParam]
+
   implicit val encoderGmosNITCParams: Encoder[GmosNITCParams] =
     deriveEncoder[GmosNITCParams]
 
@@ -156,13 +164,13 @@ sealed trait SpectroscopyParams
 
 final case class GmosNITCParams(
   disperser: GmosNorthDisperser,
-  fpu:       GmosNorthFpu,
+  fpu:       GmosNorthFpuParam,
   filter:    Option[GmosNorthFilter]
 ) extends SpectroscopyParams
 
 final case class GmosSITCParams(
   disperser: GmosSouthDisperser,
-  fpu:       GmosSouthFpu,
+  fpu:       GmosSouthFpuParam,
   filter:    Option[GmosSouthFilter]
 ) extends SpectroscopyParams
 
@@ -199,11 +207,13 @@ object ItcMapping extends Encoders {
   // In principle this is a pure operation because resources are constant values, but the potential
   // for error in dev is high and it's nice to handle failures in `F`.
   def loadSchema[F[_]: Sync]: F[Schema] =
-    Sync[F].defer {
-      Using(Source.fromResource("graphql/itc.graphql", getClass().getClassLoader())) { src =>
-        Schema(src.mkString).right.get
-      }.liftTo[F]
-    }
+    Sync[F]
+      .defer {
+        Using(Source.fromResource("graphql/itc.graphql", getClass().getClassLoader())) { src =>
+          Schema(src.mkString).right.get
+        }.liftTo[F]
+      }
+      .handleError { e => println(e.getMessage); e.printStackTrace(); null }
 
   def spectroscopy[F[_]: ApplicativeError[*[_], Throwable]: Logger: Parallel: Trace](
     itc: Itc[F]
@@ -298,7 +308,8 @@ object ItcMapping extends Encoders {
         val BigDecimalType         = schema.ref("BigDecimal")
         val LongType               = schema.ref("Long")
         val DurationType           = schema.ref("Duration")
-        val typeMappings           =
+
+        val typeMappings =
           List(
             ObjectMapping(
               tpe = QueryType,
@@ -652,7 +663,13 @@ object ItcMapping extends Encoders {
               gmosS match {
                 case ObjectValue(
                       List(("disperser", TypedEnumValue(EnumValue(d, _, _, _))),
-                           ("fpu", TypedEnumValue(EnumValue(fpu, _, _, _))),
+                           ("fpu",
+                            ObjectValue(
+                              List(("customMask", AbsentValue),
+                                   ("builtin", TypedEnumValue(EnumValue(fpu, _, _, _)))
+                              )
+                            )
+                           ),
                            ("filter", f)
                       )
                     ) =>
@@ -661,7 +678,9 @@ object ItcMapping extends Encoders {
                       gsFilter.get(f)
                     case _                                     => none
                   }
-                  (gsDisperser.get(d), gsFpu.get(fpu)).mapN(GmosSITCParams(_, _, filterOpt))
+                  (gsDisperser.get(d), gsFpu.get(fpu)).mapN((a, b) =>
+                    GmosSITCParams(a, GmosSouthFpuParam(b), filterOpt)
+                  )
                 case _ =>
                   none
               }
@@ -669,7 +688,13 @@ object ItcMapping extends Encoders {
               gmosN match {
                 case ObjectValue(
                       List(("disperser", TypedEnumValue(EnumValue(d, _, _, _))),
-                           ("fpu", TypedEnumValue(EnumValue(fpu, _, _, _))),
+                           ("fpu",
+                            ObjectValue(
+                              List(("customMask", AbsentValue),
+                                   ("builtin", TypedEnumValue(EnumValue(fpu, _, _, _)))
+                              )
+                            )
+                           ),
                            ("filter", f)
                       )
                     ) =>
@@ -678,7 +703,9 @@ object ItcMapping extends Encoders {
                       gnFilter.get(f)
                     case _                                     => none
                   }
-                  (gnDisperser.get(d), gnFpu.get(fpu)).mapN(GmosNITCParams(_, _, filterOpt))
+                  (gnDisperser.get(d), gnFpu.get(fpu)).mapN((a, b) =>
+                    GmosNITCParams(a, GmosNorthFpuParam(b), filterOpt)
+                  )
                 case _ =>
                   none
               }
@@ -699,8 +726,8 @@ object ItcMapping extends Encoders {
                         ("elevationRange",
                          ObjectValue(
                            List(
-                             ("airmassRange", ObjectValue(List(("min", min), ("max", max)))),
-                             ("hourAngleRange", AbsentValue)
+                             ("airMass", ObjectValue(List(("min", min), ("max", max)))),
+                             ("hourAngle", AbsentValue)
                            )
                          )
                         )
@@ -747,10 +774,8 @@ object ItcMapping extends Encoders {
                      ("elevationRange",
                       ObjectValue(
                         List(
-                          ("airmassRange", AbsentValue),
-                          ("hourAngleRange",
-                           ObjectValue(List(("minHours", min), ("maxHours", max)))
-                          )
+                          ("airMass", AbsentValue),
+                          ("hourAngle", ObjectValue(List(("minHours", min), ("maxHours", max))))
                         )
                       )
                      )

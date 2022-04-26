@@ -30,7 +30,7 @@ object ItcInstrumentDetails {
             )
           ),
           "grating"           -> Json.obj("DisperserNorth" -> Json.fromString(a.disperser.ocs2Tag)),
-          "fpMask"            -> Json.obj("FPUnitNorth" -> Json.fromString(a.fpu.ocs2Tag)),
+          "fpMask"            -> Json.obj("FPUnitNorth" -> Json.fromString(a.fpu.builtin.ocs2Tag)),
           // Remaining fields are defaulted for now.
           "spectralBinning"   -> Json.fromInt(1),
           "site"              -> Json.fromString("GN"),
@@ -57,7 +57,7 @@ object ItcInstrumentDetails {
             )
           ),
           "grating"           -> Json.obj("DisperserSouth" -> Json.fromString(a.disperser.ocs2Tag)),
-          "fpMask"            -> Json.obj("FPUnitSouth" -> Json.fromString(a.fpu.ocs2Tag)),
+          "fpMask"            -> Json.obj("FPUnitSouth" -> Json.fromString(a.fpu.builtin.ocs2Tag)),
           // Remaining fields are defaulted for now.
           "spectralBinning"   -> Json.fromInt(1),
           "site"              -> Json.fromString("GS"),

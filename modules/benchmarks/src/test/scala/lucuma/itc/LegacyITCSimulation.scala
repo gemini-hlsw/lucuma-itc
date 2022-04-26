@@ -28,6 +28,8 @@ import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.syntax.gmossouthfpu._
 
 import scala.collection.immutable.SortedMap
+import lucuma.itc.search.GmosNorthFpuParam
+import lucuma.itc.search.GmosSouthFpuParam
 
 /**
  * This is a unit test mostly to ensure all possible combination of params can be parsed by the
@@ -72,7 +74,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
   val instrument = ItcInstrumentDetails.fromObservingMode(
     ObservingMode.Spectroscopy.GmosNorth(Wavelength.decimalNanometers.getOption(600).get,
                                          GmosNorthDisperser.B1200_G5301,
-                                         GmosNorthFpu.LongSlit_5_00,
+                                         GmosNorthFpuParam(GmosNorthFpu.LongSlit_5_00),
                                          none
     )
   )
@@ -143,13 +145,13 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
 
   val gnConf = ObservingMode.Spectroscopy.GmosNorth(Wavelength.decimalNanometers.getOption(600).get,
                                                     GmosNorthDisperser.B1200_G5301,
-                                                    GmosNorthFpu.LongSlit_1_00,
+                                                    GmosNorthFpuParam(GmosNorthFpu.LongSlit_1_00),
                                                     none
   )
 
   val gsConf = ObservingMode.Spectroscopy.GmosSouth(Wavelength.decimalNanometers.getOption(600).get,
                                                     GmosSouthDisperser.B1200_G5321,
-                                                    GmosSouthFpu.LongSlit_1_00,
+                                                    GmosSouthFpuParam(GmosSouthFpu.LongSlit_1_00),
                                                     none
   )
 
@@ -189,7 +191,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .headers(headers_10)
         .check(status.in(200, 400))
         .check(substring("decode").notExists)
-        .body(StringBody(bodyConf(gnConf.copy(fpu = f)).asJson.noSpaces))
+        .body(StringBody(bodyConf(gnConf.copy(fpu = GmosNorthFpuParam(f))).asJson.noSpaces))
     }
   }
 
@@ -222,9 +224,9 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     .map { f =>
       val conf =
         if (f.isIfu)
-          bodyConf(gsConf.copy(fpu = f), ifuAnalysisMethod)
+          bodyConf(gsConf.copy(fpu = GmosSouthFpuParam(f)), ifuAnalysisMethod)
         else
-          bodyConf(gsConf.copy(fpu = f))
+          bodyConf(gsConf.copy(fpu = GmosSouthFpuParam(f)))
       spec {
         http("sanity_gs_fpu")
           .post("/json")
