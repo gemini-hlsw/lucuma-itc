@@ -7,7 +7,7 @@ import cats.implicits._
 import coulomb._
 import coulomb.si.Kelvin
 import eu.timepit.refined.auto._
-import eu.timepit.refined.types.numeric.PosBigDecimal
+import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax._
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
@@ -15,7 +15,6 @@ import io.gatling.http.funspec.GatlingHttpFunSpec
 import lucuma.core.enum._
 import lucuma.core.math.Angle
 import lucuma.core.math.BrightnessUnits._
-import lucuma.core.math.BrightnessValue
 import lucuma.core.math.Redshift
 import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional._
@@ -45,7 +44,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       SpectralDefinition.BandNormalized(
         UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V),
         SortedMap(
-          Band.R -> BrightnessValue(5).withUnit[VegaMagnitude].toMeasureTagged
+          Band.R -> BigDecimal(5).withUnit[VegaMagnitude].toMeasureTagged
         )
       )
     ),
@@ -373,7 +372,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodyIntMagUnits(
-              f.withValueTagged(BrightnessValue(5))
+              f.withValueTagged(BigDecimal(5))
             ).asJson.noSpaces
           )
         )
@@ -409,7 +408,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodySurfaceMagUnits(
-              f.withValueTagged(BrightnessValue(5))
+              f.withValueTagged(BigDecimal(5))
             ).asJson.noSpaces
           )
         )
@@ -446,7 +445,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodyIntGaussianMagUnits(
-              f.withValueTagged(BrightnessValue(5))
+              f.withValueTagged(BigDecimal(5))
             ).asJson.noSpaces
           )
         )
@@ -461,7 +460,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
           SpectralDefinition.BandNormalized(
             UnnormalizedSED.PowerLaw(c),
             SortedMap(
-              Band.R -> BrightnessValue(5).withUnit[VegaMagnitude].toMeasureTagged
+              Band.R -> BigDecimal(5).withUnit[VegaMagnitude].toMeasureTagged
             )
           )
         )
@@ -488,7 +487,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     }
   }
 
-  def bodyBlackBody(c: PosBigDecimal) =
+  def bodyBlackBody(c: PosInt) =
     ItcParameters(
       sourceDefinition.copy(profile =
         SourceProfile.Gaussian(
@@ -496,7 +495,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
           SpectralDefinition.BandNormalized(
             UnnormalizedSED.BlackBody(c.withUnit[Kelvin]),
             SortedMap(
-              Band.R -> BrightnessValue(5).withUnit[VegaMagnitude].toMeasureTagged
+              Band.R -> BigDecimal(5).withUnit[VegaMagnitude].toMeasureTagged
             )
           )
         )
@@ -507,7 +506,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       instrument
     )
 
-  List[PosBigDecimal](BigDecimal(0.1), BigDecimal(10), BigDecimal(100)).map { f =>
+  List[PosInt](10, 100).map { f =>
     spec {
       http("black body")
         .post("/json")

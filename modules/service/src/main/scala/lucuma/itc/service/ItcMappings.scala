@@ -24,7 +24,6 @@ import lucuma.core.enum.WaterVapor
 import lucuma.core.enum._
 import lucuma.core.math.Angle
 import lucuma.core.math.BrightnessUnits._
-import lucuma.core.math.BrightnessValue
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.Units._
@@ -387,7 +386,7 @@ object ItcMapping extends Encoders {
               val units = unitsItems.get(u)
               (band, value, units)
                 .mapN { (b, v, u) =>
-                  b -> u.withValueTagged(BrightnessValue.fromBigDecimal.get(v))
+                  b -> u.withValueTagged(v)
                 }
                 .toRightIorNec("Invalid brightness")
             case e => s"Invalid brighness entry $e".leftIorNec
@@ -523,7 +522,7 @@ object ItcMapping extends Encoders {
               ("fluxDensities", AbsentValue) :: Nil =>
             bigDecimalValue(r) match {
               case Some(r) if r > 0 =>
-                val blackBody = refineV[Positive](r)
+                val blackBody = refineV[Positive](r.toInt)
                   .map(k => UnnormalizedSED.BlackBody(k.withUnit[Kelvin]))
                   .toOption
                 blackBody.toRightIorNec(s"Not a valid black body value $r")

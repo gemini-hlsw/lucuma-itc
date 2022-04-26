@@ -7,11 +7,11 @@ val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.1"
 val cirisVersion                = "2.3.2"
 val clueVersion                 = "0.21.0"
-val http4sVersion               = "0.23.10"
+val http4sVersion               = "0.23.11"
 val http4sJdkHttpClientVersion  = "0.5.0"
 val fs2Version                  = "3.2.7"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.24.0"
+val lucumaCoreVersion           = "0.31.0"
 val slf4jVersion                = "1.7.35"
 val log4catsVersion             = "2.2.0"
 val monocleVersion              = "3.1.0"
@@ -49,20 +49,20 @@ lazy val itc = project
   .settings(
     name := "lucuma-itc",
     libraryDependencies ++= Seq(
-      "edu.gemini"     %% "lucuma-core"              % lucumaCoreVersion,
-      "org.typelevel"  %% "cats-core"                % catsVersion,
-      "org.typelevel"  %% "cats-effect"              % catsEffectVersion,
-      "org.http4s"     %% "http4s-async-http-client" % http4sVersion,
-      "org.http4s"     %% "http4s-circe"             % http4sVersion,
-      "org.http4s"     %% "http4s-dsl"               % http4sVersion,
-      "io.circe"       %% "circe-literal"            % circeVersion,
-      "edu.gemini"     %% "clue-model"               % clueVersion,
-      "io.circe"       %% "circe-generic"            % circeVersion,
-      "org.tpolecat"   %% "natchez-http4s"           % natcchezHttp4sVersion,
-      "org.typelevel"  %% "log4cats-slf4j"           % log4catsVersion,
-      "com.manyangled" %% "coulomb"                  % coulombVersion,
-      "com.manyangled" %% "coulomb-cats"             % coulombVersion,
-      "org.typelevel"  %% "munit-cats-effect-3"      % munitCatsEffectVersion % Test
+      "edu.gemini"     %% "lucuma-core"         % lucumaCoreVersion,
+      "org.typelevel"  %% "cats-core"           % catsVersion,
+      "org.typelevel"  %% "cats-effect"         % catsEffectVersion,
+      "org.http4s"     %% "http4s-ember-client" % http4sVersion,
+      "org.http4s"     %% "http4s-circe"        % http4sVersion,
+      "org.http4s"     %% "http4s-dsl"          % http4sVersion,
+      "io.circe"       %% "circe-literal"       % circeVersion,
+      "edu.gemini"     %% "clue-model"          % clueVersion,
+      "io.circe"       %% "circe-generic"       % circeVersion,
+      "org.tpolecat"   %% "natchez-http4s"      % natcchezHttp4sVersion,
+      "org.typelevel"  %% "log4cats-slf4j"      % log4catsVersion,
+      "com.manyangled" %% "coulomb"             % coulombVersion,
+      "com.manyangled" %% "coulomb-cats"        % coulombVersion,
+      "org.typelevel"  %% "munit-cats-effect-3" % munitCatsEffectVersion % Test
     )
   )
 
