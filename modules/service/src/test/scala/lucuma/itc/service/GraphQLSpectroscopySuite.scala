@@ -653,7 +653,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
   }
 
   test("gmosN_gratings") {
-    Enumerated[GmosNorthDisperser].all.traverse { d =>
+    Enumerated[GmosNorthGrating].all.traverse { d =>
       query(
         s"""
         query {
@@ -765,7 +765,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
   }
 
   test("gmosS_gratings") {
-    Enumerated[GmosSouthDisperser].all.traverse { d =>
+    Enumerated[GmosSouthGrating].all.traverse { d =>
       query(
         s"""
         query {

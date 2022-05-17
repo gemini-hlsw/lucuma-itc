@@ -7,10 +7,10 @@ import lucuma.core.enum._
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import lucuma.itc.ItcObservationDetails
-import lucuma.itc.search.syntax.gmosnorthdisperser._
+import lucuma.itc.search.syntax.gmosnorthgrating._
 import lucuma.itc.search.syntax.gmosnorthfilter._
 import lucuma.itc.search.syntax.gmosnorthfpu._
-import lucuma.itc.search.syntax.gmossouthdisperser._
+import lucuma.itc.search.syntax.gmossouthgrating._
 import lucuma.itc.search.syntax.gmossouthfilter._
 import lucuma.itc.search.syntax.gmossouthfpu._
 import spire.math.Rational
@@ -61,7 +61,7 @@ object ObservingMode {
 
     final case class GmosNorth(
       λ:         Wavelength,
-      disperser: GmosNorthDisperser,
+      disperser: GmosNorthGrating,
       fpu:       GmosNorthFpuParam,
       filter:    Option[GmosNorthFilter]
     ) extends GmosSpectroscopy {
@@ -79,7 +79,7 @@ object ObservingMode {
 
     final case class GmosSouth(
       λ:         Wavelength,
-      disperser: GmosSouthDisperser,
+      disperser: GmosSouthGrating,
       fpu:       GmosSouthFpuParam,
       filter:    Option[GmosSouthFilter]
     ) extends GmosSpectroscopy {

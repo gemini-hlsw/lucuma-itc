@@ -162,13 +162,13 @@ trait Encoders {
 sealed trait SpectroscopyParams
 
 final case class GmosNITCParams(
-  grating: GmosNorthDisperser,
+  grating: GmosNorthGrating,
   fpu:     GmosNorthFpuParam,
   filter:  Option[GmosNorthFilter]
 ) extends SpectroscopyParams
 
 final case class GmosSITCParams(
-  grating: GmosSouthDisperser,
+  grating: GmosSouthGrating,
   fpu:     GmosSouthFpuParam,
   filter:  Option[GmosSouthFilter]
 ) extends SpectroscopyParams
@@ -179,11 +179,11 @@ object ItcMapping extends Encoders {
     Enumerated[A].all.fproductLeft(_.tag.toScreamingSnakeCase).toMap
 
   val gnFilter  = enumTags[GmosNorthFilter]
-  val gnGrating = enumTags[GmosNorthDisperser]
+  val gnGrating = enumTags[GmosNorthGrating]
   val gnFpu     = enumTags[GmosNorthFpu]
 
   val gsFilter  = enumTags[GmosSouthFilter]
-  val gsGrating = enumTags[GmosSouthDisperser]
+  val gsGrating = enumTags[GmosSouthGrating]
   val gsFpu     = enumTags[GmosSouthFpu]
 
   val iqItems = enumTags[ImageQuality]

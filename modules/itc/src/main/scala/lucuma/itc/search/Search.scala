@@ -42,7 +42,7 @@ object Search {
 
     val gmosNorthModes: List[ObservingMode.Spectroscopy] =
       for {
-        disp   <- GmosNorthDisperser.all
+        disp   <- GmosNorthGrating.all
         fpu    <- GmosNorthFpu.all.filterNot(excludedFPUs)
         filter <- GmosNorthFilterSelector.selectBlocking(disp, fpu, constraints.λ).toList
       } yield ObservingMode.Spectroscopy.GmosNorth(constraints.λ,

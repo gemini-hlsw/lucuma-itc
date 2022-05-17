@@ -4,7 +4,7 @@
 package lucuma.itc.search.gmosnorth
 
 import cats.implicits._
-import lucuma.core.enum.GmosNorthDisperser._
+import lucuma.core.enum.GmosNorthGrating._
 import lucuma.core.enum.GmosNorthFilter._
 import lucuma.core.enum.GmosNorthFpu._
 import lucuma.core.enum._
@@ -19,7 +19,7 @@ object GmosNorthFilterSelector {
    * exact boundary both filters will be selected.
    */
   def selectBlocking(
-    disperser: GmosNorthDisperser,
+    disperser: GmosNorthGrating,
     fpu:       GmosNorthFpu,
     λ:         Wavelength
   ): Set[Option[GmosNorthFilter]] =
@@ -64,7 +64,7 @@ object GmosNorthFilterSelector {
   private val R150  = R150_G5308
 
   private case class Selector(
-    disperser: GmosNorthDisperser,
+    disperser: GmosNorthGrating,
     fpus:      Set[GmosNorthFpu],
     minλ:      Wavelength,
     maxλ:      Wavelength,
@@ -72,7 +72,7 @@ object GmosNorthFilterSelector {
     optimalλ:  Option[Wavelength]
   ) {
 
-    def matches(disperser: GmosNorthDisperser, fpu: GmosNorthFpu, λ: Wavelength): Boolean =
+    def matches(disperser: GmosNorthGrating, fpu: GmosNorthFpu, λ: Wavelength): Boolean =
       disperser === this.disperser && fpus.contains(fpu) && minλ <= λ && λ <= maxλ
 
   }
@@ -81,7 +81,7 @@ object GmosNorthFilterSelector {
 
     // Overloaded `apply` that taks Int anometers instead of Wavelengths
     private[GmosNorthFilterSelector] def apply(
-      disperser: GmosNorthDisperser,
+      disperser: GmosNorthGrating,
       fpus:      Set[GmosNorthFpu],
       minNm:     Int,
       maxNm:     Int,

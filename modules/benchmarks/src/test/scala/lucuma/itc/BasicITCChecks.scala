@@ -70,7 +70,7 @@ class BasicITCChecks extends Simulation {
                 fpu: {
                   builtin: LONG_SLIT_1_00
                 },
-                disperser: B600_G5307
+                grating: B600_G5307
               }
             }]
           }) {
@@ -80,7 +80,7 @@ class BasicITCChecks extends Simulation {
                   resolution
                   params {
                     ... on GmosNITCParams {
-                      disperser
+                      grating
                     }
                   }
                   wavelength {
@@ -165,7 +165,7 @@ class BasicITCChecks extends Simulation {
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
-                disperser: R831_G5302
+                grating: R831_G5302
               }
             }]
           }) {
@@ -173,11 +173,6 @@ class BasicITCChecks extends Simulation {
                 mode {
                   instrument
                   resolution
-                  params {
-                    ... on GmosNITCParams {
-                      disperser
-                    }
-                  }
                   wavelength {
                     nanometers
                   }
