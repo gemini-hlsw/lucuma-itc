@@ -5,8 +5,8 @@ package lucuma.itc.search.syntax
 
 import eu.timepit.refined.auto._
 import eu.timepit.refined.types.numeric.PosInt
-import lucuma.core.enum.GmosSouthDisperser
-import lucuma.core.enum.GmosSouthDisperser._
+import lucuma.core.enum.GmosSouthGrating
+import lucuma.core.enum.GmosSouthGrating._
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import lucuma.itc.search.Coverage
@@ -16,7 +16,7 @@ import spire.math.Rational
  * Syntax extensions for missing properties. These need to be folded back into the lucuma.core
  * enumerations.
  */
-final class GmosSouthDisperserOps(val self: GmosSouthDisperser) extends AnyVal {
+final class GmosSouthGratingOps(val self: GmosSouthGrating) extends AnyVal {
 
   /**
    * Reference wavelength (nm) and resolution for 0.5" slit.
@@ -68,22 +68,6 @@ final class GmosSouthDisperserOps(val self: GmosSouthDisperser) extends AnyVal {
   def coverage(λ: Wavelength): Coverage =
     Coverage.centered(λ, simultaneousCoverage)
 
-  /**
-   * Dispersion (pm/pixel) with Hamamatsu detectors.
-   * @see
-   *   http://www.gemini.edu/sciops/instruments/gmos/spectroscopy-overview/gratings
-   */
-  def dispersion: PosInt =
-    self match {
-      case B1200_G5321 => 26
-      case R831_G5322  => 38
-      case B600_G5323  => 50
-      case R600_G5324  => 52
-      case R400_G5325  => 74
-      case B480_G5327  => 62
-      case R150_G5326  => 193
-    }
-
   // pedantic: tags are the same in OCS2 and OCS3 but this is just a coincidence
   def ocs2Tag: String =
     self match {
@@ -97,9 +81,9 @@ final class GmosSouthDisperserOps(val self: GmosSouthDisperser) extends AnyVal {
     }
 }
 
-trait ToGmosSouthDisperserOps {
-  implicit def toGmosSouthDisperserOps(self: GmosSouthDisperser): GmosSouthDisperserOps =
-    new GmosSouthDisperserOps(self)
+trait ToGmosSouthGratingOps {
+  implicit def toGmosSouthDisperserOps(self: GmosSouthGrating): GmosSouthGratingOps =
+    new GmosSouthGratingOps(self)
 }
 
-object gmossouthdisperser extends ToGmosSouthDisperserOps
+object gmossouthgrating extends ToGmosSouthGratingOps

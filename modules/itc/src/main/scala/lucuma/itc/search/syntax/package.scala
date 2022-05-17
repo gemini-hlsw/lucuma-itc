@@ -6,10 +6,10 @@ package lucuma.itc.search
 package object syntax {
   object all
       extends ToGmosNorthFilterOps
-      with ToGmosNorthDisperserOps
+      with ToGmosNorthGratingOps
       with ToGmosNorthFpuOps
       with ToGmosSouthFilterOps
-      with ToGmosSouthDisperserOps
+      with ToGmosSouthGratingOps
       with ToGmosSouthFpuOps
       with ToConditionsOps
 

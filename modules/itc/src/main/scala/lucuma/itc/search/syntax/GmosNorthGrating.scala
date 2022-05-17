@@ -4,8 +4,8 @@
 package lucuma.itc.search.syntax
 
 import eu.timepit.refined.auto._
-import lucuma.core.enum.GmosNorthDisperser
-import lucuma.core.enum.GmosNorthDisperser._
+import lucuma.core.enum.GmosNorthGrating
+import lucuma.core.enum.GmosNorthGrating._
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import lucuma.itc.search.Coverage
@@ -15,7 +15,7 @@ import spire.math.Rational
  * Syntax extensions for missing properties. These need to be folded back into the lucuma.core
  * enumerations.
  */
-final class GmosNorthDisperserOps(val self: GmosNorthDisperser) extends AnyVal {
+final class GmosNorthGratingOps(val self: GmosNorthGrating) extends AnyVal {
 
   /**
    * Reference wavelength (nm) and resolution for 0.5" slit.
@@ -72,24 +72,6 @@ final class GmosNorthDisperserOps(val self: GmosNorthDisperser) extends AnyVal {
   def coverage(λ: Wavelength): Coverage =
     Coverage.centered(λ, simultaneousCoverage)
 
-  /**
-   * Dispersion (pm/pixel) with Hamamatsu detectors.
-   * @see
-   *   http://www.gemini.edu/sciops/instruments/gmos/spectroscopy-overview/gratings
-   */
-  def dispersion: Int =
-    self match {
-      case B1200_G5301 => 26
-      case R831_G5302  => 38
-      case B600_G5303  => 45  // obsolete, value with old e2v detector
-      case B600_G5307  => 50
-      case R600_G5304  => 52
-      case R400_G5305  => 74
-      case B480_G5309  => 62
-      case R150_G5306  => 174 // obsolete, value with old e2v detector
-      case R150_G5308  => 193
-    }
-
   // pedantic: tags are the same in OCS2 and OCS3 but this is just a coincidence
   def ocs2Tag: String =
     self match {
@@ -105,9 +87,9 @@ final class GmosNorthDisperserOps(val self: GmosNorthDisperser) extends AnyVal {
     }
 }
 
-trait ToGmosNorthDisperserOps {
-  implicit def toGmosNorthDisperserOps(self: GmosNorthDisperser): GmosNorthDisperserOps =
-    new GmosNorthDisperserOps(self)
+trait ToGmosNorthGratingOps {
+  implicit def toGmosNorthGratingOps(self: GmosNorthGrating): GmosNorthGratingOps =
+    new GmosNorthGratingOps(self)
 }
 
-object gmosnorthdisperser extends ToGmosNorthDisperserOps
+object gmosnorthgrating extends ToGmosNorthGratingOps

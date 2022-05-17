@@ -72,7 +72,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
   )
   val instrument = ItcInstrumentDetails.fromObservingMode(
     ObservingMode.Spectroscopy.GmosNorth(Wavelength.decimalNanometers.getOption(600).get,
-                                         GmosNorthDisperser.B1200_G5301,
+                                         GmosNorthGrating.B1200_G5301,
                                          GmosNorthFpuParam(GmosNorthFpu.LongSlit_5_00),
                                          none
     )
@@ -143,13 +143,13 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
   }
 
   val gnConf = ObservingMode.Spectroscopy.GmosNorth(Wavelength.decimalNanometers.getOption(600).get,
-                                                    GmosNorthDisperser.B1200_G5301,
+                                                    GmosNorthGrating.B1200_G5301,
                                                     GmosNorthFpuParam(GmosNorthFpu.LongSlit_1_00),
                                                     none
   )
 
   val gsConf = ObservingMode.Spectroscopy.GmosSouth(Wavelength.decimalNanometers.getOption(600).get,
-                                                    GmosSouthDisperser.B1200_G5321,
+                                                    GmosSouthGrating.B1200_G5321,
                                                     GmosSouthFpuParam(GmosSouthFpu.LongSlit_1_00),
                                                     none
   )
@@ -171,7 +171,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       ItcInstrumentDetails.fromObservingMode(c)
     )
 
-  Enumerated[GmosNorthDisperser].all.map { d =>
+  Enumerated[GmosNorthGrating].all.map { d =>
     spec {
       http("sanity_gn_disperser")
         .post("/json")
@@ -206,7 +206,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     }
   }
 
-  Enumerated[GmosSouthDisperser].all.map { d =>
+  Enumerated[GmosSouthGrating].all.map { d =>
     spec {
       http("sanity_gs_disperser")
         .post("/json")
