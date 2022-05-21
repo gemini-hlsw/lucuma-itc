@@ -59,6 +59,7 @@ import scala.util.Using
 import Query._
 import Value._
 import QueryCompiler._
+import lucuma.itc.UpstreamException
 
 trait Encoders {
   import io.circe.generic.semiauto._
@@ -242,8 +243,10 @@ object ItcMapping extends Encoders {
                   c,
                   sn.value
                 )
-                .handleErrorWith { case x =>
-                  Logger[F].error(x)(s"Upstream error") *>
+                .handleErrorWith {
+                  case UpstreamException(msg) =>
+                    Itc.Result.CalculationError(msg).pure[F].widen
+                  case x                      =>
                     Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen
                 }
                 .map(r => SpectroscopyResults(List(Spectroscopy(specMode, r))))

@@ -7,6 +7,8 @@ import lucuma.itc.search._
 
 import scala.concurrent.duration.FiniteDuration
 
+final case class UpstreamException(msg: String) extends RuntimeException(msg)
+
 trait Itc[F[_]] {
 
   /**
