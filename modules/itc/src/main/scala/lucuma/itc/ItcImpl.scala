@@ -3,7 +3,7 @@
 
 package lucuma.itc
 
-import cats.Applicative
+import cats.ApplicativeError
 import cats.effect._
 import cats.syntax.all._
 import coulomb._
@@ -18,12 +18,12 @@ import lucuma.itc.search.TargetProfile
 import natchez.Trace
 import natchez.http4s.NatchezMiddleware
 import org.http4s._
-import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.circe._
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.client.middleware._
 import org.http4s.dsl.io._
+import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.syntax.all._
 import org.typelevel.log4cats.Logger
 import spire.implicits._
@@ -36,6 +36,8 @@ object ItcImpl {
 
   def forHeroku[F[_]: Async: Logger: Trace]: Resource[F, Itc[F]] =
     forUri(uri"https://gemini-itc.herokuapp.com/json")
+
+  val Error400Regex = "<title>Error 400 (.*)</title>".r
 
   def forUri[F[_]: Async: Logger: Trace](uri: Uri): Resource[F, Itc[F]] =
     EmberClientBuilder.default.build
@@ -82,11 +84,26 @@ object ItcImpl {
             Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
             Trace[F].put("itc.exposures" -> exposures) *>
             Trace[F].put("itc.level" -> level.value) *>
-            c.expect(POST(json, uri))(jsonOf[F, ItcResult]).attemptTap {
-              case Left(e) => L.warn(e)("Remote ITC error")
-              case _       => Applicative[F].unit
+            c.run(POST(json, uri)).use {
+              case Status.Successful(resp) =>
+                implicit val decoder = jsonOf[F, ItcResult]
+                resp.as[ItcResult]
+              case resp                    =>
+                resp.bodyText
+                  .through(fs2.text.lines)
+                  .filter(_.startsWith("<title>"))
+                  .compile
+                  .last
+                  .flatMap {
+                    case Some(Error400Regex(msg)) =>
+                      L.warn(s"Upstream error $msg") *>
+                        ApplicativeError[F, Throwable].raiseError(new UpstreamException(msg))
+                    case u                        =>
+                      L.warn(s"Upstream error ${u}") *>
+                        ApplicativeError[F, Throwable]
+                          .raiseError(new UpstreamException(u.getOrElse("Upstream Exception")))
+                  }
             }
-
         }
 
       val MaxIterations = 10

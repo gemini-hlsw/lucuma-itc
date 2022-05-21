@@ -38,6 +38,7 @@ import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
 import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
+import lucuma.itc.UpstreamException
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ObservingMode
@@ -242,8 +243,10 @@ object ItcMapping extends Encoders {
                   c,
                   sn.value
                 )
-                .handleErrorWith { case x =>
-                  Logger[F].error(x)(s"Upstream error") *>
+                .handleErrorWith {
+                  case UpstreamException(msg) =>
+                    Itc.Result.CalculationError(msg).pure[F].widen
+                  case x                      =>
                     Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen
                 }
                 .map(r => SpectroscopyResults(List(Spectroscopy(specMode, r))))
