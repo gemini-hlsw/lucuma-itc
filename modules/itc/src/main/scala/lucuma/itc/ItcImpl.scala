@@ -18,12 +18,12 @@ import lucuma.itc.search.TargetProfile
 import natchez.Trace
 import natchez.http4s.NatchezMiddleware
 import org.http4s._
-import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.circe._
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.client.middleware._
 import org.http4s.dsl.io._
+import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.syntax.all._
 import org.typelevel.log4cats.Logger
 import spire.implicits._

@@ -38,6 +38,7 @@ import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
 import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
+import lucuma.itc.UpstreamException
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ObservingMode
@@ -59,7 +60,6 @@ import scala.util.Using
 import Query._
 import Value._
 import QueryCompiler._
-import lucuma.itc.UpstreamException
 
 trait Encoders {
   import io.circe.generic.semiauto._
