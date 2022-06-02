@@ -23,12 +23,12 @@ import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.core.util.Enumerated
+import lucuma.itc.search.GmosNorthFpuParam
+import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.syntax.gmossouthfpu._
 
 import scala.collection.immutable.SortedMap
-import lucuma.itc.search.GmosNorthFpuParam
-import lucuma.itc.search.GmosSouthFpuParam
 
 /**
  * This is a unit test mostly to ensure all possible combination of params can be parsed by the
