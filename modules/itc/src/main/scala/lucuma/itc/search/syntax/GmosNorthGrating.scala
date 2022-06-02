@@ -8,7 +8,6 @@ import lucuma.core.enum.GmosNorthGrating
 import lucuma.core.enum.GmosNorthGrating._
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
-import lucuma.itc.search.Coverage
 import spire.math.Rational
 
 /**
@@ -67,10 +66,6 @@ final class GmosNorthGratingOps(val self: GmosNorthGrating) extends AnyVal {
         Wavelength.fromNanometers(1071).get // obsolete, value with old e2v detector
       case R150_G5308  => Wavelength.fromNanometers(1219).get
     }
-
-  /** Compute the coverage of this disperser, given a central wavelength. */
-  def coverage(λ: Wavelength): Coverage =
-    Coverage.centered(λ, simultaneousCoverage)
 
   // pedantic: tags are the same in OCS2 and OCS3 but this is just a coincidence
   def ocs2Tag: String =

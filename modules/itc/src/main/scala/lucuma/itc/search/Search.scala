@@ -60,7 +60,9 @@ object Search {
     // Now filter down the list.
     val compatibleModes: List[ObservingMode.Spectroscopy] =
       allModes
-        .filter(_.coverage.width >= constraints.simultaneousCoverage)
+        .filter(
+          _.coverage.width.value.value >= constraints.simultaneousCoverage.toPicometers.value.value
+        )
         .filter(_.resolution >= constraints.resolution.value)
 
     // Done!

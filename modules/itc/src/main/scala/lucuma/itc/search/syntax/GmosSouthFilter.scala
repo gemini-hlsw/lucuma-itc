@@ -7,7 +7,7 @@ import cats.implicits._
 import lucuma.core.enum.GmosSouthFilter
 import lucuma.core.enum.GmosSouthFilter._
 import lucuma.core.math.Wavelength
-import lucuma.itc.search.Coverage
+import lucuma.core.math.Coverage
 
 final class GmosSouthFilterOps(val self: GmosSouthFilter) extends AnyVal {
 
