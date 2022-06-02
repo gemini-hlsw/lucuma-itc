@@ -30,7 +30,7 @@ object ItcObservingConditions {
          )
        ),
        Json.obj(
-         "extinction" -> Json.fromBigDecimal(BigDecimal(a.cc.toMagnitudes))
+         "extinction" -> Json.fromBigDecimal(BigDecimal(a.cc.toBrightness))
        ),
        a.wv.ocs2Tag,
        a.sb.ocs2Tag,
