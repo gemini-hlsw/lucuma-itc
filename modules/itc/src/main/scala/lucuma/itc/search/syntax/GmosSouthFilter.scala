@@ -6,8 +6,8 @@ package lucuma.itc.search.syntax
 import cats.implicits._
 import lucuma.core.enum.GmosSouthFilter
 import lucuma.core.enum.GmosSouthFilter._
-import lucuma.core.math.Wavelength
 import lucuma.core.math.Coverage
+import lucuma.core.math.Wavelength
 
 final class GmosSouthFilterOps(val self: GmosSouthFilter) extends AnyVal {
 

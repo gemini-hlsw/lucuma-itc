@@ -23,7 +23,7 @@ import org.http4s.implicits._
 import org.http4s.server.Server
 import org.http4s.server.middleware.CORS
 import org.http4s.server.middleware.CORSPolicy
-import org.http4s.server.middleware.{ Logger => Http4sLogger }
+import org.http4s.server.middleware.{Logger => Http4sLogger}
 import org.http4s.server.staticcontent._
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger

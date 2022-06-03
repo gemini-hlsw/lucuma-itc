@@ -5,8 +5,8 @@ package lucuma.itc.search
 
 import lucuma.core.enum._
 import lucuma.core.math.Angle
-import lucuma.core.math.Wavelength
 import lucuma.core.math.Coverage
+import lucuma.core.math.Wavelength
 import lucuma.itc.ItcObservationDetails
 import lucuma.itc.search.syntax.gmosnorthfilter._
 import lucuma.itc.search.syntax.gmosnorthfpu._
