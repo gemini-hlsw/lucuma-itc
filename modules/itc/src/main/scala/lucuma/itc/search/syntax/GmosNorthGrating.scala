@@ -6,8 +6,11 @@ package lucuma.itc.search.syntax
 import eu.timepit.refined.auto._
 import lucuma.core.enums.GmosNorthGrating
 import lucuma.core.enums.GmosNorthGrating._
+import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.numeric.Positive
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
+import lucuma.core.math.refined.*
 import spire.math.Rational
 
 /**
@@ -21,17 +24,17 @@ final class GmosNorthGratingOps(val self: GmosNorthGrating) extends AnyVal {
    * @see
    *   http://www.gemini.edu/sciops/instruments/gmos/spectroscopy-overview/gratings
    */
-  private def reference: (Long, Long) =
+  private def reference: (PosInt, PosInt) =
     self match {
-      case B1200_G5301 => (463, 3744)
-      case R831_G5302  => (757, 4396)
-      case B600_G5303  => (461, 1688) // obsolete
-      case B600_G5307  => (461, 1688)
-      case R600_G5304  => (926, 3744)
-      case B480_G5309  => (422, 1520)
-      case R400_G5305  => (764, 1918)
-      case R150_G5306  => (717, 631)  // obsolete
-      case R150_G5308  => (717, 631)
+      case B1200_G5301 => (463.refined, 3744.refined)
+      case R831_G5302  => (757.refined, 4396.refined)
+      case B600_G5303  => (461.refined, 1688.refined) // obsolete
+      case B600_G5307  => (461.refined, 1688.refined)
+      case R600_G5304  => (926.refined, 3744.refined)
+      case B480_G5309  => (422.refined, 1520.refined)
+      case R400_G5305  => (764.refined, 1918.refined)
+      case R150_G5306  => (717.refined, 631.refined)  // obsolete
+      case R150_G5308  => (717.refined, 631.refined)
     }
 
   /**
@@ -41,7 +44,7 @@ final class GmosNorthGratingOps(val self: GmosNorthGrating) extends AnyVal {
    */
   private def Δλ: Rational = {
     val (λ, r) = reference
-    Rational(λ, r) // r = λ / Δλ
+    Rational(λ.value, r.value) // r = λ / Δλ
   }
 
   /** Resolution at λ with the specified slit width (arcsec). */
@@ -61,7 +64,7 @@ final class GmosNorthGratingOps(val self: GmosNorthGrating) extends AnyVal {
       case B600_G5307  => Wavelength.fromNanometers(317).get
       case R600_G5304  => Wavelength.fromNanometers(328).get
       case R400_G5305  => Wavelength.fromNanometers(472).get
-      case B480_G5309  => Wavelength(390000)
+      case B480_G5309  => Wavelength(390000.refined[Positive])
       case R150_G5306  =>
         Wavelength.fromNanometers(1071).get // obsolete, value with old e2v detector
       case R150_G5308  => Wavelength.fromNanometers(1219).get

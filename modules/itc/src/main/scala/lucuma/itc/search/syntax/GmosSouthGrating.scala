@@ -7,8 +7,10 @@ import eu.timepit.refined.auto._
 import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.enums.GmosSouthGrating
 import lucuma.core.enums.GmosSouthGrating._
+import eu.timepit.refined.numeric.Positive
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
+import lucuma.core.math.refined.*
 import spire.math.Rational
 
 /**
@@ -24,13 +26,13 @@ final class GmosSouthGratingOps(val self: GmosSouthGrating) extends AnyVal {
    */
   private def reference: (PosInt, PosInt) =
     self match {
-      case B1200_G5321 => (463, 3744)
-      case R831_G5322  => (757, 4396)
-      case B600_G5323  => (461, 1688)
-      case R600_G5324  => (926, 3744)
-      case B480_G5327  => (422, 1520)
-      case R400_G5325  => (764, 1918)
-      case R150_G5326  => (717, 631)
+      case B1200_G5321 => (463.refined, 3744.refined)
+      case R831_G5322  => (757.refined, 4396.refined)
+      case B600_G5323  => (461.refined, 1688.refined)
+      case R600_G5324  => (926.refined, 3744.refined)
+      case B480_G5327  => (422.refined, 1520.refined)
+      case R400_G5325  => (764.refined, 1918.refined)
+      case R150_G5326  => (717.refined, 631.refined)
     }
 
   /**
@@ -59,7 +61,7 @@ final class GmosSouthGratingOps(val self: GmosSouthGrating) extends AnyVal {
       case B600_G5323  => Wavelength.fromNanometers(307).get
       case R600_G5324  => Wavelength.fromNanometers(318).get
       case R400_G5325  => Wavelength.fromNanometers(462).get
-      case B480_G5327  => Wavelength(390000)
+      case B480_G5327  => Wavelength(390000.refined[Positive])
       case R150_G5326  => Wavelength.fromNanometers(1190).get
     }
 

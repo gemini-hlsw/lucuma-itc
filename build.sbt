@@ -29,7 +29,6 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion       := "3.1.2"
 ThisBuild / crossScalaVersions := Seq("3.1.2")
-ThisBuild / scalacOptions += "-Xsource:3"
 
 addCommandAlias(
   "fixImports",
@@ -41,92 +40,94 @@ lazy val commonSettings = lucumaGlobalSettings ++ Seq(
     "org.typelevel" %% "cats-testkit"           % catsVersion                 % "test",
     "org.typelevel" %% "cats-testkit-scalatest" % catsTestkitScalaTestVersion % "test"
   ),
-  Test / parallelExecution := false // tests run fine in parallel but output is nicer this way
-  // scalacOptions ++= Seq(
+  Test / parallelExecution := false, // tests run fine in parallel but output is nicer this way
+  scalacOptions ++= Seq(
+    "-language:implicitConversions"
+  )
   //   "-Ymacro-annotations",
   //   "-Ywarn-macros:after"
   // )
 )
 
-lazy val itc3 = project
-  .in(file("modules/itc3"))
-  .settings(
-    name := "lucuma-itc3",
-    libraryDependencies ++= Seq(
-      // "edu.gemini"     %% "lucuma-core"   % lucumaCoreVersion,
-      // "org.typelevel"  %% "cats-core"     % catsVersion,
-      "com.manyangled" %% "coulomb-core"  % coulombVersion,
-      "com.manyangled" %% "coulomb-spire" % coulombVersion,
-      "com.manyangled" %% "coulomb-units" % coulombVersion
-    )
-  )
-
-// lazy val itc = project
-//   .in(file("modules/itc"))
-//   // .settings(commonSettings)
-//   .settings(lucumaGlobalSettings)
+// lazy val itc3 = project
+//   .in(file("modules/itc3"))
 //   .settings(
-//     name := "lucuma-itc",
+//     name := "lucuma-itc3",
 //     libraryDependencies ++= Seq(
 //       // "edu.gemini"     %% "lucuma-core"   % lucumaCoreVersion,
-//       "org.typelevel"  %% "cats-core"     % catsVersion,
-//       // "org.typelevel"  %% "cats-effect"   % catsEffectVersion,
-//       // "org.http4s"     %% "http4s-ember-client" % http4sVersion,
-//       // "org.http4s"     %% "http4s-circe"        % http4sVersion,
-//       // "org.http4s"     %% "http4s-dsl"          % http4sVersion,
-//       // "io.circe"       %% "circe-literal"       % circeVersion,
-//       // "edu.gemini"     %% "clue-model"          % clueVersion,
-//       // "io.circe"       %% "circe-generic"       % circeVersion,
-//       // "org.tpolecat"   %% "natchez-http4s"      % natcchezHttp4sVersion,
-//       // "org.typelevel"  %% "log4cats-slf4j"      % log4catsVersion,
+//       // "org.typelevel"  %% "cats-core"     % catsVersion,
 //       "com.manyangled" %% "coulomb-core"  % coulombVersion,
 //       "com.manyangled" %% "coulomb-spire" % coulombVersion,
 //       "com.manyangled" %% "coulomb-units" % coulombVersion
-//       // "org.typelevel"  %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
-//       // "org.typelevel" %%% "spire"               % spireVersion,
-//       // "org.typelevel" %%% "spire-extras"        % spireVersion
 //     )
 //   )
 //
-// lazy val service = project
-//   .in(file("modules/service"))
-//   .dependsOn(itc)
-//   .settings(commonSettings)
-//   .settings(
-//     name              := "lucuma-itc-service",
-//     scalacOptions -= "-Vtype-diffs",
-//     reStart / envVars := Map("ITC_URL" -> "https://gemini-new-itc.herokuapp.com/json"),
-//     libraryDependencies ++= Seq(
-//       "edu.gemini"    %% "gsp-graphql-core"    % grackleVersion,
-//       "edu.gemini"    %% "gsp-graphql-generic" % grackleVersion,
-//       "edu.gemini"    %% "gsp-graphql-circe"   % grackleVersion,
-//       "org.tpolecat"  %% "natchez-honeycomb"   % natchezVersion,
-//       "org.tpolecat"  %% "natchez-log"         % natchezVersion,
-//       "org.tpolecat"  %% "natchez-http4s"      % natcchezHttp4sVersion,
-//       "co.fs2"        %% "fs2-core"            % fs2Version,
-//       "edu.gemini"    %% "lucuma-core"         % lucumaCoreVersion,
-//       "org.typelevel" %% "cats-core"           % catsVersion,
-//       "org.typelevel" %% "cats-effect"         % catsEffectVersion,
-//       "is.cir"        %% "ciris"               % cirisVersion,
-//       "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
-//       "org.slf4j"      % "slf4j-simple"        % slf4jVersion,
-//       "org.http4s"    %% "http4s-core"         % http4sVersion,
-//       "org.http4s"    %% "http4s-blaze-server" % http4sVersion,
-//       "eu.timepit"    %% "refined"             % refinedVersion,
-//       "eu.timepit"    %% "refined-cats"        % refinedVersion,
-//       "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test
-//     )
-//   )
-//   .enablePlugins(JavaAppPackaging)
-//
-// lazy val benchmark = project
-//   .in(file("modules/benchmarks"))
-//   .enablePlugins(GatlingPlugin)
-//   .settings(
-//     libraryDependencies ++= Seq(
-//       "io.circe"             %% "circe-core"                % circeVersion,
-//       "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % Test,
-//       "io.gatling"            % "gatling-test-framework"    % gatlingVersion % Test
-//     )
-//   )
-//   .dependsOn(service)
+lazy val itc = project
+  .in(file("modules/itc"))
+  .settings(commonSettings)
+  .settings(lucumaGlobalSettings)
+  .settings(
+    name := "lucuma-itc",
+    libraryDependencies ++= Seq(
+      "edu.gemini"     %% "lucuma-core"         % lucumaCoreVersion,
+      "org.typelevel"  %% "cats-core"           % catsVersion,
+      "org.typelevel"  %% "cats-effect"         % catsEffectVersion,
+      "org.http4s"     %% "http4s-ember-client" % http4sVersion,
+      "org.http4s"     %% "http4s-circe"        % http4sVersion,
+      "org.http4s"     %% "http4s-dsl"          % http4sVersion,
+      "io.circe"       %% "circe-literal"       % circeVersion,
+      "edu.gemini"     %% "clue-model"          % clueVersion,
+      "io.circe"       %% "circe-generic"       % circeVersion,
+      "org.tpolecat"   %% "natchez-http4s"      % natcchezHttp4sVersion,
+      "org.typelevel"  %% "log4cats-slf4j"      % log4catsVersion,
+      "com.manyangled" %% "coulomb-core"        % coulombVersion,
+      "com.manyangled" %% "coulomb-spire"       % coulombVersion,
+      "com.manyangled" %% "coulomb-units"       % coulombVersion
+      // "org.typelevel"  %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
+      // "org.typelevel" %%% "spire"               % spireVersion,
+      // "org.typelevel" %%% "spire-extras"        % spireVersion
+    )
+  )
+
+lazy val service = project
+  .in(file("modules/service"))
+  .dependsOn(itc)
+  .settings(commonSettings)
+  .settings(
+    name              := "lucuma-itc-service",
+    scalacOptions -= "-Vtype-diffs",
+    reStart / envVars := Map("ITC_URL" -> "https://gemini-new-itc.herokuapp.com/json"),
+    libraryDependencies ++= Seq(
+      "edu.gemini"    %% "gsp-graphql-core"    % grackleVersion,
+      "edu.gemini"    %% "gsp-graphql-generic" % grackleVersion,
+      "edu.gemini"    %% "gsp-graphql-circe"   % grackleVersion,
+      "org.tpolecat"  %% "natchez-honeycomb"   % natchezVersion,
+      "org.tpolecat"  %% "natchez-log"         % natchezVersion,
+      "org.tpolecat"  %% "natchez-http4s"      % natcchezHttp4sVersion,
+      "co.fs2"        %% "fs2-core"            % fs2Version,
+      "edu.gemini"    %% "lucuma-core"         % lucumaCoreVersion,
+      "org.typelevel" %% "cats-core"           % catsVersion,
+      "org.typelevel" %% "cats-effect"         % catsEffectVersion,
+      "is.cir"        %% "ciris"               % cirisVersion,
+      "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
+      "org.slf4j"      % "slf4j-simple"        % slf4jVersion,
+      "org.http4s"    %% "http4s-core"         % http4sVersion,
+      "org.http4s"    %% "http4s-blaze-server" % http4sVersion,
+      "eu.timepit"    %% "refined"             % refinedVersion,
+      "eu.timepit"    %% "refined-cats"        % refinedVersion,
+      "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test
+    )
+  )
+  .enablePlugins(JavaAppPackaging)
+
+lazy val benchmark = project
+  .in(file("modules/benchmarks"))
+  .enablePlugins(GatlingPlugin)
+  .settings(
+    libraryDependencies ++= Seq(
+      "io.circe"             %% "circe-core"                % circeVersion,
+      "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % Test,
+      "io.gatling"            % "gatling-test-framework"    % gatlingVersion % Test
+    )
+  )
+  .dependsOn(service)
