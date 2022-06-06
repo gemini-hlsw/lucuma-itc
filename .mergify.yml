@@ -12,30 +12,14 @@ pull_request_rules:
   - or:
     - body~=labels:.*early-semver-patch
     - body~=labels:.*early-semver-minor
-  - status-success=Build and Test (ubuntu-latest, 2.13.8, temurin@17)
+  - status-success=Build and Test (ubuntu-latest, 3.1.2, temurin@17)
   actions:
     merge: {}
-- name: Label benchmarks PRs
+- name: Label itc3 PRs
   conditions:
-  - files~=^modules/benchmarks/
+  - files~=^modules/itc3/
   actions:
     label:
       add:
-      - benchmarks
-      remove: []
-- name: Label itc PRs
-  conditions:
-  - files~=^modules/itc/
-  actions:
-    label:
-      add:
-      - itc
-      remove: []
-- name: Label service PRs
-  conditions:
-  - files~=^modules/service/
-  actions:
-    label:
-      add:
-      - service
+      - itc3
       remove: []
