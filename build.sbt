@@ -1,4 +1,4 @@
-val coulombVersion              = "0.5.8"
+val coulombVersion              = "0.6.0-M1"
 val catsEffectVersion           = "3.3.13"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsVersion                 = "2.8.0"
@@ -11,7 +11,7 @@ val http4sVersion               = "0.23.12"
 val http4sJdkHttpClientVersion  = "0.5.0"
 val fs2Version                  = "3.2.9"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.43.0"
+val lucumaCoreVersion           = "0.40-ceb35e3-SNAPSHOT"
 val slf4jVersion                = "1.7.36"
 val log4catsVersion             = "2.3.2"
 val monocleVersion              = "3.1.0"
@@ -23,8 +23,12 @@ val natchezVersion              = "0.1.6"
 val munitVersion                = "0.7.29"
 val disciplineMunitVersion      = "1.0.9"
 val gatlingVersion              = "3.7.6"
+lazy val spireVersion           = "0.18.0-M3"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
+
+ThisBuild / scalaVersion := "3.1.2"
+ThisBuild / scalacOptions += "-Xsource:3"
 
 addCommandAlias(
   "fixImports",
@@ -36,12 +40,25 @@ lazy val commonSettings = lucumaGlobalSettings ++ Seq(
     "org.typelevel" %% "cats-testkit"           % catsVersion                 % "test",
     "org.typelevel" %% "cats-testkit-scalatest" % catsTestkitScalaTestVersion % "test"
   ),
-  Test / parallelExecution := false, // tests run fine in parallel but output is nicer this way
-  scalacOptions ++= Seq(
-    "-Ymacro-annotations",
-    "-Ywarn-macros:after"
-  )
+  Test / parallelExecution := false // tests run fine in parallel but output is nicer this way
+  // scalacOptions ++= Seq(
+  //   "-Ymacro-annotations",
+  //   "-Ywarn-macros:after"
+  // )
 )
+
+lazy val itc3 = project
+  .in(file("modules/itc3"))
+  .settings(
+    name := "lucuma-itc3",
+    libraryDependencies ++= Seq(
+      // "edu.gemini"     %% "lucuma-core"   % lucumaCoreVersion,
+      // "org.typelevel"  %% "cats-core"     % catsVersion,
+      "com.manyangled" %% "coulomb-core"  % coulombVersion,
+      "com.manyangled" %% "coulomb-spire" % coulombVersion,
+      "com.manyangled" %% "coulomb-units" % coulombVersion
+    )
+  )
 
 lazy val itc = project
   .in(file("modules/itc"))
