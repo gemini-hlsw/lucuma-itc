@@ -3,26 +3,24 @@
 
 package lucuma.itc.service
 
+import algebra.instances.all.given
 import cats._
 import cats.data._
 import cats.effect._
 import cats.syntax.all._
 import coulomb.*
-import coulomb.syntax.*
-
-import algebra.instances.all.given
 import coulomb.ops.algebra.spire.all.given
-
 import coulomb.policy.spire.standard.given
+import coulomb.syntax.*
 import coulomb.units.si.*
-import coulomb.units.time.*
-import coulomb.units.si.prefixes.*
 import coulomb.units.si.given
-import eu.timepit.refined.types.numeric.NonNegInt
+import coulomb.units.si.prefixes.*
+import coulomb.units.time.*
 import edu.gemini.grackle._
 import edu.gemini.grackle.circe.CirceMapping
 import eu.timepit.refined._
 import eu.timepit.refined.numeric.Positive
+import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import io.circe.Encoder
 import io.circe.Json

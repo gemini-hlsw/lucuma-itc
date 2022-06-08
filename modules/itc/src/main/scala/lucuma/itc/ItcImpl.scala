@@ -3,26 +3,23 @@
 
 package lucuma.itc
 
+import algebra.instances.all.given
 import cats.ApplicativeError
 import cats.effect._
 import cats.syntax.all._
-
 import coulomb.*
-import coulomb.syntax.*
-
-import algebra.instances.all.given
 import coulomb.ops.algebra.spire.all.given
-
 import coulomb.policy.spire.standard.given
+import coulomb.syntax.*
 import coulomb.units.si.*
 import coulomb.units.si.given
 import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.syntax._
 import lucuma.core.math.Angle
+import lucuma.core.math.refined.*
 import lucuma.itc.Itc
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
-import lucuma.core.math.refined.*
 import natchez.Trace
 import natchez.http4s.NatchezMiddleware
 import org.http4s._

@@ -4,8 +4,8 @@
 package lucuma.itc.service
 
 import ciris.ConfigValue
-import ciris.env
 import ciris.Effect
+import ciris.env
 import ciris.prop
 
 package object config {

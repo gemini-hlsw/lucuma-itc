@@ -14,10 +14,10 @@ import natchez.Trace.Implicits.noop
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.syntax.all._
+import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.duration._
-import org.typelevel.log4cats.Logger
 
 trait GraphQLSuite extends munit.CatsEffectSuite {
   implicit val unsafeLogger: Logger[IO] = Slf4jLogger.getLogger[IO]

@@ -4,8 +4,8 @@
 package lucuma.itc.service.config
 
 import cats.implicits._
-import ciris._
 import ciris.ConfigValue.configValueNonEmptyParallel
+import ciris._
 
 case class HoneycombConfig(
   writeKey: String,
