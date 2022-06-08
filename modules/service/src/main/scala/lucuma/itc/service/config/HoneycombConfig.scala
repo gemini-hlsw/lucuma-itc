@@ -15,7 +15,7 @@ case class HoneycombConfig(
 object HoneycombConfig {
 
   val config: ConfigValue[Effect, HoneycombConfig] =
-    (envOrProp("HONEYCOMB_WRITE_KEY"), envOrProp("HONEYCOMB_DATASET")).mapN((a, b) =>
+    (envOrProp("HONEYCOMB_WRITE_KEY"), envOrProp("HONEYCOMB_DATASET")).parMapN((a, b) =>
       HoneycombConfig(a, b)
     )
 
