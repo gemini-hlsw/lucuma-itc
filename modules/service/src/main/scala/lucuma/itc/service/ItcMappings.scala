@@ -79,8 +79,6 @@ trait Encoders {
     type Micro
     final def apply(d: FiniteDuration): Json =
       val value: Quantity[Long, Nanosecond] = d.toNanos.withUnit[Nanosecond]
-      // val v2: Quantity[BigDecimal, Microsecond] = value.toUnit[Microsecond]
-      // val vl: Long                              = v2.value
 
       Json.obj(
         ("microseconds", Json.fromLong(value.toValue[BigDecimal].toUnit[Microsecond].value.toLong)),
@@ -221,9 +219,6 @@ object ItcMapping extends Encoders {
         Using(Source.fromResource("graphql/itc.graphql", getClass().getClassLoader())) { src =>
           Schema(src.mkString).right.get
         }.liftTo[F]
-      }
-      .handleError { e =>
-        println(e.getMessage); e.printStackTrace(); null
       }
 
   def spectroscopy[F[_]: ApplicativeThrow: Logger: Parallel: Trace](

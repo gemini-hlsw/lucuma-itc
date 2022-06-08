@@ -34,13 +34,12 @@ import org.http4s.dsl.io._
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.syntax.all._
 import org.typelevel.log4cats.Logger
-import spire.syntax
 
 import scala.concurrent.duration._
 import scala.math._
 
 /** An ITC implementation that calls the OCS2 ITC server remotely. */
-object ItcImpl extends syntax.IsRealSyntax {
+object ItcImpl {
 
   def forHeroku[F[_]: Async: Logger: Trace]: Resource[F, Itc[F]] =
     forUri(uri"https://gemini-itc.herokuapp.com/json")
