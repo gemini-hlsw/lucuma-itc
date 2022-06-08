@@ -79,7 +79,7 @@ trait Encoders {
       val value: Quantity[Long, Nanosecond] = d.toNanos.withUnit[Nanosecond]
 
       Json.obj(
-        ("microseconds", Json.fromLong(value.toValue[BigDecimal].toUnit[Microsecond].value.toLong)),
+        ("microseconds", Json.fromLong(value.tToUnit[Microsecond].value)),
         ("milliseconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Millisecond].value)),
         ("seconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Second].value)),
         ("minutes", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Minute].value)),
