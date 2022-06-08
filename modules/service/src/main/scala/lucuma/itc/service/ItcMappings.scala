@@ -7,11 +7,18 @@ import cats._
 import cats.data._
 import cats.effect._
 import cats.syntax.all._
-import coulomb._
-import coulomb.si.Kelvin
-import coulomb.si._
-import coulomb.siprefix._
-import coulomb.time._
+import coulomb.*
+import coulomb.syntax.*
+
+import algebra.instances.all.given
+import coulomb.ops.algebra.spire.all.given
+
+import coulomb.policy.spire.standard.given
+import coulomb.units.si.*
+import coulomb.units.time.*
+import coulomb.units.si.prefixes.*
+import coulomb.units.si.given
+import eu.timepit.refined.types.numeric.NonNegInt
 import edu.gemini.grackle._
 import edu.gemini.grackle.circe.CirceMapping
 import eu.timepit.refined._
@@ -64,22 +71,24 @@ import QueryCompiler._
 trait Encoders {
   import io.circe.generic.semiauto._
   import io.circe.syntax._
-  type Nanosecond  = Nano %* Second
-  type Microsecond = Micro %* Second
-  type Millisecond = Milli %* Second
+  type Nanosecond  = Nano * Second
+  type Microsecond = Micro * Second
+  type Millisecond = Milli * Second
 
   implicit val encoderFiniteDuration: Encoder[FiniteDuration] = new Encoder[FiniteDuration] {
     type Micro
-    final def apply(d: FiniteDuration): Json = {
-      val value = d.toNanos.withUnit[Nanosecond]
+    final def apply(d: FiniteDuration): Json =
+      val value: Quantity[Long, Nanosecond] = d.toNanos.withUnit[Nanosecond]
+      // val v2: Quantity[BigDecimal, Microsecond] = value.toUnit[Microsecond]
+      // val vl: Long                              = v2.value
+
       Json.obj(
-        ("microseconds", Json.fromLong(value.toUnit[Microsecond].value)),
-        ("milliseconds", Json.fromBigDecimal(value.to[BigDecimal, Millisecond].value)),
-        ("seconds", Json.fromBigDecimal(value.to[BigDecimal, Second].value)),
-        ("minutes", Json.fromBigDecimal(value.to[BigDecimal, Minute].value)),
-        ("hours", Json.fromBigDecimal(value.to[BigDecimal, Hour].value))
+        ("microseconds", Json.fromLong(value.toValue[BigDecimal].toUnit[Microsecond].value.toLong)),
+        ("milliseconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Millisecond].value)),
+        ("seconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Second].value)),
+        ("minutes", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Minute].value)),
+        ("hours", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Hour].value))
       )
-    }
   }
 
   implicit val encoderItcResultSuccess: Encoder[Itc.Result.Success] =
@@ -213,9 +222,11 @@ object ItcMapping extends Encoders {
           Schema(src.mkString).right.get
         }.liftTo[F]
       }
-      .handleError { e => println(e.getMessage); e.printStackTrace(); null }
+      .handleError { e =>
+        println(e.getMessage); e.printStackTrace(); null
+      }
 
-  def spectroscopy[F[_]: ApplicativeError[*[_], Throwable]: Logger: Parallel: Trace](
+  def spectroscopy[F[_]: ApplicativeThrow: Logger: Parallel: Trace](
     itc: Itc[F]
   )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] =
     (env.get[Wavelength]("wavelength"),
@@ -292,7 +303,7 @@ object ItcMapping extends Encoders {
   def parseRadialVelocity(units: List[(String, Value)]): Option[RadialVelocity] =
     units.find(_._2 != Value.AbsentValue) match {
       case Some(("centimetersPerSecond", IntValue(n))) =>
-        RadialVelocity(n.withUnit[CentimetersPerSecond].to[BigDecimal, MetersPerSecond])
+        RadialVelocity(n.withUnit[CentimetersPerSecond].toValue[BigDecimal].toUnit[MetersPerSecond])
       case Some(("metersPerSecond", n))                =>
         bigDecimalValue(n).flatMap(v => RadialVelocity(v.withUnit[MetersPerSecond]))
       case Some(("kilometersPerSecond", n))            =>

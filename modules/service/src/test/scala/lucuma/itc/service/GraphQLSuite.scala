@@ -17,9 +17,10 @@ import org.http4s.syntax.all._
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.duration._
+import org.typelevel.log4cats.Logger
 
 trait GraphQLSuite extends munit.CatsEffectSuite {
-  implicit val unsafeLogger = Slf4jLogger.getLogger[IO]
+  implicit val unsafeLogger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
   val itc = new Itc[IO] {
     def calculate(

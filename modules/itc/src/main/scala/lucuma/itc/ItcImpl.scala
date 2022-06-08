@@ -7,23 +7,15 @@ import cats.ApplicativeError
 import cats.effect._
 import cats.syntax.all._
 
-import coulomb._
-import coulomb.syntax._
+import coulomb.*
+import coulomb.syntax.*
 
 import algebra.instances.all.given
 import coulomb.ops.algebra.spire.all.given
 
 import coulomb.policy.spire.standard.given
-import coulomb.units.si._
+import coulomb.units.si.*
 import coulomb.units.si.given
-// import coulomb._
-// import coulomb.syntax._
-// import coulomb.units.si.Second
-// import coulomb.policy.spire.standard.`given`
-// import coulomb.ops.algebra.spire.all.given
-// import algebra.instances.all.given
-// import coulomb.ops.resolution.*
-// import eu.timepit.refined.auto._
 import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.syntax._
 import lucuma.core.math.Angle
@@ -42,7 +34,6 @@ import org.http4s.dsl.io._
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.syntax.all._
 import org.typelevel.log4cats.Logger
-// import spire.std.bigDecimal._
 import spire.syntax
 
 import scala.concurrent.duration._

@@ -44,24 +44,8 @@ lazy val commonSettings = lucumaGlobalSettings ++ Seq(
   scalacOptions ++= Seq(
     "-language:implicitConversions"
   )
-  //   "-Ymacro-annotations",
-  //   "-Ywarn-macros:after"
-  // )
 )
 
-// lazy val itc3 = project
-//   .in(file("modules/itc3"))
-//   .settings(
-//     name := "lucuma-itc3",
-//     libraryDependencies ++= Seq(
-//       // "edu.gemini"     %% "lucuma-core"   % lucumaCoreVersion,
-//       // "org.typelevel"  %% "cats-core"     % catsVersion,
-//       "com.manyangled" %% "coulomb-core"  % coulombVersion,
-//       "com.manyangled" %% "coulomb-spire" % coulombVersion,
-//       "com.manyangled" %% "coulomb-units" % coulombVersion
-//     )
-//   )
-//
 lazy val itc = project
   .in(file("modules/itc"))
   .settings(commonSettings)
@@ -82,10 +66,9 @@ lazy val itc = project
       "org.typelevel"  %% "log4cats-slf4j"      % log4catsVersion,
       "com.manyangled" %% "coulomb-core"        % coulombVersion,
       "com.manyangled" %% "coulomb-spire"       % coulombVersion,
-      "com.manyangled" %% "coulomb-units"       % coulombVersion
-      // "org.typelevel"  %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
-      // "org.typelevel" %%% "spire"               % spireVersion,
-      // "org.typelevel" %%% "spire-extras"        % spireVersion
+      "com.manyangled" %% "coulomb-units"       % coulombVersion,
+      "org.typelevel" %%% "spire"               % spireVersion,
+      "org.typelevel" %%% "spire-extras"        % spireVersion
     )
   )
 
@@ -120,14 +103,14 @@ lazy val service = project
   )
   .enablePlugins(JavaAppPackaging)
 
-lazy val benchmark = project
-  .in(file("modules/benchmarks"))
-  .enablePlugins(GatlingPlugin)
-  .settings(
-    libraryDependencies ++= Seq(
-      "io.circe"             %% "circe-core"                % circeVersion,
-      "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % Test,
-      "io.gatling"            % "gatling-test-framework"    % gatlingVersion % Test
-    )
-  )
-  .dependsOn(service)
+// lazy val benchmark = project
+//   .in(file("modules/benchmarks"))
+//   .enablePlugins(GatlingPlugin)
+//   .settings(
+//     libraryDependencies ++= Seq(
+//       // "io.circe"             %% "circe-core"                % circeVersion,
+//       // "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % Test,
+//       "io.gatling" % "gatling-test-framework_2.13" % gatlingVersion
+//     )
+//   )
+//   // .dependsOn(service)

@@ -4,8 +4,8 @@
 package lucuma.itc
 
 import cats.implicits._
-import coulomb._
-import coulomb.si.Kelvin
+import coulomb.*
+import coulomb.units.si.*
 import eu.timepit.refined.auto._
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax._

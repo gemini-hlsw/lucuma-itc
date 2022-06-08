@@ -5,10 +5,11 @@ package lucuma.itc.service
 
 import ciris.ConfigValue
 import ciris.env
+import ciris.Effect
 import ciris.prop
 
 package object config {
-  def envOrProp[F[_]](name: String): ConfigValue[F, String] =
+  def envOrProp(name: String): ConfigValue[Effect, String] =
     env(name).or(prop(name))
 
 }
