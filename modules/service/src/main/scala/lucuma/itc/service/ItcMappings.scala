@@ -256,7 +256,7 @@ object ItcMapping extends Encoders {
         .handleErrorWith { case x =>
           Problem(s"Error calculating itc $x").leftIorNec.pure[F]
         }
-    }.map(_.getOrElse((Problem("Missing parameters for spectroscopy")).leftIorNec))
+    }.map(_.getOrElse(Problem("Missing parameters for spectroscopy").leftIorNec))
 
   def bigDecimalValue(v: Value): Option[BigDecimal] = v match {
     case IntValue(r)    => BigDecimal(r).some
@@ -553,7 +553,7 @@ object ItcMapping extends Encoders {
                                                   IorNec[Problem, Environment]
         ] = {
           case (i, ("sourceProfile", ObjectValue(v))) if v.length === 3 =>
-            (v match {
+            v match {
               case ("point", AbsentValue) ::
                   ("uniform", ObjectValue(ov)) ::
                   ("gaussian", AbsentValue) :: Nil =>
@@ -641,7 +641,7 @@ object ItcMapping extends Encoders {
                 }
                 gaussian.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
               case _ => i.addProblem("Unsupported source profile")
-            })
+            }
           case (i, ("sourceProfile", v))                                =>
             i.addProblem(s"Cannot parse sourceProfile $v")
         }
