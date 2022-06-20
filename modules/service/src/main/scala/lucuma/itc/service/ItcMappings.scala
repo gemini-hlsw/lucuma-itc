@@ -19,9 +19,9 @@ import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import io.circe.Encoder
 import io.circe.Json
-import lucuma.core.enum.SkyBackground
-import lucuma.core.enum.WaterVapor
-import lucuma.core.enum._
+import lucuma.core.enums.SkyBackground
+import lucuma.core.enums.WaterVapor
+import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.BrightnessUnits._
 import lucuma.core.math.RadialVelocity

@@ -6,7 +6,7 @@ package lucuma.itc.search
 import cats._
 import cats.syntax.all._
 import eu.timepit.refined.types.numeric.PosInt
-import lucuma.core.enum._
+import lucuma.core.enums._
 import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.search.gmosnorth.GmosNorthFilterSelector

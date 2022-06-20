@@ -3,7 +3,7 @@
 
 package lucuma.itc.search.syntax
 
-import lucuma.core.enum.HIIRegionSpectrum
+import lucuma.core.enums.HIIRegionSpectrum
 
 /**
  * Syntax extensions for missing ocs2Tag items

@@ -5,7 +5,7 @@ package lucuma.itc
 
 import io.circe.Encoder
 import io.circe.Json
-import lucuma.core.enum._
+import lucuma.core.enums._
 import lucuma.itc.search.syntax.all._
 
 import java.math.MathContext

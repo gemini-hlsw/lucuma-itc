@@ -3,7 +3,7 @@
 
 package lucuma.itc.search.syntax
 
-import lucuma.core.enum.PlanetSpectrum
+import lucuma.core.enums.PlanetSpectrum
 
 /**
  * Syntax extensions for missing ocs2Tag items

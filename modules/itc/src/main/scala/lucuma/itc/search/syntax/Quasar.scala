@@ -3,7 +3,7 @@
 
 package lucuma.itc.search.syntax
 
-import lucuma.core.enum.QuasarSpectrum
+import lucuma.core.enums.QuasarSpectrum
 
 /**
  * Syntax extensions for missing ocs2Tag items

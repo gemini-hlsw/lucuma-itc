@@ -3,7 +3,7 @@
 
 package lucuma.itc.search.syntax
 
-import lucuma.core.enum.StellarLibrarySpectrum
+import lucuma.core.enums.StellarLibrarySpectrum
 
 /**
  * Syntax extensions for missing ocs2Tag items

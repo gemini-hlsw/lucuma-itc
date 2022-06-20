@@ -4,8 +4,8 @@
 package lucuma.itc.search.syntax
 
 import eu.timepit.refined.auto._
-import lucuma.core.enum.GmosNorthGrating
-import lucuma.core.enum.GmosNorthGrating._
+import lucuma.core.enums.GmosNorthGrating
+import lucuma.core.enums.GmosNorthGrating._
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import spire.math.Rational

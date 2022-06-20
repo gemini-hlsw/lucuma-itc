@@ -3,7 +3,7 @@
 
 package lucuma.itc.search.syntax
 
-import lucuma.core.enum.CoolStarTemperature
+import lucuma.core.enums.CoolStarTemperature
 import lucuma.core.model.UnnormalizedSED.CoolStarModel
 
 /**
