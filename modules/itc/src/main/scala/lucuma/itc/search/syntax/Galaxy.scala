@@ -3,7 +3,7 @@
 
 package lucuma.itc.search.syntax
 
-import lucuma.core.enum.GalaxySpectrum
+import lucuma.core.enums.GalaxySpectrum
 
 /**
  * Syntax extensions for missing ocs2Tag items

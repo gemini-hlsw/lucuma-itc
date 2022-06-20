@@ -3,7 +3,7 @@
 
 package lucuma.itc.search
 
-import lucuma.core.enum.Band
+import lucuma.core.enums.Band
 import lucuma.core.math.Redshift
 import lucuma.core.model.SourceProfile
 

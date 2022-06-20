@@ -6,7 +6,7 @@ package lucuma.itc
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax._
-import lucuma.core.enum._
+import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.Redshift
 import lucuma.core.model.SourceProfile

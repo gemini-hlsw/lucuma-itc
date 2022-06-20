@@ -3,8 +3,8 @@
 
 package lucuma.itc.search.syntax
 
-import lucuma.core.enum.GmosSouthFpu
-import lucuma.core.enum.GmosSouthFpu._
+import lucuma.core.enums.GmosSouthFpu
+import lucuma.core.enums.GmosSouthFpu._
 import lucuma.core.math.Angle
 
 /**

@@ -4,10 +4,10 @@
 package lucuma.itc.search.gmosnorth
 
 import cats.implicits._
-import lucuma.core.enum.GmosNorthFilter._
-import lucuma.core.enum.GmosNorthFpu._
-import lucuma.core.enum.GmosNorthGrating._
-import lucuma.core.enum._
+import lucuma.core.enums.GmosNorthFilter._
+import lucuma.core.enums.GmosNorthFpu._
+import lucuma.core.enums.GmosNorthGrating._
+import lucuma.core.enums._
 import lucuma.core.math.Wavelength
 
 object GmosNorthFilterSelector {

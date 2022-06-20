@@ -3,7 +3,7 @@
 
 package lucuma.itc.syntax
 
-import lucuma.core.enum.Instrument
+import lucuma.core.enums.Instrument
 
 import scala.concurrent.duration._
 

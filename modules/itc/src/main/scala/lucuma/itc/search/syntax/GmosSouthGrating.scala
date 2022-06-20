@@ -5,8 +5,8 @@ package lucuma.itc.search.syntax
 
 import eu.timepit.refined.auto._
 import eu.timepit.refined.types.numeric.PosInt
-import lucuma.core.enum.GmosSouthGrating
-import lucuma.core.enum.GmosSouthGrating._
+import lucuma.core.enums.GmosSouthGrating
+import lucuma.core.enums.GmosSouthGrating._
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import spire.math.Rational

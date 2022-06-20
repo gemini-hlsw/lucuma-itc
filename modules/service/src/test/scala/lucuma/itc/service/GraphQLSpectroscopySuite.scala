@@ -5,7 +5,7 @@ package lucuma.itc.service
 
 import cats.syntax.all._
 import io.circe.literal._
-import lucuma.core.enum._
+import lucuma.core.enums._
 import lucuma.core.syntax.enumerated._
 import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated

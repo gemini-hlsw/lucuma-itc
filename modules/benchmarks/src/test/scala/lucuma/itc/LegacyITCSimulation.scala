@@ -12,7 +12,7 @@ import io.circe.syntax._
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import io.gatling.http.funspec.GatlingHttpFunSpec
-import lucuma.core.enum._
+import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.BrightnessUnits._
 import lucuma.core.math.Redshift
