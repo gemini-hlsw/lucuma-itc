@@ -1,4 +1,4 @@
-val coulombVersion              = "0.6.0-M1"
+val coulombVersion              = "0.6.0-M2"
 val catsEffectVersion           = "3.3.13"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsVersion                 = "2.8.0"
@@ -11,7 +11,7 @@ val http4sVersion               = "0.23.12"
 val http4sJdkHttpClientVersion  = "0.5.0"
 val fs2Version                  = "3.2.9"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.40-ceb35e3-SNAPSHOT"
+val lucumaCoreVersion           = "0.41-8517424-SNAPSHOT"
 val slf4jVersion                = "1.7.36"
 val log4catsVersion             = "2.3.2"
 val monocleVersion              = "3.1.0"
@@ -23,7 +23,7 @@ val natchezVersion              = "0.1.6"
 val munitVersion                = "0.7.29"
 val disciplineMunitVersion      = "1.0.9"
 val gatlingVersion              = "3.7.6"
-lazy val spireVersion           = "0.18.0-M3"
+val spireVersion                = "0.18.0"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 

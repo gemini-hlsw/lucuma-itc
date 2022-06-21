@@ -24,8 +24,6 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import io.circe.Encoder
 import io.circe.Json
-import lucuma.core.enums.SkyBackground
-import lucuma.core.enums.WaterVapor
 import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.BrightnessUnits._
