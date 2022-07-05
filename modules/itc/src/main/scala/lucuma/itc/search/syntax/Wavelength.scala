@@ -8,7 +8,6 @@ import coulomb.policy.spire.standard.given
 import eu.timepit.refined._
 import eu.timepit.refined.numeric.Positive
 import lucuma.core.math.Wavelength
-import lucuma.core.math.refined.*
 import spire.std.int._
 
 final class WavelengthOps(val self: Wavelength) extends AnyVal {

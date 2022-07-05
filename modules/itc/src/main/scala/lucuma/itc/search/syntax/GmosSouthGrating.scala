@@ -4,13 +4,13 @@
 package lucuma.itc.search.syntax
 
 import eu.timepit.refined.auto._
+import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.enums.GmosSouthGrating
 import lucuma.core.enums.GmosSouthGrating._
-import eu.timepit.refined.numeric.Positive
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
-import lucuma.core.math.refined.*
+import lucuma.refined.*
 import spire.math.Rational
 
 /**

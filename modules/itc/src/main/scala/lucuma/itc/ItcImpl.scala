@@ -16,10 +16,10 @@ import coulomb.units.si.given
 import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.syntax._
 import lucuma.core.math.Angle
-import lucuma.core.math.refined.*
 import lucuma.itc.Itc
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
+import lucuma.refined.*
 import natchez.Trace
 import natchez.http4s.NatchezMiddleware
 import org.http4s._

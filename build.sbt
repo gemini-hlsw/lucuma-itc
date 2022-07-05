@@ -11,7 +11,8 @@ val http4sVersion               = "0.23.12"
 val http4sJdkHttpClientVersion  = "0.5.0"
 val fs2Version                  = "3.2.9"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.41-8517424-SNAPSHOT"
+val lucumaCoreVersion           = "0.44-13de521-SNAPSHOT"
+val lucumaRefinedVersion        = "0.0-e39b79d-SNAPSHOT"
 val slf4jVersion                = "1.7.36"
 val log4catsVersion             = "2.3.2"
 val monocleVersion              = "3.1.0"
@@ -54,6 +55,7 @@ lazy val itc = project
     name := "lucuma-itc",
     libraryDependencies ++= Seq(
       "edu.gemini"     %% "lucuma-core"         % lucumaCoreVersion,
+      "edu.gemini"    %%% "lucuma-refined"      % lucumaRefinedVersion,
       "org.typelevel"  %% "cats-core"           % catsVersion,
       "org.typelevel"  %% "cats-effect"         % catsEffectVersion,
       "org.http4s"     %% "http4s-ember-client" % http4sVersion,
