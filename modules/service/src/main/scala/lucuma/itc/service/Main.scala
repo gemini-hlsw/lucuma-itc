@@ -7,6 +7,7 @@ import cats.Applicative
 import cats.Parallel
 import cats.effect._
 import cats.syntax.all._
+import com.comcast.ip4s._
 import lucuma.itc.ItcImpl
 import lucuma.itc.service.config.Environment._
 import lucuma.itc.service.config._
@@ -18,7 +19,7 @@ import natchez.http4s.implicits._
 import natchez.log.Log
 import org.http4s.HttpApp
 import org.http4s._
-import org.http4s.blaze.server.BlazeServerBuilder
+import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits._
 import org.http4s.server.Server
 import org.http4s.server.middleware.CORS
@@ -74,10 +75,12 @@ object Main extends IOApp {
 
   def serverResource[F[_]: Async](app: HttpApp[F], cfg: Config): Resource[F, Server] =
     // Spin up the server ...
-    BlazeServerBuilder[F]
-      .bindHttp(cfg.port, "0.0.0.0")
+    EmberServerBuilder
+      .default[F]
+      .withHost(ipv4"0.0.0.0")
+      .withPort(Port.fromInt(cfg.port).get)
       .withHttpApp(app)
-      .resource
+      .build
 
   def routes[F[_]: Async: Parallel: Trace](cfg: Config): Resource[F, HttpRoutes[F]] =
     for {
