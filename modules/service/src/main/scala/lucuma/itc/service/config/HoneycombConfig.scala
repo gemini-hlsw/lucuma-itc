@@ -3,7 +3,8 @@
 
 package lucuma.itc.service.config
 
-import cats.syntax.all._
+import cats.implicits._
+import ciris.ConfigValue.configValueNonEmptyParallel
 import ciris._
 
 case class HoneycombConfig(
@@ -14,8 +15,8 @@ case class HoneycombConfig(
 object HoneycombConfig {
 
   val config: ConfigValue[Effect, HoneycombConfig] =
-    (envOrProp("HONEYCOMB_WRITE_KEY"), envOrProp("HONEYCOMB_DATASET")).parMapN(
-      HoneycombConfig(_, _)
+    (envOrProp("HONEYCOMB_WRITE_KEY"), envOrProp("HONEYCOMB_DATASET")).parMapN((a, b) =>
+      HoneycombConfig(a, b)
     )
 
 }

@@ -1,4 +1,4 @@
-val coulombVersion              = "0.5.8"
+val coulombVersion              = "0.6.0-M2"
 val catsEffectVersion           = "3.3.13"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsVersion                 = "2.8.0"
@@ -11,7 +11,8 @@ val http4sVersion               = "0.23.13"
 val http4sJdkHttpClientVersion  = "0.5.0"
 val fs2Version                  = "3.2.9"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.43.0"
+val lucumaCoreVersion           = "0.44-13de521-SNAPSHOT"
+val lucumaRefinedVersion        = "0.0-e39b79d-SNAPSHOT"
 val slf4jVersion                = "1.7.36"
 val log4catsVersion             = "2.3.2"
 val monocleVersion              = "3.1.0"
@@ -23,8 +24,12 @@ val natchezVersion              = "0.1.6"
 val munitVersion                = "0.7.29"
 val disciplineMunitVersion      = "1.0.9"
 val gatlingVersion              = "3.7.6"
+val spireVersion                = "0.18.0"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
+
+ThisBuild / scalaVersion       := "3.1.2"
+ThisBuild / crossScalaVersions := Seq("3.1.2")
 
 addCommandAlias(
   "fixImports",
@@ -38,18 +43,19 @@ lazy val commonSettings = lucumaGlobalSettings ++ Seq(
   ),
   Test / parallelExecution := false, // tests run fine in parallel but output is nicer this way
   scalacOptions ++= Seq(
-    "-Ymacro-annotations",
-    "-Ywarn-macros:after"
+    "-language:implicitConversions"
   )
 )
 
 lazy val itc = project
   .in(file("modules/itc"))
   .settings(commonSettings)
+  .settings(lucumaGlobalSettings)
   .settings(
     name := "lucuma-itc",
     libraryDependencies ++= Seq(
       "edu.gemini"     %% "lucuma-core"         % lucumaCoreVersion,
+      "edu.gemini"    %%% "lucuma-refined"      % lucumaRefinedVersion,
       "org.typelevel"  %% "cats-core"           % catsVersion,
       "org.typelevel"  %% "cats-effect"         % catsEffectVersion,
       "org.http4s"     %% "http4s-ember-client" % http4sVersion,
@@ -60,9 +66,11 @@ lazy val itc = project
       "io.circe"       %% "circe-generic"       % circeVersion,
       "org.tpolecat"   %% "natchez-http4s"      % natcchezHttp4sVersion,
       "org.typelevel"  %% "log4cats-slf4j"      % log4catsVersion,
-      "com.manyangled" %% "coulomb"             % coulombVersion,
-      "com.manyangled" %% "coulomb-cats"        % coulombVersion,
-      "org.typelevel"  %% "munit-cats-effect-3" % munitCatsEffectVersion % Test
+      "com.manyangled" %% "coulomb-core"        % coulombVersion,
+      "com.manyangled" %% "coulomb-spire"       % coulombVersion,
+      "com.manyangled" %% "coulomb-units"       % coulombVersion,
+      "org.typelevel" %%% "spire"               % spireVersion,
+      "org.typelevel" %%% "spire-extras"        % spireVersion
     )
   )
 
@@ -97,14 +105,14 @@ lazy val service = project
   )
   .enablePlugins(JavaAppPackaging)
 
-lazy val benchmark = project
-  .in(file("modules/benchmarks"))
-  .enablePlugins(GatlingPlugin)
-  .settings(
-    libraryDependencies ++= Seq(
-      "io.circe"             %% "circe-core"                % circeVersion,
-      "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % Test,
-      "io.gatling"            % "gatling-test-framework"    % gatlingVersion % Test
-    )
-  )
-  .dependsOn(service)
+// lazy val benchmark = project
+//   .in(file("modules/benchmarks"))
+//   .enablePlugins(GatlingPlugin)
+//   .settings(
+//     libraryDependencies ++= Seq(
+//       // "io.circe"             %% "circe-core"                % circeVersion,
+//       // "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % Test,
+//       "io.gatling" % "gatling-test-framework_2.13" % gatlingVersion
+//     )
+//   )
+//   // .dependsOn(service)

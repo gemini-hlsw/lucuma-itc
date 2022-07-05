@@ -3,18 +3,23 @@
 
 package lucuma.itc
 
+import algebra.instances.all.given
 import cats.ApplicativeError
 import cats.effect._
 import cats.syntax.all._
-import coulomb._
-import coulomb.si.Second
-import eu.timepit.refined.auto._
-import eu.timepit.refined.types.numeric._
+import coulomb.*
+import coulomb.ops.algebra.spire.all.given
+import coulomb.policy.spire.standard.given
+import coulomb.syntax.*
+import coulomb.units.si.*
+import coulomb.units.si.given
+import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.syntax._
 import lucuma.core.math.Angle
 import lucuma.itc.Itc
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
+import lucuma.refined.*
 import natchez.Trace
 import natchez.http4s.NatchezMiddleware
 import org.http4s._
@@ -26,7 +31,6 @@ import org.http4s.dsl.io._
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.syntax.all._
 import org.typelevel.log4cats.Logger
-import spire.implicits._
 
 import scala.concurrent.duration._
 import scala.math._
@@ -86,7 +90,7 @@ object ItcImpl {
             Trace[F].put("itc.level" -> level.value) *>
             c.run(POST(json, uri)).use {
               case Status.Successful(resp) =>
-                implicit val decoder = jsonOf[F, ItcResult]
+                implicit val decoder: EntityDecoder[F, ItcResult] = jsonOf[F, ItcResult]
                 resp.as[ItcResult]
               case resp                    =>
                 resp.bodyText
@@ -133,9 +137,10 @@ object ItcImpl {
             Concurrent[F].raiseError(new ItcCalculationError("S/N obtained is 0"))
           } else {
             val totalTime: Quantity[BigDecimal, Second] =
-              expTime * nExp.withUnit[Unitless] * pow(requestedSN / snr, 2).withUnit[Unitless]
-            val newNExp: BigDecimal                     = (totalTime / maxTime).value.ceil
-            val newExpTime: BigDecimal                  = (totalTime / newNExp.withUnit[Unitless]).value.ceil
+              expTime * nExp.withUnit[1] * pow(requestedSN / snr, 2).withUnit[1]
+            val newNExp: BigDecimal                     = spire.math.ceil((totalTime / maxTime).value)
+            val newExpTime: BigDecimal                  =
+              spire.math.ceil((totalTime / newNExp.withUnit[1]).value)
             val next                                    = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
             L.info(s"Total time: $totalTime maxTime: $maxTime") *>
               L.info(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
@@ -143,7 +148,7 @@ object ItcImpl {
                   nExp != oldNExp ||
                   ((expTime - oldExpTime) > 1.withUnit[Second] || (oldExpTime - expTime) > 1
                     .withUnit[Second]) &&
-                  counter < MaxIterations &&
+                  counter.value < MaxIterations &&
                   newExpTime < (pow(2, 63) - 1)
                 ) {
                   itc(targetProfile,
@@ -179,7 +184,13 @@ object ItcImpl {
           ) *>
           Trace[F].span("itc") {
 
-            itc(targetProfile, observingMode, constraints, startExpTime, numberOfExposures, 1)
+            itc(targetProfile,
+                observingMode,
+                constraints,
+                startExpTime,
+                numberOfExposures,
+                1.refined
+            )
               .flatMap { r =>
                 val halfWellTime = r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime.value
                 L.info(
@@ -197,7 +208,7 @@ object ItcImpl {
                             r.maxTotalSNRatio,
                             maxTime.withUnit[Second],
                             r,
-                            0
+                            0.refined
                     )
                   }
                 }
