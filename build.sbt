@@ -7,7 +7,7 @@ val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.2"
 val cirisVersion                = "2.3.2"
 val clueVersion                 = "0.23.0"
-val http4sVersion               = "0.23.12"
+val http4sVersion               = "0.23.13"
 val http4sJdkHttpClientVersion  = "0.5.0"
 val fs2Version                  = "3.2.9"
 val kindProjectorVersion        = "0.13.2"
@@ -89,7 +89,7 @@ lazy val service = project
       "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
       "org.slf4j"      % "slf4j-simple"        % slf4jVersion,
       "org.http4s"    %% "http4s-core"         % http4sVersion,
-      "org.http4s"    %% "http4s-blaze-server" % http4sVersion,
+      "org.http4s"    %% "http4s-ember-server" % http4sVersion,
       "eu.timepit"    %% "refined"             % refinedVersion,
       "eu.timepit"    %% "refined-cats"        % refinedVersion,
       "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test
