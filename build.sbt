@@ -28,8 +28,8 @@ val spireVersion                = "0.18.0"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / scalaVersion       := "3.1.2"
-ThisBuild / crossScalaVersions := Seq("3.1.2")
+ThisBuild / scalaVersion       := "3.1.3"
+ThisBuild / crossScalaVersions := Seq("3.1.3")
 
 addCommandAlias(
   "fixImports",
