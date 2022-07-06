@@ -31,8 +31,7 @@ type Millisecond = Milli * Second
 given Encoder[NonEmptyString] = (s: NonEmptyString) => s.value.asJson
 given Encoder[PosInt]         = (s: PosInt) => s.value.asJson
 
-given Encoder[FiniteDuration] = new Encoder[FiniteDuration]:
-  def apply(d: FiniteDuration): Json =
+given Encoder[FiniteDuration] = d =>
     val value: Quantity[Long, Nanosecond] = d.toNanos.withUnit[Nanosecond]
 
     Json.obj(
