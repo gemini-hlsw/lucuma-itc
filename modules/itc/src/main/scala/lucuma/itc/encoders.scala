@@ -32,18 +32,18 @@ given Encoder[NonEmptyString] = (s: NonEmptyString) => s.value.asJson
 given Encoder[PosInt]         = (s: PosInt) => s.value.asJson
 
 given Encoder[FiniteDuration] = d =>
-    val value: Quantity[Long, Nanosecond] = d.toNanos.withUnit[Nanosecond]
+  val value: Quantity[Long, Nanosecond] = d.toNanos.withUnit[Nanosecond]
 
-    Json.obj(
-      ("microseconds", Json.fromLong(value.tToUnit[Microsecond].value)),
-      ("milliseconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Millisecond].value)),
-      ("seconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Second].value)),
-      ("minutes", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Minute].value)),
-      ("hours", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Hour].value))
-    )
+  Json.obj(
+    ("microseconds", Json.fromLong(value.tToUnit[Microsecond].value)),
+    ("milliseconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Millisecond].value)),
+    ("seconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Second].value)),
+    ("minutes", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Minute].value)),
+    ("hours", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Hour].value))
+  )
 
-given Encoder[Wavelength] = new Encoder[Wavelength]:
-  def apply(w: Wavelength): Json = Json.obj(
+given Encoder[Wavelength] = w =>
+  Json.obj(
     ("picometers", Json.fromInt(w.toPicometers.value.value)),
     ("angstrom", Json.fromBigDecimal(w.angstrom.value.toBigDecimal(2, RoundingMode.CEILING))),
     ("nanometers",
@@ -58,16 +58,16 @@ given Encoder[Wavelength] = new Encoder[Wavelength]:
     )
   )
 
-given Encoder[GmosNorth] = new Encoder[GmosNorth]:
-  def apply(a: GmosNorth): Json = Json.obj(
+given Encoder[GmosNorth] = a =>
+  Json.obj(
     ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
     ("resolution", Json.fromInt(a.resolution.toInt)),
     ("params", GmosNITCParams(a.disperser, a.fpu, a.filter).asJson),
     ("wavelength", a.λ.asJson)
   )
 
-given Encoder[GmosSouth] = new Encoder[GmosSouth]:
-  def apply(a: GmosSouth): Json = Json.obj(
+given Encoder[GmosSouth] = a =>
+  Json.obj(
     ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
     ("resolution", Json.fromInt(a.resolution.toInt)),
     ("params", GmosSITCParams(a.disperser, a.fpu, a.filter).asJson),

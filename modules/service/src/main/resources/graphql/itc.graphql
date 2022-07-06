@@ -4893,7 +4893,7 @@ type Result {
 
 type SpectroscopyResult {
 
-  serverVersion: String!
+  serverVersion: NonEmptyString!
 
   # Search results
   results: [Result!]!
