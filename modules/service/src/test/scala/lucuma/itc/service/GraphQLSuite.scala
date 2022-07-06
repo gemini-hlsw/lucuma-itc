@@ -10,6 +10,7 @@ import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
+import lucuma.itc.service.config.ExecutionEnvironment
 import natchez.Trace.Implicits.noop
 import org.http4s._
 import org.http4s.circe._
@@ -35,7 +36,9 @@ trait GraphQLSuite extends munit.CatsEffectSuite {
   }
 
   val service: IO[HttpRoutes[IO]] =
-    ItcMapping[IO](itc).map(m => ItcService.routes[IO](ItcService.service[IO](m)))
+    ItcMapping[IO](ExecutionEnvironment.Local, itc).map(m =>
+      ItcService.routes[IO](ItcService.service[IO](m))
+    )
 
   val itcFixture = ResourceSuiteLocalFixture(
     "itc",

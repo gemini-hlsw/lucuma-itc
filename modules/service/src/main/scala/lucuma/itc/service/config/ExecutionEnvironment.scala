@@ -6,20 +6,18 @@ package lucuma.itc.service.config
 import cats.implicits._
 import ciris._
 
-sealed trait Environment
-object Environment {
+sealed trait ExecutionEnvironment
+object ExecutionEnvironment:
 
-  case object Local      extends Environment
-  case object Review     extends Environment
-  case object Staging    extends Environment
-  case object Production extends Environment
+  case object Local      extends ExecutionEnvironment
+  case object Review     extends ExecutionEnvironment
+  case object Staging    extends ExecutionEnvironment
+  case object Production extends ExecutionEnvironment
 
-  implicit val ConfigDecoderEnvironment: ConfigDecoder[String, Environment] =
+  given ConfigDecoder[String, ExecutionEnvironment] =
     ConfigDecoder[String].map(_.toLowerCase).collect("Environment") {
       case "local"      => Local
       case "review"     => Review
       case "staging"    => Staging
       case "production" => Production
     }
-
-}

@@ -4,6 +4,7 @@
 package lucuma.itc.service
 
 import algebra.instances.all.given
+import buildinfo.BuildInfo
 import cats._
 import cats.data._
 import cats.effect._
@@ -22,6 +23,7 @@ import eu.timepit.refined._
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
+import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
 import io.circe.Json
 import lucuma.core.enums._
@@ -39,9 +41,13 @@ import lucuma.core.model.UnnormalizedSED._
 import lucuma.core.syntax.enumerated._
 import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
+import lucuma.itc.GmosNITCParams
+import lucuma.itc.GmosSITCParams
 import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
+import lucuma.itc.SpectroscopyParams
 import lucuma.itc.UpstreamException
+import lucuma.itc.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ObservingMode
@@ -50,11 +56,16 @@ import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
 import lucuma.itc.search.Result.Spectroscopy
 import lucuma.itc.search.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
+import lucuma.itc.service.config._
 import lucuma.itc.service.syntax.all._
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
 import java.math.RoundingMode
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import scala.collection.immutable.SortedMap
 import scala.concurrent.duration._
 import scala.io.Source
@@ -64,120 +75,7 @@ import Query._
 import Value._
 import QueryCompiler._
 
-trait Encoders {
-  import io.circe.generic.semiauto._
-  import io.circe.syntax._
-  type Nanosecond  = Nano * Second
-  type Microsecond = Micro * Second
-  type Millisecond = Milli * Second
-
-  implicit val encoderFiniteDuration: Encoder[FiniteDuration] = new Encoder[FiniteDuration] {
-    type Micro
-    final def apply(d: FiniteDuration): Json =
-      val value: Quantity[Long, Nanosecond] = d.toNanos.withUnit[Nanosecond]
-
-      Json.obj(
-        ("microseconds", Json.fromLong(value.tToUnit[Microsecond].value)),
-        ("milliseconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Millisecond].value)),
-        ("seconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Second].value)),
-        ("minutes", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Minute].value)),
-        ("hours", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Hour].value))
-      )
-  }
-
-  implicit val encoderItcResultSuccess: Encoder[Itc.Result.Success] =
-    deriveEncoder[Itc.Result.Success]
-
-  implicit val encoderItcResult: Encoder[Itc.Result] = Encoder.instance {
-    case f: Itc.Result.Success          =>
-      Json.obj(("resultType", Json.fromString("Success"))).deepMerge(f.asJson)
-    case Itc.Result.CalculationError(m) =>
-      Json.obj(("resultType", Json.fromString("Error")), ("msg", Json.fromString(m)))
-    case Itc.Result.SourceTooBright(m)  =>
-      Json.obj(("resultType", Json.fromString("Error")),
-               ("msg", Json.fromString(s"Source too bright $m"))
-      )
-  }
-
-  implicit val encoderWavelength: Encoder[Wavelength] = new Encoder[Wavelength] {
-    final def apply(w: Wavelength): Json = Json.obj(
-      ("picometers", Json.fromInt(w.toPicometers.value.value)),
-      ("angstrom", Json.fromBigDecimal(w.angstrom.value.toBigDecimal(2, RoundingMode.CEILING))),
-      ("nanometers",
-       Json.fromBigDecimal(
-         w.nanometer.value.toBigDecimal(2, RoundingMode.CEILING)
-       )
-      ),
-      ("micrometers",
-       Json.fromBigDecimal(
-         w.micrometer.value.toBigDecimal(2, RoundingMode.CEILING)
-       )
-      )
-    )
-  }
-
-  implicit val encoderGmosNFpuParam: Encoder[GmosNorthFpuParam] =
-    deriveEncoder[GmosNorthFpuParam]
-
-  implicit val encoderGmosSFpuParam: Encoder[GmosSouthFpuParam] =
-    deriveEncoder[GmosSouthFpuParam]
-
-  implicit val encoderGmosNITCParams: Encoder[GmosNITCParams] =
-    deriveEncoder[GmosNITCParams]
-
-  implicit val encoderGmosSITCParams: Encoder[GmosSITCParams] =
-    deriveEncoder[GmosSITCParams]
-
-  implicit val encoderGmosNorth: Encoder[GmosNorth] = new Encoder[GmosNorth] {
-    final def apply(a: GmosNorth): Json = Json.obj(
-      ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-      ("resolution", Json.fromInt(a.resolution.toInt)),
-      ("params", GmosNITCParams(a.disperser, a.fpu, a.filter).asJson),
-      ("wavelength", a.λ.asJson)
-    )
-  }
-
-  implicit val encoderGmosSouth: Encoder[GmosSouth] = new Encoder[GmosSouth] {
-    final def apply(a: GmosSouth): Json = Json.obj(
-      ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-      ("resolution", Json.fromInt(a.resolution.toInt)),
-      ("params", GmosSITCParams(a.disperser, a.fpu, a.filter).asJson),
-      ("wavelength", a.λ.asJson)
-    )
-  }
-
-  implicit val encoderObservingMode: Encoder[ObservingMode.Spectroscopy] = Encoder.instance {
-    case gn: GmosNorth => gn.asJson
-    case gs: GmosSouth => gs.asJson
-  }
-
-  implicit val encoderSpectroscopy: Encoder[Spectroscopy] = new Encoder[Spectroscopy] {
-    final def apply(s: Spectroscopy): Json = Json.obj(
-      ("mode", s.mode.asJson),
-      ("itc", s.itc.asJson)
-    )
-  }
-
-  implicit val encoderSpectroscopyResults: Encoder[SpectroscopyResults] =
-    deriveEncoder[SpectroscopyResults]
-
-}
-
-sealed trait SpectroscopyParams
-
-final case class GmosNITCParams(
-  grating: GmosNorthGrating,
-  fpu:     GmosNorthFpuParam,
-  filter:  Option[GmosNorthFilter]
-) extends SpectroscopyParams
-
-final case class GmosSITCParams(
-  grating: GmosSouthGrating,
-  fpu:     GmosSouthFpuParam,
-  filter:  Option[GmosSouthFilter]
-) extends SpectroscopyParams
-
-object ItcMapping extends Encoders {
+object ItcMapping extends Version {
 
   def enumTags[A: Enumerated] =
     Enumerated[A].all.fproductLeft(_.tag.toScreamingSnakeCase).toMap
@@ -218,8 +116,9 @@ object ItcMapping extends Encoders {
       }
 
   def spectroscopy[F[_]: ApplicativeThrow: Logger: Parallel: Trace](
-    itc: Itc[F]
-  )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] =
+    environment: ExecutionEnvironment,
+    itc:         Itc[F]
+  )(env:         Cursor.Env): F[Result[List[SpectroscopyResults]]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[PosBigDecimal]("signalToNoise"),
@@ -251,7 +150,9 @@ object ItcMapping extends Encoders {
                   case x                      =>
                     Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen
                 }
-                .map(r => SpectroscopyResults(List(Spectroscopy(specMode, r))))
+                .map(r =>
+                  SpectroscopyResults(version(environment), List(Spectroscopy(specMode, r)))
+                )
             }
         }
         .map(_.rightIor[NonEmptyChain[Problem]])
@@ -302,7 +203,10 @@ object ItcMapping extends Encoders {
       case _                                           => None
     }
 
-  def apply[F[_]: Sync: Logger: Parallel: Trace](itc: Itc[F]): F[Mapping[F]] =
+  def apply[F[_]: Sync: Logger: Parallel: Trace](
+    environment: ExecutionEnvironment,
+    itc:         Itc[F]
+  ): F[Mapping[F]] =
     loadSchema[F].map { loadedSchema =>
       new CirceMapping[F] with ComputeMapping[F] {
 
@@ -320,7 +224,7 @@ object ItcMapping extends Encoders {
               fieldMappings = List(
                 ComputeRoot[List[SpectroscopyResults]]("spectroscopy",
                                                        ListType(SpectroscopyResultType),
-                                                       spectroscopy[F](itc)
+                                                       spectroscopy[F](environment, itc)
                 )
               )
             ),

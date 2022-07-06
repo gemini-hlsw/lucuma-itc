@@ -9,7 +9,7 @@ import cats.effect._
 import cats.syntax.all._
 import com.comcast.ip4s._
 import lucuma.itc.ItcImpl
-import lucuma.itc.service.config.Environment._
+import lucuma.itc.service.config.ExecutionEnvironment._
 import lucuma.itc.service.config._
 import natchez.EntryPoint
 import natchez.Trace
@@ -47,7 +47,7 @@ object Main extends IOApp {
   }
 
   /** A middleware that adds CORS headers. In production the origin must match the cookie domain. */
-  def cors(env: Environment, domain: Option[String]): CORSPolicy =
+  def cors(env: ExecutionEnvironment, domain: Option[String]): CORSPolicy =
     env match {
       case Local | Review | Staging =>
         CORS.policy
@@ -87,7 +87,7 @@ object Main extends IOApp {
       log <- Resource.eval(Slf4jLogger.create[F])
       map <- {
         implicit val L: Logger[F] = log
-        ItcImpl.forUri(cfg.itcUrl).flatMap(itc => Resource.eval(ItcMapping(itc)))
+        ItcImpl.forUri(cfg.itcUrl).flatMap(itc => Resource.eval(ItcMapping(cfg.environment, itc)))
       }
       its <- Resource.pure(ItcService.service(map))
     } yield

@@ -3,6 +3,7 @@
 
 package lucuma.itc.search
 
+import io.circe.*
 import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.Coverage
@@ -16,14 +17,14 @@ import spire.math.Rational
 
 final case class GmosNorthFpuParam(
   builtin: GmosNorthFpu
-) {
+) derives Encoder.AsObject {
   def isIfu: Boolean            = builtin.isIfu
   def effectiveSlitWidth: Angle = builtin.effectiveSlitWidth
 }
 
 final case class GmosSouthFpuParam(
   builtin: GmosSouthFpu
-) {
+) derives Encoder.AsObject {
   def isIfu: Boolean            = builtin.isIfu
   def effectiveSlitWidth: Angle = builtin.effectiveSlitWidth
 }

@@ -6,30 +6,37 @@ package lucuma.itc.search
 import cats._
 import cats.syntax.all._
 import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.string.NonEmptyString
+import io.circe.*
+import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
+import lucuma.itc.given
 import lucuma.itc.search.gmosnorth.GmosNorthFilterSelector
 
-sealed trait Result {
+sealed trait Result:
   def mode: ObservingMode
   def itc: Itc.Result
-}
 
-object Result {
-  case class Spectroscopy(mode: ObservingMode.Spectroscopy, itc: Itc.Result)
-}
+object Result:
+  final case class Spectroscopy(mode: ObservingMode.Spectroscopy, itc: Itc.Result)
+      derives Encoder.AsObject
 
-final case class SpectroscopyResults(results: List[Result.Spectroscopy])
+final case class SpectroscopyResults(
+  serverVersion: NonEmptyString,
+  results:       List[Result.Spectroscopy]
+) derives Encoder.AsObject
 
-object Search {
+object Search:
 
   def spectroscopy[F[_]: Parallel: Monad: Itc](
+    version:        NonEmptyString,
     constraints:    Constraints.Spectroscopy,
     targetProfile:  TargetProfile,
     itcConstraints: ItcObservingConditions,
     signalToNoise:  PosInt
-  ): F[SpectroscopyResults] = {
+  ): F[SpectroscopyResults] =
 
     // As a first pass we'll generate every possible configuration and then filter them at the end.
     // This lets us apply the constraints in one place rather than duplicating the filtering logic
@@ -77,9 +84,4 @@ object Search {
         case Result.Spectroscopy(_, Itc.Result.SourceTooBright(_))  => Double.MaxValue
         case Result.Spectroscopy(_, Itc.Result.CalculationError(_)) => Double.MaxValue
       })
-      .map(SpectroscopyResults(_))
-    resp
-
-  }
-
-}
+    resp.map(r => SpectroscopyResults(version, r))

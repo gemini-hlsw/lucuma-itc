@@ -101,9 +101,16 @@ lazy val service = project
       "eu.timepit"    %% "refined"             % refinedVersion,
       "eu.timepit"    %% "refined-cats"        % refinedVersion,
       "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test
+    ),
+    buildInfoKeys     := Seq[BuildInfoKey](
+      scalaVersion,
+      sbtVersion,
+      git.gitHeadCommit,
+      "herokuSourceVersion" -> sys.env.get("SOURCE_VERSION"),
+      "buildDateTime"       -> System.currentTimeMillis()
     )
   )
-  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
 
 // lazy val benchmark = project
 //   .in(file("modules/benchmarks"))

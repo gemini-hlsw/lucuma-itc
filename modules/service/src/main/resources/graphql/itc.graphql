@@ -2268,7 +2268,7 @@ input SourceProfileInput {
 }
 
 """
-Spectral definition input with integrated units.  Specify exactly one of "bandNormalized" or "emissionLines" 
+Spectral definition input with integrated units.  Specify exactly one of "bandNormalized" or "emissionLines"
 """
 input SpectralDefinitionIntegratedInput {
   bandNormalized: BandNormalizedIntegratedInput
@@ -2276,7 +2276,7 @@ input SpectralDefinitionIntegratedInput {
 }
 
 """
-Spectral definition input with surface units.  Specify exactly one of "bandNormalized" or "emissionLines" 
+Spectral definition input with surface units.  Specify exactly one of "bandNormalized" or "emissionLines"
 """
 input SpectralDefinitionSurfaceInput {
   bandNormalized: BandNormalizedSurfaceInput
@@ -4892,6 +4892,9 @@ type Result {
 }
 
 type SpectroscopyResult {
+
+  serverVersion: String!
+
   # Search results
   results: [Result!]!
 }
