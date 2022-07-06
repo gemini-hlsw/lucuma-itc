@@ -79,3 +79,14 @@ given Encoder[ObservingMode.Spectroscopy] = Encoder.instance {
   case gn: GmosNorth => gn.asJson
   case gs: GmosSouth => gs.asJson
 }
+
+given Encoder[Itc.Result] = Encoder.instance {
+  case f: Itc.Result.Success          =>
+    Json.obj(("resultType", Json.fromString("Success"))).deepMerge(f.asJson)
+  case Itc.Result.CalculationError(m) =>
+    Json.obj(("resultType", Json.fromString("Error")), ("msg", Json.fromString(m)))
+  case Itc.Result.SourceTooBright(m)  =>
+    Json.obj(("resultType", Json.fromString("Error")),
+             ("msg", Json.fromString(s"Source too bright $m"))
+    )
+}
