@@ -32,7 +32,7 @@ given Encoder[NonEmptyString] = (s: NonEmptyString) => s.value.asJson
 given Encoder[PosInt]         = (s: PosInt) => s.value.asJson
 
 given Encoder[FiniteDuration] = new Encoder[FiniteDuration]:
-  final def apply(d: FiniteDuration): Json =
+  def apply(d: FiniteDuration): Json =
     val value: Quantity[Long, Nanosecond] = d.toNanos.withUnit[Nanosecond]
 
     Json.obj(
@@ -44,7 +44,7 @@ given Encoder[FiniteDuration] = new Encoder[FiniteDuration]:
     )
 
 given Encoder[Wavelength] = new Encoder[Wavelength]:
-  final def apply(w: Wavelength): Json = Json.obj(
+  def apply(w: Wavelength): Json = Json.obj(
     ("picometers", Json.fromInt(w.toPicometers.value.value)),
     ("angstrom", Json.fromBigDecimal(w.angstrom.value.toBigDecimal(2, RoundingMode.CEILING))),
     ("nanometers",

@@ -6,18 +6,14 @@ package lucuma.itc.service.config
 import cats.implicits._
 import ciris._
 
-sealed trait ExecutionEnvironment
-object ExecutionEnvironment:
+enum ExecutionEnvironment:
 
-  case object Local      extends ExecutionEnvironment
-  case object Review     extends ExecutionEnvironment
-  case object Staging    extends ExecutionEnvironment
-  case object Production extends ExecutionEnvironment
+  case Local, Review, Staging, Production
 
-  given ConfigDecoder[String, ExecutionEnvironment] =
-    ConfigDecoder[String].map(_.toLowerCase).collect("Environment") {
-      case "local"      => Local
-      case "review"     => Review
-      case "staging"    => Staging
-      case "production" => Production
-    }
+given ConfigDecoder[String, ExecutionEnvironment] =
+  ConfigDecoder[String].map(_.toLowerCase).collect("Environment") {
+    case "local"      => ExecutionEnvironment.Local
+    case "review"     => ExecutionEnvironment.Review
+    case "staging"    => ExecutionEnvironment.Staging
+    case "production" => ExecutionEnvironment.Production
+  }
