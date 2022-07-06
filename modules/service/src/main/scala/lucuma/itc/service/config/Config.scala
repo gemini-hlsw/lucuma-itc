@@ -11,7 +11,7 @@ import org.http4s.Uri
  * Application configuration.
  */
 final case class Config(
-  environment: Environment,
+  environment: ExecutionEnvironment,
   port:        Int,
   itcUrl:      Uri,
   honeycomb:   Option[HoneycombConfig]
@@ -26,8 +26,8 @@ object Config {
 
   def config: ConfigValue[Effect, Config] =
     (envOrProp("LUCUMA_SSO_ENVIRONMENT")
-       .as[Environment]
-       .default(Environment.Local),
+       .as[ExecutionEnvironment]
+       .default(ExecutionEnvironment.Local),
      envOrProp("ITC_PORT")
        .or(envOrProp("PORT"))
        .or(ConfigValue.default("6060"))

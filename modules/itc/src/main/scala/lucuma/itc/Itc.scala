@@ -3,6 +3,7 @@
 
 package lucuma.itc
 
+import io.circe.*
 import lucuma.itc.search._
 
 import scala.concurrent.duration.FiniteDuration
@@ -36,6 +37,7 @@ object Itc {
       exposures:     Int,
       signalToNoise: BigDecimal
     ) extends Result
+        derives Encoder.AsObject
 
     /** Object is too bright to be observed in the specified mode. */
     final case class SourceTooBright(msg: String) extends Result
