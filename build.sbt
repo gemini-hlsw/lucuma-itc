@@ -1,4 +1,4 @@
-val coulombVersion              = "0.6.0-M2"
+val coulombVersion              = "0.6.0-M3"
 val catsEffectVersion           = "3.3.13"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsVersion                 = "2.8.0"
