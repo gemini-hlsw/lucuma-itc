@@ -161,15 +161,15 @@ object ItcMapping extends Version {
         }
     }.map(_.getOrElse(Problem("Missing parameters for spectroscopy").leftIorNec))
 
-  def bigDecimalValue(v: Value): Option[BigDecimal] = v match {
-    case IntValue(r)    => BigDecimal(r).some
-    case FloatValue(r)  => BigDecimal(r).some
-    case StringValue(r) => Either.catchNonFatal(BigDecimal(r)).toOption
-    case _              => none
-  }
+  def bigDecimalValue(v: Value): Option[BigDecimal] =
+    v match
+      case IntValue(r)    => BigDecimal(r).some
+      case FloatValue(r)  => BigDecimal(r).some
+      case StringValue(r) => Either.catchNonFatal(BigDecimal(r)).toOption
+      case _              => none
 
   def parseFwhw(units: List[(String, Value)]): Option[Angle] =
-    units.find(_._2 != Value.AbsentValue) match {
+    units.find(_._2 != Value.AbsentValue) match
       case Some(("microarcseconds", n)) =>
         bigDecimalValue(n).map(n => Angle.microarcseconds.reverseGet(n.toLong))
       case Some(("milliarcseconds", n)) =>
@@ -177,10 +177,9 @@ object ItcMapping extends Version {
       case Some(("arcseconds", n))      =>
         bigDecimalValue(n).map(n => Angle.arcseconds.reverseGet(n.toInt))
       case _                            => None
-    }
 
   def parseWavelength(units: List[(String, Value)]): Option[Wavelength] =
-    units.find(_._2 != Value.AbsentValue) match {
+    units.find(_._2 != Value.AbsentValue) match
       case Some(("picometers", IntValue(n))) =>
         Wavelength.fromPicometers.getOption(n)
       case Some(("angstroms", n))            =>
@@ -190,10 +189,9 @@ object ItcMapping extends Version {
       case Some(("micrometers", n))          =>
         bigDecimalValue(n).flatMap(Wavelength.decimalMicrometers.getOption)
       case _                                 => None
-    }
 
   def parseRadialVelocity(units: List[(String, Value)]): Option[RadialVelocity] =
-    units.find(_._2 != Value.AbsentValue) match {
+    units.find(_._2 != Value.AbsentValue) match
       case Some(("centimetersPerSecond", IntValue(n))) =>
         RadialVelocity(n.withUnit[CentimetersPerSecond].toValue[BigDecimal].toUnit[MetersPerSecond])
       case Some(("metersPerSecond", n))                =>
@@ -201,7 +199,6 @@ object ItcMapping extends Version {
       case Some(("kilometersPerSecond", n))            =>
         bigDecimalValue(n).flatMap(v => RadialVelocity.kilometerspersecond.getOption(v))
       case _                                           => None
-    }
 
   def apply[F[_]: Sync: Logger: Parallel: Trace](
     environment: ExecutionEnvironment,

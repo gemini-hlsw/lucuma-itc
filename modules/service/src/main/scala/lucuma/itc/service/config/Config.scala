@@ -17,13 +17,13 @@ final case class Config(
   honeycomb:   Option[HoneycombConfig]
 )
 
-object Config {
+object Config:
 
-  implicit val uri: ConfigDecoder[String, Uri] =
+  given ConfigDecoder[String, Uri] =
     ConfigDecoder[String].mapOption("URI") { s =>
       Uri.fromString(s).toOption
     }
-
+  
   def config: ConfigValue[Effect, Config] =
     (envOrProp("LUCUMA_SSO_ENVIRONMENT")
        .as[ExecutionEnvironment]
@@ -36,4 +36,3 @@ object Config {
      HoneycombConfig.config.option
     ).parMapN(Config.apply)
 
-}
