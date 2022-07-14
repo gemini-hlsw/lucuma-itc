@@ -151,7 +151,53 @@ object ItcMapping extends Version {
                     Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen
                 }
                 .map(r =>
-                  SpectroscopyResults(version(environment), List(Spectroscopy(specMode, r)))
+                  SpectroscopyResults(version(environment).value, List(Spectroscopy(specMode, r)))
+                )
+            }
+        }
+        .map(_.rightIor[NonEmptyChain[Problem]])
+        .handleErrorWith { case x =>
+          Problem(s"Error calculating itc $x").leftIorNec.pure[F]
+        }
+    }.map(_.getOrElse(Problem("Missing parameters for spectroscopy").leftIorNec))
+
+  def spectroscopyGraph[F[_]: ApplicativeThrow: Logger: Parallel: Trace](
+    environment: ExecutionEnvironment,
+    itc:         Itc[F]
+  )(env:         Cursor.Env): F[Result[List[SpectroscopyResults]]] =
+    (env.get[Wavelength]("wavelength"),
+     env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
+     env.get[PosBigDecimal]("signalToNoise"),
+     env.get[SourceProfile]("sourceProfile"),
+     env.get[Band]("band"),
+     env.get[SpectroscopyParams]("modes"),
+     env.get[ItcObservingConditions]("constraints")
+    ).traverseN { (wv, rs, sn, sp, sd, modes, c) =>
+      List(modes)
+        .parTraverse { mode =>
+          Logger[F].info(s"ITC calculate for $mode, conditions $c and profile $sp") *>
+            {
+              val specMode = mode match {
+                case GmosNITCParams(grating, fpu, filter) =>
+                  ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
+                case GmosSITCParams(grating, fpu, filter) =>
+                  ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
+              }
+              itc
+                .calculate(
+                  TargetProfile(sp, sd, rs),
+                  specMode,
+                  c,
+                  sn.value
+                )
+                .handleErrorWith {
+                  case UpstreamException(msg) =>
+                    Itc.Result.CalculationError(msg).pure[F].widen
+                  case x                      =>
+                    Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen
+                }
+                .map(r =>
+                  SpectroscopyResults(version(environment).value, List(Spectroscopy(specMode, r)))
                 )
             }
         }
@@ -222,6 +268,10 @@ object ItcMapping extends Version {
                 ComputeRoot[List[SpectroscopyResults]]("spectroscopy",
                                                        ListType(SpectroscopyResultType),
                                                        spectroscopy[F](environment, itc)
+                ),
+                ComputeRoot[List[SpectroscopyResults]]("spectroscopyGraph",
+                                                       ListType(SpectroscopyResultType),
+                                                       spectroscopyGraph[F](environment, itc)
                 )
               )
             ),
@@ -618,6 +668,64 @@ object ItcMapping extends Version {
           cursorEnvAdd("modes", modes)(i)
         }
 
+        def instrumentModePartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
+                                                   IorNec[Problem, Environment]
+        ] = { case (i, ("mode", m)) =>
+          val modes = m.match {
+            case ObjectValue(List(("gmosN", AbsentValue), ("gmosS", gmosS))) =>
+              gmosS match {
+                case ObjectValue(
+                      List(("grating", TypedEnumValue(EnumValue(d, _, _, _))),
+                           ("fpu",
+                            ObjectValue(
+                              List(("customMask", AbsentValue),
+                                   ("builtin", TypedEnumValue(EnumValue(fpu, _, _, _)))
+                              )
+                            )
+                           ),
+                           ("filter", f)
+                      )
+                    ) =>
+                  val filterOpt = f match {
+                    case TypedEnumValue(EnumValue(f, _, _, _)) =>
+                      gsFilter.get(f)
+                    case _                                     => none
+                  }
+                  (gsGrating.get(d), gsFpu.get(fpu)).mapN((a, b) =>
+                    GmosSITCParams(a, GmosSouthFpuParam(b), filterOpt)
+                  )
+                case _ =>
+                  none
+              }
+            case ObjectValue(List(("gmosN", gmosN), ("gmosS", AbsentValue))) =>
+              gmosN match {
+                case ObjectValue(
+                      List(("grating", TypedEnumValue(EnumValue(d, _, _, _))),
+                           ("fpu",
+                            ObjectValue(
+                              List(("customMask", AbsentValue),
+                                   ("builtin", TypedEnumValue(EnumValue(fpu, _, _, _)))
+                              )
+                            )
+                           ),
+                           ("filter", f)
+                      )
+                    ) =>
+                  val filterOpt = f match {
+                    case TypedEnumValue(EnumValue(f, _, _, _)) =>
+                      gnFilter.get(f)
+                    case _                                     => none
+                  }
+                  (gnGrating.get(d), gnFpu.get(fpu)).mapN((a, b) =>
+                    GmosNITCParams(a, GmosNorthFpuParam(b), filterOpt)
+                  )
+                case _ =>
+                  none
+              }
+          }
+          cursorEnvAdd("mode", modes)(i)
+        }
+
         def constraintsPartial: PartialFunction[(IorNec[Problem, Environment], (String, Value)),
                                                 IorNec[Problem, Environment]
         ] = {
@@ -721,7 +829,7 @@ object ItcMapping extends Version {
           new SelectElaborator(
             Map(
               QueryType -> {
-                case Select("spectroscopy", List(Binding("input", ObjectValue(wv))), child) =>
+                case Select("spectroscopy", List(Binding("input", ObjectValue(wv))), child)      =>
                   wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
                     case (e, c) =>
                       wavelengthPartial
@@ -736,6 +844,21 @@ object ItcMapping extends Version {
                           fallback
                         )
                   }.map(e => e.copy(child = Select("spectroscopy", Nil, child)))
+                case Select("spectroscopyGraph", List(Binding("input", ObjectValue(wv))), child) =>
+                  wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
+                    case (e, c) =>
+                      wavelengthPartial
+                        .orElse(radialVelocityPartial)
+                        .orElse(signalToNoisePartial)
+                        .orElse(sourceProfilePartial)
+                        .orElse(bandPartial)
+                        .orElse(instrumentModePartial)
+                        .orElse(constraintsPartial)
+                        .applyOrElse(
+                          (e, c),
+                          fallback
+                        )
+                  }.map(e => e.copy(child = Select("spectroscopyGraph", Nil, child)))
               }
             )
           )

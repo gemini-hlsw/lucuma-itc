@@ -4800,6 +4800,10 @@ type Query {
     # Query multiple modes in spectroscopy mode
     input: SpectroscopyModeInput!
   ): [SpectroscopyResult!]!
+
+  spectroscopyGraph(
+    input: SpectroscopyGraphModeInput!
+  ): [SpectroscopyResult!]!
 }
 
 type GmosSITCParams {
@@ -4883,6 +4887,30 @@ input SpectroscopyModeInput {
   modes: [InstrumentModesInput]!
 }
 
+# Configuration alternatives query
+input SpectroscopyGraphModeInput {
+  # Observing wavelength.
+  wavelength: WavelengthInput!
+
+  # Minimum desired signal-to-noise ratio.
+  signalToNoise: PosBigDecimal!
+
+  # Spatial profile PointSource/UniformSource/GaussianSource.
+  sourceProfile: SourceProfileInput!
+
+  # Observing Band
+  band: Band!
+
+  # Target radial velocity
+  radialVelocity: RadialVelocityInput!
+
+  # Conditions
+  constraints: ConstraintSetInput!
+
+  # Instrument modes
+  mode: InstrumentModesInput!
+}
+
 type Result {
   # Spectroscopy mode
   mode: ObservingModeSpectroscopy!
@@ -4893,7 +4921,7 @@ type Result {
 
 type SpectroscopyResult {
 
-  serverVersion: NonEmptyString!
+  serverVersion: String!
 
   # Search results
   results: [Result!]!

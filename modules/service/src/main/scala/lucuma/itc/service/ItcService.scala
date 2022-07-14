@@ -21,12 +21,10 @@ import org.http4s.headers.`Cache-Control`
 
 import scala.concurrent.duration._
 
-trait ItcService[F[_]] {
+trait ItcService[F[_]]:
   def runQuery(op: Option[String], vars: Option[Json], query: String): F[Json]
 
-}
-
-object ItcService {
+object ItcService:
   def routes[F[_]: Concurrent: Trace](
     service: ItcService[F]
   ): HttpRoutes[F] = {
@@ -61,9 +59,10 @@ object ItcService {
 
     HttpRoutes.of[F] {
       // GraphQL query is embedded in the URI query string when queried via GET
-      case GET -> Root / "itc" :? QueryMatcher(query) +& OperationNameMatcher(
-            op
-          ) +& VariablesMatcher(vars0) =>
+      case GET -> Root / "itc" :?
+          QueryMatcher(query) +&
+          OperationNameMatcher(op) +&
+          VariablesMatcher(vars0) =>
         vars0.sequence.fold(
           errors => BadRequest(errors.map(_.sanitized).mkString_("", ",", "")),
           vars =>
@@ -90,9 +89,6 @@ object ItcService {
   }
 
   def service[F[_]: Async](mapping: Mapping[F]): ItcService[F] =
-    new ItcService[F] {
+    new ItcService[F]:
       def runQuery(op: Option[String], vars: Option[Json], query: String): F[Json] =
         mapping.compileAndRun(query, op, vars)
-    }
-
-}

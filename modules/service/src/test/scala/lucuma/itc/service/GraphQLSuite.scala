@@ -20,10 +20,10 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.duration._
 
-trait GraphQLSuite extends munit.CatsEffectSuite {
-  implicit val unsafeLogger: Logger[IO] = Slf4jLogger.getLogger[IO]
+trait GraphQLSuite extends munit.CatsEffectSuite:
+  given unsafeLogger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
-  val itc = new Itc[IO] {
+  val itc = new Itc[IO]:
     def calculate(
       targetProfile: TargetProfile,
       observingMode: ObservingMode,
@@ -33,12 +33,14 @@ trait GraphQLSuite extends munit.CatsEffectSuite {
       IO.pure(
         Itc.Result.Success(1.seconds, 10, 10)
       )
-  }
 
   val service: IO[HttpRoutes[IO]] =
     ItcMapping[IO](ExecutionEnvironment.Local, itc).map(m =>
       ItcService.routes[IO](ItcService.service[IO](m))
     )
+
+  val mappingValidator: IO[Unit] =
+    ItcMapping[IO](ExecutionEnvironment.Local, itc).flatMap(m => m.validator.validate[IO]())
 
   val itcFixture = ResourceSuiteLocalFixture(
     "itc",
@@ -72,4 +74,3 @@ trait GraphQLSuite extends munit.CatsEffectSuite {
       }
       .flatMap(_.as[Json])
       .assertEquals(expected)
-}

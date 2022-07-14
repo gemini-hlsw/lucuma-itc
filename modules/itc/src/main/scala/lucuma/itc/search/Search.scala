@@ -24,7 +24,7 @@ object Result:
       derives Encoder.AsObject
 
 final case class SpectroscopyResults(
-  serverVersion: NonEmptyString,
+  serverVersion: String,
   results:       List[Result.Spectroscopy]
 ) derives Encoder.AsObject
 
@@ -84,4 +84,4 @@ object Search:
         case Result.Spectroscopy(_, Itc.Result.SourceTooBright(_))  => Double.MaxValue
         case Result.Spectroscopy(_, Itc.Result.CalculationError(_)) => Double.MaxValue
       })
-    resp.map(r => SpectroscopyResults(version, r))
+    resp.map(r => SpectroscopyResults(version.value, r))

@@ -39,7 +39,7 @@ import scala.math._
 object ItcImpl {
 
   def forHeroku[F[_]: Async: Logger: Trace]: Resource[F, Itc[F]] =
-    forUri(uri"https://gemini-itc.herokuapp.com/json")
+    forUri(uri"https://gemini-new-itc.herokuapp.com")
 
   val Error400Regex = "<title>Error 400 (.*)</title>".r
 
@@ -83,12 +83,12 @@ object ItcImpl {
                                constraints,
                                exposures
             ).asJson
-          L.debug(s"ITC remote query ${json.noSpaces}") *>
+          L.info(s"ITC remote query ${uri / "json"} ${json.noSpaces}") *>
             Trace[F].put("itc.query" -> json.spaces2) *>
             Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
             Trace[F].put("itc.exposures" -> exposures) *>
             Trace[F].put("itc.level" -> level.value) *>
-            c.run(POST(json, uri)).use {
+            c.run(POST(json, uri / "json")).use {
               case Status.Successful(resp) =>
                 implicit val decoder: EntityDecoder[F, ItcResult] = jsonOf[F, ItcResult]
                 resp.as[ItcResult]

@@ -34,7 +34,7 @@ object Main extends IOApp {
   val ServiceName = "lucuma-itc"
 
   /** A startup action that prints a banner. */
-  def banner[F[_]: Applicative: Logger]: F[Unit] = {
+  def banner[F[_]: Applicative: Logger]: F[Unit] =
     val banner =
       s"""|
             |   / /_  _________  ______ ___  ____ _      (_) /______
@@ -44,17 +44,15 @@ object Main extends IOApp {
             |
             |""".stripMargin
     banner.linesIterator.toList.traverse_(Logger[F].info(_))
-  }
 
   /** A middleware that adds CORS headers. In production the origin must match the cookie domain. */
   def cors(env: ExecutionEnvironment, domain: Option[String]): CORSPolicy =
-    env match {
+    env match
       case Local | Review | Staging =>
         CORS.policy
       case Production               =>
         CORS.policy
           .withAllowOriginHostCi(domain.contains)
-    }
 
   /**
    * A resource that yields a Natchez tracing entry point, either a Honeycomb endpoint if `config`
