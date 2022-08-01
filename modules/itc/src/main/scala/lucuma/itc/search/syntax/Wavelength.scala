@@ -20,11 +20,10 @@ final class WavelengthOps(val self: Wavelength) extends AnyVal {
 
   /** Returns the sum of this wavelength and `other`, clipped at Wavelength.Max. */
   def +(other: Wavelength): Wavelength =
-    Some(self.toPicometers.value.value + other.toPicometers.value.value)
-      .filter(_ <= Wavelength.Max.toPicometers.value.value)
-      .flatMap(w => refineV[Positive](w).map(Wavelength.apply).toOption)
+    // This works because integer addition "overflows" to negative values
+    Wavelength.fromPicometers
+      .getOption(self.toPicometers.value.value + self.toPicometers.value.value)
       .getOrElse(Wavelength.Max)
-
 }
 
 trait ToWavelengthOps {
