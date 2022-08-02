@@ -37,6 +37,7 @@ import scala.math._
 
 /** An ITC implementation that calls the OCS2 ITC server remotely. */
 object ItcImpl {
+  opaque type NumberOfExposures = Int
 
   def forHeroku[F[_]: Async: Logger: Trace]: Resource[F, Itc[F]] =
     forUri(uri"https://gemini-new-itc.herokuapp.com")
@@ -47,7 +48,7 @@ object ItcImpl {
     EmberClientBuilder.default.build
       .map(NatchezMiddleware.client[F])
       .map(RequestLogger(true, true))
-      .map(ResponseLogger(true, true))
+      // .map(ResponseLogger(true, true))
       .map(forClientAndUri[F](_, uri))
 
   def forClientAndUri[F[_]: Concurrent: Logger: Trace](c: Client[F], uri: Uri): Itc[F] =
@@ -60,11 +61,27 @@ object ItcImpl {
         constraints:   ItcObservingConditions,
         signalToNoise: BigDecimal
       ): F[Itc.Result] =
-        observingMode match {
+        observingMode match
           case _: ObservingMode.Spectroscopy =>
             spectroscopy(targetProfile, observingMode, constraints, signalToNoise)
           // TODO: imaging
-        }
+
+      def calculateGraph(
+        targetProfile: TargetProfile,
+        observingMode: ObservingMode,
+        constraints:   ItcObservingConditions,
+        signalToNoise: BigDecimal
+      ): F[Itc.Result] =
+        observingMode match
+          case _: ObservingMode.Spectroscopy =>
+            spectroscopyGraph(targetProfile,
+                              observingMode,
+                              constraints,
+                              signalToNoise,
+                              BigDecimal(4.0).withUnit[Second],
+                              10
+            )
+          // TODO: imaging
 
       // Convenience method to compute an OCS2 ITC result for the specified profile/mode.
       def itc(
@@ -90,8 +107,49 @@ object ItcImpl {
             Trace[F].put("itc.level" -> level.value) *>
             c.run(POST(json, uri / "json")).use {
               case Status.Successful(resp) =>
-                implicit val decoder: EntityDecoder[F, ItcResult] = jsonOf[F, ItcResult]
+                given EntityDecoder[F, ItcResult] = jsonOf[F, ItcResult]
                 resp.as[ItcResult]
+              case resp                    =>
+                resp.bodyText
+                  .through(fs2.text.lines)
+                  .filter(_.startsWith("<title>"))
+                  .compile
+                  .last
+                  .flatMap {
+                    case Some(Error400Regex(msg)) =>
+                      L.warn(s"Upstream error $msg") *>
+                        ApplicativeError[F, Throwable].raiseError(new UpstreamException(msg))
+                    case u                        =>
+                      L.warn(s"Upstream error ${u}") *>
+                        ApplicativeError[F, Throwable]
+                          .raiseError(new UpstreamException(u.getOrElse("Upstream Exception")))
+                  }
+            }
+        }
+
+      def itcGraph(
+        targetProfile:    TargetProfile,
+        observingMode:    ObservingMode,
+        constraints:      ItcObservingConditions,
+        exposureDuration: Quantity[BigDecimal, Second],
+        exposures:        Int
+      ): F[ItcGraphResult] =
+        Trace[F].span("legacy-itc-query") {
+          val json =
+            spectroscopyParams(targetProfile,
+                               observingMode,
+                               exposureDuration.value.toDouble.seconds,
+                               constraints,
+                               exposures
+            ).asJson
+          L.info(s"ITC remote query ${uri / "jsonchart"} ${json.noSpaces}") *>
+            Trace[F].put("itc.query" -> json.spaces2) *>
+            Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
+            Trace[F].put("itc.exposures" -> exposures) *>
+            c.run(POST(json, uri / "jsonchart")).use {
+              case Status.Successful(resp) =>
+                given EntityDecoder[F, ItcGraphResult] = jsonOf[F, ItcGraphResult]
+                resp.as[ItcGraphResult]
               case resp                    =>
                 resp.bodyText
                   .through(fs2.text.lines)
@@ -112,6 +170,23 @@ object ItcImpl {
 
       val MaxIterations = 10
 
+      def spectroscopyGraph(
+        targetProfile:    TargetProfile,
+        observingMode:    ObservingMode,
+        constraints:      ItcObservingConditions,
+        signalToNoise:    BigDecimal,
+        exposureDuration: Quantity[BigDecimal, Second],
+        exposures:        Int
+      ): F[Itc.Result] =
+        itcGraph(targetProfile, observingMode, constraints, exposureDuration, exposures).map { r =>
+          println(r)
+          Itc.Result
+            .Success(0.0.seconds, 0, 0)
+        // .Success(newExpTime.toDouble.seconds, newNExp.toInt, s.maxTotalSNRatio)
+        // .pure[F]
+        // .widen[Itc.Result]
+        }
+
       def spectroscopy(
         targetProfile: TargetProfile,
         observingMode: ObservingMode,
@@ -124,7 +199,7 @@ object ItcImpl {
 
         // This loops should be necessary only a few times but put a circuit breaker just in case
         def itcStep(
-          nExp:       Int,
+          nExp:       NumberOfExposures,
           oldNExp:    Int,
           expTime:    Quantity[BigDecimal, Second],
           oldExpTime: Quantity[BigDecimal, Second],

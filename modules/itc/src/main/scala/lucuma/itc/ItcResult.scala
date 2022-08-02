@@ -22,16 +22,16 @@ final case class ItcResult(ccds: NonEmptyList[ItcCcd]) {
 
 }
 
-object ItcResult {
+object ItcResult:
 
   // An "orElse" semigroup for ACursor
-  private implicit val decoderSemigroup: Semigroup[ACursor] =
+  given Semigroup[ACursor] =
     new Semigroup[ACursor] {
       def combine(a: ACursor, b: ACursor): ACursor =
         if (a.failed) b else a
     }
 
-  implicit val decoder: Decoder[ItcResult] =
+  given Decoder[ItcResult] =
     new Decoder[ItcResult] {
       def apply(c: HCursor): Decoder.Result[ItcResult] =
         (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
@@ -40,5 +40,3 @@ object ItcResult {
           .map(ItcResult(_))
 
     }
-
-}

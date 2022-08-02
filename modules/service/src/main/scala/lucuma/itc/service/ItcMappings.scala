@@ -147,7 +147,7 @@ object ItcMapping extends Version with GracklePartials {
     ).traverseN { (wv, rs, sn, sp, sd, modes, c) =>
       List(modes)
         .parTraverse { mode =>
-          Logger[F].info(s"ITC calculate for $mode, conditions $c and profile $sp") *> {
+          Logger[F].info(s"ITC graph calculate for $mode, conditions $c and profile $sp") *> {
             val specMode = mode match {
               case GmosNITCParams(grating, fpu, filter) =>
                 ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
@@ -155,7 +155,7 @@ object ItcMapping extends Version with GracklePartials {
                 ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
             }
             itc
-              .calculate(
+              .calculateGraph(
                 TargetProfile(sp, sd, rs),
                 specMode,
                 c,
@@ -163,6 +163,7 @@ object ItcMapping extends Version with GracklePartials {
               )
               .handleErrorWith {
                 case UpstreamException(msg) =>
+                  println(msg)
                   Itc.Result.CalculationError(msg).pure[F].widen
                 case x                      =>
                   Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen

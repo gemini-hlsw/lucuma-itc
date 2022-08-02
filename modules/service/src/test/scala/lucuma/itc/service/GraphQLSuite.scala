@@ -34,6 +34,16 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
         Itc.Result.Success(1.seconds, 10, 10)
       )
 
+    def calculateGraph(
+      targetProfile: TargetProfile,
+      observingMode: ObservingMode,
+      constraints:   ItcObservingConditions,
+      signalToNoise: BigDecimal
+    ): IO[Itc.Result] =
+      IO.pure(
+        Itc.Result.Success(1.seconds, 10, 10)
+      )
+
   val service: IO[HttpRoutes[IO]] =
     ItcMapping[IO](ExecutionEnvironment.Local, itc).map(m =>
       ItcService.routes[IO](ItcService.service[IO](m))

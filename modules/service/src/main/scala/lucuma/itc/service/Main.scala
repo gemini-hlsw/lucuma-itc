@@ -107,7 +107,8 @@ object Main extends IOApp {
         serverResource(Http4sLogger.httpApp(logHeaders = true, logBody = false)(ap.orNotFound), cfg)
     } yield ExitCode.Success
 
-  def run(args: List[String]): IO[ExitCode] =
+  def run(args: List[String]): IO[ExitCode] = {
+    println("RUEN")
     for {
       cfg <- Config.config.load[IO]
       log <- Slf4jLogger.create[IO]
@@ -116,4 +117,5 @@ object Main extends IOApp {
         server[IO](cfg)
       }.use(_ => IO.never[ExitCode])
     } yield ExitCode.Success
+  }
 }
