@@ -72,6 +72,7 @@ class ItcChartSuite extends munit.FunSuite {
         List(
           ItcSeries(
             "Signal BB(B)",
+            SeriesDataType.SignalData,
             List((518.386, 0.0),
                  (518.4119999999999, 1648773.279057645),
                  (518.438, 1648738.5069462687),
@@ -81,6 +82,7 @@ class ItcChartSuite extends munit.FunSuite {
           ),
           ItcSeries(
             "SQRT(Background) BB(B)",
+            SeriesDataType.BackgroundData,
             List(
               (518.386, 0.0),
               (518.4119999999999, 0.2232938682240929),
