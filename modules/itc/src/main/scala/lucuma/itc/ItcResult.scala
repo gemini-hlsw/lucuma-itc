@@ -6,9 +6,9 @@ package lucuma.itc
 import cats.Semigroup
 import cats.data.NonEmptyList
 import cats.implicits._
-import io.circe.ACursor
 import io.circe.Decoder
 import io.circe.HCursor
+import lucuma.itc.syntax.all.given
 
 final case class ItcResult(ccds: NonEmptyList[ItcCcd]) {
 
@@ -24,19 +24,10 @@ final case class ItcResult(ccds: NonEmptyList[ItcCcd]) {
 
 object ItcResult:
 
-  // An "orElse" semigroup for ACursor
-  given Semigroup[ACursor] =
-    new Semigroup[ACursor] {
-      def combine(a: ACursor, b: ACursor): ACursor =
-        if (a.failed) b else a
-    }
-
   given Decoder[ItcResult] =
-    new Decoder[ItcResult] {
+    new Decoder[ItcResult]:
       def apply(c: HCursor): Decoder.Result[ItcResult] =
         (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
           .downField("ccds")
           .as[NonEmptyList[ItcCcd]]
           .map(ItcResult(_))
-
-    }

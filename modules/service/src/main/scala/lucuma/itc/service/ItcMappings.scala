@@ -160,14 +160,7 @@ object ItcMapping extends Version with GracklePartials {
             c,
             sn.value
           )
-          // .handleErrorWith {
-          //   case UpstreamException(msg) =>
-          //     Itc.Result.CalculationError(msg).pure[F].widen
-          //   case x                      =>
-          //     Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen
-          // }
           .map { r =>
-            println(r.charts.length)
             SpectroscopyGraphResults(version(environment).value, r.charts)
           }
       }

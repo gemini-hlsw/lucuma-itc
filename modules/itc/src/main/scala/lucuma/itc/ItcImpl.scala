@@ -48,7 +48,7 @@ object ItcImpl {
     EmberClientBuilder.default.build
       .map(NatchezMiddleware.client[F])
       .map(RequestLogger(true, true))
-      // .map(ResponseLogger(true, true))
+      .map(ResponseLogger(true, true))
       .map(forClientAndUri[F](_, uri))
 
   def forClientAndUri[F[_]: Concurrent: Logger: Trace](c: Client[F], uri: Uri): Itc[F] =
@@ -179,7 +179,6 @@ object ItcImpl {
         exposures:        Int
       ): F[Itc.GraphResult] =
         itcGraph(targetProfile, observingMode, constraints, exposureDuration, exposures).map { r =>
-          println(s"We got ${r.charts.length}")
           Itc.GraphResult(r.charts.toList)
         }
 
@@ -209,10 +208,13 @@ object ItcImpl {
           } else {
             val totalTime: Quantity[BigDecimal, Second] =
               expTime * nExp.withUnit[1] * pow(requestedSN / snr, 2).withUnit[1]
-            val newNExp: BigDecimal                     = spire.math.ceil((totalTime / maxTime).value)
-            val newExpTime: BigDecimal                  =
+
+            val newNExp: BigDecimal = spire.math.ceil((totalTime / maxTime).value)
+
+            val newExpTime: BigDecimal =
               spire.math.ceil((totalTime / newNExp.withUnit[1]).value)
-            val next                                    = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
+
+            val next = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
             L.info(s"Total time: $totalTime maxTime: $maxTime") *>
               L.info(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
                 if (
@@ -289,106 +291,6 @@ object ItcImpl {
 
       }
     }
-
-  // def oldSpectroscopy[F[_]: Trace: Applicative](
-  //   targetProfile: TargetProfile,
-  //   observingMode: ObservingMode,
-  //   constraints:   ItcObservingConditions,
-  //   signalToNoise: BigDecimal
-  // ): F[Itc.Result] = {
-  //
-  //  val MaxPercentSaturation = 50.0
-  //
-  //   // The OCS2 ITC doesn't know how to compute exposure time and exposure count for a
-  //   // requested signal-to-noise so we have to kind of wank around to estimate it here, which
-  //   // can require up to three round-trip calls to ITC. We can push some logic back over there
-  //   // at some point but this is ok for now.
-  //
-  //   // Pull our exposure limits out of the observing mode since we'll need them soon.
-  //   // N.B. we can't just import these because they're added to `Instrument` with syntax.
-  //   val minExposureDuration: FiniteDuration = observingMode.instrument.minExposureDuration
-  //   val maxExposureDuration: FiniteDuration = observingMode.instrument.maxExposureDuration
-  //   val integralDurations: Boolean          = observingMode.instrument.integralDurations
-  //
-  //   // Compute a 1-second exposure and use this as a baseline for estimating longer/multiple
-  //   // exposures. All of our estimations are just that: we can't deal with read noise accurately
-  //   // here so the final 9kresult will be approximately the S/N the user requests. We just have to
-  //   // accept this limitation for now. Note that conditions are totally guesswork so this may
-  //   // end up being good enough. Unclear.
-  //
-  //   Trace[F].span("itc") {
-  //     itc(targetProfile, observingMode, constraints, 1.second, 1, 1).flatMap { baseline =>
-  //       // First thing we need to check is the saturation for a minimum-length exposure. If it's
-  //       // greater than our limit we simply can't observe in this mode because the source is
-  //       // too bright.
-  //
-  //       if (
-  //         baseline.maxPercentFullWell * minExposureDuration.toDoubleSeconds > MaxPercentSaturation
-  //       ) {
-  //
-  //         (Itc.Result.SourceTooBright("too bright"): Itc.Result).pure[F]
-  //
-  //       } else {
-  //
-  //         // Ok so we know that it's possible to observe this thing. Let's scale to get an ideal
-  //         // single exposure time. If it's within instrument limits and doesn't saturate
-  //         // the detector then we can do the whole thing in a single exposure.
-  //
-  //         val singleExposureDuration: FiniteDuration =
-  //           (signalToNoise * signalToNoise / (baseline.maxTotalSNRatio * baseline.maxTotalSNRatio)).toInt.seconds
-  //             .secondsCeilIf(integralDurations)
-  //
-  //         val singleExposureSaturation: Double =
-  //           baseline.maxPercentFullWell * singleExposureDuration.toDoubleSeconds
-  //
-  //         if (
-  //           singleExposureDuration >= minExposureDuration &&
-  //           singleExposureDuration <= maxExposureDuration &&
-  //           singleExposureSaturation <= MaxPercentSaturation
-  //         ) {
-  //
-  //           // We can do this in one exposure, but we need to hit ITC again to get an accurate
-  //           // signal-to-noise value.
-  //           itc(targetProfile, observingMode, constraints, singleExposureDuration, 1, 2).map { r =>
-  //             Itc.Result.Success(singleExposureDuration, 1, r.maxTotalSNRatio.toInt)
-  //           }
-  //
-  //         } else {
-  //
-  //           // For multiple exposures we compute the time it would take to fill the well to 50%,
-  //           // then clip to instrument limits and round up to the nearest second if necessary.
-  //
-  //           val multipleExposureSecs: FiniteDuration =
-  //             (MaxPercentSaturation / baseline.maxPercentFullWell).seconds
-  //               .min(maxExposureDuration)
-  //               .max(minExposureDuration)
-  //               .secondsCeilIf(integralDurations)
-  //
-  //           // We can't compute S/N accurately enough to extrapolate the number of exposures we
-  //           // need so we must ask ITC to do it.
-  //           itc(targetProfile, observingMode, constraints, multipleExposureSecs, 1, 2).flatMap {
-  //             r =>
-  //               // Now estimate the number of exposures. It may be low due to read noise but we
-  //               // don't really have a way to compensate yet.
-  //               val n =
-  //                 ((signalToNoise * signalToNoise) / (r.maxTotalSNRatio * r.maxTotalSNRatio)).toFloat.ceil.toInt
-  //
-  //               // But in any case we can calculate our final answer, which may come in low.
-  //               itc(targetProfile, observingMode, constraints, multipleExposureSecs, n, 3).map {
-  //                 r2 =>
-  //                   Itc.Result.Success(multipleExposureSecs, n, r2.maxTotalSNRatio.toInt)
-  //               }
-  //
-  //           }
-  //
-  //         }
-  //
-  //       }
-  //
-  //     }
-  // }
-
-  // }
 
   /** Convert model types into OCS2 ITC-compatible types for a spectroscopy request. */
   private def spectroscopyParams(

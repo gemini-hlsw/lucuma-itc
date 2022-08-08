@@ -66,10 +66,11 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
               }
             }
           }) {
-            serverVersion
             charts {
               series {
+                title
                 dataType
+                data
               }
             }
           }
@@ -78,12 +79,22 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
       json"""{
           "data": {
             "spectroscopyGraph": {
-              "serverVersion": "20220805-203258",
               "charts": [
                 {
                   "series": [
                     {
-                    "dataType": "BackgroundData"
+                      "title": "title",
+                      "dataType": "BackgroundData",
+                      "data": [
+                        [
+                          1.0,
+                          1000.0
+                        ],
+                        [
+                          2.0,
+                          1001.0
+                        ]
+                      ]
                     }
                   ]
                 }

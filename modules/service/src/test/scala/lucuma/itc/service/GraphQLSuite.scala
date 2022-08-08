@@ -49,7 +49,12 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
         .GraphResult(
           List(
             ItcChart(
-              List(ItcSeries("title", SeriesDataType.BackgroundData, List((1.0, 1.0), (2.0, 2.0))))
+              List(
+                ItcSeries("title",
+                          SeriesDataType.BackgroundData,
+                          List((1.0, 1000.0), (2.0, 1001.0))
+                )
+              )
             )
           )
         )

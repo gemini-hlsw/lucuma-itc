@@ -4928,7 +4928,13 @@ type SpectroscopyResult {
 }
 
 type ItcSeries {
+  title: String!
+
+  # Data type: alternatives SignalData, BackgroundData, SingleS2NData, FinalS2NData, PixSigData, PixBackData
   dataType: String!
+
+  # Data series in the form of pairs (x, y)
+  data: [[Float!]!]!
 }
 
 type ItcChart {
