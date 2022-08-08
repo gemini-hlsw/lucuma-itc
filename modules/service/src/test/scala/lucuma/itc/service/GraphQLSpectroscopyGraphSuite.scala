@@ -66,80 +66,29 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
               }
             }
           }) {
-            results {
-                mode {
-                  instrument
-                  resolution
-                  params {
-                    ... on GmosNITCParams {
-                      grating
-                    }
-                  }
-                  wavelength {
-                    nanometers
-                  }
-                }
-                itc {
-                  ... on ItcSuccess {
-                    exposures
-                    exposureTime {
-                      seconds
-                    }
-                  }
-                }
+            serverVersion
+            charts {
+              series {
+                dataType
+              }
             }
           }
         }
         """,
-      json"""
-        {
+      json"""{
           "data": {
-            "spectroscopyGraph" : [
-              {
-                "results" : [
-                  {
-                    "mode" : {
-                      "instrument" : "GMOS_NORTH",
-                      "resolution" : 970,
-                      "params": {
-                        "grating": "B1200_G5301"
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.00
-                      }
-                    },
-                    "itc" : {
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1
-                      }
+            "spectroscopyGraph": {
+              "serverVersion": "20220805-203258",
+              "charts": [
+                {
+                  "series": [
+                    {
+                    "dataType": "BackgroundData"
                     }
-                  }
-                ]
-              },
-              {
-                "results" : [
-                  {
-                    "mode" : {
-                      "instrument" : "GMOS_NORTH",
-                      "resolution" : 970,
-                      "params": {
-                        "grating": "B1200_G5301"
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.00
-                      }
-                    },
-                    "itc" : {
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
+                  ]
+                }
+              ]
+            }
           }
         }
         """

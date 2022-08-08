@@ -27,4 +27,3 @@ final case class ItcCcd(
 
 object ItcCcd:
   given Decoder[ItcCcd] = deriveDecoder
-

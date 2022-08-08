@@ -134,7 +134,7 @@ trait GracklePartials extends GrackleParsers:
   val surfaceUnitsItems    = enumTags[Units Of Brightness[Surface]]
 
   val gnFilter  = enumTags[GmosNorthFilter]
-    val gnGrating = enumTags[GmosNorthGrating]
+  val gnGrating = enumTags[GmosNorthGrating]
   val gnFpu     = enumTags[GmosNorthFpu]
 
   val gsFilter  = enumTags[GmosSouthFilter]

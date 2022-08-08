@@ -4,10 +4,15 @@
 package lucuma.itc.service
 
 import cats.effect._
+import cats.syntax.all._
 import io.circe.Json
 import io.circe.parser._
 import lucuma.itc.Itc
+import lucuma.itc.ItcChart
+import lucuma.itc.ItcChart.apply
 import lucuma.itc.ItcObservingConditions
+import lucuma.itc.ItcSeries
+import lucuma.itc.SeriesDataType
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.service.config.ExecutionEnvironment
@@ -39,10 +44,16 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
       observingMode: ObservingMode,
       constraints:   ItcObservingConditions,
       signalToNoise: BigDecimal
-    ): IO[Itc.Result] =
-      IO.pure(
-        Itc.Result.Success(1.seconds, 10, 10)
-      )
+    ): IO[Itc.GraphResult] =
+      Itc
+        .GraphResult(
+          List(
+            ItcChart(
+              List(ItcSeries("title", SeriesDataType.BackgroundData, List((1.0, 1.0), (2.0, 2.0))))
+            )
+          )
+        )
+        .pure[IO]
 
   val service: IO[HttpRoutes[IO]] =
     ItcMapping[IO](ExecutionEnvironment.Local, itc).map(m =>

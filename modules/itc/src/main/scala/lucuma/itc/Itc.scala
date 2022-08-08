@@ -32,7 +32,7 @@ trait Itc[F[_]]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     signalToNoise: BigDecimal
-  ): F[Itc.Result]
+  ): F[Itc.GraphResult]
 
 object Itc:
 
@@ -53,3 +53,7 @@ object Itc:
 
     /** Generic calculation error */
     final case class CalculationError(msg: String) extends Result
+
+  final case class GraphResult(
+    charts: List[ItcChart]
+  ) derives Encoder.AsObject

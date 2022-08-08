@@ -54,6 +54,7 @@ import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosNorth
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
 import lucuma.itc.search.Result.Spectroscopy
+import lucuma.itc.search.SpectroscopyGraphResults
 import lucuma.itc.search.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.service.config._
@@ -136,7 +137,7 @@ object ItcMapping extends Version with GracklePartials {
   def spectroscopyGraph[F[_]: ApplicativeThrow: Logger: Parallel: Trace](
     environment: ExecutionEnvironment,
     itc:         Itc[F]
-  )(env:         Cursor.Env): F[Result[List[SpectroscopyResults]]] =
+  )(env:         Cursor.Env): F[Result[SpectroscopyGraphResults]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[PosBigDecimal]("signalToNoise"),
@@ -144,35 +145,32 @@ object ItcMapping extends Version with GracklePartials {
      env.get[Band]("band"),
      env.get[SpectroscopyParams]("mode"),
      env.get[ItcObservingConditions]("constraints")
-    ).traverseN { (wv, rs, sn, sp, sd, modes, c) =>
-      List(modes)
-        .parTraverse { mode =>
-          Logger[F].info(s"ITC graph calculate for $mode, conditions $c and profile $sp") *> {
-            val specMode = mode match {
-              case GmosNITCParams(grating, fpu, filter) =>
-                ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
-              case GmosSITCParams(grating, fpu, filter) =>
-                ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
-            }
-            itc
-              .calculateGraph(
-                TargetProfile(sp, sd, rs),
-                specMode,
-                c,
-                sn.value
-              )
-              .handleErrorWith {
-                case UpstreamException(msg) =>
-                  println(msg)
-                  Itc.Result.CalculationError(msg).pure[F].widen
-                case x                      =>
-                  Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen
-              }
-              .map(r =>
-                SpectroscopyResults(version(environment).value, List(Spectroscopy(specMode, r)))
-              )
-          }
+    ).traverseN { (wv, rs, sn, sp, sd, mode, c) =>
+      Logger[F].info(s"ITC graph calculate for $mode, conditions $c and profile $sp") *> {
+        val specMode = mode match {
+          case GmosNITCParams(grating, fpu, filter) =>
+            ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
+          case GmosSITCParams(grating, fpu, filter) =>
+            ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
         }
+        itc
+          .calculateGraph(
+            TargetProfile(sp, sd, rs),
+            specMode,
+            c,
+            sn.value
+          )
+          // .handleErrorWith {
+          //   case UpstreamException(msg) =>
+          //     Itc.Result.CalculationError(msg).pure[F].widen
+          //   case x                      =>
+          //     Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen
+          // }
+          .map { r =>
+            println(r.charts.length)
+            SpectroscopyGraphResults(version(environment).value, r.charts)
+          }
+      }
         .map(_.rightIor[NonEmptyChain[Problem]])
         .handleErrorWith { case x =>
           Problem(s"Error calculating itc $x").leftIorNec.pure[F]
@@ -186,12 +184,13 @@ object ItcMapping extends Version with GracklePartials {
     loadSchema[F].map { loadedSchema =>
       new CirceMapping[F] with ComputeMapping[F] {
 
-        val schema: Schema         = loadedSchema
-        val QueryType              = schema.ref("Query")
-        val SpectroscopyResultType = schema.ref("SpectroscopyResult")
-        val BigDecimalType         = schema.ref("BigDecimal")
-        val LongType               = schema.ref("Long")
-        val DurationType           = schema.ref("Duration")
+        val schema: Schema              = loadedSchema
+        val QueryType                   = schema.ref("Query")
+        val SpectroscopyResultType      = schema.ref("SpectroscopyResult")
+        val SpectroscopyGraphResultType = schema.ref("SpectroscopyGraphResult")
+        val BigDecimalType              = schema.ref("BigDecimal")
+        val LongType                    = schema.ref("Long")
+        val DurationType                = schema.ref("Duration")
 
         val typeMappings =
           List(
@@ -202,9 +201,9 @@ object ItcMapping extends Version with GracklePartials {
                                                        ListType(SpectroscopyResultType),
                                                        spectroscopy[F](environment, itc)
                 ),
-                ComputeRoot[List[SpectroscopyResults]]("spectroscopyGraph",
-                                                       ListType(SpectroscopyResultType),
-                                                       spectroscopyGraph[F](environment, itc)
+                ComputeRoot[SpectroscopyGraphResults]("spectroscopyGraph",
+                                                      SpectroscopyGraphResultType,
+                                                      spectroscopyGraph[F](environment, itc)
                 )
               )
             ),

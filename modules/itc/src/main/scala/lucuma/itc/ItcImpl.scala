@@ -71,7 +71,7 @@ object ItcImpl {
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         signalToNoise: BigDecimal
-      ): F[Itc.Result] =
+      ): F[Itc.GraphResult] =
         observingMode match
           case _: ObservingMode.Spectroscopy =>
             spectroscopyGraph(targetProfile,
@@ -177,14 +177,10 @@ object ItcImpl {
         signalToNoise:    BigDecimal,
         exposureDuration: Quantity[BigDecimal, Second],
         exposures:        Int
-      ): F[Itc.Result] =
+      ): F[Itc.GraphResult] =
         itcGraph(targetProfile, observingMode, constraints, exposureDuration, exposures).map { r =>
-          println(r)
-          Itc.Result
-            .Success(0.0.seconds, 0, 0)
-        // .Success(newExpTime.toDouble.seconds, newNExp.toInt, s.maxTotalSNRatio)
-        // .pure[F]
-        // .widen[Itc.Result]
+          println(s"We got ${r.charts.length}")
+          Itc.GraphResult(r.charts.toList)
         }
 
       def spectroscopy(

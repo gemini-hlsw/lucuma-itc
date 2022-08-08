@@ -4803,7 +4803,7 @@ type Query {
 
   spectroscopyGraph(
     input: SpectroscopyGraphModeInput!
-  ): [SpectroscopyResult!]!
+  ): SpectroscopyGraphResult!
 }
 
 type GmosSITCParams {
@@ -4925,5 +4925,21 @@ type SpectroscopyResult {
 
   # Search results
   results: [Result!]!
+}
+
+type ItcSeries {
+  dataType: String!
+}
+
+type ItcChart {
+  series: [ItcSeries!]!
+}
+
+type SpectroscopyGraphResult {
+
+  serverVersion: String!
+
+  charts: [ItcChart!]!
+
 }
 
