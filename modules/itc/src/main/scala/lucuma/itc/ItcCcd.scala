@@ -25,6 +25,5 @@ final case class ItcCcd(
 
 }
 
-object ItcCcd {
-  implicit val decoder: Decoder[ItcCcd] = deriveDecoder
-}
+object ItcCcd:
+  given Decoder[ItcCcd] = deriveDecoder

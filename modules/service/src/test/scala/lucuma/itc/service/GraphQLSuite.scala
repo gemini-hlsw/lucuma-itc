@@ -4,10 +4,15 @@
 package lucuma.itc.service
 
 import cats.effect._
+import cats.syntax.all._
 import io.circe.Json
 import io.circe.parser._
 import lucuma.itc.Itc
+import lucuma.itc.ItcChart
+import lucuma.itc.ItcChart.apply
 import lucuma.itc.ItcObservingConditions
+import lucuma.itc.ItcSeries
+import lucuma.itc.SeriesDataType
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.service.config.ExecutionEnvironment
@@ -20,10 +25,10 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.duration._
 
-trait GraphQLSuite extends munit.CatsEffectSuite {
-  implicit val unsafeLogger: Logger[IO] = Slf4jLogger.getLogger[IO]
+trait GraphQLSuite extends munit.CatsEffectSuite:
+  given unsafeLogger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
-  val itc = new Itc[IO] {
+  val itc = new Itc[IO]:
     def calculate(
       targetProfile: TargetProfile,
       observingMode: ObservingMode,
@@ -33,12 +38,35 @@ trait GraphQLSuite extends munit.CatsEffectSuite {
       IO.pure(
         Itc.Result.Success(1.seconds, 10, 10)
       )
-  }
+
+    def calculateGraph(
+      targetProfile: TargetProfile,
+      observingMode: ObservingMode,
+      constraints:   ItcObservingConditions,
+      signalToNoise: BigDecimal
+    ): IO[Itc.GraphResult] =
+      Itc
+        .GraphResult(
+          List(
+            ItcChart(
+              List(
+                ItcSeries("title",
+                          SeriesDataType.BackgroundData,
+                          List((1.0, 1000.0), (2.0, 1001.0))
+                )
+              )
+            )
+          )
+        )
+        .pure[IO]
 
   val service: IO[HttpRoutes[IO]] =
     ItcMapping[IO](ExecutionEnvironment.Local, itc).map(m =>
       ItcService.routes[IO](ItcService.service[IO](m))
     )
+
+  val mappingValidator: IO[Unit] =
+    ItcMapping[IO](ExecutionEnvironment.Local, itc).flatMap(m => m.validator.validate[IO]())
 
   val itcFixture = ResourceSuiteLocalFixture(
     "itc",
@@ -72,4 +100,3 @@ trait GraphQLSuite extends munit.CatsEffectSuite {
       }
       .flatMap(_.as[Json])
       .assertEquals(expected)
-}

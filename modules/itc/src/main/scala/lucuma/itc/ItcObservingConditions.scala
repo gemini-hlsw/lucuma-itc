@@ -18,11 +18,11 @@ final case class ItcObservingConditions(
   airmass: Double
 )
 
-object ItcObservingConditions {
+object ItcObservingConditions:
   def toItcAirmass(m: Double): Double =
     if (m <= 1.35) 1.2 else if (m <= 1.75) 1.5 else 2.0
 
-  implicit val encoder: Encoder[ItcObservingConditions] =
+  given Encoder[ItcObservingConditions] =
     Encoder.forProduct5("exactiq", "exactcc", "wv", "sb", "airmass") { a =>
       (Json.obj(
          "arcsec"     -> Json.fromBigDecimal(
@@ -37,5 +37,3 @@ object ItcObservingConditions {
        toItcAirmass(a.airmass)
       )
     }
-
-}

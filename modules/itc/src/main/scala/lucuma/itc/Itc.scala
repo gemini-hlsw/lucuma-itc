@@ -10,7 +10,7 @@ import scala.concurrent.duration.FiniteDuration
 
 final case class UpstreamException(msg: String) extends RuntimeException(msg)
 
-trait Itc[F[_]] {
+trait Itc[F[_]]:
 
   /**
    * Compute the exposure time and number required to achieve the desired signal-to-noise under
@@ -23,14 +23,23 @@ trait Itc[F[_]] {
     signalToNoise: BigDecimal
   ): F[Itc.Result]
 
-}
+  /**
+   * Compute the exposure time and number required to achieve the desired signal-to-noise under
+   * average conditions.
+   */
+  def calculateGraph(
+    targetProfile: TargetProfile,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    signalToNoise: BigDecimal
+  ): F[Itc.GraphResult]
 
-object Itc {
+object Itc:
 
-  def apply[F[_]](implicit ev: Itc[F]): ev.type = ev
+  def apply[F[_]](using ev: Itc[F]): ev.type = ev
 
   sealed trait Result extends Product with Serializable
-  object Result {
+  object Result:
 
     final case class Success(
       exposureTime:  FiniteDuration,
@@ -44,6 +53,7 @@ object Itc {
 
     /** Generic calculation error */
     final case class CalculationError(msg: String) extends Result
-  }
 
-}
+  final case class GraphResult(
+    charts: List[ItcChart]
+  ) derives Encoder.AsObject

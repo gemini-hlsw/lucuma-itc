@@ -11,6 +11,7 @@ import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.itc.Itc
+import lucuma.itc.ItcChart
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.given
 import lucuma.itc.search.gmosnorth.GmosNorthFilterSelector
@@ -24,8 +25,13 @@ object Result:
       derives Encoder.AsObject
 
 final case class SpectroscopyResults(
-  serverVersion: NonEmptyString,
+  serverVersion: String,
   results:       List[Result.Spectroscopy]
+) derives Encoder.AsObject
+
+final case class SpectroscopyGraphResults(
+  serverVersion: String,
+  charts:        List[ItcChart]
 ) derives Encoder.AsObject
 
 object Search:
@@ -84,4 +90,4 @@ object Search:
         case Result.Spectroscopy(_, Itc.Result.SourceTooBright(_))  => Double.MaxValue
         case Result.Spectroscopy(_, Itc.Result.CalculationError(_)) => Double.MaxValue
       })
-    resp.map(r => SpectroscopyResults(version, r))
+    resp.map(r => SpectroscopyResults(version.value, r))

@@ -7,7 +7,6 @@ import cats.implicits._
 import ciris._
 
 enum ExecutionEnvironment:
-
   case Local, Review, Staging, Production
 
 given ConfigDecoder[String, ExecutionEnvironment] =

@@ -25,6 +25,7 @@ val munitVersion                = "0.7.29"
 val disciplineMunitVersion      = "1.0.9"
 val gatlingVersion              = "3.7.6"
 val spireVersion                = "0.18.0"
+val pprintVersion               = "0.7.3"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -70,7 +71,9 @@ lazy val itc = project
       "com.manyangled" %% "coulomb-spire"       % coulombVersion,
       "com.manyangled" %% "coulomb-units"       % coulombVersion,
       "org.typelevel" %%% "spire"               % spireVersion,
-      "org.typelevel" %%% "spire-extras"        % spireVersion
+      "org.typelevel" %%% "spire-extras"        % spireVersion,
+      "org.typelevel"  %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
+      "com.lihaoyi"   %%% "pprint"              % pprintVersion          % Test
     )
   )
 
@@ -81,7 +84,7 @@ lazy val service = project
   .settings(
     name              := "lucuma-itc-service",
     scalacOptions -= "-Vtype-diffs",
-    reStart / envVars := Map("ITC_URL" -> "https://gemini-new-itc.herokuapp.com/json"),
+    reStart / envVars := Map("ITC_URL" -> "https://itc-server-exp.herokuapp.com/"),
     libraryDependencies ++= Seq(
       "edu.gemini"    %% "gsp-graphql-core"    % grackleVersion,
       "edu.gemini"    %% "gsp-graphql-generic" % grackleVersion,
