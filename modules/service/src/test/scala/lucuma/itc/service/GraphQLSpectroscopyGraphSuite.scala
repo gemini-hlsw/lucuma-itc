@@ -84,7 +84,7 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
                   "series": [
                     {
                       "title": "title",
-                      "dataType": "BackgroundData",
+                      "dataType": "BACKGROUND_DATA",
                       "data": [
                         [
                           1.0,

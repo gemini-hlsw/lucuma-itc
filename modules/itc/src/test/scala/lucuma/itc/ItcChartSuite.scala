@@ -99,7 +99,7 @@ class ItcChartSuite extends munit.FunSuite {
   "series" : [
     {
       "title" : "Signal BB(B)",
-      "dataType" : "SignalData",
+      "dataType" : "SIGNAL_DATA",
       "data" : [
         [
           518.386,
@@ -125,7 +125,7 @@ class ItcChartSuite extends munit.FunSuite {
     },
     {
       "title" : "SQRT(Background) BB(B)",
-      "dataType" : "BackgroundData",
+      "dataType" : "BACKGROUND_DATA",
       "data" : [
         [
           518.386,
