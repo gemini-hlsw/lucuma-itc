@@ -31,8 +31,7 @@ object SeriesDataType:
       SeriesDataType.PixBackData
     )
 
-  given Encoder[SeriesDataType] = (a: SeriesDataType) =>
-    Json.fromString(enumerated.tag(a).toScreamingSnakeCase)
+  given Encoder[SeriesDataType] = enumerated
 
   given Decoder[SeriesDataType] = (c: HCursor) =>
     Decoder.decodeJsonObject(c).flatMap { str =>
