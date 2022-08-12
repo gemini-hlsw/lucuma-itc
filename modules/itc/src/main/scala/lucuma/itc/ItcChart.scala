@@ -54,7 +54,6 @@ object ItcSeries:
                      case (Some(a), Some(b)) if a.length === b.length => a.zip(b)
                      case _                                           => List.empty
                  }
-    // yield {println(ItcSeries(title, dt, data));ItcSeries(title, dt, data)}
     yield ItcSeries(title, dt, data)
   }
 

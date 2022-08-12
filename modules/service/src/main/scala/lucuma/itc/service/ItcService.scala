@@ -68,7 +68,8 @@ object ItcService:
           vars =>
             for {
               result <- runGraphQL(op, vars, query, GET)
-              resp   <- Ok(result, Headers(`Cache-Control`(CacheDirective.`max-age`(1.days))))
+              // TODO Increase cache time
+              resp   <- Ok(result, Headers(`Cache-Control`(CacheDirective.`max-age`(1.hour))))
             } yield resp
         )
 
