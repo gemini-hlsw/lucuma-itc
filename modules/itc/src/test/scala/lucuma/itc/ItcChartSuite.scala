@@ -4,11 +4,14 @@
 package lucuma.itc
 
 import cats.syntax.all.*
+import io.circe.Decoder
 import io.circe.Error
 import io.circe.parser.decode
 import io.circe.syntax.*
 
 class ItcChartSuite extends munit.FunSuite {
+  given Decoder[ItcChart] = ItcChart.ocs2Decoder
+
   val json = """{
         "charts" : [
           {
@@ -99,7 +102,7 @@ class ItcChartSuite extends munit.FunSuite {
   "series" : [
     {
       "title" : "Signal BB(B)",
-      "dataType" : "SignalData",
+      "dataType" : "SIGNAL_DATA",
       "data" : [
         [
           518.386,
@@ -125,7 +128,7 @@ class ItcChartSuite extends munit.FunSuite {
     },
     {
       "title" : "SQRT(Background) BB(B)",
-      "dataType" : "BackgroundData",
+      "dataType" : "BACKGROUND_DATA",
       "data" : [
         [
           518.386,

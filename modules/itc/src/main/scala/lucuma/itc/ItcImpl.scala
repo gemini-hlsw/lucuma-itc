@@ -14,7 +14,8 @@ import coulomb.syntax.*
 import coulomb.units.si.*
 import coulomb.units.si.given
 import eu.timepit.refined.types.numeric.NonNegInt
-import io.circe.syntax._
+import io.circe.Decoder
+import io.circe.syntax.*
 import lucuma.core.math.Angle
 import lucuma.itc.Itc
 import lucuma.itc.search.ObservingMode
@@ -148,6 +149,7 @@ object ItcImpl {
             Trace[F].put("itc.exposures" -> exposures) *>
             c.run(POST(json, uri / "jsonchart")).use {
               case Status.Successful(resp) =>
+                given Decoder[ItcGraphResult]          = ItcGraphResult.ocs2Decoder
                 given EntityDecoder[F, ItcGraphResult] = jsonOf[F, ItcGraphResult]
                 resp.as[ItcGraphResult]
               case resp                    =>

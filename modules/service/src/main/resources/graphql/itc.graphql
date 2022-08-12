@@ -1,28 +1,3 @@
-"""DatasetEvent creation parameters"""
-input AddDatasetEventInput {
-  observationId: ObservationId!
-  visitId: VisitId!
-  stepId: StepId!
-  datasetIndex: Int!
-  filename: DatasetFilename
-  stageType: DatasetStage!
-}
-
-"""SequenceEvent creation parameters"""
-input AddSequenceEventInput {
-  observationId: ObservationId!
-  visitId: VisitId!
-  command: SequenceCommand!
-}
-
-"""StepEvent creation parameters"""
-input AddStepEventInput {
-  observationId: ObservationId!
-  visitId: VisitId!
-  stepId: StepId!
-  sequenceType: SequenceType!
-  stage: StepStage!
-}
 
 """Air mass range creation and edit parameters"""
 input AirMassRangeInput {
@@ -227,26 +202,6 @@ input BulkEditTargetEnvironmentInput {
   edit: TargetEnvironmentInput!
 }
 
-"""
-Catalog id consisting of catalog name, string identifier and an optional object type
-"""
-input CatalogInfoInput {
-  """
-  The name field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  name: CatalogName
-
-  """
-  The id field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  id: NonEmptyString
-
-  """
-  The objectType field may be unset by assigning a null value, or ignored by skipping it altogether
-  """
-  objectType: NonEmptyString
-}
-
 """Constraint set creation and editing parameters"""
 input ConstraintSetInput {
   """
@@ -279,34 +234,6 @@ input ConstraintSetInput {
 input CoordinatesInput {
   ra: RightAscensionInput!
   dec: DeclinationInput!
-}
-
-"""Observation creation parameters"""
-input CreateObservationInput {
-  observationId: ObservationId
-  programId: ProgramId!
-  subtitle: NonEmptyString
-  status: ObsStatus
-  activeStatus: ObsActiveStatus
-  targetEnvironment: TargetEnvironmentInput
-  constraintSet: ConstraintSetInput
-  scienceRequirements: ScienceRequirementsInput
-  scienceConfiguration: ScienceConfigurationInput
-}
-
-"""Program creation parameters"""
-input CreateProgramInput {
-  programId: ProgramId
-  name: NonEmptyString
-}
-
-"""Target creation parameters"""
-input CreateTargetInput {
-  targetId: TargetId
-  name: NonEmptyString!
-  sidereal: SiderealInput
-  nonsidereal: NonsiderealInput
-  sourceProfile: SourceProfileInput!
 }
 
 """Dark calibration step"""
@@ -403,76 +330,6 @@ input DurationInput {
 input EditAsterismInput {
   add: TargetId
   delete: TargetId
-}
-
-"""Edit observation"""
-input EditObservationInput {
-  observationId: ObservationId!
-
-  """
-  The existence field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  existence: Existence
-
-  """
-  The subtitle field may be unset by assigning a null value, or ignored by skipping it altogether
-  """
-  subtitle: NonEmptyString
-
-  """
-  The status field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  status: ObsStatus
-
-  """
-  The activeStatus field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  activeStatus: ObsActiveStatus
-
-  """
-  The targetEnvironment field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  targetEnvironment: TargetEnvironmentInput
-
-  """
-  The constraintSet field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  constraintSet: ConstraintSetInput
-
-  """
-  The scienceRequirements field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  scienceRequirements: ScienceRequirementsInput
-
-  """
-  The scienceConfiguration field may be unset by assigning a null value, or ignored by skipping it altogether
-  """
-  scienceConfiguration: ScienceConfigurationInput
-}
-
-"""Edit program"""
-input EditProgramInput {
-  programId: ProgramId!
-
-  """
-  The existence field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  existence: Existence
-
-  """
-  The name field may be unset by assigning a null value, or ignored by skipping it altogether
-  """
-  name: NonEmptyString
-}
-
-"""Single target edit options"""
-input EditTargetInput {
-  targetId: TargetId!
-  existence: Existence
-  name: NonEmptyString
-  sidereal: SiderealInput
-  nonsidereal: NonsiderealInput
-  sourceProfile: SourceProfileInput
 }
 
 """Type of edit that triggered an event"""
@@ -1930,34 +1787,6 @@ enum MosPreImaging {
   IS_NOT_MOS_PRE_IMAGING
 }
 
-"""Nonsidereal target parameters.  Supply `keyType` and `des` or `key`"""
-input NonsiderealInput {
-  """
-  The keyType field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  keyType: EphemerisKeyType
-
-  """
-  The des field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  des: NonEmptyString
-
-  """
-  The key field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  key: NonEmptyString
-}
-
-"""Event sent when a new object is created or updated"""
-type ObservationEdit implements Event {
-  """Type of edit"""
-  editType: EditType!
-
-  """Edited object"""
-  value: Observation!
-  id: Long!
-}
-
 type Offset {
   """Offset in p"""
   p: p!
@@ -2211,44 +2040,6 @@ type SequenceEventEdge {
 
   """SequenceEventEdge element cursor"""
   cursor: Cursor!
-}
-
-"""Sidereal target edit parameters"""
-input SiderealInput {
-  """
-  The ra field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  ra: RightAscensionInput
-
-  """
-  The dec field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  dec: DeclinationInput
-
-  """
-  The epoch field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  epoch: EpochString
-
-  """
-  The properMotion field may be unset by assigning a null value, or ignored by skipping it altogether
-  """
-  properMotion: ProperMotionInput
-
-  """
-  The radialVelocity field may be unset by assigning a null value, or ignored by skipping it altogether
-  """
-  radialVelocity: RadialVelocityInput
-
-  """
-  The parallax field may be unset by assigning a null value, or ignored by skipping it altogether
-  """
-  parallax: ParallaxInput
-
-  """
-  The catalogInfo field may be unset by assigning a null value, or ignored by skipping it altogether
-  """
-  catalogInfo: CatalogInfoInput
 }
 
 """Slit width in appropriate units"""
@@ -4927,11 +4718,26 @@ type SpectroscopyResult {
   results: [Result!]!
 }
 
+"""Chart data types"""
+enum ItcChartDataType {
+  SIGNAL_DATA
+
+  BACKGROUND_DATA
+
+  SINGLE_S2_NDATA
+
+  FINAL_S2_NDATA
+
+  PIX_SIG_DATA
+
+  PIX_BACK_DATA
+}
+
 type ItcSeries {
   title: String!
 
   # Data type: alternatives SignalData, BackgroundData, SingleS2NData, FinalS2NData, PixSigData, PixBackData
-  dataType: String!
+  dataType: ItcChartDataType!
 
   # Data series in the form of pairs (x, y)
   data: [[Float!]!]!
