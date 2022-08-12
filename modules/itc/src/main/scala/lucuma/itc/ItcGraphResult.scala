@@ -14,8 +14,10 @@ final case class ItcGraphResult(charts: NonEmptyList[ItcChart])
 
 object ItcGraphResult:
 
-  given Decoder[ItcGraphResult] = (c: HCursor) =>
+  val ocs2Decoder: Decoder[ItcGraphResult] = (c: HCursor) => {
+    given Decoder[ItcChart] = ItcChart.ocs2Decoder
     (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
       .downField("chartGroups")
       .as[NonEmptyList[ItcChart]]
       .map(ItcGraphResult(_))
+  }

@@ -34,13 +34,15 @@ object Main extends IOApp {
   val ServiceName = "lucuma-itc"
 
   /** A startup action that prints a banner. */
-  def banner[F[_]: Applicative: Logger]: F[Unit] =
+  def banner[F[_]: Applicative: Logger](cfg: Config): F[Unit] =
     val banner =
       s"""|
             |   / /_  _________  ______ ___  ____ _      (_) /______
             |  / / / / / ___/ / / / __ `__ \\/ __ `/_____/ / __/ ___/
             | / / /_/ / /__/ /_/ / / / / / / /_/ /_____/ / /_/ /__
             |/_/\\__,_/\\___/\\__,_/_/ /_/ /_/\\__,_/     /_/\\__/\\___/
+            |
+            | old-itc-url ${cfg.itcUrl}
             |
             |""".stripMargin
     banner.linesIterator.toList.traverse_(Logger[F].info(_))
@@ -100,7 +102,7 @@ object Main extends IOApp {
    */
   def server[F[_]: Async: Parallel: Logger](cfg: Config): Resource[F, ExitCode] =
     for {
-      _  <- Resource.eval(banner)
+      _  <- Resource.eval(banner(cfg))
       ep <- entryPointResource(cfg.honeycomb)
       ap <- ep.liftR(routes(cfg))
       _  <-

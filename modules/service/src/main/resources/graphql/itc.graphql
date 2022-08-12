@@ -2042,44 +2042,6 @@ type SequenceEventEdge {
   cursor: Cursor!
 }
 
-"""Sidereal target edit parameters"""
-input SiderealInput {
-  """
-  The ra field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  ra: RightAscensionInput
-
-  """
-  The dec field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  dec: DeclinationInput
-
-  """
-  The epoch field must be either specified or skipped altogether.  It cannot be unset with a null value.
-  """
-  epoch: EpochString
-
-  """
-  The properMotion field may be unset by assigning a null value, or ignored by skipping it altogether
-  """
-  properMotion: ProperMotionInput
-
-  """
-  The radialVelocity field may be unset by assigning a null value, or ignored by skipping it altogether
-  """
-  radialVelocity: RadialVelocityInput
-
-  """
-  The parallax field may be unset by assigning a null value, or ignored by skipping it altogether
-  """
-  parallax: ParallaxInput
-
-  """
-  The catalogInfo field may be unset by assigning a null value, or ignored by skipping it altogether
-  """
-  catalogInfo: CatalogInfoInput
-}
-
 """Slit width in appropriate units"""
 input SlitWidthInput {
   microarcseconds: Long
@@ -4758,7 +4720,7 @@ type SpectroscopyResult {
 
 """Chart data types"""
 enum ItcChartDataType {
-  SINGAL_DATA
+  SIGNAL_DATA
 
   BACKGROUND_DATA
 
@@ -4770,7 +4732,6 @@ enum ItcChartDataType {
 
   PIX_BACK_DATA
 }
-
 
 type ItcSeries {
   title: String!
