@@ -24,6 +24,7 @@ import org.http4s.implicits._
 import org.http4s.server.Server
 import org.http4s.server.middleware.CORS
 import org.http4s.server.middleware.CORSPolicy
+import org.http4s.server.middleware.GZip
 import org.http4s.server.middleware.{Logger => Http4sLogger}
 import org.http4s.server.staticcontent._
 import org.typelevel.log4cats.Logger
@@ -83,36 +84,38 @@ object Main extends IOApp {
       .build
 
   def routes[F[_]: Async: Parallel: Trace](cfg: Config): Resource[F, HttpRoutes[F]] =
-    for {
-      log <- Resource.eval(Slf4jLogger.create[F])
-      map <- {
-        implicit val L: Logger[F] = log
-        ItcImpl.forUri(cfg.itcUrl).flatMap(itc => Resource.eval(ItcMapping(cfg.environment, itc)))
-      }
-      its <- Resource.pure(ItcService.service(map))
-    } yield
+    for
+      given Logger[F] <- Resource.eval(Slf4jLogger.create[F])
+      itc             <- ItcImpl.forUri(cfg.itcUrl)
+      map             <- Resource.eval(ItcMapping(cfg.environment, itc))
+      its             <- Resource.pure(ItcService.service(map))
+    yield
     // Routes for static resources, ie. GraphQL Playground
     resourceServiceBuilder[F]("/assets").toRoutes <+>
       // Routes for the ITC GraphQL service
-      NatchezMiddleware.server(cors(cfg.environment, none)(ItcService.routes(its)))
+      NatchezMiddleware.server(
+        GZip(
+          cors(cfg.environment, none)(ItcService.routes(its))
+        )
+      )
 
   /**
    * Our main server, as a resource that starts up our server on acquire and shuts it all down in
    * cleanup, yielding an `ExitCode`. Users will `use` this resource and hold it forever.
    */
   def server[F[_]: Async: Parallel: Logger](cfg: Config): Resource[F, ExitCode] =
-    for {
+    for
       _  <- Resource.eval(banner(cfg))
       ep <- entryPointResource(cfg.honeycomb)
       ap <- ep.liftR(routes(cfg))
       _  <-
         serverResource(Http4sLogger.httpApp(logHeaders = true, logBody = false)(ap.orNotFound), cfg)
-    } yield ExitCode.Success
+    yield ExitCode.Success
 
   def run(args: List[String]): IO[ExitCode] =
-    for {
+    for
       cfg              <- Config.config.load[IO]
       given Logger[IO] <- Slf4jLogger.create[IO]
       _                <- server[IO](cfg).use(_ => IO.never[ExitCode])
-    } yield ExitCode.Success
+    yield ExitCode.Success
 }
