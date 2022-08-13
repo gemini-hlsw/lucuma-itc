@@ -8,6 +8,8 @@ import cats.Parallel
 import cats.effect._
 import cats.syntax.all._
 import com.comcast.ip4s._
+import lucuma.graphql.routes.GrackleGraphQLService
+import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
 import lucuma.itc.service.config.ExecutionEnvironment._
 import lucuma.itc.service.config._
@@ -27,6 +29,7 @@ import org.http4s.server.middleware.CORSPolicy
 import org.http4s.server.middleware.GZip
 import org.http4s.server.middleware.{Logger => Http4sLogger}
 import org.http4s.server.staticcontent._
+import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
@@ -74,28 +77,32 @@ object Main extends IOApp {
       }
     }
 
-  def serverResource[F[_]: Async](app: HttpApp[F], cfg: Config): Resource[F, Server] =
+  def serverResource[F[_]: Async](
+    app: WebSocketBuilder2[F] => HttpApp[F],
+    cfg: Config
+  ): Resource[F, Server] =
     // Spin up the server ...
     EmberServerBuilder
       .default[F]
       .withHost(ipv4"0.0.0.0")
       .withPort(Port.fromInt(cfg.port).get)
-      .withHttpApp(app)
+      .withHttpWebSocketApp(app)
       .build
 
-  def routes[F[_]: Async: Parallel: Trace](cfg: Config): Resource[F, HttpRoutes[F]] =
+  def routes[F[_]: Async: Parallel: Trace](
+    cfg: Config
+  ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
       given Logger[F] <- Resource.eval(Slf4jLogger.create[F])
       itc             <- ItcImpl.forUri(cfg.itcUrl)
-      map             <- Resource.eval(ItcMapping(cfg.environment, itc))
-      its             <- Resource.pure(ItcService.service(map))
-    yield
-    // Routes for static resources, ie. GraphQL Playground
-    resourceServiceBuilder[F]("/assets").toRoutes <+>
+      mapping         <- Resource.eval(ItcMapping(cfg.environment, itc))
+    yield wsb =>
       // Routes for the ITC GraphQL service
       NatchezMiddleware.server(
         GZip(
-          cors(cfg.environment, none)(ItcService.routes(its))
+          cors(cfg.environment, none)(
+            Routes.forService(_ => GrackleGraphQLService[F](mapping).some.pure[F], wsb, "itc")
+          )
         )
       )
 
@@ -107,9 +114,8 @@ object Main extends IOApp {
     for
       _  <- Resource.eval(banner(cfg))
       ep <- entryPointResource(cfg.honeycomb)
-      ap <- ep.liftR(routes(cfg))
-      _  <-
-        serverResource(Http4sLogger.httpApp(logHeaders = true, logBody = false)(ap.orNotFound), cfg)
+      ap <- ep.wsLiftR(routes(cfg)).map(_.map(_.orNotFound))
+      _  <- serverResource(ap, cfg)
     yield ExitCode.Success
 
   def run(args: List[String]): IO[ExitCode] =

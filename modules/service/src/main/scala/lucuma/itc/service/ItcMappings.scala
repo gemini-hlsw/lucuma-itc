@@ -191,11 +191,11 @@ object ItcMapping extends Version with GracklePartials {
               tpe = QueryType,
               fieldMappings = List(
                 ComputeRoot[List[SpectroscopyResults]]("spectroscopy",
-                                                       ListType(SpectroscopyResultType),
+                                                       QueryType,
                                                        spectroscopy[F](environment, itc)
                 ),
                 ComputeRoot[SpectroscopyGraphResults]("spectroscopyGraph",
-                                                      SpectroscopyGraphResultType,
+                                                      QueryType,
                                                       spectroscopyGraph[F](environment, itc)
                 )
               )

@@ -7,6 +7,8 @@ import cats.effect._
 import cats.syntax.all._
 import io.circe.Json
 import io.circe.parser._
+import lucuma.graphql.routes.GrackleGraphQLService
+import lucuma.graphql.routes.Routes
 import lucuma.itc.Itc
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcChart.apply
@@ -19,6 +21,7 @@ import lucuma.itc.service.config.ExecutionEnvironment
 import natchez.Trace.Implicits.noop
 import org.http4s._
 import org.http4s.circe._
+import org.http4s.server.websocket.WebSocketBuilder2
 import org.http4s.syntax.all._
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
@@ -26,7 +29,7 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import scala.concurrent.duration._
 
 trait GraphQLSuite extends munit.CatsEffectSuite:
-  given unsafeLogger: Logger[IO] = Slf4jLogger.getLogger[IO]
+  given Logger[IO] = Slf4jLogger.getLogger[IO]
 
   val itc = new Itc[IO]:
     def calculate(
@@ -35,9 +38,7 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
       constraints:   ItcObservingConditions,
       signalToNoise: BigDecimal
     ): IO[Itc.Result] =
-      IO.pure(
-        Itc.Result.Success(1.seconds, 10, 10)
-      )
+      Itc.Result.Success(1.seconds, 10, 10).pure[IO]
 
     def calculateGraph(
       targetProfile: TargetProfile,
@@ -61,12 +62,10 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
         .pure[IO]
 
   val service: IO[HttpRoutes[IO]] =
-    ItcMapping[IO](ExecutionEnvironment.Local, itc).map(m =>
-      ItcService.routes[IO](ItcService.service[IO](m))
-    )
-
-  val mappingValidator: IO[Unit] =
-    ItcMapping[IO](ExecutionEnvironment.Local, itc).flatMap(m => m.validator.validate[IO]())
+    for
+      wsb <- WebSocketBuilder2[IO]
+      map <- ItcMapping[IO](ExecutionEnvironment.Local, itc)
+    yield Routes.forService(_ => IO.pure(GrackleGraphQLService(map).some), wsb)
 
   val itcFixture = ResourceSuiteLocalFixture(
     "itc",
@@ -79,7 +78,7 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
     IO(itcFixture())
       .flatMap { itc =>
         itc.orNotFound.run(
-          Request(method = Method.POST, uri = uri"/itc")
+          Request(method = Method.POST, uri = uri"/graphql")
             .withEntity(Json.obj("query" -> Json.fromString(query)))
         )
       }
@@ -90,7 +89,7 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
     IO(itcFixture())
       .flatMap { itc =>
         itc.orNotFound.run(
-          Request(method = Method.POST, uri = uri"/itc")
+          Request(method = Method.POST, uri = uri"/graphql")
             .withEntity(
               Json.obj("query"     -> Json.fromString(query.replace("\\n", "")),
                        "variables" -> parse(variables).getOrElse(Json.Null)
