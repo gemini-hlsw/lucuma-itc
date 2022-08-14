@@ -4,22 +4,16 @@
 package lucuma.itc
 
 import coulomb.*
-import coulomb.ops.algebra.spire.all.given
 import coulomb.policy.spire.standard.given
 import coulomb.syntax.*
-import coulomb.units.si.*
-import coulomb.units.si.given
 import coulomb.units.si.prefixes.*
 import coulomb.units.time.*
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
-import io.circe.*
-import io.circe.generic.semiauto._
+import io.circe.Encoder
+import io.circe.Json
 import io.circe.syntax.*
-import lucuma.core.enums._
 import lucuma.core.math.Wavelength
-import lucuma.itc.search.ObservingMode.Spectroscopy._
-import lucuma.itc.search.*
 
 import java.math.RoundingMode
 import scala.concurrent.duration.FiniteDuration
@@ -57,35 +51,3 @@ given Encoder[Wavelength] = w =>
      )
     )
   )
-
-given Encoder[GmosNorth] = a =>
-  Json.obj(
-    ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-    ("resolution", Json.fromInt(a.resolution.toInt)),
-    ("params", GmosNITCParams(a.disperser, a.fpu, a.filter).asJson),
-    ("wavelength", a.λ.asJson)
-  )
-
-given Encoder[GmosSouth] = a =>
-  Json.obj(
-    ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-    ("resolution", Json.fromInt(a.resolution.toInt)),
-    ("params", GmosSITCParams(a.disperser, a.fpu, a.filter).asJson),
-    ("wavelength", a.λ.asJson)
-  )
-
-given Encoder[ObservingMode.Spectroscopy] = Encoder.instance {
-  case gn: GmosNorth => gn.asJson
-  case gs: GmosSouth => gs.asJson
-}
-
-given Encoder[Itc.Result] = Encoder.instance {
-  case f: Itc.Result.Success          =>
-    Json.obj(("resultType", Json.fromString("Success"))).deepMerge(f.asJson)
-  case Itc.Result.CalculationError(m) =>
-    Json.obj(("resultType", Json.fromString("Error")), ("msg", Json.fromString(m)))
-  case Itc.Result.SourceTooBright(m)  =>
-    Json.obj(("resultType", Json.fromString("Error")),
-             ("msg", Json.fromString(s"Source too bright $m"))
-    )
-}

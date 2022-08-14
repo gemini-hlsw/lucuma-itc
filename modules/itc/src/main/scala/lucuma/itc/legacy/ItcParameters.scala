@@ -1,10 +1,12 @@
 // Copyright (c) 2016-2022 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc
+package lucuma.itc.legacy
 
 import io.circe.Encoder
 import io.circe.generic.semiauto._
+import lucuma.itc.ItcObservingConditions
+import lucuma.itc.search.ItcObservationDetails
 
 case class ItcParameters(
   source:      ItcSourceDefinition,
@@ -13,8 +15,3 @@ case class ItcParameters(
   telescope:   ItcTelescopeDetails,
   instrument:  ItcInstrumentDetails
 )
-
-object ItcParameters {
-  implicit val encoder: Encoder[ItcParameters] =
-    deriveEncoder[ItcParameters]
-}

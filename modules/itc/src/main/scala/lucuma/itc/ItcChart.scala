@@ -15,6 +15,7 @@ import io.circe.HCursor
 import io.circe.Json
 import io.circe.generic.semiauto._
 import io.circe.refined._
+import lucuma.core.enums.*
 import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
 import lucuma.itc.math._
@@ -97,3 +98,11 @@ object ItcChart:
     given Decoder[ItcSeries] = ItcSeries.ocs2Decoder
     c.downField("charts").downArray.downField("series").as[List[ItcSeries]].map(ItcChart.apply)
   }
+
+case class ItcObservingConditions(
+  iq:      ImageQuality,
+  cc:      CloudExtinction,
+  wv:      WaterVapor,
+  sb:      SkyBackground,
+  airmass: Double
+) {}
