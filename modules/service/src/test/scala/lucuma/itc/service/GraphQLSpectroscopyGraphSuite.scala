@@ -64,6 +64,9 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
                 },
                 grating: B1200_G5301
               }
+            },
+            significantFigures: {
+              xAxis: 4
             }
           }) {
             charts {
@@ -71,6 +74,11 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
                 title
                 dataType
                 data
+                xAxis {
+                  start
+                  end
+                  count
+                }
               }
             }
           }
@@ -94,7 +102,12 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
                           2.0,
                           1001.0
                         ]
-                      ]
+                      ],
+                      "xAxis" : {
+                        "start" : 1.0,
+                        "end" : 2.0,
+                        "count" : 2
+                      }
                     }
                   ]
                 }

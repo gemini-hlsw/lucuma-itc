@@ -124,7 +124,12 @@ class ItcChartSuite extends munit.FunSuite {
           518.49,
           1648543.5849223256
         ]
-      ]
+      ],
+      "xAxis" : {
+        "start" : 518.386,
+        "end" : 518.49,
+        "count" : 5
+      }
     },
     {
       "title" : "SQRT(Background) BB(B)",
@@ -150,7 +155,12 @@ class ItcChartSuite extends munit.FunSuite {
           518.49,
           0.22357480860414133
         ]
-      ]
+      ],
+      "xAxis" : {
+        "start" : 518.386,
+        "end" : 518.49,
+        "count" : 5
+      }
     }
   ]
 }""".stripMargin

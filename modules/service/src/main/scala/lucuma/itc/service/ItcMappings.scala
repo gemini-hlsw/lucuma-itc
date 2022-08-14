@@ -23,6 +23,7 @@ import eu.timepit.refined._
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
+import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
 import io.circe.Json
@@ -45,6 +46,7 @@ import lucuma.itc.GmosNITCParams
 import lucuma.itc.GmosSITCParams
 import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
+import lucuma.itc.SignificantFigures
 import lucuma.itc.SpectroscopyParams
 import lucuma.itc.UpstreamException
 import lucuma.itc.given
@@ -147,7 +149,8 @@ object ItcMapping extends Version with GracklePartials {
      env.get[ItcObservingConditions]("constraints")
     ).traverseN { (wv, rs, sn, sp, sd, mode, c) =>
       Logger[F].info(s"ITC graph calculate for $mode, conditions $c and profile $sp") *> {
-        val specMode = mode match {
+        val significantFigures = env.get[SignificantFigures]("significantFigures")
+        val specMode           = mode match {
           case GmosNITCParams(grating, fpu, filter) =>
             ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
           case GmosSITCParams(grating, fpu, filter) =>
@@ -161,7 +164,9 @@ object ItcMapping extends Version with GracklePartials {
             sn.value
           )
           .map { r =>
-            SpectroscopyGraphResults(version(environment).value, r.charts)
+            val charts =
+              significantFigures.fold(r.charts)(v => r.charts.map(_.adjustSignificantFigures(v)))
+            SpectroscopyGraphResults(version(environment).value, charts)
           }
       }
         .map(_.rightIor[NonEmptyChain[Problem]])
@@ -184,6 +189,7 @@ object ItcMapping extends Version with GracklePartials {
         val BigDecimalType              = schema.ref("BigDecimal")
         val LongType                    = schema.ref("Long")
         val DurationType                = schema.ref("Duration")
+        val PosIntType                  = schema.ref("PosInt")
 
         val typeMappings =
           List(
@@ -202,6 +208,7 @@ object ItcMapping extends Version with GracklePartials {
             ),
             LeafMapping[BigDecimal](BigDecimalType),
             LeafMapping[Long](LongType),
+            LeafMapping[PosInt](PosIntType),
             LeafMapping[FiniteDuration](DurationType)
           )
 
@@ -237,6 +244,7 @@ object ItcMapping extends Version with GracklePartials {
                         .orElse(bandPartial)
                         .orElse(instrumentModePartial)
                         .orElse(constraintsPartial)
+                        .orElse(significantFiguresPartial)
                         .applyOrElse(
                           (e, c),
                           fallback
