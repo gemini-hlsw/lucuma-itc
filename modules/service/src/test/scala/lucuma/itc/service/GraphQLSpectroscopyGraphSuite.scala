@@ -79,6 +79,7 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
                   end
                   count
                 }
+                dataY
               }
             }
           }
@@ -107,7 +108,11 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
                         "start" : 1.0,
                         "end" : 2.0,
                         "count" : 2
-                      }
+                      },
+                      "dataY": [
+                        1000.0,
+                        1001.0
+                      ]
                     }
                   ]
                 }

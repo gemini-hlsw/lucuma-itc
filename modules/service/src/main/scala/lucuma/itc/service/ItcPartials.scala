@@ -467,17 +467,15 @@ trait GracklePartials extends GrackleParsers:
         .map(b => cursorEnvAdd("band", b)(i))
         .getOrElse(i.addProblem("Cannot parse band"))
 
+  def posIntValue(v: Value): Option[PosInt] =
+    v match
+      case IntValue(r) if r > 0 =>
+        refineV[Positive](r).fold(_ => none, _.some)
+      case _                    => none
+
   def significantFiguresPartial: PartialFunction[(Partial, (String, Value)), Partial] =
 
     case (i, ("significantFigures", ObjectValue(r))) =>
-      def posIntValue(v: Value): Option[PosInt] =
-        v match
-          case IntValue(r) if r > 0 =>
-            refineV[Positive](r).fold(_ => none, _.some)
-          case _                    => none
-
-      println(r)
-
       r match
         case ("xAxis", x) :: ("yAxis", y) :: Nil =>
           (posIntValue(x), posIntValue(y)) match
