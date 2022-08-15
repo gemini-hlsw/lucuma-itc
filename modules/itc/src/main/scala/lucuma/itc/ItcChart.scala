@@ -27,7 +27,7 @@ enum SeriesDataType(val tag: String):
   case SingleS2NData  extends SeriesDataType("single_s2_ndata")
   case FinalS2NData   extends SeriesDataType("final_s2_ndata")
   case PixSigData     extends SeriesDataType("pix_sig_data")
-  case PixBackData    extends SeriesDataType("pick_back_data")
+  case PixBackData    extends SeriesDataType("pix_back_data")
 
 object SeriesDataType:
   given Enumerated[SeriesDataType] =
