@@ -6,6 +6,10 @@ package lucuma.itc.service.syntax
 import cats.data._
 import edu.gemini.grackle.Problem
 import edu.gemini.grackle.Query.Environment
+import lucuma.itc.ItcChart
+import lucuma.itc.ItcSeries
+import lucuma.itc.SignificantFigures
+import lucuma.itc.math.roundToSignificantFigures
 import monocle.Focus
 import monocle.std.these._
 
@@ -36,10 +40,26 @@ trait ItcSyntax:
     def fromScreamingSnakeCase: String =
       self.split("_").map(_.toLowerCase.capitalize).mkString("")
 
-  def cursorEnv[A]                                                                          = theseRight[A, Environment].andThen(Focus[Environment](_.env))
+  def cursorEnv[A] = theseRight[A, Environment].andThen(Focus[Environment](_.env))
+
   def cursorEnvAdd[A, B](key: String, value: B): Ior[A, Environment] => Ior[A, Environment] =
     cursorEnv[A].modify(_.add((key, value)))
 
 end ItcSyntax
 
-object all extends ItcSyntax
+trait ItcChartSyntax:
+  extension (series: ItcSeries)
+    def adjustSignificantFigures(figures: SignificantFigures): ItcSeries =
+      val data =
+        series.data.map((x, y) =>
+          (figures.xAxis.fold(x)(xDigits => roundToSignificantFigures(x, xDigits.value)),
+           figures.yAxis.fold(y)(yDigits => roundToSignificantFigures(y, yDigits.value))
+          )
+        )
+      ItcSeries(series.title, series.dataType, data)
+
+  extension (chart: ItcChart)
+    def adjustSignificantFigures(figures: SignificantFigures): ItcChart =
+      chart.copy(series = chart.series.map(_.adjustSignificantFigures(figures)))
+
+object all extends ItcSyntax with ItcChartSyntax

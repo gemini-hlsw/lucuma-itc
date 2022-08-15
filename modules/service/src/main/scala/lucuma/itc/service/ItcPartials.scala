@@ -23,6 +23,7 @@ import eu.timepit.refined._
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
+import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
 import io.circe.Json
@@ -45,6 +46,7 @@ import lucuma.itc.GmosNITCParams
 import lucuma.itc.GmosSITCParams
 import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
+import lucuma.itc.SignificantFigures
 import lucuma.itc.SpectroscopyParams
 import lucuma.itc.UpstreamException
 import lucuma.itc.given
@@ -376,7 +378,7 @@ trait GracklePartials extends GrackleParsers:
             case ("bandNormalized", ObjectValue(bn)) ::
                 ("emissionLines", AbsentValue) ::
                 Nil =>
-              val s: IorNec[String, SourceProfile.Uniform] = bn match
+              bn match
                 case ("sed", ObjectValue(sed)) ::
                     ("brightnesses", ListValue(br)) ::
                     ("editBrightnesses", AbsentValue) ::
@@ -390,7 +392,6 @@ trait GracklePartials extends GrackleParsers:
                   )
                 case _ => "Error parsing uniform profile".leftIorNec
 
-              s
             case _ => "Emission lines are not supported yet".leftIorNec
 
           uniform.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
@@ -401,7 +402,7 @@ trait GracklePartials extends GrackleParsers:
             case ("bandNormalized", ObjectValue(bn)) ::
                 ("emissionLines", AbsentValue) ::
                 Nil =>
-              val s: IorNec[String, SourceProfile.Point] = bn match
+              bn match
                 case ("sed", ObjectValue(sed)) ::
                     ("brightnesses", ListValue(br)) ::
                     ("editBrightnesses", AbsentValue) ::
@@ -416,7 +417,6 @@ trait GracklePartials extends GrackleParsers:
                   )
                 case _ => "Error parsing point profile".leftIorNec
 
-              s
             case _ => "Emission lines are not supported yet".leftIorNec
 
           point.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
@@ -430,7 +430,7 @@ trait GracklePartials extends GrackleParsers:
                 Nil =>
               val fwhmResult = parseFwhw(fw).toRightIorNec(s"Cannot parse fwhm $fw")
 
-              val s: IorNec[String, SourceProfile.Gaussian] = sd match
+              sd match
                 case ("bandNormalized", ObjectValue(bn)) ::
                     ("emissionLines", AbsentValue) ::
                     Nil =>
@@ -452,7 +452,6 @@ trait GracklePartials extends GrackleParsers:
 
                 case _ => "Emission lines are not supported yet".leftIorNec
 
-              s
             case _ => "Cannot parse gaussian profile input".leftIorNec
 
           gaussian.map(p => cursorEnvAdd("sourceProfile", p)(i)).leftProblems.flatten
@@ -461,14 +460,32 @@ trait GracklePartials extends GrackleParsers:
     case (i, ("sourceProfile", v))                                =>
       i.addProblem(s"Cannot parse sourceProfile $v")
 
-  def bandPartial: PartialFunction[(Partial, (String, Value)), Partial] = {
-    // magnitude
+  def bandPartial: PartialFunction[(Partial, (String, Value)), Partial] =
     case (i, ("band", TypedEnumValue(EnumValue(b, _, _, _)))) =>
       bandItems
         .get(b)
         .map(b => cursorEnvAdd("band", b)(i))
         .getOrElse(i.addProblem("Cannot parse band"))
-  }
+
+  def posIntValue(v: Value): Option[PosInt] =
+    v match
+      case IntValue(r) if r > 0 =>
+        refineV[Positive](r).fold(_ => none, _.some)
+      case _                    => none
+
+  def significantFiguresPartial: PartialFunction[(Partial, (String, Value)), Partial] =
+
+    case (i, ("significantFigures", ObjectValue(r))) =>
+      r match
+        case ("xAxis", x) :: ("yAxis", y) :: Nil =>
+          (posIntValue(x), posIntValue(y)) match
+            case (None, None) =>
+              i.addProblem(s"Not valid significantFigures value $r")
+            case (x, y)       =>
+              cursorEnvAdd("significantFigures", SignificantFigures(x, y))(i)
+
+        case _ =>
+          i.addProblem(s"Not valid significantFigures value $r")
 
   def instrumentModesPartial: PartialFunction[(Partial, (String, Value)), Partial] =
     case (i, ("modes", ListValue(m))) =>
