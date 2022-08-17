@@ -13,81 +13,22 @@ import lucuma.core.enums._
 import lucuma.itc.Itc
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcObservingConditions
-import lucuma.itc.encoders.given
-import lucuma.itc.search.gmosnorth.GmosNorthFilterSelector
+import lucuma.itc.given
 
 sealed trait Result:
   def mode: ObservingMode
   def itc: Itc.Result
 
 object Result:
-  final case class Spectroscopy(mode: ObservingMode.Spectroscopy, itc: Itc.Result)
+  case class Spectroscopy(mode: ObservingMode.Spectroscopy, itc: Itc.Result)
       derives Encoder.AsObject
 
-final case class SpectroscopyResults(
+case class SpectroscopyResults(
   serverVersion: String,
   results:       List[Result.Spectroscopy]
 ) derives Encoder.AsObject
 
-final case class SpectroscopyGraphResults(
+case class SpectroscopyGraphResults(
   serverVersion: String,
   charts:        List[ItcChart]
 ) derives Encoder.AsObject
-
-object Search:
-
-  def spectroscopy[F[_]: Parallel: Monad: Itc](
-    version:        NonEmptyString,
-    constraints:    Constraints.Spectroscopy,
-    targetProfile:  TargetProfile,
-    itcConstraints: ItcObservingConditions,
-    signalToNoise:  PosInt
-  ): F[SpectroscopyResults] =
-
-    // As a first pass we'll generate every possible configuration and then filter them at the end.
-    // This lets us apply the constraints in one place rather than duplicating the filtering logic
-    // for each instrument (at the cost of dealing with some large sets in memory).
-
-    val excludedFPUs: Set[GmosNorthFpu] = {
-      import GmosNorthFpu._
-      Set(Ifu2Slits, IfuBlue, IfuRed, Ns0, Ns1, Ns2, Ns3, Ns4, Ns5)
-    }
-
-    val gmosNorthModes: List[ObservingMode.Spectroscopy] =
-      for {
-        disp   <- GmosNorthGrating.all
-        fpu    <- GmosNorthFpu.all.filterNot(excludedFPUs)
-        filter <- GmosNorthFilterSelector.selectBlocking(disp, fpu, constraints.λ).toList
-      } yield ObservingMode.Spectroscopy.GmosNorth(constraints.λ,
-                                                   disp,
-                                                   GmosNorthFpuParam(fpu),
-                                                   filter
-      )
-
-    // more instruments ...
-
-    // Every spectrographic observing mode
-    val allModes: List[ObservingMode.Spectroscopy] =
-      gmosNorthModes // ++ ...
-
-    // Now filter down the list.
-    val compatibleModes: List[ObservingMode.Spectroscopy] =
-      allModes
-        .filter(
-          _.coverage.width.value.value >= constraints.simultaneousCoverage.toPicometers.value.value
-        )
-        .filter(_.resolution >= constraints.resolution.value)
-
-    // Done!
-    val resp = compatibleModes
-      .parTraverse { mode =>
-        Itc[F]
-          .calculate(targetProfile, mode, itcConstraints, signalToNoise.value)
-          .map(Result.Spectroscopy(mode, _))
-      }
-      .map(_.sortBy {
-        case Result.Spectroscopy(_, Itc.Result.Success(t, n, _))    => t.toSeconds.toDouble * n
-        case Result.Spectroscopy(_, Itc.Result.SourceTooBright(_))  => Double.MaxValue
-        case Result.Spectroscopy(_, Itc.Result.CalculationError(_)) => Double.MaxValue
-      })
-    resp.map(r => SpectroscopyResults(version.value, r))
