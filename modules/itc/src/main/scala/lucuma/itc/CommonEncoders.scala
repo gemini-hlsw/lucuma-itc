@@ -22,32 +22,34 @@ type Nanosecond  = Nano * Second
 type Microsecond = Micro * Second
 type Millisecond = Milli * Second
 
-given Encoder[NonEmptyString] = (s: NonEmptyString) => s.value.asJson
-given Encoder[PosInt]         = (s: PosInt) => s.value.asJson
+object encoders:
 
-given Encoder[FiniteDuration] = d =>
-  val value: Quantity[Long, Nanosecond] = d.toNanos.withUnit[Nanosecond]
+  given Encoder[NonEmptyString] = (s: NonEmptyString) => s.value.asJson
+  given Encoder[PosInt]         = (s: PosInt) => s.value.asJson
 
-  Json.obj(
-    ("microseconds", Json.fromLong(value.tToUnit[Microsecond].value)),
-    ("milliseconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Millisecond].value)),
-    ("seconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Second].value)),
-    ("minutes", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Minute].value)),
-    ("hours", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Hour].value))
-  )
+  given Encoder[FiniteDuration] = d =>
+    val value: Quantity[Long, Nanosecond] = d.toNanos.withUnit[Nanosecond]
 
-given Encoder[Wavelength] = w =>
-  Json.obj(
-    ("picometers", Json.fromInt(w.toPicometers.value.value)),
-    ("angstrom", Json.fromBigDecimal(w.angstrom.value.toBigDecimal(2, RoundingMode.CEILING))),
-    ("nanometers",
-     Json.fromBigDecimal(
-       w.nanometer.value.toBigDecimal(2, RoundingMode.CEILING)
-     )
-    ),
-    ("micrometers",
-     Json.fromBigDecimal(
-       w.micrometer.value.toBigDecimal(2, RoundingMode.CEILING)
-     )
+    Json.obj(
+      ("microseconds", Json.fromLong(value.tToUnit[Microsecond].value)),
+      ("milliseconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Millisecond].value)),
+      ("seconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Second].value)),
+      ("minutes", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Minute].value)),
+      ("hours", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Hour].value))
     )
-  )
+
+  given Encoder[Wavelength] = w =>
+    Json.obj(
+      ("picometers", Json.fromInt(w.toPicometers.value.value)),
+      ("angstrom", Json.fromBigDecimal(w.angstrom.value.toBigDecimal(2, RoundingMode.CEILING))),
+      ("nanometers",
+       Json.fromBigDecimal(
+         w.nanometer.value.toBigDecimal(2, RoundingMode.CEILING)
+       )
+      ),
+      ("micrometers",
+       Json.fromBigDecimal(
+         w.micrometer.value.toBigDecimal(2, RoundingMode.CEILING)
+       )
+      )
+    )

@@ -155,7 +155,6 @@ object ItcImpl {
             Trace[F].put("itc.exposures" -> exposures) *>
             c.run(POST(json, uri / "jsonchart")).use {
               case Status.Successful(resp) =>
-                given Decoder[ItcGraphResult]          = ItcGraphResult.ocs2Decoder
                 given EntityDecoder[F, ItcGraphResult] = jsonOf[F, ItcGraphResult]
                 resp.as[ItcGraphResult]
               case resp                    =>

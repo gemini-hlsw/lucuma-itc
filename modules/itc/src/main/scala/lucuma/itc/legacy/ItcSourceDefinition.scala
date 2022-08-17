@@ -11,13 +11,13 @@ import lucuma.core.math.Redshift
 import lucuma.core.model.SourceProfile
 import lucuma.itc.search.TargetProfile
 
-final case class ItcSourceDefinition(
+case class ItcSourceDefinition(
   profile:  SourceProfile,
   normBand: Band,
   redshift: Redshift
 )
 
-object ItcSourceDefinition {
+object ItcSourceDefinition:
 
   def fromTargetProfile(p: TargetProfile): ItcSourceDefinition =
     ItcSourceDefinition(
@@ -25,4 +25,4 @@ object ItcSourceDefinition {
       p.band,
       p.redshift
     )
-}
+

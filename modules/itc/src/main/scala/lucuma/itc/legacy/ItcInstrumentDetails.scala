@@ -5,7 +5,7 @@ package lucuma.itc.legacy
 
 import lucuma.itc.search.ObservingMode
 
-final case class ItcInstrumentDetails(mode: ObservingMode)
+case class ItcInstrumentDetails(mode: ObservingMode)
 
 object ItcInstrumentDetails:
   def fromObservingMode(mode: ObservingMode): ItcInstrumentDetails =

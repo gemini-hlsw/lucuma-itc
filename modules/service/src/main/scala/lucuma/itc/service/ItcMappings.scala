@@ -49,7 +49,7 @@ import lucuma.itc.ItcObservingConditions
 import lucuma.itc.SignificantFigures
 import lucuma.itc.SpectroscopyParams
 import lucuma.itc.UpstreamException
-import lucuma.itc.given
+import lucuma.itc.encoders.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ObservingMode

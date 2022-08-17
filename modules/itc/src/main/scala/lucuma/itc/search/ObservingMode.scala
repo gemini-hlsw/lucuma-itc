@@ -4,10 +4,14 @@
 package lucuma.itc.search
 
 import io.circe.*
+import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.Coverage
 import lucuma.core.math.Wavelength
+import lucuma.itc.GmosNITCParams
+import lucuma.itc.GmosSITCParams
+import lucuma.itc.encoders.given
 import lucuma.itc.search.syntax.gmosnorthfilter._
 import lucuma.itc.search.syntax.gmosnorthfpu._
 import lucuma.itc.search.syntax.gmossouthfilter._
@@ -42,6 +46,10 @@ object ObservingMode {
   }
 
   object Spectroscopy {
+    given Encoder[ObservingMode.Spectroscopy] = Encoder.instance {
+      case gn: GmosNorth => gn.asJson
+      case gs: GmosSouth => gs.asJson
+    }
 
     sealed trait GmosSpectroscopy extends Spectroscopy {
       def isIfu: Boolean
@@ -58,7 +66,7 @@ object ObservingMode {
           )
     }
 
-    final case class GmosNorth(
+    case class GmosNorth(
       λ:         Wavelength,
       disperser: GmosNorthGrating,
       fpu:       GmosNorthFpuParam,
@@ -76,7 +84,16 @@ object ObservingMode {
         filter.foldLeft(disperser.coverage(λ))(_ ⋂ _.coverage)
     }
 
-    final case class GmosSouth(
+    object GmosNorth:
+      given Encoder[GmosNorth] = a =>
+        Json.obj(
+          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+          ("resolution", Json.fromInt(a.resolution.toInt)),
+          ("params", GmosNITCParams(a.disperser, a.fpu, a.filter).asJson),
+          ("wavelength", a.λ.asJson)
+        )
+
+    case class GmosSouth(
       λ:         Wavelength,
       disperser: GmosSouthGrating,
       fpu:       GmosSouthFpuParam,
@@ -93,6 +110,16 @@ object ObservingMode {
       def coverage: Coverage =
         filter.foldLeft(disperser.coverage(λ))(_ ⋂ _.coverage)
     }
+
+    object GmosSouth:
+      given Encoder[GmosSouth] = a =>
+        Json.obj(
+          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+          ("resolution", Json.fromInt(a.resolution.toInt)),
+          ("params", GmosSITCParams(a.disperser, a.fpu, a.filter).asJson),
+          ("wavelength", a.λ.asJson)
+        )
+
   }
 
 }

@@ -3,6 +3,8 @@
 
 package lucuma.itc.legacy
 
+import cats.data.NonEmptyList
+import cats.syntax.all._
 import io.circe.*
 import io.circe.generic.semiauto._
 import io.circe.syntax.*
@@ -13,46 +15,26 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
+import lucuma.itc.ItcChart
+import lucuma.itc.ItcGraphResult
 import lucuma.itc.ItcObservingConditions
+import lucuma.itc.ItcSeries
+import lucuma.itc.SeriesDataType
 import lucuma.itc.search.ObservingMode.Spectroscopy._
 import lucuma.itc.search.*
 import lucuma.itc.search.syntax.all._
 import lucuma.itc.search.syntax.sed._
+import lucuma.itc.syntax.all.given
 
 import java.math.MathContext
+import scala.util.Try
 
-// given Encoder[GmosNorth] = a =>
-//   Json.obj(
-//     ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-//     ("resolution", Json.fromInt(a.resolution.toInt)),
-//     ("params", GmosNITCParams(a.disperser, a.fpu, a.filter).asJson),
-//     ("wavelength", a.λ.asJson)
-//   )
+////////////////////////////////////////////////////////////
 //
-// given Encoder[GmosSouth] = a =>
-//   Json.obj(
-//     ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-//     ("resolution", Json.fromInt(a.resolution.toInt)),
-//     ("params", GmosSITCParams(a.disperser, a.fpu, a.filter).asJson),
-//     ("wavelength", a.λ.asJson)
-//   )
+// These are encoders/decoders used to communicate with the 
+// old ocs2-based itc
 //
-// given Encoder[ObservingMode.Spectroscopy] = Encoder.instance {
-//   case gn: GmosNorth => gn.asJson
-//   case gs: GmosSouth => gs.asJson
-// }
-//
-// given Encoder[Itc.Result] = Encoder.instance {
-//   case f: Itc.Result.Success          =>
-//     Json.obj(("resultType", Json.fromString("Success"))).deepMerge(f.asJson)
-//   case Itc.Result.CalculationError(m) =>
-//     Json.obj(("resultType", Json.fromString("Error")), ("msg", Json.fromString(m)))
-//   case Itc.Result.SourceTooBright(m)  =>
-//     Json.obj(("resultType", Json.fromString("Error")),
-//              ("msg", Json.fromString(s"Source too bright $m"))
-//     )
-// }
-//
+////////////////////////////////////////////////////////////
 private def toItcAirmass(m: Double): Double =
   if (m <= 1.35) 1.2 else if (m <= 1.75) 1.5 else 2.0
 
@@ -343,3 +325,33 @@ given Encoder[ItcSourceDefinition] =
 
 given Encoder[ItcParameters] =
   deriveEncoder[ItcParameters]
+
+private given Decoder[SeriesDataType] = (c: HCursor) =>
+  Decoder.decodeJsonObject(c).flatMap { str =>
+    val key = str.keys.headOption.orEmpty
+    Try(SeriesDataType.valueOf(key)).toEither.leftMap { _ =>
+      DecodingFailure(s"no enum value matched for $key", List(CursorOp.Field(key)))
+    }
+  }
+
+private given Decoder[ItcSeries] = (c: HCursor) =>
+  for
+    title <- c.downField("title").as[String]
+    dt    <- c.downField("dataType").as[SeriesDataType]
+    data  <- c.downField("data")
+               .as[List[List[Double]]]
+               .map { i =>
+                 (i.lift(0), i.lift(1)) match
+                   case (Some(a), Some(b)) if a.length === b.length => a.zip(b)
+                   case _                                           => List.empty
+               }
+  yield ItcSeries(title, dt, data)
+
+given Decoder[ItcChart] = (c: HCursor) =>
+  c.downField("charts").downArray.downField("series").as[List[ItcSeries]].map(ItcChart.apply)
+
+given Decoder[ItcGraphResult] = (c: HCursor) =>
+  (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
+    .downField("chartGroups")
+    .as[NonEmptyList[ItcChart]]
+    .map(ItcGraphResult(_))

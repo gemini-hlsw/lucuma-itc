@@ -13,7 +13,7 @@ import lucuma.core.enums._
 import lucuma.itc.Itc
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcObservingConditions
-import lucuma.itc.given
+import lucuma.itc.encoders.given
 import lucuma.itc.search.gmosnorth.GmosNorthFilterSelector
 
 sealed trait Result:

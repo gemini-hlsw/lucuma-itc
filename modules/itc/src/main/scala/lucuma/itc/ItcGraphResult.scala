@@ -8,16 +8,5 @@ import cats.data.NonEmptyList
 import cats.implicits._
 import io.circe.Decoder
 import io.circe.HCursor
-import lucuma.itc.syntax.all.given
 
-final case class ItcGraphResult(charts: NonEmptyList[ItcChart])
-
-object ItcGraphResult:
-
-  val ocs2Decoder: Decoder[ItcGraphResult] = (c: HCursor) => {
-    given Decoder[ItcChart] = ItcChart.ocs2Decoder
-    (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
-      .downField("chartGroups")
-      .as[NonEmptyList[ItcChart]]
-      .map(ItcGraphResult(_))
-  }
+case class ItcGraphResult(charts: NonEmptyList[ItcChart])
