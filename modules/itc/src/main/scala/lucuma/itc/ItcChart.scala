@@ -67,4 +67,3 @@ object ItcSeries:
     )
 
 case class ItcChart(series: List[ItcSeries]) derives Encoder.AsObject
-

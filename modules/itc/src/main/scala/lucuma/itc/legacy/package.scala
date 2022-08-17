@@ -3,14 +3,14 @@
 
 package lucuma.itc.legacy
 
+import lucuma.core.enums._
 import lucuma.core.math.Angle
+import lucuma.core.math.Redshift
+import lucuma.core.model.SourceProfile
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.search.ItcObservationDetails
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
-import lucuma.core.enums._
-import lucuma.core.math.Redshift
-import lucuma.core.model.SourceProfile
 
 import scala.concurrent.duration.FiniteDuration
 
