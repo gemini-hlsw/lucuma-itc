@@ -8,8 +8,46 @@ import lucuma.itc.ItcObservingConditions
 import lucuma.itc.search.ItcObservationDetails
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
+import lucuma.core.enums._
+import lucuma.core.math.Redshift
+import lucuma.core.model.SourceProfile
 
 import scala.concurrent.duration.FiniteDuration
+
+enum ItcWavefrontSensor(val ocs2Tag: String):
+  case PWFS  extends ItcWavefrontSensor("PWFS")
+  case OIWFS extends ItcWavefrontSensor("OIWFS")
+
+case class ItcTelescopeDetails(wfs: ItcWavefrontSensor)
+
+case class ItcSourceDefinition(
+  profile:  SourceProfile,
+  normBand: Band,
+  redshift: Redshift
+)
+
+object ItcSourceDefinition:
+
+  def fromTargetProfile(p: TargetProfile): ItcSourceDefinition =
+    ItcSourceDefinition(
+      p.sourceProfile,
+      p.band,
+      p.redshift
+    )
+
+case class ItcParameters(
+  source:      ItcSourceDefinition,
+  observation: ItcObservationDetails,
+  conditions:  ItcObservingConditions,
+  telescope:   ItcTelescopeDetails,
+  instrument:  ItcInstrumentDetails
+)
+
+case class ItcInstrumentDetails(mode: ObservingMode)
+
+object ItcInstrumentDetails:
+  def fromObservingMode(mode: ObservingMode): ItcInstrumentDetails =
+    apply(mode)
 
 /** Convert model types into OCS2 ITC-compatible types for a spectroscopy request. */
 def spectroscopyParams(

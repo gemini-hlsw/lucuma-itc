@@ -68,10 +68,3 @@ object ItcSeries:
 
 case class ItcChart(series: List[ItcSeries]) derives Encoder.AsObject
 
-case class ItcObservingConditions(
-  iq:      ImageQuality,
-  cc:      CloudExtinction,
-  wv:      WaterVapor,
-  sb:      SkyBackground,
-  airmass: Double
-)

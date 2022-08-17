@@ -31,3 +31,11 @@ final case class GmosSITCParams(
   filter:  Option[GmosSouthFilter]
 ) extends SpectroscopyParams
     derives Encoder.AsObject
+
+case class ItcObservingConditions(
+  iq:      ImageQuality,
+  cc:      CloudExtinction,
+  wv:      WaterVapor,
+  sb:      SkyBackground,
+  airmass: Double
+)

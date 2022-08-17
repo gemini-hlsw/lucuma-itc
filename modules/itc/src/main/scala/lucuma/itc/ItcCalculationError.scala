@@ -3,4 +3,4 @@
 
 package lucuma.itc
 
-final case class ItcCalculationError(msg: String) extends RuntimeException(msg)
+case class ItcCalculationError(msg: String) extends RuntimeException(msg)
