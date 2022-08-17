@@ -18,14 +18,14 @@ import lucuma.itc.search.syntax.gmossouthfilter._
 import lucuma.itc.search.syntax.gmossouthfpu._
 import spire.math.Rational
 
-final case class GmosNorthFpuParam(
+case class GmosNorthFpuParam(
   builtin: GmosNorthFpu
 ) derives Encoder.AsObject {
   def isIfu: Boolean            = builtin.isIfu
   def effectiveSlitWidth: Angle = builtin.effectiveSlitWidth
 }
 
-final case class GmosSouthFpuParam(
+case class GmosSouthFpuParam(
   builtin: GmosSouthFpu
 ) derives Encoder.AsObject {
   def isIfu: Boolean            = builtin.isIfu
