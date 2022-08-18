@@ -4592,7 +4592,7 @@ type Query {
     input: SpectroscopyModeInput!
   ): [SpectroscopyResult!]!
 
-  spectroscopyGraph(
+  spectroscopyGraphBeta(
     input: SpectroscopyGraphModeInput!
   ): SpectroscopyGraphResult!
 }
@@ -4692,8 +4692,11 @@ input SpectroscopyGraphModeInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
 
-  # Minimum desired signal-to-noise ratio.
-  signalToNoise: PosBigDecimal!
+  # Exposure time duration
+  exposureTime: DurationInput!
+
+  # Exposures
+  exposures: PosInt!
 
   # Spatial profile PointSource/UniformSource/GaussianSource.
   sourceProfile: SourceProfileInput!

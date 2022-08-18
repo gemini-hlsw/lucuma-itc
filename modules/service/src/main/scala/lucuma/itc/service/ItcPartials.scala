@@ -64,6 +64,7 @@ import natchez.Trace
 import org.typelevel.log4cats.Logger
 
 import java.math.RoundingMode
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -94,6 +95,20 @@ trait GrackleParsers:
       case Some(("arcseconds", n))      =>
         bigDecimalValue(n).map(n => Angle.arcseconds.reverseGet(n.toInt))
       case _                            => None
+
+  def parseDuration(units: List[(String, Value)]): Option[Duration] =
+    units.find(_._2 != Value.AbsentValue) match
+      case Some(("microseconds", IntValue(n))) =>
+        Duration.ofNanos(n * 1000).some
+      case Some(("milliseconds", n))           =>
+        bigDecimalValue(n).map(n => Duration.ofNanos((n * 1e6).toLong))
+      case Some(("seconds", n))                =>
+        bigDecimalValue(n).map(n => Duration.ofMillis((n * 1e9).toLong))
+      case Some(("minutes", n))                =>
+        bigDecimalValue(n).map(n => Duration.ofMillis(((n * 60) * 1e9).toLong))
+      case Some(("hours", n))                  =>
+        bigDecimalValue(n).map(n => Duration.ofMillis(((n * 60 * 60) * 1e9).toLong))
+      case _                                   => None
 
   def parseWavelength(units: List[(String, Value)]): Option[Wavelength] =
     units.find(_._2 != Value.AbsentValue) match
@@ -367,6 +382,24 @@ trait GracklePartials extends GrackleParsers:
 
       case _ =>
         s"Error on spectral definition parameter".leftIorNec
+
+  def exposuresPartial: PartialFunction[(Partial, (String, Value)), Partial] =
+    case (i, ("exposures", v)) =>
+      posIntValue(v)
+        .map(m => cursorEnvAdd("exposures", m)(i))
+        .getOrElse(i.addProblem("Exposures must be a positive int"))
+
+  def exposureTimePartial: PartialFunction[(Partial, (String, Value)), Partial] =
+    case (i, ("exposureTime", ObjectValue(units)))
+        if units.filter(_._2 != Value.AbsentValue).length != 1 =>
+      val presentUnits =
+        units.filter(_._2 != Value.AbsentValue).map(_._1).mkString("{", ", ", "}")
+      i.addProblem(s"Exposure time defined with multiple units $presentUnits")
+
+    case (i, ("exposureTime", ObjectValue(v))) =>
+      parseDuration(v)
+        .map(m => cursorEnvAdd("exposureTime", m)(i))
+        .getOrElse(i.addProblem("Exposure time must be a valid duration"))
 
   def sourceProfilePartial: PartialFunction[(Partial, (String, Value)), Partial] =
     case (i, ("sourceProfile", ObjectValue(v))) if v.length === 3 =>

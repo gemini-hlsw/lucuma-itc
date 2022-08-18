@@ -5,6 +5,7 @@ package lucuma.itc.service
 
 import cats.effect._
 import cats.syntax.all._
+import eu.timepit.refined.types.numeric.PosInt
 import io.circe.Json
 import io.circe.parser._
 import lucuma.graphql.routes.GrackleGraphQLService
@@ -26,6 +27,7 @@ import org.http4s.syntax.all._
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
+import java.time.Duration
 import scala.concurrent.duration._
 
 trait GraphQLSuite extends munit.CatsEffectSuite:
@@ -44,7 +46,8 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
       targetProfile: TargetProfile,
       observingMode: ObservingMode,
       constraints:   ItcObservingConditions,
-      signalToNoise: BigDecimal
+      exposureTime:  Duration,
+      exposures:     PosInt
     ): IO[Itc.GraphResult] =
       Itc
         .GraphResult(

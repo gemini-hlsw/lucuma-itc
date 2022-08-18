@@ -14,6 +14,7 @@ import coulomb.syntax.*
 import coulomb.units.si.*
 import coulomb.units.si.given
 import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.PosInt
 import io.circe.Decoder
 import io.circe.syntax.*
 import lucuma.core.math.Angle
@@ -33,6 +34,7 @@ import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.syntax.all._
 import org.typelevel.log4cats.Logger
 
+import java.time.Duration
 import scala.concurrent.duration._
 import scala.math._
 
@@ -71,16 +73,17 @@ object ItcImpl {
         targetProfile: TargetProfile,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
-        signalToNoise: BigDecimal
+        exposureTime:  Duration,
+        exposures:     PosInt
       ): F[Itc.GraphResult] =
         observingMode match
           case _: ObservingMode.Spectroscopy =>
             spectroscopyGraph(targetProfile,
                               observingMode,
                               constraints,
-                              signalToNoise,
-                              BigDecimal(4.0).withUnit[Second],
-                              10
+                              // exposureTime,
+                              BigDecimal(exposureTime.toMillis).withUnit[Microsecond],
+                              exposures.value
             )
           // TODO: imaging
 
@@ -181,7 +184,6 @@ object ItcImpl {
         targetProfile:    TargetProfile,
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
-        signalToNoise:    BigDecimal,
         exposureDuration: Quantity[BigDecimal, Second],
         exposures:        Int
       ): F[Itc.GraphResult] =
