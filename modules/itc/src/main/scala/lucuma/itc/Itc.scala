@@ -3,13 +3,13 @@
 
 package lucuma.itc
 
-import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.PosLong
 import io.circe.*
 import io.circe.syntax.*
+import lucuma.core.model.NonNegDuration
 import lucuma.itc.encoders.given
 import lucuma.itc.search._
 
-import java.time.Duration
 import scala.concurrent.duration.FiniteDuration
 
 final case class UpstreamException(msg: String) extends RuntimeException(msg)
@@ -35,8 +35,8 @@ trait Itc[F[_]]:
     targetProfile: TargetProfile,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
-    exposureTime:  Duration,
-    exposures:     PosInt
+    exposureTime:  NonNegDuration,
+    exposures:     PosLong
   ): F[Itc.GraphResult]
 
 object Itc:

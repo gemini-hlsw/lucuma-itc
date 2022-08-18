@@ -6,8 +6,10 @@ package lucuma.itc.service
 import cats.effect._
 import cats.syntax.all._
 import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.PosLong
 import io.circe.Json
 import io.circe.parser._
+import lucuma.core.model.NonNegDuration
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.Itc
@@ -46,8 +48,8 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
       targetProfile: TargetProfile,
       observingMode: ObservingMode,
       constraints:   ItcObservingConditions,
-      exposureTime:  Duration,
-      exposures:     PosInt
+      exposureTime:  NonNegDuration,
+      exposures:     PosLong
     ): IO[Itc.GraphResult] =
       Itc
         .GraphResult(

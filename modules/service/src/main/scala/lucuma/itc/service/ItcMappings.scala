@@ -24,6 +24,7 @@ import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.PosLong
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
 import io.circe.Json
@@ -35,6 +36,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.Units._
 import lucuma.core.math.dimensional._
 import lucuma.core.math.units._
+import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
@@ -143,8 +145,8 @@ object ItcMapping extends Version with GracklePartials {
   )(env:         Cursor.Env): F[Result[SpectroscopyGraphResults]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
-     env.get[Duration]("exposureTime"),
-     env.get[PosInt]("exposures"),
+     env.get[NonNegDuration]("exposureTime"),
+     env.get[PosLong]("exposures"),
      env.get[SourceProfile]("sourceProfile"),
      env.get[Band]("band"),
      env.get[SpectroscopyParams]("mode"),

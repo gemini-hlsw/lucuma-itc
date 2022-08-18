@@ -24,6 +24,7 @@ import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.PosLong
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
 import io.circe.Json
@@ -35,6 +36,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.Units._
 import lucuma.core.math.dimensional._
 import lucuma.core.math.units._
+import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
@@ -96,8 +98,8 @@ trait GrackleParsers:
         bigDecimalValue(n).map(n => Angle.arcseconds.reverseGet(n.toInt))
       case _                            => None
 
-  def parseDuration(units: List[(String, Value)]): Option[Duration] =
-    units.find(_._2 != Value.AbsentValue) match
+  def parseNonNegDuration(units: List[(String, Value)]): Option[NonNegDuration] =
+    (units.find(_._2 != Value.AbsentValue) match
       case Some(("microseconds", IntValue(n))) =>
         Duration.ofNanos(n * 1000).some
       case Some(("milliseconds", n))           =>
@@ -109,6 +111,7 @@ trait GrackleParsers:
       case Some(("hours", n))                  =>
         bigDecimalValue(n).map(n => Duration.ofMillis(((n * 60 * 60) * 1e9).toLong))
       case _                                   => None
+    ).flatMap(NonNegDuration.from(_).toOption)
 
   def parseWavelength(units: List[(String, Value)]): Option[Wavelength] =
     units.find(_._2 != Value.AbsentValue) match
@@ -385,7 +388,7 @@ trait GracklePartials extends GrackleParsers:
 
   def exposuresPartial: PartialFunction[(Partial, (String, Value)), Partial] =
     case (i, ("exposures", v)) =>
-      posIntValue(v)
+      posLongValue(v)
         .map(m => cursorEnvAdd("exposures", m)(i))
         .getOrElse(i.addProblem("Exposures must be a positive int"))
 
@@ -397,7 +400,7 @@ trait GracklePartials extends GrackleParsers:
       i.addProblem(s"Exposure time defined with multiple units $presentUnits")
 
     case (i, ("exposureTime", ObjectValue(v))) =>
-      parseDuration(v)
+      parseNonNegDuration(v)
         .map(m => cursorEnvAdd("exposureTime", m)(i))
         .getOrElse(i.addProblem("Exposure time must be a valid duration"))
 
@@ -504,6 +507,12 @@ trait GracklePartials extends GrackleParsers:
     v match
       case IntValue(r) if r > 0 =>
         refineV[Positive](r).fold(_ => none, _.some)
+      case _                    => none
+
+  def posLongValue(v: Value): Option[PosLong] =
+    v match
+      case IntValue(r) if r > 0 =>
+        refineV[Positive](r.toLong).fold(_ => none, _.some)
       case _                    => none
 
   def significantFiguresPartial: PartialFunction[(Partial, (String, Value)), Partial] =
