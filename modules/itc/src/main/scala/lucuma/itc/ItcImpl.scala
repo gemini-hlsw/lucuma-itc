@@ -93,6 +93,9 @@ object ItcImpl {
         exposures:        Int,
         level:            NonNegInt
       ): F[ItcResult] =
+        import lucuma.itc.legacy.given
+        import lucuma.itc.legacy.*
+
         Trace[F].span("legacy-itc-query") {
           val json =
             spectroscopyParams(targetProfile,
@@ -135,6 +138,9 @@ object ItcImpl {
         exposureDuration: Quantity[BigDecimal, Second],
         exposures:        Int
       ): F[ItcGraphResult] =
+        import lucuma.itc.legacy.given
+        import lucuma.itc.legacy.*
+
         Trace[F].span("legacy-itc-query") {
           val json =
             spectroscopyParams(targetProfile,
@@ -149,7 +155,6 @@ object ItcImpl {
             Trace[F].put("itc.exposures" -> exposures) *>
             c.run(POST(json, uri / "jsonchart")).use {
               case Status.Successful(resp) =>
-                given Decoder[ItcGraphResult]          = ItcGraphResult.ocs2Decoder
                 given EntityDecoder[F, ItcGraphResult] = jsonOf[F, ItcGraphResult]
                 resp.as[ItcGraphResult]
               case resp                    =>
@@ -293,32 +298,5 @@ object ItcImpl {
 
       }
     }
-
-  /** Convert model types into OCS2 ITC-compatible types for a spectroscopy request. */
-  private def spectroscopyParams(
-    targetProfile:    TargetProfile,
-    observingMode:    ObservingMode,
-    exposureDuration: FiniteDuration,
-    conditions:       ItcObservingConditions,
-    exposures:        Int
-  ): ItcParameters =
-    ItcParameters(
-      source = ItcSourceDefinition.fromTargetProfile(targetProfile),
-      observation = ItcObservationDetails(
-        calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
-          exposures = exposures,
-          coadds = None,
-          exposureDuration = exposureDuration,
-          sourceFraction = 1.0,
-          ditherOffset = Angle.Angle0
-        ),
-        analysisMethod = observingMode.analysisMethod
-      ),
-      conditions = conditions,
-      telescope = ItcTelescopeDetails(
-        wfs = ItcWavefrontSensor.OIWFS
-      ),
-      instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
-    )
 
 }

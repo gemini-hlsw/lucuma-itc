@@ -1,7 +1,7 @@
 // Copyright (c) 2016-2022 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc
+package lucuma.itc.search
 
 import io.circe._
 import io.circe.generic.semiauto._
@@ -67,7 +67,7 @@ object ItcObservationDetails {
           }
       }
 
-      implicit val encoder: Encoder[SignalToNoise] =
+      given encoder: Encoder[SignalToNoise] =
         new Encoder[SignalToNoise] {
           def apply(a: SignalToNoise): Json =
             a match {
@@ -114,7 +114,7 @@ object ItcObservationDetails {
 
     }
 
-    implicit val encoder: Encoder[CalculationMethod] =
+    given Encoder[CalculationMethod] =
       new Encoder[CalculationMethod] {
         def apply(a: CalculationMethod): Json =
           a match {
@@ -149,7 +149,7 @@ object ItcObservationDetails {
         val encoder: Encoder[User] = deriveEncoder
       }
 
-      val encoder: Encoder[Aperture] =
+      given encoder: Encoder[Aperture] =
         new Encoder[Aperture] {
           def apply(a: Aperture): Json =
             a match {
@@ -217,7 +217,7 @@ object ItcObservationDetails {
 
     }
 
-    implicit val encoder: Encoder[AnalysisMethod] =
+    given Encoder[AnalysisMethod] =
       new Encoder[AnalysisMethod] {
         def apply(a: AnalysisMethod): Json =
           a match {
@@ -228,7 +228,7 @@ object ItcObservationDetails {
 
   }
 
-  implicit val encoder: Encoder[ItcObservationDetails] =
+  given Encoder[ItcObservationDetails] =
     deriveEncoder
 
 }

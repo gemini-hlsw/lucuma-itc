@@ -11,7 +11,7 @@ package object syntax {
       with ToGmosSouthFilterOps
       with ToGmosSouthGratingOps
       with ToGmosSouthFpuOps
-      with ToConditionsOps
+      with lucuma.itc.legacy.syntax.ConditionsSyntax
 
   object sed
       extends ToStellarLibrarySpectrumOps

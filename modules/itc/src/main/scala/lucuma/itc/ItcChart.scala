@@ -15,11 +15,10 @@ import io.circe.HCursor
 import io.circe.Json
 import io.circe.generic.semiauto._
 import io.circe.refined._
+import lucuma.core.enums.*
 import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
 import lucuma.itc.math._
-
-import scala.util.Try
 
 enum SeriesDataType(val tag: String):
   case SignalData     extends SeriesDataType("signal_data")
@@ -42,19 +41,11 @@ object SeriesDataType:
       )
       .withTag(_.tag)
 
-  val ocs2Decoder: Decoder[SeriesDataType] = (c: HCursor) =>
-    Decoder.decodeJsonObject(c).flatMap { str =>
-      val key = str.keys.headOption.orEmpty
-      Try(SeriesDataType.valueOf(key)).toEither.leftMap { _ =>
-        DecodingFailure(s"no enum value matched for $key", List(CursorOp.Field(key)))
-      }
-    }
-
-final case class ItcAxis(start: Double, end: Double, min: Double, max: Double, count: Int)
+case class ItcAxis(start: Double, end: Double, min: Double, max: Double, count: Int)
     derives Decoder,
       Encoder.AsObject
 
-final case class ItcSeries private (
+case class ItcSeries private (
   title:    String,
   dataType: SeriesDataType,
   data:     List[(Double, Double)],
@@ -75,25 +66,4 @@ object ItcSeries:
               calcAxis(data, _._2)
     )
 
-  val ocs2Decoder: Decoder[ItcSeries] = (c: HCursor) => {
-    given Decoder[SeriesDataType] = SeriesDataType.ocs2Decoder
-    for
-      title <- c.downField("title").as[String]
-      dt    <- c.downField("dataType").as[SeriesDataType]
-      data  <- c.downField("data")
-                 .as[List[List[Double]]]
-                 .map { i =>
-                   (i.lift(0), i.lift(1)) match
-                     case (Some(a), Some(b)) if a.length === b.length => a.zip(b)
-                     case _                                           => List.empty
-                 }
-    yield ItcSeries(title, dt, data)
-  }
-
-final case class ItcChart(series: List[ItcSeries]) derives Encoder.AsObject
-
-object ItcChart:
-  val ocs2Decoder: Decoder[ItcChart] = (c: HCursor) => {
-    given Decoder[ItcSeries] = ItcSeries.ocs2Decoder
-    c.downField("charts").downArray.downField("series").as[List[ItcSeries]].map(ItcChart.apply)
-  }
+case class ItcChart(series: List[ItcSeries]) derives Encoder.AsObject

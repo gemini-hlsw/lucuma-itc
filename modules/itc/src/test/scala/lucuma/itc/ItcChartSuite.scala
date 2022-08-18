@@ -10,7 +10,8 @@ import io.circe.parser.decode
 import io.circe.syntax.*
 
 class ItcChartSuite extends munit.FunSuite {
-  given Decoder[ItcChart] = ItcChart.ocs2Decoder
+  import lucuma.itc.legacy.given
+  import lucuma.itc.legacy.*
 
   val json = """{
         "charts" : [
