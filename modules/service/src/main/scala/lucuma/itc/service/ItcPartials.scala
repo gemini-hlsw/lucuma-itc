@@ -24,6 +24,7 @@ import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.PosLong
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
 import io.circe.Json
@@ -35,6 +36,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.Units._
 import lucuma.core.math.dimensional._
 import lucuma.core.math.units._
+import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
@@ -64,6 +66,7 @@ import natchez.Trace
 import org.typelevel.log4cats.Logger
 
 import java.math.RoundingMode
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -94,6 +97,21 @@ trait GrackleParsers:
       case Some(("arcseconds", n))      =>
         bigDecimalValue(n).map(n => Angle.arcseconds.reverseGet(n.toInt))
       case _                            => None
+
+  def parseNonNegDuration(units: List[(String, Value)]): Option[NonNegDuration] =
+    (units.find(_._2 != Value.AbsentValue) match
+      case Some(("microseconds", IntValue(n))) =>
+        Duration.ofNanos(n * 1000).some
+      case Some(("milliseconds", n))           =>
+        bigDecimalValue(n).map(n => Duration.ofNanos((n * 1e6).toLong))
+      case Some(("seconds", n))                =>
+        bigDecimalValue(n).map(n => Duration.ofNanos((n * 1e9).toLong))
+      case Some(("minutes", n))                =>
+        bigDecimalValue(n).map(n => Duration.ofNanos(((n * 60) * 1e9).toLong))
+      case Some(("hours", n))                  =>
+        bigDecimalValue(n).map(n => Duration.ofNanos(((n * 60 * 60) * 1e9).toLong))
+      case _                                   => None
+    ).flatMap(NonNegDuration.from(_).toOption)
 
   def parseWavelength(units: List[(String, Value)]): Option[Wavelength] =
     units.find(_._2 != Value.AbsentValue) match
@@ -368,6 +386,24 @@ trait GracklePartials extends GrackleParsers:
       case _ =>
         s"Error on spectral definition parameter".leftIorNec
 
+  def exposuresPartial: PartialFunction[(Partial, (String, Value)), Partial] =
+    case (i, ("exposures", v)) =>
+      posLongValue(v)
+        .map(m => cursorEnvAdd("exposures", m)(i))
+        .getOrElse(i.addProblem("Exposures must be a positive int"))
+
+  def exposureTimePartial: PartialFunction[(Partial, (String, Value)), Partial] =
+    case (i, ("exposureTime", ObjectValue(units)))
+        if units.filter(_._2 != Value.AbsentValue).length != 1 =>
+      val presentUnits =
+        units.filter(_._2 != Value.AbsentValue).map(_._1).mkString("{", ", ", "}")
+      i.addProblem(s"Exposure time defined with multiple units $presentUnits")
+
+    case (i, ("exposureTime", ObjectValue(v))) =>
+      parseNonNegDuration(v)
+        .map(m => cursorEnvAdd("exposureTime", m)(i))
+        .getOrElse(i.addProblem("Exposure time must be a valid duration"))
+
   def sourceProfilePartial: PartialFunction[(Partial, (String, Value)), Partial] =
     case (i, ("sourceProfile", ObjectValue(v))) if v.length === 3 =>
       v match {
@@ -471,6 +507,12 @@ trait GracklePartials extends GrackleParsers:
     v match
       case IntValue(r) if r > 0 =>
         refineV[Positive](r).fold(_ => none, _.some)
+      case _                    => none
+
+  def posLongValue(v: Value): Option[PosLong] =
+    v match
+      case IntValue(r) if r > 0 =>
+        refineV[Positive](r.toLong).fold(_ => none, _.some)
       case _                    => none
 
   def significantFiguresPartial: PartialFunction[(Partial, (String, Value)), Partial] =

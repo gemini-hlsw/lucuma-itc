@@ -14,9 +14,12 @@ import coulomb.syntax.*
 import coulomb.units.si.*
 import coulomb.units.si.given
 import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.PosLong
 import io.circe.Decoder
 import io.circe.syntax.*
 import lucuma.core.math.Angle
+import lucuma.core.model.NonNegDuration
 import lucuma.itc.Itc
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
@@ -33,6 +36,7 @@ import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.syntax.all._
 import org.typelevel.log4cats.Logger
 
+import java.time.Duration
 import scala.concurrent.duration._
 import scala.math._
 
@@ -48,8 +52,8 @@ object ItcImpl {
   def forUri[F[_]: Async: Logger: Trace](uri: Uri): Resource[F, Itc[F]] =
     EmberClientBuilder.default.build
       .map(NatchezMiddleware.client[F])
-      .map(RequestLogger(true, true))
-      .map(ResponseLogger(true, true))
+      .map(RequestLogger(true, false))
+      .map(ResponseLogger(true, false))
       .map(forClientAndUri[F](_, uri))
 
   def forClientAndUri[F[_]: Concurrent: Logger: Trace](c: Client[F], uri: Uri): Itc[F] =
@@ -71,16 +75,16 @@ object ItcImpl {
         targetProfile: TargetProfile,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
-        signalToNoise: BigDecimal
+        exposureTime:  NonNegDuration,
+        exposures:     PosLong
       ): F[Itc.GraphResult] =
         observingMode match
           case _: ObservingMode.Spectroscopy =>
             spectroscopyGraph(targetProfile,
                               observingMode,
                               constraints,
-                              signalToNoise,
-                              BigDecimal(4.0).withUnit[Second],
-                              10
+                              BigDecimal(exposureTime.value.toMillis).withUnit[Microsecond],
+                              exposures.value
             )
           // TODO: imaging
 
@@ -136,7 +140,7 @@ object ItcImpl {
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
         exposureDuration: Quantity[BigDecimal, Second],
-        exposures:        Int
+        exposures:        Long
       ): F[ItcGraphResult] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
@@ -147,12 +151,12 @@ object ItcImpl {
                                observingMode,
                                exposureDuration.value.toDouble.seconds,
                                constraints,
-                               exposures
+                               exposures.toInt
             ).asJson
           L.info(s"ITC remote query ${uri / "jsonchart"} ${json.noSpaces}") *>
             Trace[F].put("itc.query" -> json.spaces2) *>
             Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
-            Trace[F].put("itc.exposures" -> exposures) *>
+            Trace[F].put("itc.exposures" -> exposures.toInt) *>
             c.run(POST(json, uri / "jsonchart")).use {
               case Status.Successful(resp) =>
                 given EntityDecoder[F, ItcGraphResult] = jsonOf[F, ItcGraphResult]
@@ -181,9 +185,8 @@ object ItcImpl {
         targetProfile:    TargetProfile,
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
-        signalToNoise:    BigDecimal,
         exposureDuration: Quantity[BigDecimal, Second],
-        exposures:        Int
+        exposures:        Long
       ): F[Itc.GraphResult] =
         itcGraph(targetProfile, observingMode, constraints, exposureDuration, exposures).map { r =>
           Itc.GraphResult(r.charts.toList)

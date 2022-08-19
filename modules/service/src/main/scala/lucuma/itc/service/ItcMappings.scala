@@ -24,6 +24,7 @@ import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.PosLong
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
 import io.circe.Json
@@ -35,6 +36,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.Units._
 import lucuma.core.math.dimensional._
 import lucuma.core.math.units._
+import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
@@ -65,6 +67,7 @@ import natchez.Trace
 import org.typelevel.log4cats.Logger
 
 import java.math.RoundingMode
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -142,13 +145,16 @@ object ItcMapping extends Version with GracklePartials {
   )(env:         Cursor.Env): F[Result[SpectroscopyGraphResults]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
-     env.get[PosBigDecimal]("signalToNoise"),
+     env.get[NonNegDuration]("exposureTime"),
+     env.get[PosLong]("exposures"),
      env.get[SourceProfile]("sourceProfile"),
      env.get[Band]("band"),
      env.get[SpectroscopyParams]("mode"),
      env.get[ItcObservingConditions]("constraints")
-    ).traverseN { (wv, rs, sn, sp, sd, mode, c) =>
-      Logger[F].info(s"ITC graph calculate for $mode, conditions $c and profile $sp") *> {
+    ).traverseN { (wv, rs, expTime, exp, sp, sd, mode, c) =>
+      Logger[F].info(
+        s"ITC graph calculate for $mode, conditions $c, exposureTime $expTime x $exp and profile $sp"
+      ) *> {
         val significantFigures = env.get[SignificantFigures]("significantFigures")
         val specMode           = mode match {
           case GmosNITCParams(grating, fpu, filter) =>
@@ -161,7 +167,8 @@ object ItcMapping extends Version with GracklePartials {
             TargetProfile(sp, sd, rs),
             specMode,
             c,
-            sn.value
+            expTime,
+            exp
           )
           .map { r =>
             val charts =
@@ -200,7 +207,7 @@ object ItcMapping extends Version with GracklePartials {
                                                        QueryType,
                                                        spectroscopy[F](environment, itc)
                 ),
-                ComputeRoot[SpectroscopyGraphResults]("spectroscopyGraph",
+                ComputeRoot[SpectroscopyGraphResults]("spectroscopyGraphBeta",
                                                       QueryType,
                                                       spectroscopyGraph[F](environment, itc)
                 )
@@ -219,7 +226,7 @@ object ItcMapping extends Version with GracklePartials {
           new SelectElaborator(
             Map(
               QueryType -> {
-                case Select("spectroscopy", List(Binding("input", ObjectValue(wv))), child)      =>
+                case Select("spectroscopy", List(Binding("input", ObjectValue(wv))), child) =>
                   wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
                     case (e, c) =>
                       wavelengthPartial
@@ -234,12 +241,16 @@ object ItcMapping extends Version with GracklePartials {
                           fallback
                         )
                   }.map(e => e.copy(child = Select("spectroscopy", Nil, child)))
-                case Select("spectroscopyGraph", List(Binding("input", ObjectValue(wv))), child) =>
+                case Select("spectroscopyGraphBeta",
+                            List(Binding("input", ObjectValue(wv))),
+                            child
+                    ) =>
                   wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
                     case (e, c) =>
                       wavelengthPartial
                         .orElse(radialVelocityPartial)
-                        .orElse(signalToNoisePartial)
+                        .orElse(exposureTimePartial)
+                        .orElse(exposuresPartial)
                         .orElse(sourceProfilePartial)
                         .orElse(bandPartial)
                         .orElse(instrumentModePartial)
@@ -249,7 +260,7 @@ object ItcMapping extends Version with GracklePartials {
                           (e, c),
                           fallback
                         )
-                  }.map(e => e.copy(child = Select("spectroscopyGraph", Nil, child)))
+                  }.map(e => e.copy(child = Select("spectroscopyGraphBeta", Nil, child)))
               }
             )
           )

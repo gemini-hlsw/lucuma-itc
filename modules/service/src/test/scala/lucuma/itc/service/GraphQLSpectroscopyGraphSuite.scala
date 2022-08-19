@@ -17,14 +17,17 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyGraph(input: {
+          spectroscopyGraphBeta(input: {
             wavelength: {
               nanometers: 60,
             },
             radialVelocity: {
               kilometersPerSecond: 1000
             },
-            signalToNoise: 2,
+            exposureTime: {
+              milliseconds: 2.5,
+            },
+            exposures: 10,
             sourceProfile: {
               point: {
                 bandNormalized: {
@@ -87,7 +90,7 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
         """,
       json"""{
           "data": {
-            "spectroscopyGraph": {
+            "spectroscopyGraphBeta": {
               "charts": [
                 {
                   "series": [

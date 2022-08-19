@@ -3,8 +3,10 @@
 
 package lucuma.itc
 
+import eu.timepit.refined.types.numeric.PosLong
 import io.circe.*
 import io.circe.syntax.*
+import lucuma.core.model.NonNegDuration
 import lucuma.itc.encoders.given
 import lucuma.itc.search._
 
@@ -33,7 +35,8 @@ trait Itc[F[_]]:
     targetProfile: TargetProfile,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
-    signalToNoise: BigDecimal
+    exposureTime:  NonNegDuration,
+    exposures:     PosLong
   ): F[Itc.GraphResult]
 
 object Itc:
