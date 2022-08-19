@@ -52,8 +52,8 @@ object ItcImpl {
   def forUri[F[_]: Async: Logger: Trace](uri: Uri): Resource[F, Itc[F]] =
     EmberClientBuilder.default.build
       .map(NatchezMiddleware.client[F])
-      .map(RequestLogger(true, true))
-      .map(ResponseLogger(true, true))
+      .map(RequestLogger(true, false))
+      .map(ResponseLogger(true, false))
       .map(forClientAndUri[F](_, uri))
 
   def forClientAndUri[F[_]: Concurrent: Logger: Trace](c: Client[F], uri: Uri): Itc[F] =
@@ -83,7 +83,6 @@ object ItcImpl {
             spectroscopyGraph(targetProfile,
                               observingMode,
                               constraints,
-                              // exposureTime,
                               BigDecimal(exposureTime.value.toMillis).withUnit[Microsecond],
                               exposures.value
             )

@@ -152,7 +152,9 @@ object ItcMapping extends Version with GracklePartials {
      env.get[SpectroscopyParams]("mode"),
      env.get[ItcObservingConditions]("constraints")
     ).traverseN { (wv, rs, expTime, exp, sp, sd, mode, c) =>
-      Logger[F].info(s"ITC graph calculate for $mode, conditions $c and profile $sp") *> {
+      Logger[F].info(
+        s"ITC graph calculate for $mode, conditions $c, exposureTime $expTime x $exp and profile $sp"
+      ) *> {
         val significantFigures = env.get[SignificantFigures]("significantFigures")
         val specMode           = mode match {
           case GmosNITCParams(grating, fpu, filter) =>

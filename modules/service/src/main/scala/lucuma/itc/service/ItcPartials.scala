@@ -64,6 +64,7 @@ import lucuma.itc.service.config._
 import lucuma.itc.service.syntax.all._
 import natchez.Trace
 import org.typelevel.log4cats.Logger
+
 import java.math.RoundingMode
 import java.time.Duration
 import java.time.Instant
@@ -104,11 +105,11 @@ trait GrackleParsers:
       case Some(("milliseconds", n))           =>
         bigDecimalValue(n).map(n => Duration.ofNanos((n * 1e6).toLong))
       case Some(("seconds", n))                =>
-        bigDecimalValue(n).map(n => Duration.ofMillis((n * 1e9).toLong))
+        bigDecimalValue(n).map(n => Duration.ofNanos((n * 1e9).toLong))
       case Some(("minutes", n))                =>
-        bigDecimalValue(n).map(n => Duration.ofMillis(((n * 60) * 1e9).toLong))
+        bigDecimalValue(n).map(n => Duration.ofNanos(((n * 60) * 1e9).toLong))
       case Some(("hours", n))                  =>
-        bigDecimalValue(n).map(n => Duration.ofMillis(((n * 60 * 60) * 1e9).toLong))
+        bigDecimalValue(n).map(n => Duration.ofNanos(((n * 60 * 60) * 1e9).toLong))
       case _                                   => None
     ).flatMap(NonNegDuration.from(_).toOption)
 

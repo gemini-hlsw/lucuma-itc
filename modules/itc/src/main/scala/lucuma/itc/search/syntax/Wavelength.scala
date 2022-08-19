@@ -11,7 +11,7 @@ import lucuma.core.math.Wavelength
 import spire.std.int._
 
 trait WavelengthSyntax:
-  extension(self: Wavelength)
+  extension (self: Wavelength)
     /** Returns the difference of this wavelength and `other`, clipped at Wavelength.Min. */
     def -(other: Wavelength): Wavelength =
       Wavelength.fromPicometers

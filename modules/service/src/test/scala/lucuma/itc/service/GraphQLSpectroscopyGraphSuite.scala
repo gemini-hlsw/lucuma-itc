@@ -25,7 +25,7 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
               kilometersPerSecond: 1000
             },
             exposureTime: {
-              seconds: 2,
+              milliseconds: 2.5,
             },
             exposures: 10,
             sourceProfile: {
