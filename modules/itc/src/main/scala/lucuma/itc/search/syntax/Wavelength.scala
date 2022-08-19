@@ -10,25 +10,19 @@ import eu.timepit.refined.numeric.Positive
 import lucuma.core.math.Wavelength
 import spire.std.int._
 
-final class WavelengthOps(val self: Wavelength) extends AnyVal {
+trait WavelengthSyntax:
+  extension(self: Wavelength)
+    /** Returns the difference of this wavelength and `other`, clipped at Wavelength.Min. */
+    def -(other: Wavelength): Wavelength =
+      Wavelength.fromPicometers
+        .getOption(self.toPicometers.value.value - other.toPicometers.value.value)
+        .getOrElse(Wavelength.Min)
 
-  /** Returns the difference of this wavelength and `other`, clipped at Wavelength.Min. */
-  def -(other: Wavelength): Wavelength =
-    Wavelength.fromPicometers
-      .getOption(self.toPicometers.value.value - other.toPicometers.value.value)
-      .getOrElse(Wavelength.Min)
+    /** Returns the sum of this wavelength and `other`, clipped at Wavelength.Max. */
+    def +(other: Wavelength): Wavelength =
+      // This works because integer addition "overflows" to negative values
+      Wavelength.fromPicometers
+        .getOption(self.toPicometers.value.value + self.toPicometers.value.value)
+        .getOrElse(Wavelength.Max)
 
-  /** Returns the sum of this wavelength and `other`, clipped at Wavelength.Max. */
-  def +(other: Wavelength): Wavelength =
-    // This works because integer addition "overflows" to negative values
-    Wavelength.fromPicometers
-      .getOption(self.toPicometers.value.value + self.toPicometers.value.value)
-      .getOrElse(Wavelength.Max)
-}
-
-trait ToWavelengthOps {
-  implicit def toWavelengthOps(self: Wavelength): WavelengthOps =
-    new WavelengthOps(self)
-}
-
-object wavelength extends ToWavelengthOps
+object wavelength extends WavelengthSyntax

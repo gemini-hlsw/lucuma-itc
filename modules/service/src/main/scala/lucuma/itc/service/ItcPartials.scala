@@ -64,7 +64,6 @@ import lucuma.itc.service.config._
 import lucuma.itc.service.syntax.all._
 import natchez.Trace
 import org.typelevel.log4cats.Logger
-
 import java.math.RoundingMode
 import java.time.Duration
 import java.time.Instant

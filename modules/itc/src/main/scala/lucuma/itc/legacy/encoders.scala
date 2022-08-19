@@ -22,8 +22,7 @@ import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
 import lucuma.itc.search.ObservingMode.Spectroscopy._
 import lucuma.itc.search.*
-import lucuma.itc.search.syntax.all._
-import lucuma.itc.search.syntax.sed._
+import lucuma.itc.search.syntax.all.*
 import lucuma.itc.syntax.all.given
 
 import java.math.MathContext
