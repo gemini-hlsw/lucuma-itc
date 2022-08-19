@@ -9,42 +9,9 @@ import lucuma.core.enums.GmosSouthFilter._
 import lucuma.core.math.Coverage
 import lucuma.core.math.Wavelength
 
-final class GmosSouthFilterOps(val self: GmosSouthFilter) extends AnyVal {
-
-  def ocs2Tag: String =
-    self match {
-      case GPrime           => "g_G0301"
-      case RPrime           => "r_G0303"
-      case IPrime           => "i_G0302"
-      case ZPrime           => "z_G0304"
-      case Z                => "Z_G0322"
-      case Y                => "Y_G0323"
-      case GG455            => "GG455_G0305"
-      case OG515            => "OG515_G0306"
-      case RG610            => "RG610_G0307"
-      case RG780            => "RG780_G0334"
-      case CaT              => "CaT_G0309"
-      case Ha               => "Ha_G0310"
-      case HaC              => "HaC_G0311"
-      case SII              => "SII_G0317"
-      case OIII             => "OIII_G0318"
-      case OIIIC            => "OIIIC_G0319"
-      case HeII             => "HeII_G0320"
-      case HeIIC            => "HeIIC_G0321"
-      case Lya395           => "Lya395_G0342"
-      case HartmannA_RPrime => "HartmannA_G0313_r_G0303"
-      case HartmannB_RPrime => "HartmannB_G0314_r_G0303"
-      case GPrime_GG455     => "g_G0301_GG455_G0305"
-      case GPrime_OG515     => "g_G0301_OG515_G0306"
-      case RPrime_RG610     => "r_G0303_RG610_G0307"
-      case IPrime_RG780     => "i_G0327_RG780_G0334"
-      case IPrime_CaT       => "i_G0302_CaT_G0309"
-      case ZPrime_CaT       => "z_G0304_CaT_G0309"
-      case UPrime           => "u_G0308"
-    }
-
+extension (self: GmosSouthFilter)
   // see http://www.gemini.edu/node/10621
-  def coverage: Coverage = {
+  def coverageGS: Coverage =
     import Wavelength.fromPicometers
 
     def cov(a: Int, b: Int = Int.MaxValue): Coverage =
@@ -52,7 +19,7 @@ final class GmosSouthFilterOps(val self: GmosSouthFilter) extends AnyVal {
         .mapN(Coverage.apply)
         .getOrElse(sys.error("Invalid constant coverage."))
 
-    self match {
+    self match
 
       // Broad Band Imaging Filters
       case UPrime => cov(336000, 385000)
@@ -95,29 +62,3 @@ final class GmosSouthFilterOps(val self: GmosSouthFilter) extends AnyVal {
 
       // Obsolete
       case Lya395 => sys.error("obsolete")
-    }
-  }
-
-}
-
-trait ToGmosSouthFilterOps {
-  implicit def toGmosSouthFilterOps(self: GmosSouthFilter): GmosSouthFilterOps =
-    new GmosSouthFilterOps(self)
-}
-
-final class GmosSouthFilterCompanionOps(val self: GmosSouthFilter.type) extends AnyVal {
-
-  /** Filters to use for acquisition, sorted by wavelength. */
-  def allAcquisition: List[GmosSouthFilter] =
-    List(UPrime, GPrime, RPrime, IPrime, ZPrime).sortBy(_.wavelength)
-
-}
-
-trait ToGmosSouthFilterCompanionOps {
-  implicit def toGmosSouthFilterCompanionOps(
-    self: GmosSouthFilter.type
-  ): GmosSouthFilterCompanionOps =
-    new GmosSouthFilterCompanionOps(self)
-}
-
-object gmossouthfilter extends ToGmosSouthFilterOps with ToGmosSouthFilterCompanionOps

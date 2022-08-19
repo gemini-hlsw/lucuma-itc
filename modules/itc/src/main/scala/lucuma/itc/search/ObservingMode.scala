@@ -12,23 +12,20 @@ import lucuma.core.math.Wavelength
 import lucuma.itc.GmosNITCParams
 import lucuma.itc.GmosSITCParams
 import lucuma.itc.encoders.given
-import lucuma.itc.search.syntax.gmosnorthfilter._
-import lucuma.itc.search.syntax.gmosnorthfpu._
-import lucuma.itc.search.syntax.gmossouthfilter._
-import lucuma.itc.search.syntax.gmossouthfpu._
+import lucuma.itc.search.syntax.*
 import spire.math.Rational
 
 case class GmosNorthFpuParam(
   builtin: GmosNorthFpu
 ) derives Encoder.AsObject {
-  def isIfu: Boolean            = builtin.isIfu
+  def isIfu: Boolean            = builtin.isGNIfu
   def effectiveSlitWidth: Angle = builtin.effectiveSlitWidth
 }
 
 case class GmosSouthFpuParam(
   builtin: GmosSouthFpu
 ) derives Encoder.AsObject {
-  def isIfu: Boolean            = builtin.isIfu
+  def isIfu: Boolean            = builtin.isGSIfu
   def effectiveSlitWidth: Angle = builtin.effectiveSlitWidth
 }
 
@@ -81,7 +78,7 @@ object ObservingMode {
         disperser.resolution(λ, fpu.effectiveSlitWidth)
 
       def coverage: Coverage =
-        filter.foldLeft(disperser.coverage(λ))(_ ⋂ _.coverage)
+        filter.foldLeft(disperser.coverage(λ))(_ ⋂ _.coverageGN)
     }
 
     object GmosNorth:
@@ -108,7 +105,7 @@ object ObservingMode {
         disperser.resolution(λ, fpu.effectiveSlitWidth)
 
       def coverage: Coverage =
-        filter.foldLeft(disperser.coverage(λ))(_ ⋂ _.coverage)
+        filter.foldLeft(disperser.coverage(λ))(_ ⋂ _.coverageGS)
     }
 
     object GmosSouth:

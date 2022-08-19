@@ -1,15 +1,15 @@
 // Copyright (c) 2016-2022 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc.search.syntax
+package lucuma.itc.legacy.syntax
 
 object all
-    extends ToGmosNorthFilterOps
-    with ToGmosNorthGratingOps
-    with ToGmosNorthFpuOps
-    with ToGmosSouthFilterOps
-    with ToGmosSouthGratingOps
-    with ToGmosSouthFpuOps
+    extends lucuma.itc.legacy.syntax.GmosSouthGratingSyntax
+    with lucuma.itc.legacy.syntax.GmosSouthFilterSyntax
+    with lucuma.itc.legacy.syntax.GmosNorthFilterSyntax
+    with lucuma.itc.legacy.syntax.GmosNorthGratingSyntax
+    with lucuma.itc.legacy.syntax.GmosNorthFpuSyntax
+    with lucuma.itc.legacy.syntax.GmosSouthFpuSyntax
     with lucuma.itc.legacy.syntax.ConditionsSyntax
     with lucuma.itc.legacy.syntax.CoolStarModelSyntax
     with lucuma.itc.legacy.syntax.StellarLibrarySpectrumSyntax

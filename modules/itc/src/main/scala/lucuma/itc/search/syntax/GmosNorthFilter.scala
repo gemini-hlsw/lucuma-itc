@@ -9,40 +9,9 @@ import lucuma.core.enums.GmosNorthFilter._
 import lucuma.core.math.Coverage
 import lucuma.core.math.Wavelength
 
-final class GmosNorthFilterOps(val self: GmosNorthFilter) extends AnyVal {
-
-  def ocs2Tag: String =
-    self match {
-      case GPrime           => "g_G0301"
-      case RPrime           => "r_G0303"
-      case IPrime           => "i_G0302"
-      case ZPrime           => "z_G0304"
-      case Z                => "Z_G0322"
-      case Y                => "Y_G0323"
-      case GG455            => "GG455_G0305"
-      case OG515            => "OG515_G0306"
-      case RG610            => "RG610_G0307"
-      case CaT              => "CaT_G0309"
-      case Ha               => "Ha_G0310"
-      case HaC              => "HaC_G0311"
-      case DS920            => "DS920_G0312"
-      case SII              => "SII_G0317"
-      case OIII             => "OIII_G0318"
-      case OIIIC            => "OIIIC_G0319"
-      case HeII             => "HeII_G0320"
-      case HeIIC            => "HeIIC_G0321"
-      case HartmannA_RPrime => "HartmannA_G0313_r_G0303"
-      case HartmannB_RPrime => "HartmannB_G0314_r_G0303"
-      case GPrime_GG455     => "g_G0301_GG455_G0305"
-      case GPrime_OG515     => "g_G0301_OG515_G0306"
-      case RPrime_RG610     => "r_G0303_RG610_G0307"
-      case IPrime_CaT       => "i_G0302_CaT_G0309"
-      case ZPrime_CaT       => "z_G0304_CaT_G0309"
-      case UPrime           => "u_G0308"
-    }
-
+extension (self: GmosNorthFilter)
   // see http://www.gemini.edu/node/10621
-  def coverage: Coverage = {
+  def coverageGN: Coverage =
     import Wavelength.fromPicometers
 
     def cov(a: Int, b: Int = Int.MaxValue): Coverage =
@@ -50,7 +19,7 @@ final class GmosNorthFilterOps(val self: GmosNorthFilter) extends AnyVal {
         .mapN(Coverage.apply)
         .getOrElse(sys.error("Invalid constant coverage."))
 
-    self match {
+    self match
 
       // Broad Band Imaging Filters
       case UPrime => cov(336000, 385000)
@@ -90,29 +59,3 @@ final class GmosNorthFilterOps(val self: GmosNorthFilter) extends AnyVal {
       case RPrime_RG610 => cov(615000, 698000)
       case IPrime_CaT   => cov(780000, 850000)
       case ZPrime_CaT   => cov(848000, 933000)
-    }
-  }
-
-}
-
-trait ToGmosNorthFilterOps {
-  implicit def toGmosNorthFilterOps(self: GmosNorthFilter): GmosNorthFilterOps =
-    new GmosNorthFilterOps(self)
-}
-
-final class GmosNorthFilterCompanionOps(val self: GmosNorthFilter.type) extends AnyVal {
-
-  /** Filters to use for acquisition, sorted by wavelength. */
-  def allAcquisition: List[GmosNorthFilter] =
-    List(UPrime, GPrime, RPrime, IPrime, ZPrime).sortBy(_.wavelength)
-
-}
-
-trait ToGmosNorthFilterCompanionOps {
-  implicit def toGmosNorthFilterCompanionOps(
-    self: GmosNorthFilter.type
-  ): GmosNorthFilterCompanionOps =
-    new GmosNorthFilterCompanionOps(self)
-}
-
-object gmosnorthfilter extends ToGmosNorthFilterOps with ToGmosNorthFilterCompanionOps
