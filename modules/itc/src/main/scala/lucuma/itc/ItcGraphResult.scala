@@ -9,4 +9,4 @@ import cats.implicits._
 import io.circe.Decoder
 import io.circe.HCursor
 
-case class ItcGraphResult(charts: NonEmptyList[ItcChart])
+case class ItcGraphResult(versionToken: String, charts: NonEmptyList[ItcChart])

@@ -10,7 +10,7 @@ import io.circe.Decoder
 import io.circe.HCursor
 import lucuma.itc.syntax.all.given
 
-final case class ItcResult(ccds: NonEmptyList[ItcCcd]) {
+case class ItcResult(versionToken: String, ccds: NonEmptyList[ItcCcd]) {
 
   // We may not need these
   def maxPeakPixelFlux: Int      = ccds.map(_.peakPixelFlux).maximum.toInt
@@ -21,13 +21,3 @@ final case class ItcResult(ccds: NonEmptyList[ItcCcd]) {
   def maxTotalSNRatio: Double    = ccds.map(_.totalSNRatio).maximum
 
 }
-
-object ItcResult:
-
-  given Decoder[ItcResult] =
-    new Decoder[ItcResult]:
-      def apply(c: HCursor): Decoder.Result[ItcResult] =
-        (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
-          .downField("ccds")
-          .as[NonEmptyList[ItcCcd]]
-          .map(ItcResult(_))

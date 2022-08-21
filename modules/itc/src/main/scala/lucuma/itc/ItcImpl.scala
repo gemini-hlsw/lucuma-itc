@@ -65,7 +65,7 @@ object ItcImpl {
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         signalToNoise: BigDecimal
-      ): F[Itc.Result] =
+      ): F[(Option[String], Itc.Result)] =
         observingMode match
           case _: ObservingMode.Spectroscopy =>
             spectroscopy(targetProfile, observingMode, constraints, signalToNoise)
@@ -189,7 +189,7 @@ object ItcImpl {
         exposures:        Long
       ): F[Itc.GraphResult] =
         itcGraph(targetProfile, observingMode, constraints, exposureDuration, exposures).map { r =>
-          Itc.GraphResult(r.charts.toList)
+          Itc.GraphResult(r.versionToken, r.charts.toList)
         }
 
       def spectroscopy(
@@ -197,7 +197,7 @@ object ItcImpl {
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         signalToNoise: BigDecimal
-      ): F[Itc.Result] = {
+      ): F[(Option[String], Itc.Result)] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise.toDouble
@@ -281,7 +281,9 @@ object ItcImpl {
                 ) *> {
                   if (halfWellTime < 1.0) {
                     val msg = s"Target is too bright. Well half filled in $halfWellTime"
-                    L.error(msg) *> Itc.Result.SourceTooBright(msg).pure[F].widen[Itc.Result]
+                    L.error(msg) *> (none, Itc.Result.SourceTooBright(msg))
+                      .pure[F]
+                      .widen
                   } else {
                     val maxTime = startExpTime.value.min(halfWellTime)
                     itcStep(numberOfExposures,
@@ -292,7 +294,7 @@ object ItcImpl {
                             maxTime.withUnit[Second],
                             r,
                             0.refined
-                    )
+                    ).map(x => (r.versionToken.some, x))
                   }
                 }
 
