@@ -4,6 +4,6 @@
 package lucuma.itc
 
 import io.circe.Decoder
-import io.circe.generic.semiauto._
+import io.circe.Encoder
 
-final case class ItcWarning(msg: String) derives Decoder
+case class ItcWarning(msg: String) derives Decoder, Encoder.AsObject

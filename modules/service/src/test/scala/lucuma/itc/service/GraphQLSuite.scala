@@ -13,6 +13,7 @@ import lucuma.core.model.NonNegDuration
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.Itc
+import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcChart.apply
 import lucuma.itc.ItcObservingConditions
@@ -53,6 +54,9 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
     ): IO[Itc.GraphResult] =
       Itc
         .GraphResult("1",
+                     List(
+                       ItcCcd(1, 2, 3, 4, 5, Nil)
+                     ),
                      List(
                        ItcChart(
                          List(

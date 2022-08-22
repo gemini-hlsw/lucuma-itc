@@ -6,6 +6,7 @@ package lucuma.itc.service.syntax
 import cats.data._
 import edu.gemini.grackle.Problem
 import edu.gemini.grackle.Query.Environment
+import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcSeries
 import lucuma.itc.SignificantFigures
@@ -61,5 +62,17 @@ trait ItcChartSyntax:
   extension (chart: ItcChart)
     def adjustSignificantFigures(figures: SignificantFigures): ItcChart =
       chart.copy(series = chart.series.map(_.adjustSignificantFigures(figures)))
+
+  extension (ccd: ItcCcd)
+    def adjustSignificantFigures(figures: SignificantFigures): ItcCcd =
+      figures.ccd.fold(ccd)(c =>
+        ccd.copy(
+          singleSNRatio = roundToSignificantFigures(ccd.singleSNRatio, c.value),
+          totalSNRatio = roundToSignificantFigures(ccd.totalSNRatio, c.value),
+          peakPixelFlux = roundToSignificantFigures(ccd.peakPixelFlux, c.value),
+          wellDepth = roundToSignificantFigures(ccd.wellDepth, c.value),
+          ampGain = roundToSignificantFigures(ccd.ampGain, c.value)
+        )
+      )
 
 object all extends ItcSyntax with ItcChartSyntax

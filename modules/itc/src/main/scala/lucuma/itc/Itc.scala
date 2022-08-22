@@ -70,4 +70,4 @@ object Itc:
         )
     }
 
-  case class GraphResult(dataVersion: String, charts: List[ItcChart]) derives Encoder.AsObject
+  case class GraphResult(dataVersion: String, ccds: List[ItcCcd], charts: List[ItcChart])

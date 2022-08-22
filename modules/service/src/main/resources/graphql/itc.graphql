@@ -4707,6 +4707,9 @@ input SignificantFiguresInput {
 
   # Significant figures for yAxis
   yAxis: PosInt
+
+  # Significant figures for ccds
+  ccd: PosInt
 }
 
 # Configuration alternatives query
@@ -4817,6 +4820,24 @@ type ItcChart {
   series: [ItcSeries!]!
 }
 
+type ItcCcd {
+  # the final SN ratio for a single image
+  singleSNRatio: BigDecimal!
+
+  # the total SN ratio for all images
+  totalSNRatio:  BigDecimal!
+
+  # the highest e- count for all pixels on the CCD
+  peakPixelFlux: BigDecimal!
+
+  # the well depth (max e- count per pixel) for this CCD
+  wellDepth:     BigDecimal!
+
+  # the amplifier gain for this CCD (used to calculate ADU)
+  ampGain:       BigDecimal!
+
+}
+
 type SpectroscopyGraphResult {
 
   # id of the backend server
@@ -4824,6 +4845,8 @@ type SpectroscopyGraphResult {
 
   # token for the itc data version, can be null
   dataVersion: String
+
+  ccds: [ItcCcd!]!
 
   charts: [ItcChart!]!
 

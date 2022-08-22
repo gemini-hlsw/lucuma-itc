@@ -519,12 +519,12 @@ trait GracklePartials extends GrackleParsers:
 
     case (i, ("significantFigures", ObjectValue(r))) =>
       r match
-        case ("xAxis", x) :: ("yAxis", y) :: Nil =>
-          (posIntValue(x), posIntValue(y)) match
-            case (None, None) =>
+        case ("xAxis", x) :: ("yAxis", y) :: ("ccd", c) :: Nil =>
+          (posIntValue(x), posIntValue(y), posIntValue(c)) match
+            case (None, None, None) =>
               i.addProblem(s"Not valid significantFigures value $r")
-            case (x, y)       =>
-              cursorEnvAdd("significantFigures", SignificantFigures(x, y))(i)
+            case (x, y, c)          =>
+              cursorEnvAdd("significantFigures", SignificantFigures(x, y, c))(i)
 
         case _ =>
           i.addProblem(s"Not valid significantFigures value $r")

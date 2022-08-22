@@ -4,6 +4,11 @@
 package lucuma.itc.legacy
 
 import cats.data.NonEmptyList
+import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 
-case class ItcRemoteGraphResult(versionToken: String, charts: NonEmptyList[ItcChart])
+case class ItcRemoteGraphResult(
+  versionToken: String,
+  ccds:         NonEmptyList[ItcCcd],
+  charts:       NonEmptyList[ItcChart]
+)
