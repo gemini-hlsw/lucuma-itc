@@ -17,9 +17,7 @@ import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
-import lucuma.itc.ItcGraphResult
 import lucuma.itc.ItcObservingConditions
-import lucuma.itc.ItcResult
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
 import lucuma.itc.legacy.syntax.all.*
@@ -334,18 +332,18 @@ private given Decoder[ItcSeries] = (c: HCursor) =>
 given Decoder[ItcChart] = (c: HCursor) =>
   c.downField("charts").downArray.downField("series").as[List[ItcSeries]].map(ItcChart.apply)
 
-given Decoder[ItcGraphResult] = (c: HCursor) =>
+given Decoder[ItcRemoteGraphResult] = (c: HCursor) =>
   for
     v   <- c.downField("versionToken").as[String]
     ccd <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
              .downField("chartGroups")
              .as[NonEmptyList[ItcChart]]
-  yield ItcGraphResult(v, ccd)
+  yield ItcRemoteGraphResult(v, ccd)
 
-given Decoder[ItcResult] = (c: HCursor) =>
+given Decoder[ItcRemoteResult] = (c: HCursor) =>
   for
     v   <- c.downField("versionToken").as[String]
     ccd <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
              .downField("ccds")
              .as[NonEmptyList[ItcCcd]]
-  yield ItcResult(v, ccd)
+  yield ItcRemoteResult(v, ccd)
