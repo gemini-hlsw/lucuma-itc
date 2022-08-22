@@ -9,6 +9,6 @@ import io.circe.refined._
 
 import scala.math._
 
-case class SignificantFigures(xAxis: Option[PosInt], yAxis: Option[PosInt])
+case class SignificantFigures(xAxis: Option[PosInt], yAxis: Option[PosInt], ccd: Option[PosInt])
     derives Encoder.AsObject,
       Decoder

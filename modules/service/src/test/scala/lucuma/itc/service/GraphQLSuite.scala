@@ -13,6 +13,7 @@ import lucuma.core.model.NonNegDuration
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.Itc
+import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcChart.apply
 import lucuma.itc.ItcObservingConditions
@@ -31,7 +32,6 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import java.time.Duration
 import scala.concurrent.duration._
-import lucuma.itc.ItcCcd
 
 trait GraphQLSuite extends munit.CatsEffectSuite:
   given Logger[IO] = Slf4jLogger.getLogger[IO]

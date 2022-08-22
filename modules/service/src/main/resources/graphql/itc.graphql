@@ -4707,6 +4707,9 @@ input SignificantFiguresInput {
 
   # Significant figures for yAxis
   yAxis: PosInt
+
+  # Significant figures for ccds
+  ccd: PosInt
 }
 
 # Configuration alternatives query

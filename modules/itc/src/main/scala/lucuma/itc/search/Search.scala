@@ -11,8 +11,8 @@ import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.itc.Itc
-import lucuma.itc.ItcChart
 import lucuma.itc.ItcCcd
+import lucuma.itc.ItcChart
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.given
 
