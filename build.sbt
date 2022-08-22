@@ -30,8 +30,12 @@ val pprintVersion               = "0.7.3"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / scalaVersion       := "3.1.3"
-ThisBuild / crossScalaVersions := Seq("3.1.3")
+ThisBuild / scalaVersion        := "3.1.3"
+ThisBuild / crossScalaVersions  := Seq("3.1.3")
+ThisBuild / tlBaseVersion       := "0.1"
+ThisBuild / tlCiReleaseBranches := Seq("master")
+
+Global / onChangedBuildSource := ReloadOnSourceChanges
 
 addCommandAlias(
   "fixImports",
@@ -39,22 +43,28 @@ addCommandAlias(
 )
 
 lazy val commonSettings = lucumaGlobalSettings ++ Seq(
-  libraryDependencies ++= Seq(
-    "org.typelevel" %% "cats-testkit"           % catsVersion                 % "test",
-    "org.typelevel" %% "cats-testkit-scalatest" % catsTestkitScalaTestVersion % "test"
-  ),
-  Test / parallelExecution := false, // tests run fine in parallel but output is nicer this way
-  scalacOptions ++= Seq(
-    "-language:implicitConversions"
-  )
+  Test / parallelExecution := false // tests run fine in parallel but output is nicer this way
 )
 
-lazy val itc = project
-  .in(file("modules/itc"))
+// Basic model classes
+lazy val model = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("modules/model"))
   .settings(commonSettings)
-  .settings(lucumaGlobalSettings)
   .settings(
     name := "lucuma-itc",
+    libraryDependencies ++= Seq(
+      "org.typelevel"  %% "cats-core"           % catsVersion
+    )
+  )
+
+// Contains ITC logic and conectivity to the old itc server
+lazy val core = project
+  .in(file("modules/itc"))
+  .dependsOn(model.jvm)
+  .settings(commonSettings)
+  .settings(
+    name := "lucuma-itc-core",
     libraryDependencies ++= Seq(
       "edu.gemini"     %% "lucuma-core"         % lucumaCoreVersion,
       "edu.gemini"    %%% "lucuma-refined"      % lucumaRefinedVersion,
@@ -77,10 +87,12 @@ lazy val itc = project
       "com.lihaoyi"   %%% "pprint"              % pprintVersion          % Test
     )
   )
+  .enablePlugins(NoPublishPlugin)
 
+// Contains the grackle server
 lazy val service = project
   .in(file("modules/service"))
-  .dependsOn(itc)
+  .dependsOn(core)
   .settings(commonSettings)
   .settings(
     name              := "lucuma-itc-service",
@@ -115,7 +127,7 @@ lazy val service = project
       "buildDateTime"       -> System.currentTimeMillis()
     )
   )
-  .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
+  .enablePlugins(JavaAppPackaging, BuildInfoPlugin, NoPublishPlugin)
 
 // lazy val benchmark = project
 //   .in(file("modules/benchmarks"))

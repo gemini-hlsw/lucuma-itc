@@ -80,11 +80,12 @@ object ItcImpl {
       ): F[Itc.GraphResult] =
         observingMode match
           case _: ObservingMode.Spectroscopy =>
-            spectroscopyGraph(targetProfile,
-                              observingMode,
-                              constraints,
-                              BigDecimal(exposureTime.value.toMillis).withUnit[Microsecond],
-                              exposures.value
+            spectroscopyGraph(
+              targetProfile,
+              observingMode,
+              constraints,
+              BigDecimal(exposureTime.value.toMillis).withUnit[Microsecond].toUnit[Second],
+              exposures.value
             )
           // TODO: imaging
 
@@ -96,7 +97,7 @@ object ItcImpl {
         exposureDuration: Quantity[BigDecimal, Second],
         exposures:        Int,
         level:            NonNegInt
-      ): F[ItcResult] =
+      ): F[legacy.ItcRemoteResult] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
@@ -115,8 +116,8 @@ object ItcImpl {
             Trace[F].put("itc.level" -> level.value) *>
             c.run(POST(json, uri / "json")).use {
               case Status.Successful(resp) =>
-                given EntityDecoder[F, ItcResult] = jsonOf[F, ItcResult]
-                resp.as[ItcResult]
+                given EntityDecoder[F, ItcRemoteResult] = jsonOf[F, ItcRemoteResult]
+                resp.as[ItcRemoteResult]
               case resp                    =>
                 resp.bodyText
                   .through(fs2.text.lines)
@@ -141,7 +142,7 @@ object ItcImpl {
         constraints:      ItcObservingConditions,
         exposureDuration: Quantity[BigDecimal, Second],
         exposures:        Long
-      ): F[ItcGraphResult] =
+      ): F[legacy.ItcRemoteGraphResult] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
@@ -159,8 +160,8 @@ object ItcImpl {
             Trace[F].put("itc.exposures" -> exposures.toInt) *>
             c.run(POST(json, uri / "jsonchart")).use {
               case Status.Successful(resp) =>
-                given EntityDecoder[F, ItcGraphResult] = jsonOf[F, ItcGraphResult]
-                resp.as[ItcGraphResult]
+                given EntityDecoder[F, ItcRemoteGraphResult] = jsonOf[F, ItcRemoteGraphResult]
+                resp.as[ItcRemoteGraphResult]
               case resp                    =>
                 resp.bodyText
                   .through(fs2.text.lines)
@@ -210,7 +211,7 @@ object ItcImpl {
           oldExpTime: Quantity[BigDecimal, Second],
           snr:        Double,
           maxTime:    Quantity[BigDecimal, Second],
-          s:          ItcResult,
+          s:          legacy.ItcRemoteResult,
           counter:    NonNegInt
         ): F[Itc.Result] =
           if (snr === 0.0) {

@@ -4,7 +4,6 @@
 package lucuma.itc
 
 import io.circe.Decoder
-import io.circe.generic.semiauto._
 
 case class ItcCcd(
   singleSNRatio: Double,          // the final SN ratio for a single image

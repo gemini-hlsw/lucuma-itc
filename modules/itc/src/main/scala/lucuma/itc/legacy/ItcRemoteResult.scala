@@ -1,16 +1,13 @@
 // Copyright (c) 2016-2022 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc
+package lucuma.itc.legacy
 
-import cats.Semigroup
 import cats.data.NonEmptyList
-import cats.implicits._
-import io.circe.Decoder
-import io.circe.HCursor
-import lucuma.itc.syntax.all.given
+import cats.syntax.all._
+import lucuma.itc.ItcCcd
 
-case class ItcResult(versionToken: String, ccds: NonEmptyList[ItcCcd]) {
+case class ItcRemoteResult(versionToken: String, ccds: NonEmptyList[ItcCcd]) {
 
   // We may not need these
   def maxPeakPixelFlux: Int      = ccds.map(_.peakPixelFlux).maximum.toInt

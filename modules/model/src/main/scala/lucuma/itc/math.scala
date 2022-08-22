@@ -3,9 +3,6 @@
 
 package lucuma.itc.math
 
-import cats.syntax.all._
-import lucuma.itc.ItcAxis
-
 import scala.math._
 
 // Round the value to n significant figures, this to remove
@@ -20,14 +17,3 @@ def roundToSignificantFigures(num: Double, n: Int): Double =
     val magnitude = pow(10, power)
     val shifted   = round(num * magnitude)
     shifted / magnitude
-
-// Calculate the values on the axis' range
-def calcAxis(data: List[(Double, Double)], fun: ((Double, Double)) => Double): Option[ItcAxis] =
-  if (data.nonEmpty)
-    val (min, max, count) =
-      data.foldLeft((Double.MaxValue, Double.MinValue, 0)) { case ((max, min, count), current) =>
-        val x = fun(current)
-        (x.min(max), x.max(min), count + 1)
-      }
-    ItcAxis(fun(data.head), fun(data.last), min, max, count).some
-  else none

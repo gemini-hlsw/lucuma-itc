@@ -45,6 +45,18 @@ case class ItcAxis(start: Double, end: Double, min: Double, max: Double, count: 
     derives Decoder,
       Encoder.AsObject
 
+object ItcAxis:
+  // Calculate the values on the axis' range
+  def calcAxis(data: List[(Double, Double)], fun: ((Double, Double)) => Double): Option[ItcAxis] =
+    if (data.nonEmpty)
+      val (min, max, count) =
+        data.foldLeft((Double.MaxValue, Double.MinValue, 0)) { case ((max, min, count), current) =>
+          val x = fun(current)
+          (x.min(max), x.max(min), count + 1)
+        }
+      ItcAxis(fun(data.head), fun(data.last), min, max, count).some
+    else none
+
 case class ItcSeries private (
   title:    String,
   dataType: SeriesDataType,
@@ -62,8 +74,8 @@ object ItcSeries:
               data,
               data.map(_._1),
               data.map(_._2),
-              calcAxis(data, _._1),
-              calcAxis(data, _._2)
+              ItcAxis.calcAxis(data, _._1),
+              ItcAxis.calcAxis(data, _._2)
     )
 
 case class ItcChart(series: List[ItcSeries]) derives Encoder.AsObject
