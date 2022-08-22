@@ -41,8 +41,8 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
       observingMode: ObservingMode,
       constraints:   ItcObservingConditions,
       signalToNoise: BigDecimal
-    ): IO[Itc.Result] =
-      Itc.Result.Success(1.seconds, 10, 10).pure[IO]
+    ): IO[(Option[String], Itc.Result)] =
+      (none, Itc.Result.Success(1.seconds, 10, 10)).pure[IO]
 
     def calculateGraph(
       targetProfile: TargetProfile,
@@ -52,17 +52,17 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
       exposures:     PosLong
     ): IO[Itc.GraphResult] =
       Itc
-        .GraphResult(
-          List(
-            ItcChart(
-              List(
-                ItcSeries("title",
-                          SeriesDataType.BackgroundData,
-                          List((1.0, 1000.0), (2.0, 1001.0))
-                )
-              )
-            )
-          )
+        .GraphResult("1",
+                     List(
+                       ItcChart(
+                         List(
+                           ItcSeries("title",
+                                     SeriesDataType.BackgroundData,
+                                     List((1.0, 1000.0), (2.0, 1001.0))
+                           )
+                         )
+                       )
+                     )
         )
         .pure[IO]
 

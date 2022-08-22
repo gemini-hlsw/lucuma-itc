@@ -124,13 +124,16 @@ object ItcMapping extends Version with GracklePartials {
                 )
                 .handleErrorWith {
                   case UpstreamException(msg) =>
-                    Itc.Result.CalculationError(msg).pure[F].widen
+                    (none, Itc.Result.CalculationError(msg)).pure[F].widen
                   case x                      =>
-                    Itc.Result.CalculationError(s"Error calculating itc $x").pure[F].widen
+                    (none, Itc.Result.CalculationError(s"Error calculating itc $x")).pure[F].widen
                 }
-                .map(r =>
-                  SpectroscopyResults(version(environment).value, List(Spectroscopy(specMode, r)))
-                )
+                .map { (dataVersion, r) =>
+                  SpectroscopyResults(version(environment).value,
+                                      dataVersion,
+                                      List(Spectroscopy(specMode, r))
+                  )
+                }
             }
         }
         .map(_.rightIor[NonEmptyChain[Problem]])
@@ -173,7 +176,7 @@ object ItcMapping extends Version with GracklePartials {
           .map { r =>
             val charts =
               significantFigures.fold(r.charts)(v => r.charts.map(_.adjustSignificantFigures(v)))
-            SpectroscopyGraphResults(version(environment).value, charts)
+            SpectroscopyGraphResults(version(environment).value, r.dataVersion.some, charts)
           }
       }
         .map(_.rightIor[NonEmptyChain[Problem]])

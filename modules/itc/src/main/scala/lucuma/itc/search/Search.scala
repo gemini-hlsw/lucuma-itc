@@ -25,10 +25,12 @@ object Result:
 
 case class SpectroscopyResults(
   serverVersion: String,
+  dataVersion:   Option[String],
   results:       List[Result.Spectroscopy]
 ) derives Encoder.AsObject
 
 case class SpectroscopyGraphResults(
   serverVersion: String,
+  dataVersion:   Option[String],
   charts:        List[ItcChart]
 ) derives Encoder.AsObject

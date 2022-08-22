@@ -25,7 +25,7 @@ trait Itc[F[_]]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     signalToNoise: BigDecimal
-  ): F[Itc.Result]
+  ): F[(Option[String], Itc.Result)]
 
   /**
    * Compute the exposure time and number required to achieve the desired signal-to-noise under
@@ -43,10 +43,10 @@ object Itc:
 
   def apply[F[_]](using ev: Itc[F]): ev.type = ev
 
-  sealed trait Result extends Product with Serializable
+  sealed trait Result extends Product with Serializable {}
   object Result:
 
-    final case class Success(
+    case class Success(
       exposureTime:  FiniteDuration,
       exposures:     Int,
       signalToNoise: BigDecimal
@@ -54,10 +54,10 @@ object Itc:
         derives Encoder.AsObject
 
     /** Object is too bright to be observed in the specified mode. */
-    final case class SourceTooBright(msg: String) extends Result
+    case class SourceTooBright(msg: String) extends Result
 
     /** Generic calculation error */
-    final case class CalculationError(msg: String) extends Result
+    case class CalculationError(msg: String) extends Result
 
     given Encoder[Itc.Result] = Encoder.instance {
       case f: Itc.Result.Success          =>
@@ -70,4 +70,4 @@ object Itc:
         )
     }
 
-  case class GraphResult(charts: List[ItcChart]) derives Encoder.AsObject
+  case class GraphResult(dataVersion: String, charts: List[ItcChart]) derives Encoder.AsObject

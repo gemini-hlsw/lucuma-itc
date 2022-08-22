@@ -4749,7 +4749,11 @@ type Result {
 
 type SpectroscopyResult {
 
+  # id of the backend server
   serverVersion: String!
+
+  # token for the itc data version, can be null
+  dataVersion: String
 
   # Search results
   results: [Result!]!
@@ -4815,7 +4819,11 @@ type ItcChart {
 
 type SpectroscopyGraphResult {
 
+  # id of the backend server
   serverVersion: String!
+
+  # token for the itc data version, can be null
+  dataVersion: String
 
   charts: [ItcChart!]!
 
