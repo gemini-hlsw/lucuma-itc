@@ -334,11 +334,14 @@ given Decoder[ItcChart] = (c: HCursor) =>
 
 given Decoder[ItcRemoteGraphResult] = (c: HCursor) =>
   for
-    v   <- c.downField("versionToken").as[String]
-    ccd <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
-             .downField("chartGroups")
-             .as[NonEmptyList[ItcChart]]
-  yield ItcRemoteGraphResult(v, ccd)
+    v      <- c.downField("versionToken").as[String]
+    charts <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
+                .downField("chartGroups")
+                .as[NonEmptyList[ItcChart]]
+    ccd    <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
+                .downField("ccds")
+                .as[NonEmptyList[ItcCcd]]
+  yield ItcRemoteGraphResult(v, ccd, charts)
 
 given Decoder[ItcRemoteResult] = (c: HCursor) =>
   for

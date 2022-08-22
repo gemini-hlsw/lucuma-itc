@@ -31,6 +31,7 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import java.time.Duration
 import scala.concurrent.duration._
+import lucuma.itc.ItcCcd
 
 trait GraphQLSuite extends munit.CatsEffectSuite:
   given Logger[IO] = Slf4jLogger.getLogger[IO]
@@ -53,6 +54,9 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
     ): IO[Itc.GraphResult] =
       Itc
         .GraphResult("1",
+                     List(
+                       ItcCcd(1, 2, 3, 4, 5, Nil)
+                     ),
                      List(
                        ItcChart(
                          List(

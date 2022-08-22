@@ -72,6 +72,13 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
               xAxis: 4
             }
           }) {
+            ccds {
+              singleSNRatio
+              totalSNRatio
+              peakPixelFlux
+              wellDepth
+              ampGain
+            }
             charts {
               series {
                 title
@@ -91,6 +98,15 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
       json"""{
           "data": {
             "spectroscopyGraphBeta": {
+              "ccds" : [
+                {
+                  "singleSNRatio" : 1.0,
+                  "totalSNRatio" : 2.0,
+                  "peakPixelFlux" : 3.0,
+                  "wellDepth" : 4.0,
+                  "ampGain" : 5.0
+                }
+              ],
               "charts": [
                 {
                   "series": [

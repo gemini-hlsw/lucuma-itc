@@ -176,7 +176,7 @@ object ItcMapping extends Version with GracklePartials {
           .map { r =>
             val charts =
               significantFigures.fold(r.charts)(v => r.charts.map(_.adjustSignificantFigures(v)))
-            SpectroscopyGraphResults(version(environment).value, r.dataVersion.some, charts)
+            SpectroscopyGraphResults(version(environment).value, r.dataVersion.some, r.ccds, charts)
           }
       }
         .map(_.rightIor[NonEmptyChain[Problem]])

@@ -12,6 +12,7 @@ import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.itc.Itc
 import lucuma.itc.ItcChart
+import lucuma.itc.ItcCcd
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.given
 
@@ -32,5 +33,6 @@ case class SpectroscopyResults(
 case class SpectroscopyGraphResults(
   serverVersion: String,
   dataVersion:   Option[String],
+  ccds:          List[ItcCcd],
   charts:        List[ItcChart]
 ) derives Encoder.AsObject

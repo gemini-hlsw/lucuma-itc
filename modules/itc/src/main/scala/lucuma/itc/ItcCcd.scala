@@ -4,6 +4,7 @@
 package lucuma.itc
 
 import io.circe.Decoder
+import io.circe.Encoder
 
 case class ItcCcd(
   singleSNRatio: Double,          // the final SN ratio for a single image
@@ -12,7 +13,8 @@ case class ItcCcd(
   wellDepth:     Double,          // the well depth (max e- count per pixel) for this CCD
   ampGain:       Double,          // the amplifier gain for this CCD (used to calculate ADU)
   warnings:      List[ItcWarning] // the warnings provided by ITC for this CCD
-) derives Decoder {
+) derives Decoder,
+      Encoder.AsObject {
 
   // the max percentage of the well saturation for peak pixel
   val percentFullWell: Double =
