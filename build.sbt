@@ -87,12 +87,11 @@ lazy val core = project
       "com.lihaoyi"   %%% "pprint"              % pprintVersion          % Test
     )
   )
-  .enablePlugins(NoPublishPlugin)
 
 // Contains the grackle server
 lazy val service = project
   .in(file("modules/service"))
-  .dependsOn(core)
+  .dependsOn(core, model.jvm)
   .settings(commonSettings)
   .settings(
     name              := "lucuma-itc-service",
@@ -127,7 +126,7 @@ lazy val service = project
       "buildDateTime"       -> System.currentTimeMillis()
     )
   )
-  .enablePlugins(JavaAppPackaging, BuildInfoPlugin, NoPublishPlugin)
+  .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
 
 // lazy val benchmark = project
 //   .in(file("modules/benchmarks"))
