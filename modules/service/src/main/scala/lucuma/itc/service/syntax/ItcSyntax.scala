@@ -8,6 +8,7 @@ import edu.gemini.grackle.Problem
 import edu.gemini.grackle.Query.Environment
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
+import lucuma.itc.ItcChartGroup
 import lucuma.itc.ItcSeries
 import lucuma.itc.SignificantFigures
 import lucuma.itc.math.roundToSignificantFigures
@@ -57,11 +58,15 @@ trait ItcChartSyntax:
            figures.yAxis.fold(y)(yDigits => roundToSignificantFigures(y, yDigits.value))
           )
         )
-      ItcSeries(series.title, series.dataType, data)
+      ItcSeries(series.title, series.seriesType, data)
 
   extension (chart: ItcChart)
     def adjustSignificantFigures(figures: SignificantFigures): ItcChart =
       chart.copy(series = chart.series.map(_.adjustSignificantFigures(figures)))
+
+  extension (group: ItcChartGroup)
+    def adjustSignificantFigures(figures: SignificantFigures): ItcChartGroup =
+      group.copy(charts = group.charts.map(_.adjustSignificantFigures(figures)))
 
   extension (ccd: ItcCcd)
     def adjustSignificantFigures(figures: SignificantFigures): ItcCcd =

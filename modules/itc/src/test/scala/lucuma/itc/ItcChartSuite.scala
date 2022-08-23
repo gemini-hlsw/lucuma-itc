@@ -17,14 +17,14 @@ class ItcChartSuite extends munit.FunSuite {
   val expected    = source.mkString
   val chartPprint = pprint.copy(
     additionalHandlers = { case value: ItcSeries =>
-      pprint.Tree.Literal(ItcSeries(value.title, value.dataType, value.data.take(2)).toString)
+      pprint.Tree.Literal(ItcSeries(value.title, value.seriesType, value.data.take(2)).toString)
     }
   )
   test("decode response") {
     chartPprint.pprintln(decode[ItcRemoteGraphResult](expected))
     assertEquals(
       2.asRight,
-      decode[ItcRemoteGraphResult](expected).map(_.groups.toList.flatMap(_.charts).length)
+      decode[ItcRemoteGraphResult](expected).map(_.groups.flatMap(_.charts).length)
     )
   }
 

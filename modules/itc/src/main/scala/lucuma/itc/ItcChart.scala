@@ -3,6 +3,7 @@
 
 package lucuma.itc
 
+import cats.data.NonEmptyList
 import cats.syntax.all._
 import eu.timepit.refined._
 import eu.timepit.refined.numeric.NonNegative
@@ -42,8 +43,8 @@ object SeriesDataType:
       .withTag(_.tag)
 
 enum ChartType(val tag: String):
-  case SignalChart extends ChartType("signal")
-  case S2NChart    extends ChartType("s2n")
+  case SignalChart extends ChartType("signal_chart")
+  case S2NChart    extends ChartType("s2n_chart")
 
 object ChartType:
   given Enumerated[ChartType] =
@@ -71,13 +72,13 @@ object ItcAxis:
     else none
 
 case class ItcSeries private (
-  title:    String,
-  dataType: SeriesDataType,
-  data:     List[(Double, Double)],
-  dataX:    List[Double],
-  dataY:    List[Double],
-  xAxis:    Option[ItcAxis],
-  yAxis:    Option[ItcAxis]
+  title:      String,
+  seriesType: SeriesDataType,
+  data:       List[(Double, Double)],
+  dataX:      List[Double],
+  dataY:      List[Double],
+  xAxis:      Option[ItcAxis],
+  yAxis:      Option[ItcAxis]
 ) derives Encoder.AsObject
 
 object ItcSeries:
@@ -93,4 +94,4 @@ object ItcSeries:
 
 case class ItcChart(chartType: ChartType, series: List[ItcSeries]) derives Encoder.AsObject
 
-case class ItcChartGroup(charts: List[ItcChart]) derives Encoder.AsObject
+case class ItcChartGroup(charts: NonEmptyList[ItcChart]) derives Encoder.AsObject

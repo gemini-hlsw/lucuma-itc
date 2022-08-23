@@ -15,12 +15,13 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
+import lucuma.itc.ChartType
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
+import lucuma.itc.ItcChartGroup
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
-import lucuma.itc.ChartType
 import lucuma.itc.legacy.syntax.all.*
 import lucuma.itc.search.ObservingMode.Spectroscopy._
 import lucuma.itc.search.*
@@ -28,7 +29,6 @@ import lucuma.itc.syntax.all.given
 
 import java.math.MathContext
 import scala.util.Try
-import lucuma.itc.ItcChartGroup
 
 ////////////////////////////////////////////////////////////
 //
@@ -346,7 +346,7 @@ given Decoder[ItcChart] = (c: HCursor) =>
   yield ItcChart(d, series)
 
 given Decoder[ItcChartGroup] = (c: HCursor) =>
-  c.downField("charts").as[List[ItcChart]].map(ItcChartGroup.apply)
+  c.downField("charts").as[NonEmptyList[ItcChart]].map(ItcChartGroup.apply)
 
 given Decoder[ItcRemoteGraphResult] = (c: HCursor) =>
   for

@@ -3,6 +3,7 @@
 
 package lucuma.itc
 
+import cats.data.NonEmptyList
 import eu.timepit.refined.types.numeric.PosLong
 import io.circe.*
 import io.circe.syntax.*
@@ -11,7 +12,6 @@ import lucuma.itc.encoders.given
 import lucuma.itc.search._
 
 import scala.concurrent.duration.FiniteDuration
-import cats.data.NonEmptyList
 
 final case class UpstreamException(msg: String) extends RuntimeException(msg)
 
