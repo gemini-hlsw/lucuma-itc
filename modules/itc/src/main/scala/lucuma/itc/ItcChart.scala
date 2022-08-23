@@ -41,16 +41,16 @@ object SeriesDataType:
       )
       .withTag(_.tag)
 
-enum ChartDataType(val tag: String):
-  case SignalChart extends ChartDataType("signal")
-  case SNChart     extends ChartDataType("sn")
+enum ChartType(val tag: String):
+  case SignalChart extends ChartType("signal")
+  case S2NChart    extends ChartType("s2n")
 
-object ChartDataType:
-  given Enumerated[ChartDataType] =
+object ChartType:
+  given Enumerated[ChartType] =
     Enumerated
       .from(
-        ChartDataType.SignalChart,
-        ChartDataType.SNChart
+        ChartType.SignalChart,
+        ChartType.S2NChart
       )
       .withTag(_.tag)
 
@@ -91,6 +91,6 @@ object ItcSeries:
               ItcAxis.calcAxis(data, _._2)
     )
 
-case class ItcChart(series: List[ItcSeries]) derives Encoder.AsObject
+case class ItcChart(chartType: ChartType, series: List[ItcSeries]) derives Encoder.AsObject
 
-case class ItcChartGroup(chartType: ChartDataType, charts: List[ItcChart]) derives Encoder.AsObject
+case class ItcChartGroup(charts: List[ItcChart]) derives Encoder.AsObject

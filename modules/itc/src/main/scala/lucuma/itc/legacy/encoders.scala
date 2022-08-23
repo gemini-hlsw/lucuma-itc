@@ -20,6 +20,7 @@ import lucuma.itc.ItcChart
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
+import lucuma.itc.ChartType
 import lucuma.itc.legacy.syntax.all.*
 import lucuma.itc.search.ObservingMode.Spectroscopy._
 import lucuma.itc.search.*
@@ -317,6 +318,14 @@ private given Decoder[SeriesDataType] = (c: HCursor) =>
     }
   }
 
+private given Decoder[ChartType] = (c: HCursor) =>
+  Decoder.decodeJsonObject(c).flatMap { str =>
+    val key = str.keys.headOption.orEmpty
+    Try(ChartType.valueOf(key)).toEither.leftMap { _ =>
+      DecodingFailure(s"no enum value matched for $key", List(CursorOp.Field(key)))
+    }
+  }
+
 private given Decoder[ItcSeries] = (c: HCursor) =>
   for
     title <- c.downField("title").as[String]
@@ -331,7 +340,10 @@ private given Decoder[ItcSeries] = (c: HCursor) =>
   yield ItcSeries(title, dt, data)
 
 given Decoder[ItcChart] = (c: HCursor) =>
-  c.downField("series").as[List[ItcSeries]].map(ItcChart.apply)
+  for
+    series <- c.downField("series").as[List[ItcSeries]]
+    d      <- c.downField("chartType").as[ChartType]
+  yield ItcChart(d, series)
 
 given Decoder[ItcChartGroup] = (c: HCursor) =>
   c.downField("charts").as[List[ItcChart]].map(ItcChartGroup.apply)
