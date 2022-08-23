@@ -11,6 +11,7 @@ import lucuma.itc.encoders.given
 import lucuma.itc.search._
 
 import scala.concurrent.duration.FiniteDuration
+import cats.data.NonEmptyList
 
 final case class UpstreamException(msg: String) extends RuntimeException(msg)
 
@@ -70,4 +71,8 @@ object Itc:
         )
     }
 
-  case class GraphResult(dataVersion: String, ccds: List[ItcCcd], charts: List[ItcChart])
+  case class GraphResult(
+    dataVersion: String,
+    ccds:        NonEmptyList[ItcCcd],
+    charts:      NonEmptyList[ItcChartGroup]
+  )

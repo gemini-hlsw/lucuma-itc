@@ -27,6 +27,7 @@ import lucuma.itc.syntax.all.given
 
 import java.math.MathContext
 import scala.util.Try
+import lucuma.itc.ItcChartGroup
 
 ////////////////////////////////////////////////////////////
 //
@@ -330,14 +331,17 @@ private given Decoder[ItcSeries] = (c: HCursor) =>
   yield ItcSeries(title, dt, data)
 
 given Decoder[ItcChart] = (c: HCursor) =>
-  c.downField("charts").downArray.downField("series").as[List[ItcSeries]].map(ItcChart.apply)
+  c.downField("series").as[List[ItcSeries]].map(ItcChart.apply)
+
+given Decoder[ItcChartGroup] = (c: HCursor) =>
+  c.downField("charts").as[List[ItcChart]].map(ItcChartGroup.apply)
 
 given Decoder[ItcRemoteGraphResult] = (c: HCursor) =>
   for
     v      <- c.downField("versionToken").as[String]
     charts <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
                 .downField("chartGroups")
-                .as[NonEmptyList[ItcChart]]
+                .as[NonEmptyList[ItcChartGroup]]
     ccd    <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
                 .downField("ccds")
                 .as[NonEmptyList[ItcCcd]]
