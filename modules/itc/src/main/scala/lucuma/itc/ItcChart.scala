@@ -3,6 +3,7 @@
 
 package lucuma.itc
 
+import cats.data.NonEmptyList
 import cats.syntax.all._
 import eu.timepit.refined._
 import eu.timepit.refined.numeric.NonNegative
@@ -41,6 +42,19 @@ object SeriesDataType:
       )
       .withTag(_.tag)
 
+enum ChartType(val tag: String):
+  case SignalChart extends ChartType("signal_chart")
+  case S2NChart    extends ChartType("s2n_chart")
+
+object ChartType:
+  given Enumerated[ChartType] =
+    Enumerated
+      .from(
+        ChartType.SignalChart,
+        ChartType.S2NChart
+      )
+      .withTag(_.tag)
+
 case class ItcAxis(start: Double, end: Double, min: Double, max: Double, count: Int)
     derives Decoder,
       Encoder.AsObject
@@ -58,13 +72,13 @@ object ItcAxis:
     else none
 
 case class ItcSeries private (
-  title:    String,
-  dataType: SeriesDataType,
-  data:     List[(Double, Double)],
-  dataX:    List[Double],
-  dataY:    List[Double],
-  xAxis:    Option[ItcAxis],
-  yAxis:    Option[ItcAxis]
+  title:      String,
+  seriesType: SeriesDataType,
+  data:       List[(Double, Double)],
+  dataX:      List[Double],
+  dataY:      List[Double],
+  xAxis:      Option[ItcAxis],
+  yAxis:      Option[ItcAxis]
 ) derives Encoder.AsObject
 
 object ItcSeries:
@@ -78,4 +92,6 @@ object ItcSeries:
               ItcAxis.calcAxis(data, _._2)
     )
 
-case class ItcChart(series: List[ItcSeries]) derives Encoder.AsObject
+case class ItcChart(chartType: ChartType, series: List[ItcSeries]) derives Encoder.AsObject
+
+case class ItcChartGroup(charts: NonEmptyList[ItcChart]) derives Encoder.AsObject

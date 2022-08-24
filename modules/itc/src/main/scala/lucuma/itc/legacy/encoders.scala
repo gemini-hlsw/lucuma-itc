@@ -15,8 +15,10 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
+import lucuma.itc.ChartType
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
+import lucuma.itc.ItcChartGroup
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
@@ -316,6 +318,14 @@ private given Decoder[SeriesDataType] = (c: HCursor) =>
     }
   }
 
+private given Decoder[ChartType] = (c: HCursor) =>
+  Decoder.decodeJsonObject(c).flatMap { str =>
+    val key = str.keys.headOption.orEmpty
+    Try(ChartType.valueOf(key)).toEither.leftMap { _ =>
+      DecodingFailure(s"no enum value matched for $key", List(CursorOp.Field(key)))
+    }
+  }
+
 private given Decoder[ItcSeries] = (c: HCursor) =>
   for
     title <- c.downField("title").as[String]
@@ -330,14 +340,20 @@ private given Decoder[ItcSeries] = (c: HCursor) =>
   yield ItcSeries(title, dt, data)
 
 given Decoder[ItcChart] = (c: HCursor) =>
-  c.downField("charts").downArray.downField("series").as[List[ItcSeries]].map(ItcChart.apply)
+  for
+    series <- c.downField("series").as[List[ItcSeries]]
+    d      <- c.downField("chartType").as[ChartType]
+  yield ItcChart(d, series)
+
+given Decoder[ItcChartGroup] = (c: HCursor) =>
+  c.downField("charts").as[NonEmptyList[ItcChart]].map(ItcChartGroup.apply)
 
 given Decoder[ItcRemoteGraphResult] = (c: HCursor) =>
   for
     v      <- c.downField("versionToken").as[String]
     charts <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
                 .downField("chartGroups")
-                .as[NonEmptyList[ItcChart]]
+                .as[NonEmptyList[ItcChartGroup]]
     ccd    <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
                 .downField("ccds")
                 .as[NonEmptyList[ItcCcd]]

@@ -3,6 +3,7 @@
 
 package lucuma.itc
 
+import cats.data.NonEmptyList
 import eu.timepit.refined.types.numeric.PosLong
 import io.circe.*
 import io.circe.syntax.*
@@ -70,4 +71,8 @@ object Itc:
         )
     }
 
-  case class GraphResult(dataVersion: String, ccds: List[ItcCcd], charts: List[ItcChart])
+  case class GraphResult(
+    dataVersion: String,
+    ccds:        NonEmptyList[ItcCcd],
+    charts:      NonEmptyList[ItcChartGroup]
+  )

@@ -80,9 +80,10 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
               ampGain
             }
             charts {
+              chartType
               series {
                 title
-                dataType
+                seriesType
                 data
                 xAxis {
                   start
@@ -109,10 +110,11 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
               ],
               "charts": [
                 {
+                  "chartType": "S2N_CHART",
                   "series": [
                     {
                       "title": "title",
-                      "dataType": "BACKGROUND_DATA",
+                      "seriesType": "BACKGROUND_DATA",
                       "data": [
                         [
                           1.0,

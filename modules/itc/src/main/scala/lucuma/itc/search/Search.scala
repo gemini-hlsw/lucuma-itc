@@ -4,6 +4,7 @@
 package lucuma.itc.search
 
 import cats._
+import cats.data.NonEmptyList
 import cats.syntax.all._
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
@@ -33,6 +34,6 @@ case class SpectroscopyResults(
 case class SpectroscopyGraphResults(
   serverVersion: String,
   dataVersion:   Option[String],
-  ccds:          List[ItcCcd],
-  charts:        List[ItcChart]
+  ccds:          NonEmptyList[ItcCcd],
+  charts:        NonEmptyList[ItcChart]
 ) derives Encoder.AsObject

@@ -190,7 +190,7 @@ object ItcImpl {
         exposures:        Long
       ): F[Itc.GraphResult] =
         itcGraph(targetProfile, observingMode, constraints, exposureDuration, exposures).map { r =>
-          Itc.GraphResult(r.versionToken, r.ccds.toList, r.charts.toList)
+          Itc.GraphResult(r.versionToken, r.ccds, r.groups)
         }
 
       def spectroscopy(

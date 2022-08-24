@@ -3,6 +3,7 @@
 
 package lucuma.itc.service
 
+import cats.data.NonEmptyList
 import cats.effect._
 import cats.syntax.all._
 import eu.timepit.refined.types.numeric.PosInt
@@ -12,10 +13,12 @@ import io.circe.parser._
 import lucuma.core.model.NonNegDuration
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
+import lucuma.itc.ChartType
 import lucuma.itc.Itc
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcChart.apply
+import lucuma.itc.ItcChartGroup
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
@@ -53,20 +56,26 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
       exposures:     PosLong
     ): IO[Itc.GraphResult] =
       Itc
-        .GraphResult("1",
-                     List(
-                       ItcCcd(1, 2, 3, 4, 5, Nil)
-                     ),
-                     List(
-                       ItcChart(
-                         List(
-                           ItcSeries("title",
-                                     SeriesDataType.BackgroundData,
-                                     List((1.0, 1000.0), (2.0, 1001.0))
-                           )
-                         )
-                       )
-                     )
+        .GraphResult(
+          "1",
+          NonEmptyList.of(
+            ItcCcd(1, 2, 3, 4, 5, Nil)
+          ),
+          NonEmptyList.of(
+            ItcChartGroup(
+              NonEmptyList.of(
+                ItcChart(
+                  ChartType.S2NChart,
+                  List(
+                    ItcSeries("title",
+                              SeriesDataType.BackgroundData,
+                              List((1.0, 1000.0), (2.0, 1001.0))
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
         .pure[IO]
 
