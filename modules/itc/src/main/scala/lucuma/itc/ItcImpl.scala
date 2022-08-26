@@ -137,7 +137,6 @@ object ItcImpl {
         }
 
       override def itcVersions: F[String] =
-        // import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
         L.info(s"ITC remote query for versions") *>
