@@ -84,7 +84,7 @@ object ItcImpl {
               targetProfile,
               observingMode,
               constraints,
-              BigDecimal(exposureTime.value.toMillis).withUnit[Microsecond].toUnit[Second],
+              BigDecimal(exposureTime.value.toMillis).withUnit[Millisecond].toUnit[Second],
               exposures.value
             )
           // TODO: imaging
@@ -135,6 +135,20 @@ object ItcImpl {
                   }
             }
         }
+
+      override def itcVersions: F[String] =
+        import lucuma.itc.legacy.*
+
+        L.info(s"ITC remote query for versions") *>
+          c.run(GET(uri / "version")).use {
+            case Status.Successful(resp) =>
+              given EntityDecoder[F, ItcRemoteVersion] = jsonOf[F, ItcRemoteVersion]
+              resp.as[ItcRemoteVersion].map(_.versionToken)
+            case resp                    =>
+              L.warn(s"Upstream error ${resp}") *>
+                ApplicativeError[F, Throwable]
+                  .raiseError(new UpstreamException("Upstream Exception"))
+          }
 
       def itcGraph(
         targetProfile:    TargetProfile,

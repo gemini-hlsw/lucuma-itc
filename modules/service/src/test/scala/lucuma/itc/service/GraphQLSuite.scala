@@ -79,6 +79,8 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
         )
         .pure[IO]
 
+    override def itcVersions = IO.pure("versionToken")
+
   val service: IO[HttpRoutes[IO]] =
     for
       wsb <- WebSocketBuilder2[IO]

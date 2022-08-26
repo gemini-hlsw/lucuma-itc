@@ -40,6 +40,8 @@ trait Itc[F[_]]:
     exposures:     PosLong
   ): F[Itc.GraphResult]
 
+  def itcVersions: F[String]
+
 object Itc:
 
   def apply[F[_]](using ev: Itc[F]): ev.type = ev
