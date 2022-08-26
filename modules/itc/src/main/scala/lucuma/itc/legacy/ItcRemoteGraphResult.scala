@@ -4,6 +4,7 @@
 package lucuma.itc.legacy
 
 import cats.data.NonEmptyList
+import io.circe.Decoder
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChartGroup
 
@@ -12,3 +13,7 @@ case class ItcRemoteGraphResult(
   ccds:         NonEmptyList[ItcCcd],
   groups:       NonEmptyList[ItcChartGroup]
 )
+
+case class ItcRemoteVersion(
+  versionToken: String
+) derives Decoder

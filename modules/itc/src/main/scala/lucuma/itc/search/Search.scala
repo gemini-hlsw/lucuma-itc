@@ -37,3 +37,8 @@ case class SpectroscopyGraphResults(
   ccds:          NonEmptyList[ItcCcd],
   charts:        NonEmptyList[ItcChart]
 ) derives Encoder.AsObject
+
+case class ItcVersions(
+  serverVersion: String,
+  dataVersion:   Option[String]
+) derives Encoder.AsObject

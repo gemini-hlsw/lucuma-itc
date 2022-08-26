@@ -54,6 +54,7 @@ import lucuma.itc.UpstreamException
 import lucuma.itc.encoders.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
+import lucuma.itc.search.ItcVersions
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosNorth
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
@@ -191,6 +192,18 @@ object ItcMapping extends Version with GracklePartials {
         }
     }.map(_.getOrElse(Problem(s"Missing parameters for spectroscopy graph $env").leftIorNec))
 
+  def versions[F[_]: ApplicativeThrow](environment: ExecutionEnvironment, itc: Itc[F])(
+    env:                                            Cursor.Env
+  ): F[Result[ItcVersions]] =
+    itc.itcVersions
+      .map { r =>
+        ItcVersions(version(environment).value, r.some)
+      }
+      .map(_.rightIor[NonEmptyChain[Problem]])
+      .handleErrorWith { case x =>
+        Problem(s"Error getting the itc version $x").leftIorNec.pure[F]
+      }
+
   def apply[F[_]: Sync: Logger: Parallel: Trace](
     environment: ExecutionEnvironment,
     itc:         Itc[F]
@@ -198,14 +211,12 @@ object ItcMapping extends Version with GracklePartials {
     loadSchema[F].map { loadedSchema =>
       new CirceMapping[F] with ComputeMapping[F] {
 
-        val schema: Schema              = loadedSchema
-        val QueryType                   = schema.ref("Query")
-        val SpectroscopyResultType      = schema.ref("SpectroscopyResult")
-        val SpectroscopyGraphResultType = schema.ref("SpectroscopyGraphResult")
-        val BigDecimalType              = schema.ref("BigDecimal")
-        val LongType                    = schema.ref("Long")
-        val DurationType                = schema.ref("Duration")
-        val PosIntType                  = schema.ref("PosInt")
+        val schema: Schema = loadedSchema
+        val QueryType      = schema.ref("Query")
+        val BigDecimalType = schema.ref("BigDecimal")
+        val LongType       = schema.ref("Long")
+        val DurationType   = schema.ref("Duration")
+        val PosIntType     = schema.ref("PosInt")
 
         val typeMappings =
           List(
@@ -219,7 +230,8 @@ object ItcMapping extends Version with GracklePartials {
                 ComputeRoot[SpectroscopyGraphResults]("spectroscopyGraphBeta",
                                                       QueryType,
                                                       spectroscopyGraph[F](environment, itc)
-                )
+                ),
+                ComputeRoot[ItcVersions]("versions", QueryType, versions[F](environment, itc))
               )
             ),
             LeafMapping[BigDecimal](BigDecimalType),
