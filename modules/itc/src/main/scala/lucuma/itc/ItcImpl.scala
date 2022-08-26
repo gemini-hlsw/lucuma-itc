@@ -84,7 +84,7 @@ object ItcImpl {
               targetProfile,
               observingMode,
               constraints,
-              BigDecimal(exposureTime.value.toMillis).withUnit[Microsecond].toUnit[Second],
+              BigDecimal(exposureTime.value.toMillis).withUnit[Millisecond].toUnit[Second],
               exposures.value
             )
           // TODO: imaging
