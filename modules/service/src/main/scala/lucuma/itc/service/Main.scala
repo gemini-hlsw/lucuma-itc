@@ -8,6 +8,8 @@ import cats.Parallel
 import cats.effect._
 import cats.syntax.all._
 import com.comcast.ip4s._
+import dev.profunktor.redis4cats.Redis
+import dev.profunktor.redis4cats.log4cats.*
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
@@ -47,6 +49,7 @@ object Main extends IOApp {
             |/_/\\__,_/\\___/\\__,_/_/ /_/ /_/\\__,_/     /_/\\__/\\___/
             |
             | old-itc-url ${cfg.itcUrl}
+            | redis-url ${cfg.redisUrl}
             |
             |""".stripMargin
     banner.linesIterator.toList.traverse_(Logger[F].info(_))
@@ -89,13 +92,13 @@ object Main extends IOApp {
       .withHttpWebSocketApp(app)
       .build
 
-  def routes[F[_]: Async: Parallel: Trace](
+  def routes[F[_]: Async: Logger: Parallel: Trace](
     cfg: Config
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
-      given Logger[F] <- Resource.eval(Slf4jLogger.create[F])
-      itc             <- ItcImpl.forUri(cfg.itcUrl)
-      mapping         <- Resource.eval(ItcMapping(cfg.environment, itc))
+      itc     <- ItcImpl.forUri(cfg.itcUrl)
+      redis   <- Redis[F].utf8(cfg.redisUrl.toString)
+      mapping <- Resource.eval(ItcMapping(cfg.environment, redis, itc))
     yield wsb =>
       // Routes for the ITC GraphQL service
       NatchezMiddleware.server(

@@ -17,6 +17,7 @@ import coulomb.units.si.*
 import coulomb.units.si.given
 import coulomb.units.si.prefixes.*
 import coulomb.units.time.*
+import dev.profunktor.redis4cats.algebra.StringCommands
 import edu.gemini.grackle._
 import edu.gemini.grackle.circe.CirceMapping
 import eu.timepit.refined._
@@ -192,20 +193,31 @@ object ItcMapping extends Version with GracklePartials {
         }
     }.map(_.getOrElse(Problem(s"Missing parameters for spectroscopy graph $env").leftIorNec))
 
-  def versions[F[_]: ApplicativeThrow](environment: ExecutionEnvironment, itc: Itc[F])(
-    env:                                            Cursor.Env
+  def versions[F[_]: MonadThrow](
+    environment: ExecutionEnvironment,
+    redis:       StringCommands[F, String, String],
+    itc:         Itc[F]
+  )(
+    env:         Cursor.Env
   ): F[Result[ItcVersions]] =
-    itc.itcVersions
-      .map { r =>
-        ItcVersions(version(environment).value, r.some)
-      }
-      .map(_.rightIor[NonEmptyChain[Problem]])
+    for
+      fromRedis <- redis.get("itc:version")
+      version   <- fromRedis.fold(
+                     itc.itcVersions
+                       .map { r =>
+                         ItcVersions(version(environment).value, r.some)
+                       }
+                   )(v => ItcVersions(version(environment).value, v.some).pure[F])
+      _         <- redis.set("itc:version", version.dataVersion.orEmpty).whenA(fromRedis.isEmpty)
+    yield version
+      .rightIor[NonEmptyChain[Problem]]
       .handleErrorWith { case x =>
-        Problem(s"Error getting the itc version $x").leftIorNec.pure[F]
+        Problem(s"Error getting the itc version $x").leftIorNec
       }
 
   def apply[F[_]: Sync: Logger: Parallel: Trace](
     environment: ExecutionEnvironment,
+    redis:       StringCommands[F, String, String],
     itc:         Itc[F]
   ): F[Mapping[F]] =
     loadSchema[F].map { loadedSchema =>
@@ -231,7 +243,10 @@ object ItcMapping extends Version with GracklePartials {
                                                       QueryType,
                                                       spectroscopyGraph[F](environment, itc)
                 ),
-                ComputeRoot[ItcVersions]("versions", QueryType, versions[F](environment, itc))
+                ComputeRoot[ItcVersions]("versions",
+                                         QueryType,
+                                         versions[F](environment, redis, itc)
+                )
               )
             ),
             LeafMapping[BigDecimal](BigDecimalType),
