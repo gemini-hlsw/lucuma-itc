@@ -24,7 +24,7 @@ given picklerRefined[A: Pickler, B](using Validate[A, B]): Pickler[A Refined B] 
     }
   }
 
-given picklerEnumeration[A: Enumerated]: Pickler[A] =
+given picklerEnumerated[A: Enumerated]: Pickler[A] =
   transformPickler((a: String) => Enumerated[A].fromTag(a).getOrElse(sys.error("Cannot unpickle")))(
     Enumerated[A].tag(_)
   )

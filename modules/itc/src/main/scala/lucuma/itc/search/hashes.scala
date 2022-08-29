@@ -17,7 +17,7 @@ import lucuma.core.util.Enumerated
 
 import java.time.Duration
 
-given hastEnumerated[A: Enumerated]: Hash[A] = Hash.by(summon[Enumerated[A]].tag)
+given hashEnumerated[A: Enumerated]: Hash[A] = Hash.by(summon[Enumerated[A]].tag)
 
 given hashRefined[A: Hash, B](using Validate[A, B]): Hash[A Refined B] =
   Hash.by(_.value)
