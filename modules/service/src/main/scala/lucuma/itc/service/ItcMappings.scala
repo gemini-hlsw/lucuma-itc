@@ -86,6 +86,9 @@ import scala.util.Using
 import Query._
 import Value._
 import QueryCompiler._
+import java.nio.charset.Charset
+import boopickle.DefaultBasic.*
+import java.nio.ByteBuffer
 
 case class GraphRequest(
   targetProfile: TargetProfile,
@@ -96,6 +99,7 @@ case class GraphRequest(
 ) derives Hash
 
 object ItcMapping extends Version with GracklePartials {
+  val Ascii = Charset.forName("UTF8")
 
   // In principle this is a pure operation because resources are constant values, but the potential
   // for error in dev is high and it's nice to handle failures in `F`.
@@ -158,17 +162,22 @@ object ItcMapping extends Version with GracklePartials {
 
   private def calculateGraph[F[_]: Monad](
     request: GraphRequest
-  )(itc:     Itc[F], redis: StringCommands[F, String, String]): F[Itc.GraphResult] =
-    import lucuma.itc.redis.given
+  )(itc:     Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.GraphResult] =
+    import lucuma.itc.service.redis.given
     val hash = Hash[GraphRequest].hash(request)
     for
-      fromRedis <- redis.get(s"itc:graph:$hash")
+      fromRedis <- redis.get(s"itc:graph:$hash".getBytes(Ascii))
       decoded   <-
-        fromRedis.flatMap(decode[Itc.GraphResult](_).toOption).pure[F]
+        fromRedis
+          .flatMap(b =>
+            Either.catchNonFatal(Unpickle[Itc.GraphResult].fromBytes(ByteBuffer.wrap(b))).toOption
+          )
+          .pure[F]
       r         <-
         decoded
           .map(_.pure[F])
           .getOrElse(
+            // Call old itc
             itc
               .calculateGraph(
                 request.targetProfile,
@@ -178,26 +187,15 @@ object ItcMapping extends Version with GracklePartials {
                 request.exp
               )
           )
-      _         <- {
-        println(
-          r.asJson.hcursor
-            .downField("charts")
-            .downArray
-            .downField("charts")
-            .downArray
-            .downField("series")
-            .downArray
-            .downField("dataX")
-            .focus
-            .map(_.spaces2)
-        )
-        redis.set(s"itc:graph:$hash", r.asJson.noSpaces).whenA(fromRedis.isEmpty)
-      }
+      _         <-
+        redis
+          .set(s"itc:graph:$hash".getBytes(Ascii), Pickle.intoBytes(r).compact().array())
+          .whenA(fromRedis.isEmpty)
     yield r
 
   def spectroscopyGraph[F[_]: MonadThrow: Logger: Parallel: Trace](
     environment: ExecutionEnvironment,
-    redis:       StringCommands[F, String, String],
+    redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
   )(env:         Cursor.Env): F[Result[SpectroscopyGraphResults]] =
     (env.get[Wavelength]("wavelength"),
@@ -242,20 +240,22 @@ object ItcMapping extends Version with GracklePartials {
 
   def versions[F[_]: MonadThrow](
     environment: ExecutionEnvironment,
-    redis:       StringCommands[F, String, String],
+    redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
   )(
     env:         Cursor.Env
   ): F[Result[ItcVersions]] =
     for
-      fromRedis <- redis.get("itc:version")
+      fromRedis <- redis.get("itc:version".getBytes(Ascii))
       version   <- fromRedis.fold(
                      itc.itcVersions
                        .map { r =>
                          ItcVersions(version(environment).value, r.some)
                        }
-                   )(v => ItcVersions(version(environment).value, v.some).pure[F])
-      _         <- redis.set("itc:version", version.dataVersion.orEmpty).whenA(fromRedis.isEmpty)
+                   )(v => ItcVersions(version(environment).value, String(v, Ascii).some).pure[F])
+      _         <- redis
+                     .set("itc:version".getBytes(Ascii), version.dataVersion.orEmpty.getBytes(Ascii))
+                     .whenA(fromRedis.isEmpty)
     yield version
       .rightIor[NonEmptyChain[Problem]]
       .handleErrorWith { case x =>
@@ -264,7 +264,7 @@ object ItcMapping extends Version with GracklePartials {
 
   def apply[F[_]: Sync: Logger: Parallel: Trace](
     environment: ExecutionEnvironment,
-    redis:       StringCommands[F, String, String],
+    redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
   ): F[Mapping[F]] =
     loadSchema[F].map { loadedSchema =>

@@ -98,7 +98,7 @@ object Main extends IOApp {
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
       itc     <- ItcImpl.forUri(cfg.itcUrl)
-      redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Utf8))
+      redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
       mapping <- Resource.eval(ItcMapping(cfg.environment, redis, itc))
     yield wsb =>
       // Routes for the ITC GraphQL service

@@ -22,6 +22,22 @@ The app needs two environment variable
 * REDISCLOUD_URL which points to the redis server used for caching. e.g.
     REDISCLOUD_URL = "redis://localhost"
 
+# Caching
+ITC calculations are relatively expensive and they are pure (a given input always produces the same output)
+the lucuma ITC server uses redis to store the results linking them from the request parameters to the results
+
+The cache design is optimized to use minimal space given some of the responses (graphs) are fairly large. 
+We are also asuming we'll never need to go inside the cached data to edit the data and we can
+discard items at any moment.
+
+The keys are stored as `itc:prefix:hash` where hash is just the hash of the parameters
+
+A few diferent encodings were tested to reduce size. Here are some measurement
+
+* Plain json: 1441864
+* Compressed json: 589896
+* Boopickle: 262216
+
 ## Long term
 Ideally we'd port the old ITC codebase and integrate it here. This is no small task but an initial
 attempt was started on the `legacy-port` branch

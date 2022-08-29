@@ -29,6 +29,7 @@ val spireVersion                = "0.18.0"
 val redis4CatsVersion           = "1.2.0"
 val pprintVersion               = "0.7.3"
 val kittensVersion              = "3.0.0-M4"
+val boopickleVersion            = "1.4.0"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -141,6 +142,7 @@ lazy val service = project
       "eu.timepit"     %% "refined-cats"                  % refinedVersion,
       "dev.profunktor" %% "redis4cats-effects"            % redis4CatsVersion,
       "dev.profunktor" %% "redis4cats-log4cats"           % redis4CatsVersion,
+      "io.suzaku"      %% "boopickle"                     % boopickleVersion,
       "org.typelevel"  %% "munit-cats-effect-3"           % munitCatsEffectVersion % Test
     ),
     buildInfoKeys     := Seq[BuildInfoKey](

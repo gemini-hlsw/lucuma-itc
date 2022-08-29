@@ -95,12 +95,3 @@ object ItcSeries:
 case class ItcChart(chartType: ChartType, series: List[ItcSeries]) derives Encoder.AsObject
 
 case class ItcChartGroup(charts: NonEmptyList[ItcChart]) derives Encoder.AsObject
-
-object redis:
-  given Encoder[ItcSeries]       =
-    Encoder.forProduct3("title", "dataType", "data")(s => (s.title, s.seriesType, s.data))
-  given Decoder[ItcSeries]       = Decoder.forProduct3("title", "seriesType", "data")(ItcSeries.apply)
-  given Decoder[ItcChart]        = deriveDecoder
-  given Decoder[ItcChartGroup]   = deriveDecoder
-  given Decoder[Itc.GraphResult] = deriveDecoder
-  given Encoder[Itc.GraphResult] = deriveEncoder
