@@ -4,8 +4,8 @@
 package lucuma.itc.service
 
 import boopickle.DefaultBasic.*
-import cats._
-import cats.syntax.all._
+import cats.*
+import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.StringCommands
 import lucuma.itc.Itc
 import lucuma.itc.search.ItcVersions
@@ -14,9 +14,11 @@ import lucuma.itc.service.redis.given
 
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
+import scala.concurrent.duration.*
 
 trait ItcCacheOrRemote extends Version:
   val KeyCharset = Charset.forName("UTF8")
+  val TTL        = FiniteDuration(24, HOURS)
 
   def cacheOrRemote[F[_]: Monad, A: Hash, B: Pickler](a: A, request: A => F[B])(
     prefix:                                              String,
@@ -32,7 +34,7 @@ trait ItcCacheOrRemote extends Version:
       r         <- decoded.map(_.pure[F]).getOrElse(request(a))
       _         <-
         redis
-          .set(s"$prefix:$hash".getBytes(KeyCharset), Pickle.intoBytes(r).compact().array())
+          .setEx(s"$prefix:$hash".getBytes(KeyCharset), Pickle.intoBytes(r).compact().array(), TTL)
           .whenA(fromRedis.isEmpty)
     yield r
 
@@ -66,7 +68,10 @@ trait ItcCacheOrRemote extends Version:
                    )(v => ItcVersions(version(environment).value, String(v, KeyCharset).some).pure[F])
       _         <-
         redis
-          .set("itc:version".getBytes(KeyCharset), version.dataVersion.orEmpty.getBytes(KeyCharset))
+          .setEx("itc:version".getBytes(KeyCharset),
+                 version.dataVersion.orEmpty.getBytes(KeyCharset),
+                 TTL
+          )
           .whenA(fromRedis.isEmpty)
     yield version
 
