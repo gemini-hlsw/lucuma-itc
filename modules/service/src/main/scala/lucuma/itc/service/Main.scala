@@ -4,7 +4,9 @@
 package lucuma.itc.service
 
 import cats.Applicative
+import cats.Functor
 import cats.Parallel
+import cats.data.Kleisli
 import cats.effect._
 import cats.syntax.all._
 import com.comcast.ip4s._
@@ -25,6 +27,7 @@ import natchez.log.Log
 import org.http4s.HttpApp
 import org.http4s._
 import org.http4s.ember.server.EmberServerBuilder
+import org.http4s.headers.`Cache-Control`
 import org.http4s.implicits._
 import org.http4s.server.Server
 import org.http4s.server.middleware.CORS
@@ -35,6 +38,8 @@ import org.http4s.server.staticcontent._
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
+
+import scala.concurrent.duration._
 
 // #server
 object Main extends IOApp {
@@ -81,6 +86,16 @@ object Main extends IOApp {
       }
     }
 
+  def cacheMiddleware[F[_]: Functor](service: HttpRoutes[F]): HttpRoutes[F] = Kleisli {
+    (req: Request[F]) =>
+      service(req).map {
+        case Status.Successful(resp) =>
+          resp.putHeaders(`Cache-Control`(CacheDirective.public, CacheDirective.`max-age`(6.hours)))
+        case resp                    =>
+          resp
+      }
+  }
+
   def serverResource[F[_]: Async](
     app: WebSocketBuilder2[F] => HttpApp[F],
     cfg: Config
@@ -105,7 +120,9 @@ object Main extends IOApp {
       NatchezMiddleware.server(
         GZip(
           cors(cfg.environment, none)(
-            Routes.forService(_ => GrackleGraphQLService[F](mapping).some.pure[F], wsb, "itc")
+            cacheMiddleware(
+              Routes.forService(_ => GrackleGraphQLService[F](mapping).some.pure[F], wsb, "itc")
+            )
           )
         )
       )

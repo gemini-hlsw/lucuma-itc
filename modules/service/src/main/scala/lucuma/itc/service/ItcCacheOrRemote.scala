@@ -18,7 +18,7 @@ import scala.concurrent.duration.*
 
 trait ItcCacheOrRemote extends Version:
   val KeyCharset = Charset.forName("UTF8")
-  val TTL        = FiniteDuration(24, HOURS)
+  val TTL        = FiniteDuration(10, DAYS)
 
   def cacheOrRemote[F[_]: Monad, A: Hash, B: Pickler](a: A, request: A => F[B])(
     prefix:                                              String,
