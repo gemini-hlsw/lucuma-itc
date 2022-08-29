@@ -10,6 +10,8 @@ import eu.timepit.refined.api.*
 import lucuma.core.util.Enumerated
 import lucuma.itc.*
 
+import scala.concurrent.duration.*
+
 given picklerRefined[A: Pickler, B](using Validate[A, B]): Pickler[A Refined B] =
   new Pickler[A Refined B] {
     override def pickle(a: A Refined B)(using state: PickleState): Unit = {
@@ -30,10 +32,21 @@ given picklerEnumeration[A: Enumerated]: Pickler[A] =
 given picklerNonEmptyList[A: Pickler]: Pickler[NonEmptyList[A]] =
   transformPickler(NonEmptyList.fromListUnsafe[A])(_.toList)
 
-given Pickler[ItcSeries]       =
+given Pickler[ItcSeries]      =
   transformPickler(Function.tupled(ItcSeries.apply _))(x => (x.title, x.seriesType, x.data))
-given Pickler[ItcChart]        = generatePickler
-given Pickler[ItcChartGroup]   = generatePickler
-given Pickler[ItcWarning]      = generatePickler
-given Pickler[ItcCcd]          = generatePickler
-given Pickler[Itc.GraphResult] = generatePickler
+given Pickler[FiniteDuration] =
+  transformPickler(n => new FiniteDuration(n, NANOSECONDS))(_.toNanos)
+
+given Pickler[ItcChart]                        = generatePickler
+given Pickler[ItcChartGroup]                   = generatePickler
+given Pickler[ItcWarning]                      = generatePickler
+given Pickler[ItcCcd]                          = generatePickler
+given Pickler[Itc.GraphResult]                 = generatePickler
+given Pickler[Itc.CalcResult.Success]          = generatePickler
+given Pickler[Itc.CalcResult.SourceTooBright]  = generatePickler
+given Pickler[Itc.CalcResult.CalculationError] = generatePickler
+given Pickler[Itc.CalcResult]                  = compositePickler[Itc.CalcResult]
+  .addConcreteType[Itc.CalcResult.Success]
+  .addConcreteType[Itc.CalcResult.SourceTooBright]
+  .addConcreteType[Itc.CalcResult.CalculationError]
+given Pickler[Itc.CalcResultWithVersion]       = generatePickler

@@ -19,10 +19,10 @@ import lucuma.itc.given
 
 sealed trait Result:
   def mode: ObservingMode
-  def itc: Itc.Result
+  def itc: Itc.CalcResult
 
 object Result:
-  case class Spectroscopy(mode: ObservingMode.Spectroscopy, itc: Itc.Result)
+  case class Spectroscopy(mode: ObservingMode.Spectroscopy, itc: Itc.CalcResult)
       derives Encoder.AsObject
 
 case class SpectroscopyResults(

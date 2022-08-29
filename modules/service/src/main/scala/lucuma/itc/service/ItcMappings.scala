@@ -54,6 +54,13 @@ case class GraphRequest(
   exp:           PosLong
 ) derives Hash
 
+case class CalcRequest(
+  targetProfile: TargetProfile,
+  specMode:      ObservingMode.Spectroscopy,
+  constraints:   ItcObservingConditions,
+  signalToNoise: PosBigDecimal
+) derives Hash
+
 object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
 
   // In principle this is a pure operation because resources are constant values, but the potential
@@ -66,8 +73,9 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         }.liftTo[F]
       }
 
-  def spectroscopy[F[_]: ApplicativeThrow: Logger: Parallel: Trace](
+  def spectroscopy[F[_]: MonadThrow: Logger: Parallel: Trace](
     environment: ExecutionEnvironment,
+    redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
   )(env:         Cursor.Env): F[Result[List[SpectroscopyResults]]] =
     (env.get[Wavelength]("wavelength"),
@@ -88,23 +96,29 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                 case GmosSITCParams(grating, fpu, filter) =>
                   ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
               }
-              itc
-                .calculate(
+              calcFromCacheOrRemote(
+                CalcRequest(
                   TargetProfile(sp, sd, rs),
                   specMode,
                   c,
-                  sn.value
+                  sn
                 )
+              )(itc, redis)
                 .handleErrorWith {
                   case UpstreamException(msg) =>
-                    (none, Itc.Result.CalculationError(msg)).pure[F].widen
+                    Itc.CalcResultWithVersion(Itc.CalcResult.CalculationError(msg)).pure[F].widen
                   case x                      =>
-                    (none, Itc.Result.CalculationError(s"Error calculating itc $x")).pure[F].widen
+                    Itc
+                      .CalcResultWithVersion(
+                        Itc.CalcResult.CalculationError(s"Error calculating itc $x")
+                      )
+                      .pure[F]
+                      .widen
                 }
-                .map { (dataVersion, r) =>
+                .map { r =>
                   SpectroscopyResults(version(environment).value,
-                                      dataVersion,
-                                      List(Spectroscopy(specMode, r))
+                                      r.dataVersion,
+                                      List(Spectroscopy(specMode, r.result))
                   )
                 }
             }
@@ -195,7 +209,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
               fieldMappings = List(
                 ComputeRoot[List[SpectroscopyResults]]("spectroscopy",
                                                        QueryType,
-                                                       spectroscopy[F](environment, itc)
+                                                       spectroscopy[F](environment, redis, itc)
                 ),
                 ComputeRoot[SpectroscopyGraphResults]("spectroscopyGraphBeta",
                                                       QueryType,

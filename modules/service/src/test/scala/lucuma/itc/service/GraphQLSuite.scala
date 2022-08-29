@@ -96,8 +96,8 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
       observingMode: ObservingMode,
       constraints:   ItcObservingConditions,
       signalToNoise: BigDecimal
-    ): IO[(Option[String], Itc.Result)] =
-      (none, Itc.Result.Success(1.seconds, 10, 10)).pure[IO]
+    ): IO[Itc.CalcResultWithVersion] =
+      Itc.CalcResultWithVersion(Itc.CalcResult.Success(1.seconds, 10, 10)).pure[IO]
 
     def calculateGraph(
       targetProfile: TargetProfile,
