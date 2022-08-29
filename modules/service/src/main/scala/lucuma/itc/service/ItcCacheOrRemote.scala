@@ -6,11 +6,13 @@ package lucuma.itc.service
 import boopickle.DefaultBasic.*
 import cats.*
 import cats.syntax.all.*
+import dev.profunktor.redis4cats.algebra.Flush
 import dev.profunktor.redis4cats.algebra.StringCommands
 import lucuma.itc.Itc
 import lucuma.itc.search.ItcVersions
 import lucuma.itc.service.config.ExecutionEnvironment
 import lucuma.itc.service.redis.given
+import org.typelevel.log4cats.Logger
 
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
@@ -88,3 +90,21 @@ trait ItcCacheOrRemote extends Version:
         )
 
     cacheOrRemote(calcRequest, call)("itc:calc:spec", redis)
+
+  def checkVersionToPurge[F[_]: Monad: Logger](
+    redis: StringCommands[F, Array[Byte], Array[Byte]] with Flush[F, Array[Byte]],
+    itc:   Itc[F]
+  ): F[Unit] =
+    val L = Logger[F]
+    for
+      _              <- L.info("Check for stale cache")
+      remoteVersion  <- itc.itcVersions // Remote itc version
+      _              <- L.info(s"Remote itc version $remoteVersion")
+      fromRedis      <- redis.get("itc:version".getBytes(KeyCharset))
+      _              <- L.info(s"Local itc version $remoteVersion")
+      versionOnRedis <- fromRedis.map(v => String(v, KeyCharset)).pure[F]
+      // if the version changes flush redis
+      _              <- (L.info("Flush redis cache on itc version change") *> redis.flushAll)
+                          .whenA(versionOnRedis.exists(_ =!= remoteVersion))
+      _              <- redis.setEx("itc:version".getBytes(KeyCharset), remoteVersion.getBytes(KeyCharset), TTL)
+    yield ()

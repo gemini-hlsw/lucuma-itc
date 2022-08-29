@@ -42,8 +42,9 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import scala.concurrent.duration._
 
 // #server
-object Main extends IOApp {
-  val ServiceName = "lucuma-itc"
+object Main extends IOApp with ItcCacheOrRemote {
+  val ServiceName     = "lucuma-itc"
+  val DefaultCacheTTL = 6.hours
 
   /** A startup action that prints a banner. */
   def banner[F[_]: Applicative: Logger](cfg: Config): F[Unit] =
@@ -90,7 +91,9 @@ object Main extends IOApp {
     (req: Request[F]) =>
       service(req).map {
         case Status.Successful(resp) =>
-          resp.putHeaders(`Cache-Control`(CacheDirective.public, CacheDirective.`max-age`(6.hours)))
+          resp.putHeaders(
+            `Cache-Control`(CacheDirective.public, CacheDirective.`max-age`(DefaultCacheTTL))
+          )
         case resp                    =>
           resp
       }
@@ -108,12 +111,16 @@ object Main extends IOApp {
       .withHttpWebSocketApp(app)
       .build
 
-  def routes[F[_]: Async: Logger: Parallel: Trace](
+  def routes[F[_]: Async: Concurrent: Logger: Parallel: Trace](
     cfg: Config
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
       itc     <- ItcImpl.forUri(cfg.itcUrl)
       redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
+      // Check the cache staleness every 1 hours
+      _       <- Resource
+                   .eval((checkVersionToPurge[F](redis, itc) *> Async[F].sleep(1.hour)).foreverM)
+                   .start
       mapping <- Resource.eval(ItcMapping(cfg.environment, redis, itc))
     yield wsb =>
       // Routes for the ITC GraphQL service
