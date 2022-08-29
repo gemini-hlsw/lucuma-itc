@@ -3,82 +3,41 @@
 
 package lucuma.itc.service
 
-import algebra.instances.all.given
-import buildinfo.BuildInfo
 import cats._
-import cats.data._
-import cats.effect._
-import cats.syntax.all._
+import cats.data.*
 import cats.derived.*
-import coulomb.*
-import coulomb.ops.algebra.spire.all.given
-import coulomb.policy.spire.standard.given
-import coulomb.syntax.*
-import coulomb.units.si.*
-import coulomb.units.si.given
-import coulomb.units.si.prefixes.*
-import coulomb.units.time.*
+import cats.effect.*
+import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.StringCommands
-import edu.gemini.grackle._
+import edu.gemini.grackle.*
 import edu.gemini.grackle.circe.CirceMapping
-import eu.timepit.refined._
+import eu.timepit.refined.*
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.numeric.PosLong
 import eu.timepit.refined.types.string.NonEmptyString
-import io.circe.Encoder
-import io.circe.parser.decode
-import io.circe.Json
-import io.circe.syntax.*
-import lucuma.core.enums._
-import lucuma.core.math.Angle
-import lucuma.core.math.BrightnessUnits._
+import lucuma.core.enums.*
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
-import lucuma.core.math.dimensional.Units._
-import lucuma.core.math.dimensional._
-import lucuma.core.math.units._
 import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
-import lucuma.core.model.SpectralDefinition
-import lucuma.core.model.UnnormalizedSED
-import lucuma.core.model.UnnormalizedSED._
-import lucuma.core.syntax.enumerated._
-import lucuma.core.syntax.string._
-import lucuma.core.util.Enumerated
-import lucuma.itc.GmosNITCParams
-import lucuma.itc.GmosSITCParams
-import lucuma.itc.Itc
-import lucuma.itc.ItcObservingConditions
-import lucuma.itc.SignificantFigures
-import lucuma.itc.SpectroscopyParams
-import lucuma.itc.UpstreamException
+import lucuma.itc.*
 import lucuma.itc.encoders.given
-import lucuma.itc.search.GmosNorthFpuParam
-import lucuma.itc.search.GmosSouthFpuParam
+import lucuma.itc.search.ItcObservationDetails
 import lucuma.itc.search.ItcVersions
 import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.ObservingMode.Spectroscopy.GmosNorth
-import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
 import lucuma.itc.search.Result.Spectroscopy
 import lucuma.itc.search.SpectroscopyGraphResults
 import lucuma.itc.search.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.search.hashes.given
-import lucuma.itc.service.config._
-import lucuma.itc.service.syntax.all._
+import lucuma.itc.service.config.*
+import lucuma.itc.service.syntax.all.*
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
-import java.math.RoundingMode
-import java.time.Duration
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-import scala.collection.immutable.SortedMap
 import scala.concurrent.duration._
 import scala.io.Source
 import scala.util.Using
@@ -86,9 +45,6 @@ import scala.util.Using
 import Query._
 import Value._
 import QueryCompiler._
-import java.nio.charset.Charset
-import boopickle.DefaultBasic.*
-import java.nio.ByteBuffer
 
 case class GraphRequest(
   targetProfile: TargetProfile,
@@ -98,8 +54,7 @@ case class GraphRequest(
   exp:           PosLong
 ) derives Hash
 
-object ItcMapping extends Version with GracklePartials {
-  val Ascii = Charset.forName("UTF8")
+object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
 
   // In principle this is a pure operation because resources are constant values, but the potential
   // for error in dev is high and it's nice to handle failures in `F`.
@@ -160,39 +115,6 @@ object ItcMapping extends Version with GracklePartials {
         }
     }.map(_.getOrElse(Problem("Missing parameters for spectroscopy").leftIorNec))
 
-  private def calculateGraph[F[_]: Monad](
-    request: GraphRequest
-  )(itc:     Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.GraphResult] =
-    import lucuma.itc.service.redis.given
-    val hash = Hash[GraphRequest].hash(request)
-    for
-      fromRedis <- redis.get(s"itc:graph:$hash".getBytes(Ascii))
-      decoded   <-
-        fromRedis
-          .flatMap(b =>
-            Either.catchNonFatal(Unpickle[Itc.GraphResult].fromBytes(ByteBuffer.wrap(b))).toOption
-          )
-          .pure[F]
-      r         <-
-        decoded
-          .map(_.pure[F])
-          .getOrElse(
-            // Call old itc
-            itc
-              .calculateGraph(
-                request.targetProfile,
-                request.specMode,
-                request.constraints,
-                request.expTime,
-                request.exp
-              )
-          )
-      _         <-
-        redis
-          .set(s"itc:graph:$hash".getBytes(Ascii), Pickle.intoBytes(r).compact().array())
-          .whenA(fromRedis.isEmpty)
-    yield r
-
   def spectroscopyGraph[F[_]: MonadThrow: Logger: Parallel: Trace](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
@@ -217,7 +139,7 @@ object ItcMapping extends Version with GracklePartials {
           case GmosSITCParams(grating, fpu, filter) =>
             ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
         }
-        calculateGraph(
+        graphFromCacheOrRemote(
           GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp)
         )(itc, redis)
           .map { r =>
@@ -233,8 +155,8 @@ object ItcMapping extends Version with GracklePartials {
           }
       }
         .map(_.rightIor[NonEmptyChain[Problem]])
-        .handleErrorWith { case x =>
-          Problem(s"Error calculating itc $x").leftIorNec.pure[F]
+        .handleError { case x =>
+          Problem(s"Error calculating itc $x").leftIorNec
         }
     }.map(_.getOrElse(Problem(s"Missing parameters for spectroscopy graph $env").leftIorNec))
 
@@ -245,20 +167,9 @@ object ItcMapping extends Version with GracklePartials {
   )(
     env:         Cursor.Env
   ): F[Result[ItcVersions]] =
-    for
-      fromRedis <- redis.get("itc:version".getBytes(Ascii))
-      version   <- fromRedis.fold(
-                     itc.itcVersions
-                       .map { r =>
-                         ItcVersions(version(environment).value, r.some)
-                       }
-                   )(v => ItcVersions(version(environment).value, String(v, Ascii).some).pure[F])
-      _         <- redis
-                     .set("itc:version".getBytes(Ascii), version.dataVersion.orEmpty.getBytes(Ascii))
-                     .whenA(fromRedis.isEmpty)
-    yield version
-      .rightIor[NonEmptyChain[Problem]]
-      .handleErrorWith { case x =>
+    versionFromCacheOrRemote(environment, redis, itc)
+      .map(_.rightIor[NonEmptyChain[Problem]])
+      .handleError { case x =>
         Problem(s"Error getting the itc version $x").leftIorNec
       }
 

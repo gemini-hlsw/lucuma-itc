@@ -5,9 +5,9 @@ package lucuma.itc.service.redis
 
 import boopickle.DefaultBasic.*
 import cats.data.NonEmptyList
-import lucuma.core.util.Enumerated
 import eu.timepit.refined.*
 import eu.timepit.refined.api.*
+import lucuma.core.util.Enumerated
 import lucuma.itc.*
 
 given picklerRefined[A: Pickler, B](using Validate[A, B]): Pickler[A Refined B] =
@@ -23,9 +23,7 @@ given picklerRefined[A: Pickler, B](using Validate[A, B]): Pickler[A Refined B] 
   }
 
 given picklerEnumeration[A: Enumerated]: Pickler[A] =
-  transformPickler((a: String) =>
-    Enumerated[A].fromTag(a).getOrElse(sys.error("Cannot unpickle"))
-  )(
+  transformPickler((a: String) => Enumerated[A].fromTag(a).getOrElse(sys.error("Cannot unpickle")))(
     Enumerated[A].tag(_)
   )
 

@@ -9,6 +9,7 @@ import cats.effect._
 import cats.syntax.all._
 import com.comcast.ip4s._
 import dev.profunktor.redis4cats.Redis
+import dev.profunktor.redis4cats.data.RedisCodec
 import dev.profunktor.redis4cats.log4cats.*
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
@@ -34,7 +35,6 @@ import org.http4s.server.staticcontent._
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
-import dev.profunktor.redis4cats.data.RedisCodec
 
 // #server
 object Main extends IOApp {

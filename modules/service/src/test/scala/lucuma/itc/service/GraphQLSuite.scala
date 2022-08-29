@@ -135,7 +135,10 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
   val service: IO[HttpRoutes[IO]] =
     for
       wsb <- WebSocketBuilder2[IO]
-      map <- ItcMapping[IO](ExecutionEnvironment.Local, new NoOpRedis[IO, String, String](), itc)
+      map <- ItcMapping[IO](ExecutionEnvironment.Local,
+                            new NoOpRedis[IO, Array[Byte], Array[Byte]](),
+                            itc
+             )
     yield Routes.forService(_ => IO.pure(GrackleGraphQLService(map).some), wsb)
 
   val itcFixture = ResourceSuiteLocalFixture(

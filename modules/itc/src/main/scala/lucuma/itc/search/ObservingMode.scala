@@ -14,8 +14,8 @@ import lucuma.core.math.Wavelength
 import lucuma.itc.GmosNITCParams
 import lucuma.itc.GmosSITCParams
 import lucuma.itc.encoders.given
-import lucuma.itc.search.syntax.*
 import lucuma.itc.search.hashes.given
+import lucuma.itc.search.syntax.*
 import spire.math.Rational
 
 case class GmosNorthFpuParam(
@@ -71,7 +71,8 @@ object ObservingMode {
       disperser: GmosNorthGrating,
       fpu:       GmosNorthFpuParam,
       filter:    Option[GmosNorthFilter]
-    ) extends GmosSpectroscopy derives Hash {
+    ) extends GmosSpectroscopy
+        derives Hash {
       val isIfu = fpu.isIfu
 
       val instrument: Instrument =
@@ -98,7 +99,8 @@ object ObservingMode {
       disperser: GmosSouthGrating,
       fpu:       GmosSouthFpuParam,
       filter:    Option[GmosSouthFilter]
-    ) extends GmosSpectroscopy derives Hash {
+    ) extends GmosSpectroscopy
+        derives Hash {
       val isIfu = fpu.isIfu
 
       val instrument: Instrument =
