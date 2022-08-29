@@ -34,6 +34,7 @@ import org.http4s.server.staticcontent._
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
+import dev.profunktor.redis4cats.data.RedisCodec
 
 // #server
 object Main extends IOApp {
@@ -97,7 +98,7 @@ object Main extends IOApp {
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
       itc     <- ItcImpl.forUri(cfg.itcUrl)
-      redis   <- Redis[F].utf8(cfg.redisUrl.toString)
+      redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Utf8))
       mapping <- Resource.eval(ItcMapping(cfg.environment, redis, itc))
     yield wsb =>
       // Routes for the ITC GraphQL service

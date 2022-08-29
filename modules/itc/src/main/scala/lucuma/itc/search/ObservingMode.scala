@@ -3,6 +3,8 @@
 
 package lucuma.itc.search
 
+import cats.Hash
+import cats.derived.*
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.enums._
@@ -13,6 +15,7 @@ import lucuma.itc.GmosNITCParams
 import lucuma.itc.GmosSITCParams
 import lucuma.itc.encoders.given
 import lucuma.itc.search.syntax.*
+import lucuma.itc.search.hashes.given
 import spire.math.Rational
 
 case class GmosNorthFpuParam(
@@ -36,7 +39,7 @@ sealed trait ObservingMode {
 
 object ObservingMode {
 
-  sealed trait Spectroscopy extends ObservingMode {
+  sealed trait Spectroscopy extends ObservingMode derives Hash {
     def λ: Wavelength
     def resolution: Rational
     def coverage: Coverage
@@ -48,7 +51,7 @@ object ObservingMode {
       case gs: GmosSouth => gs.asJson
     }
 
-    sealed trait GmosSpectroscopy extends Spectroscopy {
+    sealed trait GmosSpectroscopy extends Spectroscopy derives Hash {
       def isIfu: Boolean
 
       def analysisMethod: ItcObservationDetails.AnalysisMethod =
@@ -68,7 +71,7 @@ object ObservingMode {
       disperser: GmosNorthGrating,
       fpu:       GmosNorthFpuParam,
       filter:    Option[GmosNorthFilter]
-    ) extends GmosSpectroscopy {
+    ) extends GmosSpectroscopy derives Hash {
       val isIfu = fpu.isIfu
 
       val instrument: Instrument =
@@ -95,7 +98,7 @@ object ObservingMode {
       disperser: GmosSouthGrating,
       fpu:       GmosSouthFpuParam,
       filter:    Option[GmosSouthFilter]
-    ) extends GmosSpectroscopy {
+    ) extends GmosSpectroscopy derives Hash {
       val isIfu = fpu.isIfu
 
       val instrument: Instrument =

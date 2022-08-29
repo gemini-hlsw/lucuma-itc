@@ -28,6 +28,7 @@ val gatlingVersion              = "3.8.3"
 val spireVersion                = "0.18.0"
 val redis4CatsVersion           = "1.2.0"
 val pprintVersion               = "0.7.3"
+val kittensVersion              = "3.0.0-M4"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -101,6 +102,7 @@ lazy val core = project
       "com.manyangled" %% "coulomb-units"       % coulombVersion,
       "org.typelevel" %%% "spire"               % spireVersion,
       "org.typelevel" %%% "spire-extras"        % spireVersion,
+      "org.typelevel" %%% "kittens"             % kittensVersion,
       "org.typelevel"  %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
       "com.lihaoyi"   %%% "pprint"              % pprintVersion          % Test
     )

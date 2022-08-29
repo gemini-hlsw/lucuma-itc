@@ -9,6 +9,7 @@ import cats._
 import cats.data._
 import cats.effect._
 import cats.syntax.all._
+import cats.derived.*
 import coulomb.*
 import coulomb.ops.algebra.spire.all.given
 import coulomb.policy.spire.standard.given
@@ -28,7 +29,9 @@ import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.numeric.PosLong
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
+import io.circe.parser.decode
 import io.circe.Json
+import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.BrightnessUnits._
@@ -63,6 +66,7 @@ import lucuma.itc.search.Result.Spectroscopy
 import lucuma.itc.search.SpectroscopyGraphResults
 import lucuma.itc.search.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
+import lucuma.itc.search.hashes.given
 import lucuma.itc.service.config._
 import lucuma.itc.service.syntax.all._
 import natchez.Trace
@@ -82,6 +86,14 @@ import scala.util.Using
 import Query._
 import Value._
 import QueryCompiler._
+
+case class GraphRequest(
+  targetProfile: TargetProfile,
+  specMode:      ObservingMode.Spectroscopy,
+  constraints:   ItcObservingConditions,
+  expTime:       NonNegDuration,
+  exp:           PosLong
+) derives Hash
 
 object ItcMapping extends Version with GracklePartials {
 
@@ -144,8 +156,48 @@ object ItcMapping extends Version with GracklePartials {
         }
     }.map(_.getOrElse(Problem("Missing parameters for spectroscopy").leftIorNec))
 
-  def spectroscopyGraph[F[_]: ApplicativeThrow: Logger: Parallel: Trace](
+  private def calculateGraph[F[_]: Monad](
+    request: GraphRequest
+  )(itc:     Itc[F], redis: StringCommands[F, String, String]): F[Itc.GraphResult] =
+    import lucuma.itc.redis.given
+    val hash = Hash[GraphRequest].hash(request)
+    for
+      fromRedis <- redis.get(s"itc:graph:$hash")
+      decoded   <-
+        fromRedis.flatMap(decode[Itc.GraphResult](_).toOption).pure[F]
+      r         <-
+        decoded
+          .map(_.pure[F])
+          .getOrElse(
+            itc
+              .calculateGraph(
+                request.targetProfile,
+                request.specMode,
+                request.constraints,
+                request.expTime,
+                request.exp
+              )
+          )
+      _         <- {
+        println(
+          r.asJson.hcursor
+            .downField("charts")
+            .downArray
+            .downField("charts")
+            .downArray
+            .downField("series")
+            .downArray
+            .downField("dataX")
+            .focus
+            .map(_.spaces2)
+        )
+        redis.set(s"itc:graph:$hash", r.asJson.noSpaces).whenA(fromRedis.isEmpty)
+      }
+    yield r
+
+  def spectroscopyGraph[F[_]: MonadThrow: Logger: Parallel: Trace](
     environment: ExecutionEnvironment,
+    redis:       StringCommands[F, String, String],
     itc:         Itc[F]
   )(env:         Cursor.Env): F[Result[SpectroscopyGraphResults]] =
     (env.get[Wavelength]("wavelength"),
@@ -167,14 +219,9 @@ object ItcMapping extends Version with GracklePartials {
           case GmosSITCParams(grating, fpu, filter) =>
             ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
         }
-        itc
-          .calculateGraph(
-            TargetProfile(sp, sd, rs),
-            specMode,
-            c,
-            expTime,
-            exp
-          )
+        calculateGraph(
+          GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp)
+        )(itc, redis)
           .map { r =>
             val charts =
               significantFigures.fold(r.charts)(v => r.charts.map(_.adjustSignificantFigures(v)))
@@ -241,7 +288,7 @@ object ItcMapping extends Version with GracklePartials {
                 ),
                 ComputeRoot[SpectroscopyGraphResults]("spectroscopyGraphBeta",
                                                       QueryType,
-                                                      spectroscopyGraph[F](environment, itc)
+                                                      spectroscopyGraph[F](environment, redis, itc)
                 ),
                 ComputeRoot[ItcVersions]("versions",
                                          QueryType,

@@ -3,6 +3,9 @@
 
 package lucuma.itc.search
 
+import cats.Hash
+import cats.derived.*
+import lucuma.itc.search.hashes.given
 import lucuma.core.enums.Band
 import lucuma.core.math.Redshift
 import lucuma.core.model.SourceProfile
@@ -12,4 +15,4 @@ final case class TargetProfile(
   sourceProfile: SourceProfile,
   band:          Band,
   redshift:      Redshift
-)
+) derives Hash
