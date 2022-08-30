@@ -82,9 +82,9 @@ case class ItcSeries private (
 ) derives Encoder.AsObject
 
 object ItcSeries:
-  def apply(title: String, dataType: SeriesDataType, data: List[(Double, Double)]): ItcSeries =
+  def apply(title: String, seriesType: SeriesDataType, data: List[(Double, Double)]): ItcSeries =
     ItcSeries(title,
-              dataType,
+              seriesType,
               data,
               data.map(_._1),
               data.map(_._2),

@@ -3,6 +3,8 @@
 
 package lucuma.itc
 
+import cats.Hash
+import cats.derived.*
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.*
@@ -12,6 +14,7 @@ import lucuma.core.enums._
 import lucuma.core.math.Wavelength
 import lucuma.itc.search.ObservingMode.Spectroscopy._
 import lucuma.itc.search.*
+import lucuma.itc.search.hashes.*
 
 import java.math.RoundingMode
 import scala.concurrent.duration.FiniteDuration
@@ -38,4 +41,4 @@ case class ItcObservingConditions(
   wv:      WaterVapor,
   sb:      SkyBackground,
   airmass: Double
-)
+) derives Hash

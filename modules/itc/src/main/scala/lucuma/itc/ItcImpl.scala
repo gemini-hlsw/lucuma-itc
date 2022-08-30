@@ -65,7 +65,7 @@ object ItcImpl {
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         signalToNoise: BigDecimal
-      ): F[(Option[String], Itc.Result)] =
+      ): F[Itc.CalcResultWithVersion] =
         observingMode match
           case _: ObservingMode.Spectroscopy =>
             spectroscopy(targetProfile, observingMode, constraints, signalToNoise)
@@ -212,7 +212,7 @@ object ItcImpl {
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         signalToNoise: BigDecimal
-      ): F[(Option[String], Itc.Result)] = {
+      ): F[Itc.CalcResultWithVersion] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise.toDouble
@@ -227,7 +227,7 @@ object ItcImpl {
           maxTime:    Quantity[BigDecimal, Second],
           s:          legacy.ItcRemoteResult,
           counter:    NonNegInt
-        ): F[Itc.Result] =
+        ): F[Itc.CalcResult] =
           if (snr === 0.0) {
             Concurrent[F].raiseError(new ItcCalculationError("S/N obtained is 0"))
           } else {
@@ -269,10 +269,10 @@ object ItcImpl {
                         )
                     }
                 } else
-                  Itc.Result
+                  Itc.CalcResult
                     .Success(newExpTime.toDouble.seconds, newNExp.toInt, s.maxTotalSNRatio)
                     .pure[F]
-                    .widen[Itc.Result]
+                    .widen[Itc.CalcResult]
               }
           }
 
@@ -296,9 +296,8 @@ object ItcImpl {
                 ) *> {
                   if (halfWellTime < 1.0) {
                     val msg = s"Target is too bright. Well half filled in $halfWellTime"
-                    L.error(msg) *> (none, Itc.Result.SourceTooBright(msg))
-                      .pure[F]
-                      .widen
+                    L.error(msg) *>
+                      Itc.CalcResultWithVersion(Itc.CalcResult.SourceTooBright(msg)).pure[F].widen
                   } else {
                     val maxTime = startExpTime.value.min(halfWellTime)
                     itcStep(numberOfExposures,
@@ -309,7 +308,7 @@ object ItcImpl {
                             maxTime.withUnit[Second],
                             r,
                             0.refined
-                    ).map(x => (r.versionToken.some, x))
+                    ).map(x => Itc.CalcResultWithVersion(x, r.versionToken.some))
                   }
                 }
 

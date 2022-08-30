@@ -3,13 +3,19 @@
 
 package lucuma.itc.service
 
+import cats.Applicative
+import cats.ApplicativeThrow
 import cats.data.NonEmptyList
 import cats.effect._
 import cats.syntax.all._
+import dev.profunktor.redis4cats.algebra.StringCommands
+import dev.profunktor.redis4cats.effects.SetArgs
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.numeric.PosLong
 import io.circe.Json
 import io.circe.parser._
+import io.lettuce.core.RedisFuture
+import io.lettuce.core.cluster.api.async.RedisClusterAsyncCommands
 import lucuma.core.model.NonNegDuration
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
@@ -36,6 +42,51 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import java.time.Duration
 import scala.concurrent.duration._
 
+class NoOpRedis[F[_]: ApplicativeThrow, K, V] extends StringCommands[F, K, V] {
+
+  override def unsafe[A](f: RedisClusterAsyncCommands[K, V] => RedisFuture[A]): F[A] =
+    ApplicativeThrow[F].raiseError(new RuntimeException("unsuppported"))
+
+  override def getSet(key: K, value: V): F[Option[V]] = none.pure[F]
+
+  override def get(key: K): F[Option[V]] = none.pure[F]
+
+  override def mSetNx(keyValues: Map[K, V]): F[Boolean] = true.pure[F]
+
+  override def getRange(key: K, start: Long, end: Long): F[Option[V]] = none.pure[F]
+
+  override def mGet(keys: Set[K]): F[Map[K, V]] = Map.empty.pure[F]
+
+  override def unsafeSync[A](f: RedisClusterAsyncCommands[K, V] => A): F[A] =
+    ApplicativeThrow[F].raiseError(new RuntimeException("unsuppported"))
+
+  override def incr(key: K): F[Long] = 1L.pure[F]
+
+  override def decrBy(key: K, amount: Long): F[Long] = (amount - 1).pure[F]
+
+  override def strLen(key: K): F[Option[Long]] = none.pure[F]
+
+  override def mSet(keyValues: Map[K, V]): F[Unit] = Applicative[F].unit
+
+  override def decr(key: K): F[Long] = 1L.pure[F]
+
+  override def incrByFloat(key: K, amount: Double): F[Double] = (amount + 1).pure[F]
+
+  override def set(key: K, value: V, setArgs: SetArgs): F[Boolean] = true.pure[F]
+
+  override def set(key: K, value: V): F[Unit] = Applicative[F].unit
+
+  override def setNx(key: K, value: V): F[Boolean] = true.pure[F]
+
+  override def setRange(key: K, value: V, offset: Long): F[Unit] = Applicative[F].unit
+
+  override def setEx(key: K, value: V, expiresIn: FiniteDuration): F[Unit] = Applicative[F].unit
+
+  override def incrBy(key: K, amount: Long): F[Long] = (amount + 1).pure[F]
+
+  override def append(key: K, value: V): F[Unit] = Applicative[F].unit
+
+}
 trait GraphQLSuite extends munit.CatsEffectSuite:
   given Logger[IO] = Slf4jLogger.getLogger[IO]
 
@@ -45,8 +96,8 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
       observingMode: ObservingMode,
       constraints:   ItcObservingConditions,
       signalToNoise: BigDecimal
-    ): IO[(Option[String], Itc.Result)] =
-      (none, Itc.Result.Success(1.seconds, 10, 10)).pure[IO]
+    ): IO[Itc.CalcResultWithVersion] =
+      Itc.CalcResultWithVersion(Itc.CalcResult.Success(1.seconds, 10, 10)).pure[IO]
 
     def calculateGraph(
       targetProfile: TargetProfile,
@@ -84,7 +135,10 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
   val service: IO[HttpRoutes[IO]] =
     for
       wsb <- WebSocketBuilder2[IO]
-      map <- ItcMapping[IO](ExecutionEnvironment.Local, itc)
+      map <- ItcMapping[IO](ExecutionEnvironment.Local,
+                            new NoOpRedis[IO, Array[Byte], Array[Byte]](),
+                            itc
+             )
     yield Routes.forService(_ => IO.pure(GrackleGraphQLService(map).some), wsb)
 
   val itcFixture = ResourceSuiteLocalFixture(

@@ -19,6 +19,7 @@
           imports = [ typelevel-nix.typelevelShell ];
           packages = [
             pkgs.nodePackages.graphqurl
+            pkgs.redis
           ];
           typelevelShell = {
             nodejs.enable = true;

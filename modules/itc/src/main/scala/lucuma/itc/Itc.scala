@@ -26,7 +26,7 @@ trait Itc[F[_]]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     signalToNoise: BigDecimal
-  ): F[(Option[String], Itc.Result)]
+  ): F[Itc.CalcResultWithVersion]
 
   /**
    * Compute the exposure time and number required to achieve the desired signal-to-noise under
@@ -46,32 +46,34 @@ object Itc:
 
   def apply[F[_]](using ev: Itc[F]): ev.type = ev
 
-  sealed trait Result extends Product with Serializable {}
-  object Result:
+  sealed trait CalcResult extends Product with Serializable {}
+  object CalcResult:
 
     case class Success(
       exposureTime:  FiniteDuration,
       exposures:     Int,
       signalToNoise: BigDecimal
-    ) extends Result
+    ) extends CalcResult
         derives Encoder.AsObject
 
     /** Object is too bright to be observed in the specified mode. */
-    case class SourceTooBright(msg: String) extends Result
+    case class SourceTooBright(msg: String) extends CalcResult
 
     /** Generic calculation error */
-    case class CalculationError(msg: String) extends Result
+    case class CalculationError(msg: String) extends CalcResult
 
-    given Encoder[Itc.Result] = Encoder.instance {
-      case f: Itc.Result.Success          =>
+    given Encoder[Itc.CalcResult] = Encoder.instance {
+      case f: Itc.CalcResult.Success          =>
         Json.obj(("resultType", Json.fromString("Success"))).deepMerge(f.asJson)
-      case Itc.Result.CalculationError(m) =>
+      case Itc.CalcResult.CalculationError(m) =>
         Json.obj(("resultType", Json.fromString("Error")), ("msg", Json.fromString(m)))
-      case Itc.Result.SourceTooBright(m)  =>
+      case Itc.CalcResult.SourceTooBright(m)  =>
         Json.obj(("resultType", Json.fromString("Error")),
                  ("msg", Json.fromString(s"Source too bright $m"))
         )
     }
+
+  case class CalcResultWithVersion(result: CalcResult, dataVersion: Option[String] = None)
 
   case class GraphResult(
     dataVersion: String,
