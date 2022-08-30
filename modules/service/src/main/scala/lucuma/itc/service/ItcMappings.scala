@@ -174,7 +174,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         }
     }.map(_.getOrElse(Problem(s"Missing parameters for spectroscopy graph $env").leftIorNec))
 
-  def versions[F[_]: MonadThrow](
+  def versions[F[_]: MonadThrow: Logger](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]

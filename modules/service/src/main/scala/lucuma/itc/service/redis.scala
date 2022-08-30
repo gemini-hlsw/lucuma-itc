@@ -12,6 +12,11 @@ import lucuma.itc.*
 
 import scala.concurrent.duration.*
 
+// --------------------------------------------------
+// Pickler to store results in binary with boopickle
+// The data is further gzipped
+// --------------------------------------------------
+
 given picklerRefined[A: Pickler, B](using Validate[A, B]): Pickler[A Refined B] =
   new Pickler[A Refined B] {
     override def pickle(a: A Refined B)(using state: PickleState): Unit = {

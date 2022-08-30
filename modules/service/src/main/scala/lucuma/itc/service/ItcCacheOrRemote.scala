@@ -18,17 +18,36 @@ import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import scala.concurrent.duration.*
 
+/**
+ * Methods to check if a values is on the cache and if not retrieve them from old itc and store them
+ * in the cache
+ *
+ * redis keys are formed with a prefix and a hash of the request redis values are stored in binary
+ * via boopickle
+ */
 trait ItcCacheOrRemote extends Version:
   val KeyCharset = Charset.forName("UTF8")
+  // Time to live for entries
   val TTL        = FiniteDuration(10, DAYS)
+  val VersionKey = "itc:version".getBytes(KeyCharset)
 
-  def cacheOrRemote[F[_]: Monad, A: Hash, B: Pickler](a: A, request: A => F[B])(
-    prefix:                                              String,
-    redis:                                               StringCommands[F, Array[Byte], Array[Byte]]
-  ): F[B] =
-    val hash = Hash[A].hash(a)
+  /**
+   * Generic method to stora a value on redis or request it locally
+   */
+  private def cacheOrRemote[F[_]: MonadThrow: Logger, A: Hash, B: Pickler](
+    a:       A,
+    request: A => F[B]
+  )(
+    prefix:  String,
+    redis:   StringCommands[F, Array[Byte], Array[Byte]]
+  ): F[B] = {
+    val hash     = Hash[A].hash(a)
+    val redisKey = s"$prefix:$hash".getBytes(KeyCharset)
+    val L        = Logger[F]
     for
-      fromRedis <- redis.get(s"$prefix:$hash".getBytes(KeyCharset))
+      fromRedis <- redis
+                     .get(redisKey)
+                     .handleErrorWith(e => L.error(e)(s"Error reading $redisKey") *> none.pure[F])
       decoded   <-
         fromRedis
           .flatMap(b => Either.catchNonFatal(Unpickle[B].fromBytes(ByteBuffer.wrap(b))).toOption)
@@ -36,32 +55,64 @@ trait ItcCacheOrRemote extends Version:
       r         <- decoded.map(_.pure[F]).getOrElse(request(a))
       _         <-
         redis
-          .setEx(s"$prefix:$hash".getBytes(KeyCharset), Pickle.intoBytes(r).compact().array(), TTL)
+          .setEx(redisKey, Pickle.intoBytes(r).compact().array(), TTL)
+          .handleErrorWith(L.error(_)(s"Error writing $redisKey"))
           .whenA(fromRedis.isEmpty)
     yield r
+  }
 
-  def graphFromCacheOrRemote[F[_]: Monad](
-    request: GraphRequest
-  )(itc:     Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.GraphResult] =
-    val call = (request: GraphRequest) =>
-      itc
-        .calculateGraph(
-          request.targetProfile,
-          request.specMode,
-          request.constraints,
-          request.expTime,
-          request.exp
+  private val requestGraph = [F[_]] =>
+    (itc: Itc[F]) =>
+      (request: GraphRequest) =>
+        itc
+          .calculateGraph(
+            request.targetProfile,
+            request.specMode,
+            request.constraints,
+            request.expTime,
+            request.exp
         )
 
-    cacheOrRemote(request, call)("itc:graph:spec", redis)
+  /**
+   * Request a graph
+   */
+  def graphFromCacheOrRemote[F[_]: MonadThrow: Logger](
+    request: GraphRequest
+  )(itc:     Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.GraphResult] =
+    cacheOrRemote(request, requestGraph(itc))("itc:graph:spec", redis)
 
-  def versionFromCacheOrRemote[F[_]: Monad](
+  private val requestCalc = [F[_]] =>
+    (itc: Itc[F]) =>
+      (calcRequest: CalcRequest) =>
+        itc
+          .calculate(
+            calcRequest.targetProfile,
+            calcRequest.specMode,
+            calcRequest.constraints,
+            calcRequest.signalToNoise.value
+        )
+
+  /**
+   * Request exposure time calculation
+   */
+  def calcFromCacheOrRemote[F[_]: MonadThrow: Logger](
+    calcRequest: CalcRequest
+  )(itc:         Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.CalcResultWithVersion] =
+    cacheOrRemote(calcRequest, requestCalc(itc))("itc:calc:spec", redis)
+
+  /**
+   * Request and store the itc version
+   */
+  def versionFromCacheOrRemote[F[_]: MonadThrow: Logger](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  ): F[ItcVersions] =
+  ): F[ItcVersions] = {
+    val L = Logger[F]
     for
-      fromRedis <- redis.get("itc:version".getBytes(KeyCharset))
+      fromRedis <- redis
+                     .get(VersionKey)
+                     .handleErrorWith(e => L.error(e)(s"Error reading $VersionKey") *> none.pure[F])
       version   <- fromRedis.fold(
                      itc.itcVersions
                        .map { r =>
@@ -70,41 +121,33 @@ trait ItcCacheOrRemote extends Version:
                    )(v => ItcVersions(version(environment).value, String(v, KeyCharset).some).pure[F])
       _         <-
         redis
-          .setEx("itc:version".getBytes(KeyCharset),
-                 version.dataVersion.orEmpty.getBytes(KeyCharset),
-                 TTL
-          )
+          .setEx(VersionKey, version.dataVersion.orEmpty.getBytes(KeyCharset), TTL)
+          .handleErrorWith(L.error(_)(s"Error writing $VersionKey"))
           .whenA(fromRedis.isEmpty)
     yield version
+  }
 
-  def calcFromCacheOrRemote[F[_]: Monad](
-    calcRequest: CalcRequest
-  )(itc:         Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.CalcResultWithVersion] =
-    val call = (calcRequest: CalcRequest) =>
-      itc
-        .calculate(
-          calcRequest.targetProfile,
-          calcRequest.specMode,
-          calcRequest.constraints,
-          calcRequest.signalToNoise.value
-        )
-
-    cacheOrRemote(calcRequest, call)("itc:calc:spec", redis)
-
-  def checkVersionToPurge[F[_]: Monad: Logger](
+  /**
+   * This method will get the version from the remote itc and compare it with the one on redis. If
+   * there is none in redis we just store it If the remote is different than the local flush the
+   * cache
+   */
+  def checkVersionToPurge[F[_]: MonadThrow: Logger](
     redis: StringCommands[F, Array[Byte], Array[Byte]] with Flush[F, Array[Byte]],
     itc:   Itc[F]
-  ): F[Unit] =
-    val L = Logger[F]
-    for
+  ): F[Unit] = {
+    val L      = Logger[F]
+    val result = for
       _              <- L.info("Check for stale cache")
       remoteVersion  <- itc.itcVersions // Remote itc version
       _              <- L.info(s"Remote itc version $remoteVersion")
-      fromRedis      <- redis.get("itc:version".getBytes(KeyCharset))
+      fromRedis      <- redis.get(VersionKey)
       _              <- L.info(s"Local itc version $remoteVersion")
       versionOnRedis <- fromRedis.map(v => String(v, KeyCharset)).pure[F]
       // if the version changes flush redis
       _              <- (L.info("Flush redis cache on itc version change") *> redis.flushAll)
                           .whenA(versionOnRedis.exists(_ =!= remoteVersion))
-      _              <- redis.setEx("itc:version".getBytes(KeyCharset), remoteVersion.getBytes(KeyCharset), TTL)
+      _              <- redis.setEx(VersionKey, remoteVersion.getBytes(KeyCharset), TTL)
     yield ()
+    result.handleErrorWith(e => L.error(e)("Error doing version check to purge"))
+  }
