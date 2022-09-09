@@ -17,7 +17,7 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyGraphBeta(input: {
+          spectroscopyGraph(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -98,7 +98,7 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
         """,
       json"""{
           "data": {
-            "spectroscopyGraphBeta": {
+            "spectroscopyGraph": {
               "ccds" : [
                 {
                   "singleSNRatio" : 1.0,

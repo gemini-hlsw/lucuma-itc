@@ -211,7 +211,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                                                        QueryType,
                                                        spectroscopy[F](environment, redis, itc)
                 ),
-                ComputeRoot[SpectroscopyGraphResults]("spectroscopyGraphBeta",
+                ComputeRoot[SpectroscopyGraphResults]("spectroscopyGraph",
                                                       QueryType,
                                                       spectroscopyGraph[F](environment, redis, itc)
                 ),
@@ -234,7 +234,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           new SelectElaborator(
             Map(
               QueryType -> {
-                case Select("spectroscopy", List(Binding("input", ObjectValue(wv))), child) =>
+                case Select("spectroscopy", List(Binding("input", ObjectValue(wv))), child)      =>
                   wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
                     case (e, c) =>
                       wavelengthPartial
@@ -249,10 +249,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                           fallback
                         )
                   }.map(e => e.copy(child = Select("spectroscopy", Nil, child)))
-                case Select("spectroscopyGraphBeta",
-                            List(Binding("input", ObjectValue(wv))),
-                            child
-                    ) =>
+                case Select("spectroscopyGraph", List(Binding("input", ObjectValue(wv))), child) =>
                   wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
                     case (e, c) =>
                       wavelengthPartial
@@ -268,7 +265,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                           (e, c),
                           fallback
                         )
-                  }.map(e => e.copy(child = Select("spectroscopyGraphBeta", Nil, child)))
+                  }.map(e => e.copy(child = Select("spectroscopyGraph", Nil, child)))
               }
             )
           )
