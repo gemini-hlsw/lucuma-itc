@@ -4,8 +4,8 @@
 package lucuma.itc
 
 import cats.data.NonEmptyList
-import cats.syntax.all._
-import eu.timepit.refined._
+import cats.syntax.all.*
+import eu.timepit.refined.*
 import eu.timepit.refined.numeric.NonNegative
 import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.CursorOp
@@ -14,12 +14,12 @@ import io.circe.DecodingFailure
 import io.circe.Encoder
 import io.circe.HCursor
 import io.circe.Json
-import io.circe.generic.semiauto._
-import io.circe.refined._
+import io.circe.generic.semiauto.*
+import io.circe.refined.*
 import lucuma.core.enums.*
-import lucuma.core.syntax.string._
+import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
-import lucuma.itc.math._
+import lucuma.itc.math.*
 
 enum SeriesDataType(val tag: String):
   case SignalData     extends SeriesDataType("signal_data")

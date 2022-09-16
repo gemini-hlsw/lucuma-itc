@@ -5,10 +5,10 @@ package lucuma.itc.service
 
 import algebra.instances.all.given
 import buildinfo.BuildInfo
-import cats._
-import cats.data._
-import cats.effect._
-import cats.syntax.all._
+import cats.*
+import cats.data.*
+import cats.effect.*
+import cats.syntax.all.*
 import coulomb.*
 import coulomb.ops.algebra.spire.all.given
 import coulomb.policy.spire.standard.given
@@ -17,9 +17,9 @@ import coulomb.units.si.*
 import coulomb.units.si.given
 import coulomb.units.si.prefixes.*
 import coulomb.units.time.*
-import edu.gemini.grackle._
+import edu.gemini.grackle.*
 import edu.gemini.grackle.circe.CirceMapping
-import eu.timepit.refined._
+import eu.timepit.refined.*
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
@@ -28,21 +28,21 @@ import eu.timepit.refined.types.numeric.PosLong
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
 import io.circe.Json
-import lucuma.core.enums._
+import lucuma.core.enums.*
 import lucuma.core.math.Angle
-import lucuma.core.math.BrightnessUnits._
+import lucuma.core.math.BrightnessUnits.*
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
-import lucuma.core.math.dimensional.Units._
-import lucuma.core.math.dimensional._
-import lucuma.core.math.units._
+import lucuma.core.math.dimensional.Units.*
+import lucuma.core.math.dimensional.*
+import lucuma.core.math.units.*
 import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
-import lucuma.core.model.UnnormalizedSED._
-import lucuma.core.syntax.enumerated._
-import lucuma.core.syntax.string._
+import lucuma.core.model.UnnormalizedSED.*
+import lucuma.core.syntax.enumerated.*
+import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
 import lucuma.itc.GmosNITCParams
 import lucuma.itc.GmosSITCParams
@@ -60,8 +60,8 @@ import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
 import lucuma.itc.search.Result.Spectroscopy
 import lucuma.itc.search.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
-import lucuma.itc.service.config._
-import lucuma.itc.service.syntax.all._
+import lucuma.itc.service.config.*
+import lucuma.itc.service.syntax.all.*
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
@@ -72,13 +72,13 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import scala.collection.immutable.SortedMap
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.io.Source
 import scala.util.Using
 
-import Query._
-import Value._
-import QueryCompiler._
+import Query.*
+import Value.*
+import QueryCompiler.*
 
 trait GrackleParsers:
   def bigDecimalValue(v: Value): Option[BigDecimal] =

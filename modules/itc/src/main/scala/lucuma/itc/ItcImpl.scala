@@ -5,8 +5,8 @@ package lucuma.itc
 
 import algebra.instances.all.given
 import cats.ApplicativeError
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 import coulomb.*
 import coulomb.ops.algebra.spire.all.given
 import coulomb.policy.spire.standard.given
@@ -26,19 +26,19 @@ import lucuma.itc.search.TargetProfile
 import lucuma.refined.*
 import natchez.Trace
 import natchez.http4s.NatchezMiddleware
-import org.http4s._
-import org.http4s.circe._
+import org.http4s.*
+import org.http4s.circe.*
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.client.middleware._
-import org.http4s.dsl.io._
+import org.http4s.client.middleware.*
+import org.http4s.dsl.io.*
 import org.http4s.ember.client.EmberClientBuilder
-import org.http4s.syntax.all._
+import org.http4s.syntax.all.*
 import org.typelevel.log4cats.Logger
 
 import java.time.Duration
-import scala.concurrent.duration._
-import scala.math._
+import scala.concurrent.duration.*
+import scala.math.*
 
 /** An ITC implementation that calls the OCS2 ITC server remotely. */
 object ItcImpl {

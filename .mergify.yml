@@ -15,6 +15,14 @@ pull_request_rules:
   - status-success=Build and Test (ubuntu-latest, 3.2.0, temurin@17)
   actions:
     merge: {}
+- name: Label benchmarks PRs
+  conditions:
+  - files~=^modules/benchmarks/
+  actions:
+    label:
+      add:
+      - benchmarks
+      remove: []
 - name: Label itc PRs
   conditions:
   - files~=^modules/itc/

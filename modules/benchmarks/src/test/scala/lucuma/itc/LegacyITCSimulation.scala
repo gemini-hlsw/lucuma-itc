@@ -3,30 +3,35 @@
 
 package lucuma.itc
 
-import cats.implicits._
+import cats.implicits.*
 import coulomb.*
+import coulomb.syntax.*
 import coulomb.units.si.*
-import eu.timepit.refined.auto._
+import eu.timepit.refined.auto.*
 import eu.timepit.refined.types.numeric.PosInt
-import io.circe.syntax._
-import io.gatling.core.Predef._
-import io.gatling.http.Predef._
+import io.circe.syntax.*
+import io.gatling.core.Predef.*
+import io.gatling.http.Predef.*
 import io.gatling.http.funspec.GatlingHttpFunSpec
-import lucuma.core.enums._
+import lucuma.core.enums.*
 import lucuma.core.math.Angle
-import lucuma.core.math.BrightnessUnits._
+import lucuma.core.math.BrightnessUnits.*
 import lucuma.core.math.Redshift
 import lucuma.core.math.Wavelength
-import lucuma.core.math.dimensional._
-import lucuma.core.math.units._
+import lucuma.core.math.dimensional.*
+import lucuma.core.math.units.*
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.core.util.Enumerated
+import lucuma.itc.legacy.*
+import lucuma.itc.legacy.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
+import lucuma.itc.search.ItcObservationDetails
 import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.syntax.gmossouthfpu._
+import lucuma.itc.search.syntax.*
+import lucuma.refined.*
 
 import scala.collection.immutable.SortedMap
 
@@ -222,7 +227,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     .filter(f => f =!= GmosSouthFpu.Bhros)
     .map { f =>
       val conf =
-        if (f.isIfu)
+        if (f.isGSIfu)
           bodyConf(gsConf.copy(fpu = GmosSouthFpuParam(f)), ifuAnalysisMethod)
         else
           bodyConf(gsConf.copy(fpu = GmosSouthFpuParam(f)))
@@ -506,7 +511,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       instrument
     )
 
-  List[PosInt](10, 100).map { f =>
+  List[PosInt](10.refined, 100.refined).map { f =>
     spec {
       http("black body")
         .post("/json")
