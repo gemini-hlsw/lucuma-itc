@@ -1,4 +1,3 @@
-val coulombVersion              = "0.6.0-M4"
 val catsEffectVersion           = "3.3.14"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsVersion                 = "2.8.0"
@@ -17,9 +16,9 @@ val slf4jVersion                = "2.0.1"
 val log4catsVersion             = "2.5.0"
 val monocleVersion              = "3.1.0"
 val munitCatsEffectVersion      = "1.0.7"
-val graphQLRoutesVersion        = "0.5.2"
+val graphQLRoutesVersion        = "0.5.3"
 val refinedVersion              = "0.10.1"
-val grackleVersion              = "0.5.1"
+val grackleVersion              = "0.6.0"
 val natcchezHttp4sVersion       = "0.3.2"
 val natchezVersion              = "0.1.6"
 val munitVersion                = "0.7.29"
@@ -98,9 +97,6 @@ lazy val core = project
       "io.circe"       %% "circe-generic"       % circeVersion,
       "org.tpolecat"   %% "natchez-http4s"      % natcchezHttp4sVersion,
       "org.typelevel"  %% "log4cats-slf4j"      % log4catsVersion,
-      "com.manyangled" %% "coulomb-core"        % coulombVersion,
-      "com.manyangled" %% "coulomb-spire"       % coulombVersion,
-      "com.manyangled" %% "coulomb-units"       % coulombVersion,
       "org.typelevel" %%% "spire"               % spireVersion,
       "org.typelevel" %%% "spire-extras"        % spireVersion,
       "org.typelevel" %%% "kittens"             % kittensVersion,
