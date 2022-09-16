@@ -23,7 +23,7 @@ val natcchezHttp4sVersion       = "0.3.2"
 val natchezVersion              = "0.1.6"
 val munitVersion                = "0.7.29"
 val disciplineMunitVersion      = "1.0.9"
-val gatlingVersion              = "3.8.3"
+val gatlingVersion              = "3.8.4"
 val spireVersion                = "0.18.0"
 val redis4CatsVersion           = "1.2.0"
 val pprintVersion               = "0.7.3"
@@ -151,14 +151,15 @@ lazy val service = project
   )
   .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
 
-// lazy val benchmark = project
-//   .in(file("modules/benchmarks"))
-//   .enablePlugins(GatlingPlugin)
-//   .settings(
-//     libraryDependencies ++= Seq(
-//       // "io.circe"             %% "circe-core"                % circeVersion,
-//       // "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % Test,
-//       "io.gatling" % "gatling-test-framework_2.13" % gatlingVersion
-//     )
-//   )
-//   // .dependsOn(service)
+lazy val benchmark = project
+  .in(file("modules/benchmarks"))
+  .enablePlugins(GatlingPlugin)
+  .settings(
+    libraryDependencies ++= Seq(
+      // ("io.suzaku" %% "boopickle" % "1.4.0").cross(CrossVersion.for3Use2_13),
+      ("io.gatling" % "gatling-test-framework" % gatlingVersion)
+        .exclude("org.typelevel", "spire-macros_2.13")
+        .exclude("io.suzaku", "boopickle_2.13")
+    )
+  )
+  .dependsOn(service)
