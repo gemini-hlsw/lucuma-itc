@@ -41,6 +41,7 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import java.time.Duration
 import scala.concurrent.duration._
+import lucuma.core.math.Wavelength
 
 class NoOpRedis[F[_]: ApplicativeThrow, K, V] extends StringCommands[F, K, V] {
 
@@ -129,6 +130,11 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
           )
         )
         .pure[IO]
+
+    def calculateSignalToNoise(
+      graph:        Itc.GraphResult,
+      atWavelength: Option[Wavelength]
+    ): IO[Itc.SNCalcResult] = IO.raiseError[Itc.SNCalcResult](new RuntimeException("abc"))
 
     override def itcVersions = IO.pure("versionToken")
 

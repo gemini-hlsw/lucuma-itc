@@ -4622,6 +4622,10 @@ type Query {
     input: SpectroscopyModeInput!
   ): [SpectroscopyResult!]!
 
+  spectroscopySignalToNoise(
+    input: SpectroscopyModeInput!
+  ): SignalToNoiseResult!
+
   spectroscopyGraph(
     input: SpectroscopyGraphModeInput!
   ): SpectroscopyGraphResult!
@@ -4691,6 +4695,9 @@ input SpectroscopyModeInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
 
+  # Wavelength at which to measure Signal to Noise
+  signalToNoiseAt: WavelengthInput
+
   # Minimum desired signal-to-noise ratio.
   signalToNoise: PosBigDecimal!
 
@@ -4726,6 +4733,9 @@ input SignificantFiguresInput {
 input SpectroscopyGraphModeInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
+
+  # Wavelength at which to measure Signal to Noise
+  signalToNoiseAt: WavelengthInput
 
   # Exposure time duration
   exposureTime: NonNegDurationInput!
@@ -4874,3 +4884,32 @@ type SpectroscopyGraphResult {
 
 }
 
+"""Calculation result types"""
+enum ResultType {
+  SUCCESS
+
+  SOURCE_TOO_BRIGHT
+
+  CALCULATION_ERROR
+
+  NO_DATA
+}
+
+interface SignalToNoiseResult {
+
+  # ITC result type
+  resultType: ResultType!
+}
+
+type SNCalcSuccess implements SignalToNoiseResult {
+  # Resulting signal to noise
+  signalToNoise: BigDecimal!
+}
+
+type SNCalcSourceTooBright implements SignalToNoiseResult {
+  wellDepth: BigDecimal!
+}
+
+type SNCalcError implements SignalToNoiseResult {
+  msg: String!
+}

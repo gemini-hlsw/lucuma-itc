@@ -12,6 +12,7 @@ import lucuma.itc.encoders.given
 import lucuma.itc.search._
 
 import scala.concurrent.duration.FiniteDuration
+import lucuma.core.math.Wavelength
 
 final case class UpstreamException(msg: String) extends RuntimeException(msg)
 
@@ -29,8 +30,7 @@ trait Itc[F[_]]:
   ): F[Itc.CalcResultWithVersion]
 
   /**
-   * Compute the exposure time and number required to achieve the desired signal-to-noise under
-   * average conditions.
+   * Retrieve the graph data for the given mode and exposureTime and exposures
    */
   def calculateGraph(
     targetProfile: TargetProfile,
@@ -39,6 +39,14 @@ trait Itc[F[_]]:
     exposureTime:  NonNegDuration,
     exposures:     PosLong
   ): F[Itc.GraphResult]
+
+  /**
+   * Calculate the signal to noise from graph data for the given mode and exposureTime and exposures
+   */
+  def calculateSignalToNoise(
+    graph:        Itc.GraphResult,
+    atWavelength: Option[Wavelength]
+  ): F[Itc.SNCalcResult]
 
   def itcVersions: F[String]
 
@@ -80,3 +88,32 @@ object Itc:
     ccds:        NonEmptyList[ItcCcd],
     charts:      NonEmptyList[ItcChartGroup]
   )
+
+  enum ResultType:
+    case Success, SourceTooBright, NoData, CalculationError
+
+  sealed trait SNCalcResult extends Product with Serializable {
+    def result: ResultType
+  }
+  object SNCalcResult:
+
+    case class Success(
+      signalToNoise: BigDecimal
+    ) extends SNCalcResult
+        derives Encoder.AsObject {
+      val result = ResultType.Success
+    }
+
+    /** Object is too bright to be observed in the specified mode. */
+    case class SourceTooBright(wellDepth: BigDecimal) extends SNCalcResult {
+      val result = ResultType.SourceTooBright
+    }
+
+    /** Generic calculation error */
+    case class NoData() extends SNCalcResult {
+      val result = ResultType.NoData
+    }
+
+    case class CalculationError(msg: String) extends SNCalcResult {
+      val result = ResultType.CalculationError
+    }

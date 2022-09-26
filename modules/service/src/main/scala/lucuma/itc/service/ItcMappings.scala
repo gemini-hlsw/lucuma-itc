@@ -65,10 +65,11 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
 
   // In principle this is a pure operation because resources are constant values, but the potential
   // for error in dev is high and it's nice to handle failures in `F`.
-  def loadSchema[F[_]: Sync]: F[Schema] =
+  def loadSchema[F[_]: Sync: Logger]: F[Schema] =
     Sync[F]
       .defer {
         Using(Source.fromResource("graphql/itc.graphql", getClass().getClassLoader())) { src =>
+          // println(Schema(src.mkString))
           Schema(src.mkString).right.get
         }.liftTo[F]
       }

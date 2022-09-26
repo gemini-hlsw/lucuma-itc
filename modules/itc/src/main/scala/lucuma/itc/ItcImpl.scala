@@ -39,6 +39,8 @@ import org.typelevel.log4cats.Logger
 import java.time.Duration
 import scala.concurrent.duration.*
 import scala.math.*
+import lucuma.core.math.Wavelength
+import cats.ApplicativeThrow
 
 /** An ITC implementation that calls the OCS2 ITC server remotely. */
 object ItcImpl {
@@ -135,6 +137,27 @@ object ItcImpl {
                   }
             }
         }
+
+      def calculateSignalToNoise(
+        graph:        Itc.GraphResult,
+        atWavelength: Option[Wavelength]
+      ): F[Itc.SNCalcResult] = {
+        val snChart: Option[ItcChart] =
+          graph.charts.flatMap(_.charts).find(_.chartType === ChartType.S2NChart)
+        snChart
+          .map(_.series.foldMap(_.data))
+          .map { values =>
+            if (values.isEmpty) {
+              Itc.SNCalcResult.NoData().pure[F]
+            } else {
+              val sn = atWavelength
+                .fold(values.maxByOption(_._2))(w => values.find(_._1 > w.nanometer.value.toDouble))
+                .map(_._2)
+              sn.fold(Itc.SNCalcResult.NoData())(sn => Itc.SNCalcResult.Success(sn)).pure[F]
+            }
+          }
+          .getOrElse(Itc.SNCalcResult.NoData().pure[F])
+      }
 
       override def itcVersions: F[String] =
         import lucuma.itc.legacy.*
