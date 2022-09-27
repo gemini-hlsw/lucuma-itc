@@ -180,6 +180,18 @@ trait GracklePartials extends GrackleParsers:
         .map(w => cursorEnvAdd("wavelength", w)(i))
         .getOrElse(i.addProblem("Wavelength couldn't be parsed"))
 
+  def signalToNoiseAtPartial: PartialFunction[(Partial, (String, Value)), Partial] =
+    case (i, ("signalToNoiseAt", ObjectValue(units)))
+        if units.filter(_._2 != Value.AbsentValue).length != 1 =>
+      val presentUnits =
+        units.filter(_._2 != Value.AbsentValue).map(_._1).mkString("{", ", ", "}")
+      i.addProblem(s"Signal to Noise At defined with multiple units $presentUnits")
+    case (i, ("signalToNoiseAt", ObjectValue(units))) =>
+      val wavelength: Option[Wavelength] = parseWavelength(units)
+      wavelength
+        .map(w => cursorEnvAdd("signalToNoiseAt", w)(i))
+        .getOrElse(i.addProblem("Signal To Noise At couldn't be parsed"))
+
   def radialVelocityPartial: PartialFunction[(Partial, (String, Value)), Partial] =
     // radialVelocity
     case (i, ("radialVelocity", ObjectValue(r))) =>

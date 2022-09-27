@@ -13,6 +13,7 @@ import lucuma.itc.search._
 
 import scala.concurrent.duration.FiniteDuration
 import lucuma.core.math.Wavelength
+import lucuma.core.util.Enumerated
 
 final case class UpstreamException(msg: String) extends RuntimeException(msg)
 
@@ -89,31 +90,43 @@ object Itc:
     charts:      NonEmptyList[ItcChartGroup]
   )
 
-  enum ResultType:
-    case Success, SourceTooBright, NoData, CalculationError
+  enum ResultType(val tag: String) derives Enumerated:
+    case Success          extends ResultType("success")
+    case SourceTooBright  extends ResultType("source_too_bright")
+    case NoData           extends ResultType("no_data")
+    case CalculationError extends ResultType("calculation_error")
 
   sealed trait SNCalcResult extends Product with Serializable {
-    def result: ResultType
+    def resultType: ResultType
   }
+
   object SNCalcResult:
+    given Encoder[SNCalcResult] = Encoder.instance { a =>
+      Json
+        .obj(("resultType", a.resultType.asJson))
+        .deepMerge(a match {
+          case s: Success => s.asJson
+          case _          => null
+        })
+    }
 
     case class Success(
       signalToNoise: BigDecimal
     ) extends SNCalcResult
         derives Encoder.AsObject {
-      val result = ResultType.Success
+      val resultType = ResultType.Success
     }
 
     /** Object is too bright to be observed in the specified mode. */
     case class SourceTooBright(wellDepth: BigDecimal) extends SNCalcResult {
-      val result = ResultType.SourceTooBright
+      val resultType = ResultType.SourceTooBright
+    }
+
+    case class NoData() extends SNCalcResult {
+      val resultType = ResultType.NoData
     }
 
     /** Generic calculation error */
-    case class NoData() extends SNCalcResult {
-      val result = ResultType.NoData
-    }
-
     case class CalculationError(msg: String) extends SNCalcResult {
-      val result = ResultType.CalculationError
+      val resultType = ResultType.CalculationError
     }
