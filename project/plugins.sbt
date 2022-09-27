@@ -1,4 +1,4 @@
-addSbtPlugin("edu.gemini"     % "sbt-lucuma-lib"      % "0.10.1")
+addSbtPlugin("edu.gemini"     % "sbt-lucuma-lib"      % "0.10.2")
 addSbtPlugin("io.spray"       % "sbt-revolver"        % "0.9.1")
 addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.11")
 addSbtPlugin("io.gatling"     % "gatling-sbt"         % "4.2.4")
