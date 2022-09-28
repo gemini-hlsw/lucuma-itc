@@ -205,11 +205,8 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp)
         )(itc, redis)
           .flatMap { r =>
-            val result = itc.calculateSignalToNoise(r, signalToNoiseAt)
-            println(result)
-            result
+            itc.calculateSignalToNoise(r, signalToNoiseAt)
           }
-          .flatTap(r => Logger[F].info(r.asJson.spaces2))
       }
         .map(_.rightIor[NonEmptyChain[Problem]])
         .handleError { case x =>

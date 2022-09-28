@@ -4918,31 +4918,45 @@ type SpectroscopyGraphResult {
 }
 
 """Calculation result types"""
-enum ResultType {
+enum SNResultType {
   SUCCESS
 
-  SOURCE_TOO_BRIGHT
+  NO_DATA
+
+  ABOVE_RANGE
+
+  BELOW_RANGE
 
   CALCULATION_ERROR
-
-  NO_DATA
 }
 
 interface SignalToNoiseResult {
 
   # ITC result type
-  resultType: ResultType!
+  resultType: SNResultType!
 }
 
 type SNCalcSuccess implements SignalToNoiseResult {
+  resultType: SNResultType!
+
   # Resulting signal to noise
   signalToNoise: BigDecimal!
 }
 
-type SNCalcSourceTooBright implements SignalToNoiseResult {
-  wellDepth: BigDecimal!
+type SNWavelengthAtBelowRange implements SignalToNoiseResult {
+  resultType: SNResultType!
+
+  signalToNoiseAt: Wavelength!
+}
+
+type SNWavelengthAtAboveRange implements SignalToNoiseResult {
+  resultType: SNResultType!
+
+  signalToNoiseAt: Wavelength!
 }
 
 type SNCalcError implements SignalToNoiseResult {
+  resultType: SNResultType!
+
   msg: String!
 }

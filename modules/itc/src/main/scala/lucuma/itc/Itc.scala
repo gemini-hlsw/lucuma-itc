@@ -7,13 +7,13 @@ import cats.data.NonEmptyList
 import eu.timepit.refined.types.numeric.PosLong
 import io.circe.*
 import io.circe.syntax.*
+import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
+import lucuma.core.util.Enumerated
 import lucuma.itc.encoders.given
 import lucuma.itc.search._
 
 import scala.concurrent.duration.FiniteDuration
-import lucuma.core.math.Wavelength
-import lucuma.core.util.Enumerated
 
 final case class UpstreamException(msg: String) extends RuntimeException(msg)
 
@@ -90,14 +90,16 @@ object Itc:
     charts:      NonEmptyList[ItcChartGroup]
   )
 
-  enum ResultType(val tag: String) derives Enumerated:
-    case Success          extends ResultType("success")
-    case SourceTooBright  extends ResultType("source_too_bright")
-    case NoData           extends ResultType("no_data")
-    case CalculationError extends ResultType("calculation_error")
+  enum SNResultType(val tag: String) derives Enumerated:
+    case Success          extends SNResultType("success")
+    case SourceTooBright  extends SNResultType("source_too_bright")
+    case BelowRange       extends SNResultType("below_range")
+    case AboveRange       extends SNResultType("above_range")
+    case NoData           extends SNResultType("no_data")
+    case CalculationError extends SNResultType("calculation_error")
 
   sealed trait SNCalcResult extends Product with Serializable {
-    def resultType: ResultType
+    def resultType: SNResultType
   }
 
   object SNCalcResult:
@@ -105,28 +107,36 @@ object Itc:
       Json
         .obj(("resultType", a.resultType.asJson))
         .deepMerge(a match {
-          case s: Success => s.asJson
-          case _          => null
+          case s @ SNCalcSuccess(_)          => s.asJson
+          case _: NoData                     => Json.Null
+          case w @ WavelengthAtAboveRange(_) => w.asJson
+          case w @ WavelengthAtBelowRange(_) => w.asJson
+          case _                             => null
         })
     }
 
-    case class Success(
+    case class SNCalcSuccess(
       signalToNoise: BigDecimal
     ) extends SNCalcResult
         derives Encoder.AsObject {
-      val resultType = ResultType.Success
-    }
-
-    /** Object is too bright to be observed in the specified mode. */
-    case class SourceTooBright(wellDepth: BigDecimal) extends SNCalcResult {
-      val resultType = ResultType.SourceTooBright
+      val resultType = SNResultType.Success
     }
 
     case class NoData() extends SNCalcResult {
-      val resultType = ResultType.NoData
+      val resultType = SNResultType.NoData
+    }
+
+    case class WavelengthAtBelowRange(signalToNoiseAt: Wavelength) extends SNCalcResult
+        derives Encoder.AsObject {
+      val resultType = SNResultType.BelowRange
+    }
+
+    case class WavelengthAtAboveRange(signalToNoiseAt: Wavelength) extends SNCalcResult
+        derives Encoder.AsObject {
+      val resultType = SNResultType.AboveRange
     }
 
     /** Generic calculation error */
-    case class CalculationError(msg: String) extends SNCalcResult {
-      val resultType = ResultType.CalculationError
+    case class CalculationError(msg: String) extends SNCalcResult derives Encoder.AsObject {
+      val resultType = SNResultType.CalculationError
     }
