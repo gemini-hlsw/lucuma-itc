@@ -42,3 +42,5 @@ case class ItcVersions(
   serverVersion: String,
   dataVersion:   Option[String]
 ) derives Encoder.AsObject
+
+type SNCalcResult = lucuma.itc.Itc.SNCalcResult

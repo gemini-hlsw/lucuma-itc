@@ -7,7 +7,9 @@ import cats.data.NonEmptyList
 import eu.timepit.refined.types.numeric.PosLong
 import io.circe.*
 import io.circe.syntax.*
+import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
+import lucuma.core.util.Enumerated
 import lucuma.itc.encoders.given
 import lucuma.itc.search._
 
@@ -29,8 +31,7 @@ trait Itc[F[_]]:
   ): F[Itc.CalcResultWithVersion]
 
   /**
-   * Compute the exposure time and number required to achieve the desired signal-to-noise under
-   * average conditions.
+   * Retrieve the graph data for the given mode and exposureTime and exposures
    */
   def calculateGraph(
     targetProfile: TargetProfile,
@@ -39,6 +40,14 @@ trait Itc[F[_]]:
     exposureTime:  NonNegDuration,
     exposures:     PosLong
   ): F[Itc.GraphResult]
+
+  /**
+   * Calculate the signal to noise from graph data for the given mode and exposureTime and exposures
+   */
+  def calculateSignalToNoise(
+    graph:        Itc.GraphResult,
+    atWavelength: Option[Wavelength]
+  ): F[Itc.SNCalcResult]
 
   def itcVersions: F[String]
 
@@ -80,3 +89,54 @@ object Itc:
     ccds:        NonEmptyList[ItcCcd],
     charts:      NonEmptyList[ItcChartGroup]
   )
+
+  enum SNResultType(val tag: String) derives Enumerated:
+    case Success          extends SNResultType("success")
+    case SourceTooBright  extends SNResultType("source_too_bright")
+    case BelowRange       extends SNResultType("below_range")
+    case AboveRange       extends SNResultType("above_range")
+    case NoData           extends SNResultType("no_data")
+    case CalculationError extends SNResultType("calculation_error")
+
+  sealed trait SNCalcResult extends Product with Serializable {
+    def resultType: SNResultType
+  }
+
+  object SNCalcResult:
+    given Encoder[SNCalcResult] = Encoder.instance { a =>
+      Json
+        .obj(("resultType", a.resultType.asJson))
+        .deepMerge(a match {
+          case s @ SNCalcSuccess(_)          => s.asJson
+          case _: NoData                     => Json.Null
+          case w @ WavelengthAtAboveRange(_) => w.asJson
+          case w @ WavelengthAtBelowRange(_) => w.asJson
+          case _                             => null
+        })
+    }
+
+    case class SNCalcSuccess(
+      signalToNoise: BigDecimal
+    ) extends SNCalcResult
+        derives Encoder.AsObject {
+      val resultType = SNResultType.Success
+    }
+
+    case class NoData() extends SNCalcResult {
+      val resultType = SNResultType.NoData
+    }
+
+    case class WavelengthAtBelowRange(signalToNoiseAt: Wavelength) extends SNCalcResult
+        derives Encoder.AsObject {
+      val resultType = SNResultType.BelowRange
+    }
+
+    case class WavelengthAtAboveRange(signalToNoiseAt: Wavelength) extends SNCalcResult
+        derives Encoder.AsObject {
+      val resultType = SNResultType.AboveRange
+    }
+
+    /** Generic calculation error */
+    case class CalculationError(msg: String) extends SNCalcResult derives Encoder.AsObject {
+      val resultType = SNResultType.CalculationError
+    }

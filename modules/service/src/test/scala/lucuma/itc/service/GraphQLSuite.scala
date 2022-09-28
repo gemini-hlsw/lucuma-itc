@@ -16,6 +16,7 @@ import io.circe.Json
 import io.circe.parser._
 import io.lettuce.core.RedisFuture
 import io.lettuce.core.cluster.api.async.RedisClusterAsyncCommands
+import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
@@ -28,6 +29,7 @@ import lucuma.itc.ItcChartGroup
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
+import lucuma.itc.SignalToNoiseCalculation
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.service.config.ExecutionEnvironment
@@ -90,7 +92,7 @@ class NoOpRedis[F[_]: ApplicativeThrow, K, V] extends StringCommands[F, K, V] {
 trait GraphQLSuite extends munit.CatsEffectSuite:
   given Logger[IO] = Slf4jLogger.getLogger[IO]
 
-  val itc = new Itc[IO]:
+  val itc = new Itc[IO] with SignalToNoiseCalculation[IO]:
     def calculate(
       targetProfile: TargetProfile,
       observingMode: ObservingMode,
@@ -119,7 +121,7 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
                   ChartType.S2NChart,
                   List(
                     ItcSeries("title",
-                              SeriesDataType.BackgroundData,
+                              SeriesDataType.FinalS2NData,
                               List((1.0, 1000.0), (2.0, 1001.0))
                     )
                   )
