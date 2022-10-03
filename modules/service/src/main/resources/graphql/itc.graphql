@@ -4887,14 +4887,20 @@ type ItcCcd {
   # the final SN ratio for a single image
   singleSNRatio: BigDecimal!
 
+  # Wavelength where we get the max singl SN
+  wavelengthForMaxSingleSNRatio: Wavelength!
+
+  # the max single SN ratio for this ccd
+  maxSingleSNRatio:  BigDecimal!
+
   # the total SN ratio for all images
   totalSNRatio:  BigDecimal!
 
   # Wavelength where we get the max total SN
   wavelengthForMaxTotalSNRatio: Wavelength!
 
-  # Wavelength where we get the max singl SN
-  wavelengthForMaxSingleSNRatio: Wavelength!
+  # the max final SN ratio for this ccd
+  maxTotalSNRatio:  BigDecimal!
 
   # the highest e- count for all pixels on the CCD
   peakPixelFlux: BigDecimal!

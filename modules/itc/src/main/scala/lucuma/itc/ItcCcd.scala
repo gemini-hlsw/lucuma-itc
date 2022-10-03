@@ -11,7 +11,9 @@ import lucuma.itc.encoders.given
 
 case class ItcCcd(
   singleSNRatio:                 Double,          // the final SN ratio for a single image
+  maxSingleSNRatio:              Double,          // the max single SN ratio for a single image/ccd
   totalSNRatio:                  Double,          // the total SN ratio for all images
+  maxTotalSNRatio:               Double,          // the max final SN ratio for all images/ccd
   wavelengthForMaxTotalSNRatio:  Wavelength,      // Wavelength where we get the max total SN
   wavelengthForMaxSingleSNRatio: Wavelength,      // Wavelength where we get the max single SN
   peakPixelFlux:                 Double,          // the highest e- count for all pixels on the CCD
