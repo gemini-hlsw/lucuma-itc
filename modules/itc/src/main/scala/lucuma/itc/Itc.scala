@@ -98,14 +98,6 @@ object Itc:
       ccds:        NonEmptyList[ItcRemoteCcd],
       charts:      NonEmptyList[ItcChartGroup]
     ): GraphResult = {
-      println(
-        charts
-          .flatMap(_.charts)
-          .filter(_.chartType === ChartType.S2NChart)
-          .map(_.series.filter(_.seriesType === SeriesDataType.FinalS2NData))
-          .map(_.map(_.title))
-      )
-
       def maxWavelength(chart: ItcChart, seriesDataType: SeriesDataType): List[Wavelength] =
         chart.series
           .filter(_.seriesType === seriesDataType)
