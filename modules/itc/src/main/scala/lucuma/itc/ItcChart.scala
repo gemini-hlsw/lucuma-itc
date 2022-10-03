@@ -21,7 +21,7 @@ import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
 import lucuma.itc.math.*
 
-enum SeriesDataType(val tag: String):
+enum SeriesDataType(val tag: String) derives Enumerated:
   case SignalData     extends SeriesDataType("signal_data")
   case BackgroundData extends SeriesDataType("background_data")
   case SingleS2NData  extends SeriesDataType("single_s2_ndata")
@@ -29,31 +29,9 @@ enum SeriesDataType(val tag: String):
   case PixSigData     extends SeriesDataType("pix_sig_data")
   case PixBackData    extends SeriesDataType("pix_back_data")
 
-object SeriesDataType:
-  given Enumerated[SeriesDataType] =
-    Enumerated
-      .from(
-        SeriesDataType.SignalData,
-        SeriesDataType.BackgroundData,
-        SeriesDataType.SingleS2NData,
-        SeriesDataType.FinalS2NData,
-        SeriesDataType.PixSigData,
-        SeriesDataType.PixBackData
-      )
-      .withTag(_.tag)
-
-enum ChartType(val tag: String):
+enum ChartType(val tag: String) derives Enumerated:
   case SignalChart extends ChartType("signal_chart")
   case S2NChart    extends ChartType("s2n_chart")
-
-object ChartType:
-  given Enumerated[ChartType] =
-    Enumerated
-      .from(
-        ChartType.SignalChart,
-        ChartType.S2NChart
-      )
-      .withTag(_.tag)
 
 case class ItcAxis(start: Double, end: Double, min: Double, max: Double, count: Int)
     derives Decoder,

@@ -57,7 +57,7 @@ trait ItcCacheOrRemote extends Version:
         redis
           .setEx(redisKey, Pickle.intoBytes(r).compact().array(), TTL)
           .handleErrorWith(L.error(_)(s"Error writing $redisKey"))
-          .whenA(fromRedis.isEmpty)
+          .whenA(fromRedis.isEmpty || decoded.isEmpty)
     yield r
   }
 

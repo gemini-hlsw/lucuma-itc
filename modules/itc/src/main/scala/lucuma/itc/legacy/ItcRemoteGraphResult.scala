@@ -5,12 +5,11 @@ package lucuma.itc.legacy
 
 import cats.data.NonEmptyList
 import io.circe.Decoder
-import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChartGroup
 
 case class ItcRemoteGraphResult(
   versionToken: String,
-  ccds:         NonEmptyList[ItcCcd],
+  ccds:         NonEmptyList[ItcRemoteCcd],
   groups:       NonEmptyList[ItcChartGroup]
 )
 

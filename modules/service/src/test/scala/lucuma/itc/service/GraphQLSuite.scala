@@ -112,7 +112,15 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
         .GraphResult(
           "1",
           NonEmptyList.of(
-            ItcCcd(1, 2, 3, 4, 5, Nil)
+            ItcCcd(1,
+                   2,
+                   Wavelength.fromNanometers(1001).get,
+                   Wavelength.fromNanometers(1001).get,
+                   3,
+                   4,
+                   5,
+                   Nil
+            )
           ),
           NonEmptyList.of(
             ItcChartGroup(

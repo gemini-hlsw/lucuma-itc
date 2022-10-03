@@ -16,12 +16,12 @@ import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.itc.ChartType
-import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcChartGroup
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
+import lucuma.itc.legacy.ItcRemoteCcd
 import lucuma.itc.legacy.syntax.all.*
 import lucuma.itc.search.ObservingMode.Spectroscopy._
 import lucuma.itc.search.*
@@ -356,7 +356,7 @@ given Decoder[ItcRemoteGraphResult] = (c: HCursor) =>
                 .as[NonEmptyList[ItcChartGroup]]
     ccd    <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
                 .downField("ccds")
-                .as[NonEmptyList[ItcCcd]]
+                .as[NonEmptyList[ItcRemoteCcd]]
   yield ItcRemoteGraphResult(v, ccd, charts)
 
 given Decoder[ItcRemoteResult] = (c: HCursor) =>
@@ -364,5 +364,5 @@ given Decoder[ItcRemoteResult] = (c: HCursor) =>
     v   <- c.downField("versionToken").as[String]
     ccd <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
              .downField("ccds")
-             .as[NonEmptyList[ItcCcd]]
+             .as[NonEmptyList[ItcRemoteCcd]]
   yield ItcRemoteResult(v, ccd)
