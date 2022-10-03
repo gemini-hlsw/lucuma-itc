@@ -5,16 +5,13 @@ package lucuma.itc.legacy
 
 import cats.data.NonEmptyList
 import cats.syntax.all._
-import lucuma.itc.ItcCcd
 
-case class ItcRemoteResult(versionToken: String, ccds: NonEmptyList[ItcCcd]) {
+case class ItcRemoteResult(versionToken: String, ccds: NonEmptyList[ItcRemoteCcd]) {
 
   // We may not need these
-  def maxPeakPixelFlux: Int      = ccds.map(_.peakPixelFlux).maximum.toInt
-  def maxAdu: Int                = ccds.map(_.adu).maximum
-  def maxPercentFullWell: Double = ccds.map(_.percentFullWell).maximum
-  def maxWellDepth: Double       = ccds.map(_.wellDepth).maximum
-  def maxSingleSNRatio: Double   = ccds.map(_.singleSNRatio).maximum
-  def maxTotalSNRatio: Double    = ccds.map(_.totalSNRatio).maximum
+  def maxPeakPixelFlux: Int    = ccds.map(_.peakPixelFlux).maximum.toInt
+  def maxWellDepth: Double     = ccds.map(_.wellDepth).maximum
+  def maxSingleSNRatio: Double = ccds.map(_.singleSNRatio).maximum
+  def maxTotalSNRatio: Double  = ccds.map(_.totalSNRatio).maximum
 
 }

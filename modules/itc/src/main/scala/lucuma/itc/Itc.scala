@@ -4,6 +4,7 @@
 package lucuma.itc
 
 import cats.data.NonEmptyList
+import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.PosLong
 import io.circe.*
 import io.circe.syntax.*
@@ -11,7 +12,8 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.core.util.Enumerated
 import lucuma.itc.encoders.given
-import lucuma.itc.search._
+import lucuma.itc.legacy.ItcRemoteCcd
+import lucuma.itc.search.*
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -89,6 +91,55 @@ object Itc:
     ccds:        NonEmptyList[ItcCcd],
     charts:      NonEmptyList[ItcChartGroup]
   )
+
+  object GraphResult:
+    def fromLegacy(
+      dataVersion: String,
+      ccds:        NonEmptyList[ItcRemoteCcd],
+      charts:      NonEmptyList[ItcChartGroup]
+    ): GraphResult = {
+      def maxWavelength(chart: ItcChart, seriesDataType: SeriesDataType): List[Wavelength] =
+        chart.series
+          .filter(_.seriesType === seriesDataType)
+          .zip(ccds.toList)
+          .map { case (sn, ccd) =>
+            sn.data
+              .maxByOption(_._2)
+              .map(_._1)
+              .flatMap(i => Wavelength.fromPicometers.getOption((i * 1000).toInt))
+          }
+          .flattenOption
+      // Calculate the wavelengths at where the peaks happen
+      val calculatedCCDs                                                                   =
+        charts
+          .flatMap(_.charts)
+          .filter(_.chartType === ChartType.S2NChart)
+          .flatMap { chart =>
+            val maxFinalAt  = maxWavelength(chart, SeriesDataType.FinalS2NData)
+            val maxSignalAt = maxWavelength(chart, SeriesDataType.SingleS2NData)
+
+            ccds.zipWithIndex
+              .map { (ccd, i) =>
+                val finalWV  = maxFinalAt.lift(i)
+                val singleWV = maxFinalAt.lift(i)
+                (finalWV, singleWV).mapN { (maxFinalAt, maxSingleAt) =>
+                  ItcCcd(ccd.singleSNRatio,
+                         ccd.totalSNRatio,
+                         maxFinalAt,
+                         maxSingleAt,
+                         ccd.peakPixelFlux,
+                         ccd.wellDepth,
+                         ccd.ampGain,
+                         ccd.warnings
+                  )
+                }
+              }
+              .toList
+              .flattenOption
+          }
+      assert(calculatedCCDs.length === ccds.length)
+      GraphResult(dataVersion, NonEmptyList.fromListUnsafe(calculatedCCDs), charts)
+    }
 
   enum SNResultType(val tag: String) derives Enumerated:
     case Success          extends SNResultType("success")
