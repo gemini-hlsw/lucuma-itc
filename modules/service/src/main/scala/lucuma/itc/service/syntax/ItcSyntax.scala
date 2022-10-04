@@ -73,7 +73,9 @@ trait ItcChartSyntax:
       figures.ccd.fold(ccd)(c =>
         ccd.copy(
           singleSNRatio = roundToSignificantFigures(ccd.singleSNRatio, c.value),
+          maxSingleSNRatio = roundToSignificantFigures(ccd.maxSingleSNRatio, c.value),
           totalSNRatio = roundToSignificantFigures(ccd.totalSNRatio, c.value),
+          maxTotalSNRatio = roundToSignificantFigures(ccd.maxTotalSNRatio, c.value),
           peakPixelFlux = roundToSignificantFigures(ccd.peakPixelFlux, c.value),
           wellDepth = roundToSignificantFigures(ccd.wellDepth, c.value),
           ampGain = roundToSignificantFigures(ccd.ampGain, c.value)

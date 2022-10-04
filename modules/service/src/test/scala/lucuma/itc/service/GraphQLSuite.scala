@@ -113,6 +113,8 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
           "1",
           NonEmptyList.of(
             ItcCcd(1,
+                   1,
+                   2,
                    2,
                    Wavelength.fromNanometers(1001).get,
                    Wavelength.fromNanometers(1001).get,
