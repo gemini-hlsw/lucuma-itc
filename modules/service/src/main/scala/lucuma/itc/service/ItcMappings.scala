@@ -55,11 +55,11 @@ case class GraphRequest(
 ) derives Hash
 
 case class CalcRequest(
-  targetProfile: TargetProfile,
-  specMode:      ObservingMode.Spectroscopy,
-  constraints:   ItcObservingConditions,
-  signalToNoise: PosBigDecimal,
-  atWavelength:  Option[Wavelength]
+  targetProfile:   TargetProfile,
+  specMode:        ObservingMode.Spectroscopy,
+  constraints:     ItcObservingConditions,
+  signalToNoise:   PosBigDecimal,
+  signalToNoiseAt: Option[Wavelength]
 ) derives Hash
 
 object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {

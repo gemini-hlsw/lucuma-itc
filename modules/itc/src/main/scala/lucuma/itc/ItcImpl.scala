@@ -45,8 +45,8 @@ import scala.math.*
 
 trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
   def calculateSignalToNoise(
-    graph:        NonEmptyList[ItcChartGroup],
-    atWavelength: Option[Wavelength]
+    graph:           NonEmptyList[ItcChartGroup],
+    signalToNoiseAt: Option[Wavelength]
   ): F[Itc.SNCalcResult] =
     (for {
       s2nChart     <- graph.flatMap(_.charts).find(_.chartType === ChartType.S2NChart)
@@ -57,7 +57,7 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
                         .some
     } yield {
       val sorted               = finalS2NData.sortBy(_._1)
-      val sn: Itc.SNCalcResult = atWavelength
+      val sn: Itc.SNCalcResult = signalToNoiseAt
         .fold(Itc.SNCalcResult.SNCalcSuccess(sorted.maxBy(_._2)._2)) { w =>
           val nanos = w.nanometer.value.toDouble
           if (nanos < sorted.head._1) Itc.SNCalcResult.WavelengthAtBelowRange(w)
@@ -107,15 +107,15 @@ object ItcImpl {
       val L = Logger[F]
 
       def calculateExposureTime(
-        targetProfile: TargetProfile,
-        observingMode: ObservingMode,
-        constraints:   ItcObservingConditions,
-        signalToNoise: BigDecimal,
-        atWavelength:  Option[Wavelength]
+        targetProfile:   TargetProfile,
+        observingMode:   ObservingMode,
+        constraints:     ItcObservingConditions,
+        signalToNoise:   BigDecimal,
+        signalToNoiseAt: Option[Wavelength]
       ): F[Itc.CalcResultWithVersion] =
         observingMode match
           case _: ObservingMode.Spectroscopy =>
-            spectroscopy(targetProfile, observingMode, constraints, signalToNoise, atWavelength)
+            spectroscopy(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
           // TODO: imaging
 
       def calculateGraph(
@@ -255,11 +255,11 @@ object ItcImpl {
         }
 
       def spectroscopy(
-        targetProfile: TargetProfile,
-        observingMode: ObservingMode,
-        constraints:   ItcObservingConditions,
-        signalToNoise: BigDecimal,
-        atWavelength:  Option[Wavelength]
+        targetProfile:   TargetProfile,
+        observingMode:   ObservingMode,
+        constraints:     ItcObservingConditions,
+        signalToNoise:   BigDecimal,
+        signalToNoiseAt: Option[Wavelength]
       ): F[Itc.CalcResultWithVersion] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
@@ -306,7 +306,7 @@ object ItcImpl {
                   )
                     .flatMap { s =>
                       L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *>
-                        calculateSignalToNoise(s.groups, atWavelength).flatMap {
+                        calculateSignalToNoise(s.groups, signalToNoiseAt).flatMap {
                           case Itc.SNCalcResult.SNCalcSuccess(snr) =>
                             itcStep(newNExp.toInt,
                                     nExp,
@@ -353,7 +353,7 @@ object ItcImpl {
                       Itc.CalcResultWithVersion(Itc.CalcResult.SourceTooBright(msg)).pure[F].widen
                   } else {
                     val maxTime = startExpTime.value.min(halfWellTime)
-                    calculateSignalToNoise(r.groups, atWavelength)
+                    calculateSignalToNoise(r.groups, signalToNoiseAt)
                       .flatMap {
                         case Itc.SNCalcResult.SNCalcSuccess(snr)        =>
                           itcStep(numberOfExposures,

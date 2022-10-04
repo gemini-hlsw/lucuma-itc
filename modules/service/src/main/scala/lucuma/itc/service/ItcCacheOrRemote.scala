@@ -92,7 +92,7 @@ trait ItcCacheOrRemote extends Version:
             calcRequest.specMode,
             calcRequest.constraints,
             calcRequest.signalToNoise.value,
-            calcRequest.atWavelength
+            calcRequest.signalToNoiseAt
         )
 
   /**

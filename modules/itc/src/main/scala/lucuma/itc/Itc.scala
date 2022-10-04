@@ -26,11 +26,11 @@ trait Itc[F[_]]:
    * average conditions.
    */
   def calculateExposureTime(
-    targetProfile: TargetProfile,
-    observingMode: ObservingMode,
-    constraints:   ItcObservingConditions,
-    signalToNoise: BigDecimal,
-    atWavelength:  Option[Wavelength]
+    targetProfile:   TargetProfile,
+    observingMode:   ObservingMode,
+    constraints:     ItcObservingConditions,
+    signalToNoise:   BigDecimal,
+    signalToNoiseAt: Option[Wavelength]
   ): F[Itc.CalcResultWithVersion]
 
   /**
@@ -48,8 +48,8 @@ trait Itc[F[_]]:
    * Calculate the signal to noise from graph data for the given mode and exposureTime and exposures
    */
   def calculateSignalToNoise(
-    graph:        NonEmptyList[ItcChartGroup],
-    atWavelength: Option[Wavelength]
+    graph:           NonEmptyList[ItcChartGroup],
+    signalToNoiseAt: Option[Wavelength]
   ): F[Itc.SNCalcResult]
 
   def itcVersions: F[String]

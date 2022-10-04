@@ -13,9 +13,9 @@ case class ItcRemoteResult(
   ccds:         NonEmptyList[ItcRemoteCcd],
   groups:       NonEmptyList[ItcChartGroup]
 ) {
-  def maxTotalSNRatio: Double = ccds.map(_.totalSNRatio).maximum
-  def maxWellDepth: Double    = ccds.map(_.wellDepth).maximum
-  def maxPeakPixelFlux: Int   = ccds.map(_.peakPixelFlux).maximum.toInt
+  val maxTotalSNRatio: Double = ccds.map(_.totalSNRatio).maximum
+  val maxWellDepth: Double    = ccds.map(_.wellDepth).maximum
+  val maxPeakPixelFlux: Int   = ccds.map(_.peakPixelFlux).maximum.toInt
 }
 
 case class ItcRemoteVersion(
