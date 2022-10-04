@@ -93,11 +93,12 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
   given Logger[IO] = Slf4jLogger.getLogger[IO]
 
   val itc = new Itc[IO] with SignalToNoiseCalculation[IO]:
-    def calculate(
+    def calculateExposureTime(
       targetProfile: TargetProfile,
       observingMode: ObservingMode,
       constraints:   ItcObservingConditions,
-      signalToNoise: BigDecimal
+      signalToNoise: BigDecimal,
+      atWavelength:  Option[Wavelength]
     ): IO[Itc.CalcResultWithVersion] =
       Itc.CalcResultWithVersion(Itc.CalcResult.Success(1.seconds, 10, 10)).pure[IO]
 
