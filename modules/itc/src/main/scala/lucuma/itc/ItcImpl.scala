@@ -200,7 +200,7 @@ object ItcImpl {
         constraints:      ItcObservingConditions,
         exposureDuration: Quantity[BigDecimal, Second],
         exposures:        Long
-      ): F[legacy.ItcRemoteGraphResult] =
+      ): F[legacy.ItcRemoteResult] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
@@ -218,8 +218,8 @@ object ItcImpl {
             Trace[F].put("itc.exposures" -> exposures.toInt) *>
             c.run(POST(json, uri / "jsonchart")).use {
               case Status.Successful(resp) =>
-                given EntityDecoder[F, ItcRemoteGraphResult] = jsonOf[F, ItcRemoteGraphResult]
-                resp.as[ItcRemoteGraphResult]
+                given EntityDecoder[F, ItcRemoteResult] = jsonOf[F, ItcRemoteResult]
+                resp.as[ItcRemoteResult]
               case resp                    =>
                 resp.bodyText
                   .through(fs2.text.lines)
