@@ -41,10 +41,12 @@ trait ItcCacheOrRemote extends Version:
     prefix:  String,
     redis:   StringCommands[F, Array[Byte], Array[Byte]]
   ): F[B] = {
-    val hash     = Hash[A].hash(a)
-    val redisKey = s"$prefix:$hash".getBytes(KeyCharset)
-    val L        = Logger[F]
+    val hash        = Hash[A].hash(a)
+    val redisKeyStr = s"$prefix:$hash"
+    val redisKey    = redisKeyStr.getBytes(KeyCharset)
+    val L           = Logger[F]
     for
+      _         <- L.info(s"Read key $redisKeyStr")
       fromRedis <- redis
                      .get(redisKey)
                      .handleErrorWith(e => L.error(e)(s"Error reading $redisKey") *> none.pure[F])
@@ -85,11 +87,12 @@ trait ItcCacheOrRemote extends Version:
     (itc: Itc[F]) =>
       (calcRequest: CalcRequest) =>
         itc
-          .calculate(
+          .calculateExposureTime(
             calcRequest.targetProfile,
             calcRequest.specMode,
             calcRequest.constraints,
-            calcRequest.signalToNoise.value
+            calcRequest.signalToNoise.value,
+            calcRequest.signalToNoiseAt
         )
 
   /**
@@ -98,7 +101,10 @@ trait ItcCacheOrRemote extends Version:
   def calcFromCacheOrRemote[F[_]: MonadThrow: Logger](
     calcRequest: CalcRequest
   )(itc:         Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.CalcResultWithVersion] =
-    cacheOrRemote(calcRequest, requestCalc(itc))("itc:calc:spec", redis)
+    Logger[F].info(calcRequest.toString) *> cacheOrRemote(calcRequest, requestCalc(itc))(
+      "itc:calc:spec",
+      redis
+    )
 
   /**
    * Request and store the itc version

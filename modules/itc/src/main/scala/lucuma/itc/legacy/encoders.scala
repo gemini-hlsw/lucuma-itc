@@ -348,7 +348,7 @@ given Decoder[ItcChart] = (c: HCursor) =>
 given Decoder[ItcChartGroup] = (c: HCursor) =>
   c.downField("charts").as[NonEmptyList[ItcChart]].map(ItcChartGroup.apply)
 
-given Decoder[ItcRemoteGraphResult] = (c: HCursor) =>
+given Decoder[ItcRemoteResult] = (c: HCursor) =>
   for
     v      <- c.downField("versionToken").as[String]
     charts <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
@@ -357,12 +357,4 @@ given Decoder[ItcRemoteGraphResult] = (c: HCursor) =>
     ccd    <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
                 .downField("ccds")
                 .as[NonEmptyList[ItcRemoteCcd]]
-  yield ItcRemoteGraphResult(v, ccd, charts)
-
-given Decoder[ItcRemoteResult] = (c: HCursor) =>
-  for
-    v   <- c.downField("versionToken").as[String]
-    ccd <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
-             .downField("ccds")
-             .as[NonEmptyList[ItcRemoteCcd]]
-  yield ItcRemoteResult(v, ccd)
+  yield ItcRemoteResult(v, ccd, charts)

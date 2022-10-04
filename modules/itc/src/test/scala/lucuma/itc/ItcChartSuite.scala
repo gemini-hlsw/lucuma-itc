@@ -21,10 +21,10 @@ class ItcChartSuite extends munit.FunSuite {
     }
   )
   test("decode response") {
-    chartPprint.pprintln(decode[ItcRemoteGraphResult](expected))
+    chartPprint.pprintln(decode[ItcRemoteResult](expected))
     assertEquals(
       2.asRight,
-      decode[ItcRemoteGraphResult](expected).map(_.groups.flatMap(_.charts).length)
+      decode[ItcRemoteResult](expected).map(_.groups.flatMap(_.charts).length)
     )
   }
 

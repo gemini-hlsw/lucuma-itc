@@ -55,10 +55,11 @@ case class GraphRequest(
 ) derives Hash
 
 case class CalcRequest(
-  targetProfile: TargetProfile,
-  specMode:      ObservingMode.Spectroscopy,
-  constraints:   ItcObservingConditions,
-  signalToNoise: PosBigDecimal
+  targetProfile:   TargetProfile,
+  specMode:        ObservingMode.Spectroscopy,
+  constraints:     ItcObservingConditions,
+  signalToNoise:   PosBigDecimal,
+  signalToNoiseAt: Option[Wavelength]
 ) derives Hash
 
 object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
@@ -89,7 +90,10 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     ).traverseN { (wv, rs, sn, sp, sd, modes, c) =>
       modes
         .parTraverse { mode =>
-          Logger[F].info(s"ITC calculate for $mode, conditions $c and profile $sp") *>
+          val signalToNoiseAt = env.get[Wavelength]("signalToNoiseAt")
+          Logger[F].info(
+            s"ITC calculate for $mode, conditions $c and profile $sp, at $signalToNoiseAt"
+          ) *>
             Trace[F].put(("itc.modes_count", modes.length)) *> {
               val specMode = mode match {
                 case GmosNITCParams(grating, fpu, filter) =>
@@ -102,7 +106,8 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                   TargetProfile(sp, sd, rs),
                   specMode,
                   c,
-                  sn
+                  sn,
+                  signalToNoiseAt
                 )
               )(itc, redis)
                 .handleErrorWith {
@@ -205,7 +210,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp)
         )(itc, redis)
           .flatMap { r =>
-            itc.calculateSignalToNoise(r, signalToNoiseAt)
+            itc.calculateSignalToNoise(r.charts, signalToNoiseAt)
           }
       }
         .map(_.rightIor[NonEmptyChain[Problem]])
@@ -290,6 +295,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                         .orElse(bandPartial)
                         .orElse(instrumentModesPartial)
                         .orElse(constraintsPartial)
+                        .orElse(signalToNoiseAtPartial)
                         .applyOrElse(
                           (e, c),
                           fallback

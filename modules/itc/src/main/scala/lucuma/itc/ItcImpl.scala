@@ -45,19 +45,20 @@ import scala.math.*
 
 trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
   def calculateSignalToNoise(
-    graph:        Itc.GraphResult,
-    atWavelength: Option[Wavelength]
+    graph:           NonEmptyList[ItcChartGroup],
+    signalToNoiseAt: Option[Wavelength]
   ): F[Itc.SNCalcResult] =
     (for {
-      s2nChart     <- graph.charts.flatMap(_.charts).find(_.chartType === ChartType.S2NChart)
+      s2nChart     <- graph.flatMap(_.charts).find(_.chartType === ChartType.S2NChart)
       finalS2NData <- s2nChart.series
-                        .find(_.seriesType === SeriesDataType.FinalS2NData)
+                        .filter(_.seriesType === SeriesDataType.FinalS2NData)
                         .map(_.data)
-                        .flatMap(NonEmptyList.fromList)
+                        .flatten
+                        .some
     } yield {
       val sorted               = finalS2NData.sortBy(_._1)
-      val sn: Itc.SNCalcResult = atWavelength
-        .fold(Itc.SNCalcResult.SNCalcSuccess(sorted.maximumBy(_._2)._2)) { w =>
+      val sn: Itc.SNCalcResult = signalToNoiseAt
+        .fold(Itc.SNCalcResult.SNCalcSuccess(sorted.maxBy(_._2)._2)) { w =>
           val nanos = w.nanometer.value.toDouble
           if (nanos < sorted.head._1) Itc.SNCalcResult.WavelengthAtBelowRange(w)
           else if (nanos > sorted.last._1) Itc.SNCalcResult.WavelengthAtAboveRange(w)
@@ -82,6 +83,7 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
         }
       sn.pure[F]
     }).getOrElse(Itc.SNCalcResult.NoData().pure[F])
+
 }
 
 /** An ITC implementation that calls the OCS2 ITC server remotely. */
@@ -104,15 +106,16 @@ object ItcImpl {
     new Itc[F] with Http4sClientDsl[F] with SignalToNoiseCalculation[F] {
       val L = Logger[F]
 
-      def calculate(
-        targetProfile: TargetProfile,
-        observingMode: ObservingMode,
-        constraints:   ItcObservingConditions,
-        signalToNoise: BigDecimal
+      def calculateExposureTime(
+        targetProfile:   TargetProfile,
+        observingMode:   ObservingMode,
+        constraints:     ItcObservingConditions,
+        signalToNoise:   BigDecimal,
+        signalToNoiseAt: Option[Wavelength]
       ): F[Itc.CalcResultWithVersion] =
         observingMode match
           case _: ObservingMode.Spectroscopy =>
-            spectroscopy(targetProfile, observingMode, constraints, signalToNoise)
+            spectroscopy(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
           // TODO: imaging
 
       def calculateGraph(
@@ -153,12 +156,12 @@ object ItcImpl {
                                constraints,
                                exposures
             ).asJson
-          L.info(s"ITC remote query ${uri / "json"} ${json.noSpaces}") *>
+          L.info(s"ITC remote query ${uri / "jsonchart"} ${json.noSpaces}") *>
             Trace[F].put("itc.query" -> json.spaces2) *>
             Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
             Trace[F].put("itc.exposures" -> exposures) *>
             Trace[F].put("itc.level" -> level.value) *>
-            c.run(POST(json, uri / "json")).use {
+            c.run(POST(json, uri / "jsonchart")).use {
               case Status.Successful(resp) =>
                 given EntityDecoder[F, ItcRemoteResult] = jsonOf[F, ItcRemoteResult]
                 resp.as[ItcRemoteResult]
@@ -200,7 +203,7 @@ object ItcImpl {
         constraints:      ItcObservingConditions,
         exposureDuration: Quantity[BigDecimal, Second],
         exposures:        Long
-      ): F[legacy.ItcRemoteGraphResult] =
+      ): F[legacy.ItcRemoteResult] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
@@ -218,8 +221,8 @@ object ItcImpl {
             Trace[F].put("itc.exposures" -> exposures.toInt) *>
             c.run(POST(json, uri / "jsonchart")).use {
               case Status.Successful(resp) =>
-                given EntityDecoder[F, ItcRemoteGraphResult] = jsonOf[F, ItcRemoteGraphResult]
-                resp.as[ItcRemoteGraphResult]
+                given EntityDecoder[F, ItcRemoteResult] = jsonOf[F, ItcRemoteResult]
+                resp.as[ItcRemoteResult]
               case resp                    =>
                 resp.bodyText
                   .through(fs2.text.lines)
@@ -252,10 +255,11 @@ object ItcImpl {
         }
 
       def spectroscopy(
-        targetProfile: TargetProfile,
-        observingMode: ObservingMode,
-        constraints:   ItcObservingConditions,
-        signalToNoise: BigDecimal
+        targetProfile:   TargetProfile,
+        observingMode:   ObservingMode,
+        constraints:     ItcObservingConditions,
+        signalToNoise:   BigDecimal,
+        signalToNoiseAt: Option[Wavelength]
       ): F[Itc.CalcResultWithVersion] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
@@ -302,15 +306,20 @@ object ItcImpl {
                   )
                     .flatMap { s =>
                       L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *>
-                        itcStep(newNExp.toInt,
-                                nExp,
-                                newExpTime.withUnit[Second],
-                                expTime,
-                                s.maxTotalSNRatio,
-                                maxTime,
-                                s,
-                                next
-                        )
+                        calculateSignalToNoise(s.groups, signalToNoiseAt).flatMap {
+                          case Itc.SNCalcResult.SNCalcSuccess(snr) =>
+                            itcStep(newNExp.toInt,
+                                    nExp,
+                                    newExpTime.withUnit[Second],
+                                    expTime,
+                                    snr.toDouble,
+                                    maxTime,
+                                    s,
+                                    next
+                            )
+                          case r                                   =>
+                            Itc.CalcResult.CalculationError(r.toString).pure[F]
+                        }
                     }
                 } else
                   Itc.CalcResult
@@ -344,15 +353,34 @@ object ItcImpl {
                       Itc.CalcResultWithVersion(Itc.CalcResult.SourceTooBright(msg)).pure[F].widen
                   } else {
                     val maxTime = startExpTime.value.min(halfWellTime)
-                    itcStep(numberOfExposures,
-                            0,
-                            startExpTime,
-                            BigDecimal(0).withUnit[Second],
-                            r.maxTotalSNRatio,
-                            maxTime.withUnit[Second],
-                            r,
-                            0.refined
-                    ).map(x => Itc.CalcResultWithVersion(x, r.versionToken.some))
+                    calculateSignalToNoise(r.groups, signalToNoiseAt)
+                      .flatMap {
+                        case Itc.SNCalcResult.SNCalcSuccess(snr)        =>
+                          itcStep(numberOfExposures,
+                                  0,
+                                  startExpTime,
+                                  BigDecimal(0).withUnit[Second],
+                                  snr.toDouble,
+                                  maxTime.withUnit[Second],
+                                  r,
+                                  0.refined
+                          )
+                        case Itc.SNCalcResult.WavelengthAtAboveRange(w) =>
+                          Itc.CalcResult
+                            .CalculationError(
+                              f"S/N at ${w.nanometer.value.toDouble}%.0f nm above range"
+                            )
+                            .pure[F]
+                        case Itc.SNCalcResult.WavelengthAtBelowRange(w) =>
+                          Itc.CalcResult
+                            .CalculationError(
+                              f"S/N at ${w.nanometer.value.toDouble}%.0f nm below range"
+                            )
+                            .pure[F]
+                        case r                                          =>
+                          Itc.CalcResult.CalculationError(r.toString).pure[F]
+                      }
+                      .map(x => Itc.CalcResultWithVersion(x, r.versionToken.some))
                   }
                 }
 
