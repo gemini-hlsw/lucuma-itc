@@ -40,7 +40,7 @@ trait ComputeMapping[F[_]] { this: CirceMapping[F] =>
         )
       }
 
-    def mutation: Mutation                 = Mutation.None
+    def mutation: Mutation = Mutation.None
     def withParent(tpe: Type): RootMapping = this
   }
 
