@@ -192,3 +192,19 @@ lazy val benchmark = project
     )
   )
   .dependsOn(service)
+
+val MUnitFramework = new TestFramework("munit.Framework")
+
+
+lazy val tests = project
+  .in(file("modules/tests"))
+  .enablePlugins(NoPublishPlugin)
+  .dependsOn(service, client)
+  .settings(
+    name := "lucuma-itc-tests",
+    libraryDependencies ++= Seq(
+      "org.typelevel"  %% "munit-cats-effect-3"    % munitCatsEffectVersion % Test,
+      "com.lihaoyi"   %%% "pprint"                 % pprintVersion          % Test
+    ),
+    testFrameworks += MUnitFramework
+  )
