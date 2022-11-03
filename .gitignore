@@ -10,4 +10,6 @@ project/metals.sbt
 lib
 .envrc
 .direnv
+.idea
 node_modules
+
