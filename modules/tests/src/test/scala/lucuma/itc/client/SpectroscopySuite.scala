@@ -3,9 +3,13 @@
 
 package lucuma.itc.client
 
+import cats.syntax.either.*
 import cats.syntax.option.*
 import eu.timepit.refined.auto.*
+import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
+import java.time.Duration
+import java.time.Instant
 import lucuma.core.enums.Band
 import lucuma.core.enums.CloudExtinction
 import lucuma.core.enums.GalaxySpectrum.Spiral
@@ -20,15 +24,40 @@ import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
 import lucuma.core.model.ElevationRange.AirMass
 import lucuma.core.model.ConstraintSet
+import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED.Galaxy
+import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
 import scala.collection.immutable.SortedMap
 
 class SpectroscopySuite extends ClientSuite {
 
-  clientTest("foo") { client =>
-    val in = SpectroscopyModeInput(
+  test("ItcClient basic wiring and sanity check") {
+    spectroscopy(
+      SpectroscopySuite.Input,
+      List(
+        SpectroscopyResult(
+          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+          None,
+          List(
+            Result(ItcResult.Success(
+              NonNegDuration.unsafeFrom(Duration.parse("PT1S")),
+              NonNegInt.unsafeFrom(10),
+              PosBigDecimal.unsafeFrom(10.0)
+            ))
+          )
+        )
+      ).asRight
+    )
+  }
+
+}
+
+object SpectroscopySuite {
+
+  val Input: SpectroscopyModeInput =
+    SpectroscopyModeInput(
       Wavelength.Min,
       PosBigDecimal.unsafeFrom(BigDecimal(1.0)),
       SourceProfile.Point(BandNormalized[Integrated](Galaxy(Spiral), SortedMap.empty)),
@@ -49,7 +78,5 @@ class SpectroscopySuite extends ClientSuite {
         )
       )
     )
-    client.spectroscopy(in).void
-  }
 
 }

@@ -12,7 +12,6 @@ import munit.CatsEffectSuite
 import natchez.Trace.Implicits.noop
 import org.http4s._
 import org.http4s.blaze.server.BlazeServerBuilder
-//import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
@@ -29,21 +28,11 @@ trait ClientSuite extends CatsEffectSuite {
     Resource.eval(lucuma.itc.tests.app(FixedItc))
 
   private val server: Resource[IO, Server] =
-//    Resource.make(IO.println("  • Server starting..."))(_ => IO.println("  • Server stopped.")) *>
     httpApp.flatMap { app =>
       BlazeServerBuilder[IO]
         .withHttpWebSocketApp(app)
         .bindAny()
         .resource
-
-//        .flatTap(_ => Resource.eval(IO.println("  • Server started.")))
-
-//      EmberServerBuilder
-//        .default[IO]
-//        .withHost(ipv4"0.0.0.0")
-//        .withPort(Port.fromInt(cfg.port).get)
-//        .withHttpWebSocketApp(app)
-//        .build
     }
 
   private val serverFixture: Fixture[Server] =
@@ -51,26 +40,20 @@ trait ClientSuite extends CatsEffectSuite {
 
   override def munitFixtures = List(serverFixture)
 
-  def clientTest(
-    name:       String
-  )(
-    clientTest: ItcClient[IO] => IO[Unit]
-  ): Unit =
-    test(name) {
-      Resource
-        .eval {
-          for {
-            srv <- IO(serverFixture())
-            uri  = srv.baseUri  /  "graphql" // "itc"
-            cli <- ItcClient.create[IO](uri)
-          } yield {
-            println(uri)
-            cli
-          }
-        }
-        .use { client =>
-          clientTest(client)
-        }
-    }
+  def spectroscopy(in: SpectroscopyModeInput, expected: Either[String, List[SpectroscopyResult]]): IO[Unit] =
+    Resource
+      .eval {
+        for {
+          srv <- IO(serverFixture())
+          uri  = srv.baseUri  /  "graphql"
+          cli <- ItcClient.create[IO](uri)
+        } yield cli
+      }
+      .use { client =>
+        client
+          .spectroscopy(in)
+          .map(_.leftMap(_.getMessage))
+          .assertEquals(expected)
+      }
 
 }

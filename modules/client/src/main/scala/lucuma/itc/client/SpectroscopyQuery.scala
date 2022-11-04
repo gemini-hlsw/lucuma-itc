@@ -49,12 +49,6 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
     }
 
   override val dataDecoder: Decoder[List[SpectroscopyResult]] =
-    (c: HCursor) => {
-      println(c.value.spaces2)
-      for {
-        lst <- c.downField("spectroscopy").as[List[Json]]
-        spc <- lst.traverse(_.hcursor.as[SpectroscopyResult])
-      } yield spc
-    }
+    (c: HCursor) => c.downField("spectroscopy").as[List[SpectroscopyResult]]
 
 }
