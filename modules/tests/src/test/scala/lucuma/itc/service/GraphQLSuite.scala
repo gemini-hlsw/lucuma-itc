@@ -28,7 +28,7 @@ import scala.concurrent.duration._
 trait GraphQLSuite extends munit.CatsEffectSuite:
   given Logger[IO] = Slf4jLogger.getLogger[IO]
 
-  val service = lucuma.itc.tests.service(FixedItc)
+  val service = lucuma.itc.tests.routes(FixedItc)
 
   val itcFixture = ResourceSuiteLocalFixture(
     "itc",

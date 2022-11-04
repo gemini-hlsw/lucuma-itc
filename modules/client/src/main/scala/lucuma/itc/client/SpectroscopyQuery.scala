@@ -19,6 +19,8 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
     """
       query Spectroscopy($spec: SpectroscopyModeInput!) {
         spectroscopy(input: $spec) {
+          serverVersion
+          dataVersion
           results {
             itc {
               ... on ItcSuccess {
@@ -47,10 +49,12 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
     }
 
   override val dataDecoder: Decoder[List[SpectroscopyResult]] =
-    (c: HCursor) =>
+    (c: HCursor) => {
+      println(c.value.spaces2)
       for {
         lst <- c.downField("spectroscopy").as[List[Json]]
-        spc <- lst.flatTraverse(_.hcursor.downField("results").as[List[SpectroscopyResult]])
+        spc <- lst.traverse(_.hcursor.as[SpectroscopyResult])
       } yield spc
+    }
 
 }

@@ -12,7 +12,7 @@ import io.circe.HCursor
 final case class SpectroscopyResult(
   serverVersion: String,
   dataVersion:   Option[String],
-  results:       List[ItcResult]
+  results:       List[Result]
 )
 
 object SpectroscopyResult {
@@ -22,7 +22,7 @@ object SpectroscopyResult {
       for {
         s <- c.downField("serverVersion").as[String]
         d <- c.downField("dataVersion").as[Option[String]]
-        r <- c.downField("results").as[List[ItcResult]]
+        r <- c.downField("results").as[List[Result]]
       } yield SpectroscopyResult(s, d, r)
 
   given Eq[SpectroscopyResult] with

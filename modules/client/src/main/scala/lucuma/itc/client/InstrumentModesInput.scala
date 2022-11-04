@@ -19,16 +19,16 @@ sealed trait InstrumentModesInput
 
 object InstrumentModesInput {
 
-  final case class GmosNorthItcInput(
+  final case class GmosNorth(
     grating: GmosNorthGrating,
     filter:  Option[GmosNorthFilter],
     fpu:     GmosNorthFpu
   ) extends InstrumentModesInput
 
-  object GmosNorthItcInput {
+  object GmosNorth {
 
-    given Encoder[GmosNorthItcInput] with
-      def apply(a: GmosNorthItcInput): Json =
+    given Encoder[GmosNorth] with
+      def apply(a: GmosNorth): Json =
         Json.obj(
         "gmosN" ->
           Json.fromFields(
@@ -41,16 +41,16 @@ object InstrumentModesInput {
 
   }
 
-  final case class GmosSouthItcInput(
+  final case class GmosSouth(
     grating: GmosSouthGrating,
     filter:  Option[GmosSouthFilter],
     fpu:     GmosSouthFpu
   ) extends InstrumentModesInput
 
-  object GmosSouthItcInput {
+  object GmosSouth {
 
-    given Encoder[GmosSouthItcInput] with
-      def apply(a: GmosSouthItcInput): Json =
+    given Encoder[GmosSouth] with
+      def apply(a: GmosSouth): Json =
         Json.obj(
         "gmosS" ->
           Json.fromFields(
@@ -66,8 +66,8 @@ object InstrumentModesInput {
   given Encoder[InstrumentModesInput] with
     def apply(a: InstrumentModesInput): Json =
       a match {
-        case a @ GmosNorthItcInput(_, _, _) => a.asJson
-        case a @ GmosSouthItcInput(_, _, _) => a.asJson
+        case a @ GmosNorth(_, _, _) => a.asJson
+        case a @ GmosSouth(_, _, _) => a.asJson
       }
 
 }
