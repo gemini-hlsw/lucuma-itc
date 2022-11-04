@@ -20,7 +20,12 @@ import org.http4s.Uri
 import org.http4s.jdkhttpclient.JdkHttpClient
 import org.typelevel.log4cats.Logger
 
+/**
+ * Client for calling the ITC on the JVM.
+ */
 trait ItcClient[F[_]] {
+
+  // TODO: chart, version, etc.
 
   def spectroscopy(
     input:    SpectroscopyModeInput,
@@ -37,6 +42,10 @@ object ItcClient {
     Ref
       .of[F, Map[SpectroscopyModeInput, Either[Throwable, List[SpectroscopyResult]]]](Map.empty)
       .map { cache =>
+
+        // TODO: Cache contains failed results and is not flushed until the next server restart.
+        // TOOD: Likely we don't want to cache failures and should flush at least when the version changes.
+
         new ItcClient[F] {
           val httpClient: Resource[F, TransactionalClient[F, Unit]] =
             for {

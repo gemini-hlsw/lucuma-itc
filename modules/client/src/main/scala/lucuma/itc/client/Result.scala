@@ -10,7 +10,7 @@ import io.circe.DecodingFailure
 import io.circe.HCursor
 
 final case class Result(
-  // mode:
+  // TODO: echo the mode from the input?
   itc: ItcResult
 )
 

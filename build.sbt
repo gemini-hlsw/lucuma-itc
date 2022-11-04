@@ -206,7 +206,6 @@ lazy val tests = project
       "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
       "com.lihaoyi"  %%% "pprint"              % pprintVersion          % Test,
       "org.http4s"    %% "http4s-blaze-server" % http4sBlazeVersion     % Test
-//      "org.http4s"     %% "http4s-blaze-client"    % http4sBlazeVersion     % Test,
     ),
     testFrameworks += MUnitFramework
   )
