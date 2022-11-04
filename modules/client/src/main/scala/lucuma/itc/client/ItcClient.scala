@@ -42,7 +42,6 @@ object ItcClient {
     Ref
       .of[F, Map[SpectroscopyModeInput, Either[Throwable, List[SpectroscopyResult]]]](Map.empty)
       .map { cache =>
-
         // TODO: Cache contains failed results and is not flushed until the next server restart.
         // TOOD: Likely we don't want to cache failures and should flush at least when the version changes.
 
