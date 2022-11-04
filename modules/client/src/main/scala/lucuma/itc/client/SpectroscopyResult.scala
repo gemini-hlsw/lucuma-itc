@@ -29,6 +29,6 @@ object SpectroscopyResult {
     def eqv(x: SpectroscopyResult, y: SpectroscopyResult): Boolean =
       x.serverVersion === y.serverVersion &&
         x.dataVersion === y.dataVersion &&
-        x.results     === y.results
+        x.results === y.results
 
 }

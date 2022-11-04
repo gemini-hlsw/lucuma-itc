@@ -12,8 +12,8 @@ import io.circe.Json
 import io.circe.parser._
 import lucuma.core.math.Wavelength
 import lucuma.itc.ItcChart.apply
-import lucuma.itc.tests.NoOpRedis
 import lucuma.itc.tests.FixedItc
+import lucuma.itc.tests.NoOpRedis
 import natchez.Trace.Implicits.noop
 import org.http4s._
 import org.http4s.circe._
@@ -23,7 +23,6 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import java.time.Duration
 import scala.concurrent.duration._
-
 
 trait GraphQLSuite extends munit.CatsEffectSuite:
   given Logger[IO] = Slf4jLogger.getLogger[IO]

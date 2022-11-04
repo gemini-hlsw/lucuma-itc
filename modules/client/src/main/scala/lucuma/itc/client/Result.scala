@@ -9,7 +9,6 @@ import io.circe.Decoder
 import io.circe.DecodingFailure
 import io.circe.HCursor
 
-
 final case class Result(
   // mode:
   itc: ItcResult

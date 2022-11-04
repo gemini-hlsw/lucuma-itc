@@ -11,7 +11,7 @@ import lucuma.core.model.SpectralDefinition.EmissionLines
 implicit def EncoderEmissionLines[T]: Encoder[EmissionLines[T]] =
   (el: EmissionLines[T]) =>
     Json.obj(
-      "lines" -> Json.arr(el.lines.toList.map { case (w, l) =>
+      "lines"                -> Json.arr(el.lines.toList.map { case (w, l) =>
         Json.obj(
           "wavelength" -> w.asJson,
           "lineWidth"  -> l.lineWidth.value.asJson,

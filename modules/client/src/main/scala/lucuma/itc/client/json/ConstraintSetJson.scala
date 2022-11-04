@@ -8,6 +8,7 @@ import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange
+
 import syntax.*
 
 given Encoder[ConstraintSet] with
@@ -20,7 +21,7 @@ given Encoder[ConstraintSet] with
       "elevationRange"  -> (a.elevationRange match {
         case ElevationRange.AirMass(min, max)             =>
           Json.obj(
-            "airMass"->
+            "airMass" ->
               Json.obj(
                 "min" -> min.value.asJson,
                 "max" -> max.value.asJson

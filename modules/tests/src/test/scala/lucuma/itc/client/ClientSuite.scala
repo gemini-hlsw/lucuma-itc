@@ -6,8 +6,8 @@ package lucuma.itc.client
 import cats.effect._
 import cats.implicits._
 import com.comcast.ip4s._
-import lucuma.itc.tests.FixedItc
 import lucuma.itc.client.ItcClient
+import lucuma.itc.tests.FixedItc
 import munit.CatsEffectSuite
 import natchez.Trace.Implicits.noop
 import org.http4s._
@@ -16,8 +16,8 @@ import org.http4s.server.Server
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 
 trait ClientSuite extends CatsEffectSuite {
 
@@ -40,12 +40,15 @@ trait ClientSuite extends CatsEffectSuite {
 
   override def munitFixtures = List(serverFixture)
 
-  def spectroscopy(in: SpectroscopyModeInput, expected: Either[String, List[SpectroscopyResult]]): IO[Unit] =
+  def spectroscopy(
+    in:       SpectroscopyModeInput,
+    expected: Either[String, List[SpectroscopyResult]]
+  ): IO[Unit] =
     Resource
       .eval {
         for {
           srv <- IO(serverFixture())
-          uri  = srv.baseUri  /  "graphql"
+          uri  = srv.baseUri / "graphql"
           cli <- ItcClient.create[IO](uri)
         } yield cli
       }

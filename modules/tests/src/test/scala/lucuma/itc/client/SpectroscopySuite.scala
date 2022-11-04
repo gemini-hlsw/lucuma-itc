@@ -8,8 +8,6 @@ import cats.syntax.option.*
 import eu.timepit.refined.auto.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
-import java.time.Duration
-import java.time.Instant
 import lucuma.core.enums.Band
 import lucuma.core.enums.CloudExtinction
 import lucuma.core.enums.GalaxySpectrum.Spiral
@@ -22,13 +20,16 @@ import lucuma.core.enums.WaterVapor
 import lucuma.core.math.BrightnessUnits.Integrated
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
-import lucuma.core.model.ElevationRange.AirMass
 import lucuma.core.model.ConstraintSet
+import lucuma.core.model.ElevationRange.AirMass
 import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED.Galaxy
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
+
+import java.time.Duration
+import java.time.Instant
 import scala.collection.immutable.SortedMap
 
 class SpectroscopySuite extends ClientSuite {
@@ -41,11 +42,13 @@ class SpectroscopySuite extends ClientSuite {
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           None,
           List(
-            Result(ItcResult.Success(
-              NonNegDuration.unsafeFrom(Duration.parse("PT1S")),
-              NonNegInt.unsafeFrom(10),
-              PosBigDecimal.unsafeFrom(10.0)
-            ))
+            Result(
+              ItcResult.Success(
+                NonNegDuration.unsafeFrom(Duration.parse("PT1S")),
+                NonNegInt.unsafeFrom(10),
+                PosBigDecimal.unsafeFrom(10.0)
+              )
+            )
           )
         )
       ).asRight

@@ -12,4 +12,3 @@ implicit val EncoderWavelength: Encoder[Wavelength] =
     Json.obj(
       "picometers" -> Wavelength.picometers.reverseGet(a).value.asJson
     )
-

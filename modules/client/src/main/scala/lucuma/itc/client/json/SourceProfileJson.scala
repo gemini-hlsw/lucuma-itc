@@ -9,18 +9,17 @@ import io.circe.syntax.*
 import lucuma.core.model.SourceProfile
 
 implicit val EncoderSourceProfile: Encoder[SourceProfile] = {
-    case SourceProfile.Point(s)       =>
-      Json.obj("point"    -> s.asJson)
+  case SourceProfile.Point(s) =>
+    Json.obj("point" -> s.asJson)
 
-    case SourceProfile.Uniform(s)     =>
-      Json.obj("uniform"  -> s.asJson)
+  case SourceProfile.Uniform(s) =>
+    Json.obj("uniform" -> s.asJson)
 
-    case SourceProfile.Gaussian(f, s) =>
-      Json.obj(
-        "gaussian" -> Json.obj(
-          "fwhm"               -> Json.obj("microarcseconds" -> f.toMicroarcseconds.asJson),
-          "spectralDefinition" -> s.asJson
-        )
+  case SourceProfile.Gaussian(f, s) =>
+    Json.obj(
+      "gaussian" -> Json.obj(
+        "fwhm"               -> Json.obj("microarcseconds" -> f.toMicroarcseconds.asJson),
+        "spectralDefinition" -> s.asJson
       )
-  }
-
+    )
+}

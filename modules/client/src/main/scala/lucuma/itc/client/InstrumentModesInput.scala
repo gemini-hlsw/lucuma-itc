@@ -30,13 +30,13 @@ object InstrumentModesInput {
     given Encoder[GmosNorth] with
       def apply(a: GmosNorth): Json =
         Json.obj(
-        "gmosN" ->
-          Json.fromFields(
-            List(
-              "grating" -> a.grating.asScreamingJson,
-              "fpu"     -> Json.obj("builtin" -> a.fpu.asScreamingJson)
-            ) ++ a.filter.map(_.asScreamingJson).tupleLeft("filter").toList
-          )
+          "gmosN" ->
+            Json.fromFields(
+              List(
+                "grating" -> a.grating.asScreamingJson,
+                "fpu"     -> Json.obj("builtin" -> a.fpu.asScreamingJson)
+              ) ++ a.filter.map(_.asScreamingJson).tupleLeft("filter").toList
+            )
         )
 
   }
@@ -52,13 +52,13 @@ object InstrumentModesInput {
     given Encoder[GmosSouth] with
       def apply(a: GmosSouth): Json =
         Json.obj(
-        "gmosS" ->
-          Json.fromFields(
-            List(
-              "grating" -> a.grating.asScreamingJson,
-              "fpu"     -> Json.obj("builtin" -> a.fpu.asScreamingJson)
-            ) ++ a.filter.map(_.asScreamingJson).tupleLeft("filter").toList
-          )
+          "gmosS" ->
+            Json.fromFields(
+              List(
+                "grating" -> a.grating.asScreamingJson,
+                "fpu"     -> Json.obj("builtin" -> a.fpu.asScreamingJson)
+              ) ++ a.filter.map(_.asScreamingJson).tupleLeft("filter").toList
+            )
         )
 
   }

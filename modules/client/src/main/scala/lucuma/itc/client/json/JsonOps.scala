@@ -11,8 +11,9 @@ import lucuma.core.util.Enumerated
 
 trait JsonOps {
 
-  extension [A: Enumerated](a: A) def asScreamingJson: Json =
-    a.tag.toScreamingSnakeCase.asJson
+  extension [A: Enumerated](a: A)
+    def asScreamingJson: Json =
+      a.tag.toScreamingSnakeCase.asJson
 
 }
 

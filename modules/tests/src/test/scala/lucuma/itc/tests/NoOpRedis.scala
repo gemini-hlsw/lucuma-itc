@@ -11,8 +11,8 @@ import dev.profunktor.redis4cats.algebra.StringCommands
 import dev.profunktor.redis4cats.effects.SetArgs
 import io.lettuce.core.RedisFuture
 import io.lettuce.core.cluster.api.async.RedisClusterAsyncCommands
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 
 class NoOpRedis[F[_]: ApplicativeThrow, K, V] extends StringCommands[F, K, V] {
 

@@ -20,8 +20,8 @@ import lucuma.itc.SeriesDataType
 import lucuma.itc.SignalToNoiseCalculation
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 
 object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
 
@@ -46,15 +46,15 @@ object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
         "1",
         NonEmptyList.of(
           ItcCcd(1,
-            1,
-            2,
-            2,
-            Wavelength.fromNanometers(1001).get,
-            Wavelength.fromNanometers(1001).get,
-            3,
-            4,
-            5,
-            Nil
+                 1,
+                 2,
+                 2,
+                 Wavelength.fromNanometers(1001).get,
+                 Wavelength.fromNanometers(1001).get,
+                 3,
+                 4,
+                 5,
+                 Nil
           )
         ),
         NonEmptyList.of(
@@ -64,8 +64,8 @@ object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
                 ChartType.S2NChart,
                 List(
                   ItcSeries("title",
-                    SeriesDataType.FinalS2NData,
-                    List((1.0, 1000.0), (2.0, 1001.0))
+                            SeriesDataType.FinalS2NData,
+                            List((1.0, 1000.0), (2.0, 1001.0))
                   )
                 )
               )

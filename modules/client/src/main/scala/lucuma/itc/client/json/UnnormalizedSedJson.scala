@@ -7,37 +7,38 @@ import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.model.UnnormalizedSED
+
 import syntax.*
 
 implicit val EncoderUnnormalizedSED: Encoder[UnnormalizedSED] = {
-  case UnnormalizedSED.StellarLibrary(s)      =>
+  case UnnormalizedSED.StellarLibrary(s) =>
     Json.obj("stellarLibrary" -> s.asScreamingJson)
 
-  case UnnormalizedSED.CoolStarModel(s)       =>
+  case UnnormalizedSED.CoolStarModel(s) =>
     Json.obj("coolStar" -> s.asScreamingJson)
 
-  case UnnormalizedSED.Galaxy(s)              =>
+  case UnnormalizedSED.Galaxy(s) =>
     Json.obj("galaxy" -> s.asScreamingJson)
 
-  case UnnormalizedSED.Planet(s)              =>
+  case UnnormalizedSED.Planet(s) =>
     Json.obj("planet" -> s.asScreamingJson)
 
-  case UnnormalizedSED.Quasar(s)              =>
+  case UnnormalizedSED.Quasar(s) =>
     Json.obj("quasar" -> s.asScreamingJson)
 
-  case UnnormalizedSED.HIIRegion(s)           =>
+  case UnnormalizedSED.HIIRegion(s) =>
     Json.obj("hiiRegion" -> s.asScreamingJson)
 
-  case UnnormalizedSED.PlanetaryNebula(s)     =>
+  case UnnormalizedSED.PlanetaryNebula(s) =>
     Json.obj("planetaryNebula" -> s.asScreamingJson)
 
-  case UnnormalizedSED.PowerLaw(index)        =>
+  case UnnormalizedSED.PowerLaw(index) =>
     Json.obj("powerLaw" -> index.asJson)
 
   case UnnormalizedSED.BlackBody(temperature) =>
     Json.obj("blackBodyTempK" -> temperature.value.value.asJson)
 
-  case UnnormalizedSED.UserDefined(fs)        =>
+  case UnnormalizedSED.UserDefined(fs) =>
     Json.arr(fs.toNel.toList.map { case (w, d) =>
       Json.obj(
         "wavelength" -> w.asJson,
@@ -45,6 +46,3 @@ implicit val EncoderUnnormalizedSED: Encoder[UnnormalizedSED] = {
       )
     }: _*)
 }
-
-
-

@@ -9,9 +9,9 @@ import io.circe.syntax.*
 import lucuma.core.model.SpectralDefinition
 
 implicit def EncoderSpectralDefinition[T]: Encoder[SpectralDefinition[T]] = {
-  case bn@SpectralDefinition.BandNormalized(_, _) =>
+  case bn @ SpectralDefinition.BandNormalized(_, _) =>
     Json.obj("bandNormalized" -> bn.asJson)
 
-  case el@SpectralDefinition.EmissionLines(_, _)  =>
+  case el @ SpectralDefinition.EmissionLines(_, _) =>
     Json.obj("emissionLines" -> el.asJson)
 }

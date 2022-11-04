@@ -157,8 +157,8 @@ lazy val client = project
   .dependsOn(model.jvm)
   .settings(commonSettings)
   .settings(
-    name              := "lucuma-itc-client",
-    libraryDependencies ++=Seq(
+    name := "lucuma-itc-client",
+    libraryDependencies ++= Seq(
       "edu.gemini"     %% "lucuma-core"            % lucumaCoreVersion,
       "edu.gemini"    %%% "lucuma-refined"         % lucumaRefinedVersion,
       "org.typelevel"  %% "cats-core"              % catsVersion,
@@ -196,7 +196,6 @@ lazy val benchmark = project
 
 val MUnitFramework = new TestFramework("munit.Framework")
 
-
 lazy val tests = project
   .in(file("modules/tests"))
   .enablePlugins(NoPublishPlugin)
@@ -204,9 +203,9 @@ lazy val tests = project
   .settings(
     name := "lucuma-itc-tests",
     libraryDependencies ++= Seq(
-      "org.typelevel"  %% "munit-cats-effect-3"    % munitCatsEffectVersion % Test,
-      "com.lihaoyi"   %%% "pprint"                 % pprintVersion          % Test,
-      "org.http4s"     %% "http4s-blaze-server"    % http4sBlazeVersion     % Test,
+      "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
+      "com.lihaoyi"  %%% "pprint"              % pprintVersion          % Test,
+      "org.http4s"    %% "http4s-blaze-server" % http4sBlazeVersion     % Test
 //      "org.http4s"     %% "http4s-blaze-client"    % http4sBlazeVersion     % Test,
     ),
     testFrameworks += MUnitFramework

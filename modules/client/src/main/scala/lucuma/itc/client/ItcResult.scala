@@ -44,7 +44,8 @@ object ItcResult {
       c.downField("resultType").as[String].flatMap {
         case "Success" => c.as[Success].widen[ItcResult]
         case "Error"   => c.as[Error].widen[ItcResult]
-        case rt        => DecodingFailure(s"Couldn't parse ItcResult as success or error: $rt", c.history).asLeft
+        case rt        =>
+          DecodingFailure(s"Couldn't parse ItcResult as success or error: $rt", c.history).asLeft
       }
 
   given Eq[ItcResult] with
@@ -96,25 +97,39 @@ object ItcResult {
     given Decoder[Success] with
       def apply(c: HCursor): Decoder.Result[Success] =
         for {
-          t <- c.downField("exposureTime").downField("microseconds").as[Long].flatMap(l => NonNegDuration.from(l.microseconds).leftMap(m => DecodingFailure(m, c.history)))
-          n <- c.downField("exposures").as[Int].flatMap(n => NonNegInt.from(n).leftMap(m => DecodingFailure(m, c.history)))
-          s <- c.downField("signalToNoise").as[BigDecimal].flatMap(d => PosBigDecimal.from(d).leftMap(m => DecodingFailure(m, c.history)))
+          t <- c.downField("exposureTime")
+                 .downField("microseconds")
+                 .as[Long]
+                 .flatMap(l =>
+                   NonNegDuration.from(l.microseconds).leftMap(m => DecodingFailure(m, c.history))
+                 )
+          n <- c.downField("exposures")
+                 .as[Int]
+                 .flatMap(n => NonNegInt.from(n).leftMap(m => DecodingFailure(m, c.history)))
+          s <- c.downField("signalToNoise")
+                 .as[BigDecimal]
+                 .flatMap(d => PosBigDecimal.from(d).leftMap(m => DecodingFailure(m, c.history)))
         } yield Success(t, n, s)
 
     given Eq[Success] =
-      Eq.by { a => (
-        a.exposureTime.value.toNanos,
-        a.exposures,
-        a.signalToNoise.value
-      )}
+      Eq.by { a =>
+        (
+          a.exposureTime.value.toNanos,
+          a.exposures,
+          a.signalToNoise.value
+        )
+      }
 
   }
 
   def error(msg: String): ItcResult =
     Error(msg)
 
-  def success(exposureTime: NonNegDuration, exposures: NonNegInt, signalToNoise: PosBigDecimal): ItcResult =
+  def success(
+    exposureTime:  NonNegDuration,
+    exposures:     NonNegInt,
+    signalToNoise: PosBigDecimal
+  ): ItcResult =
     Success(exposureTime, exposures, signalToNoise)
 
 }
-
