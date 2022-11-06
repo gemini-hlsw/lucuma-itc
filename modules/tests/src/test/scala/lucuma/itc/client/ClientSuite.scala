@@ -12,6 +12,8 @@ import munit.CatsEffectSuite
 import natchez.Trace.Implicits.noop
 import org.http4s._
 import org.http4s.blaze.server.BlazeServerBuilder
+import org.http4s.jdkhttpclient.JdkHttpClient
+import org.http4s.client.Client
 import org.http4s.server.Server
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
@@ -40,23 +42,27 @@ trait ClientSuite extends CatsEffectSuite {
 
   override def munitFixtures = List(serverFixture)
 
+  private def itcClientFor(c: Client[IO]): IO[ItcClient[IO]] =
+    for {
+      srv <- IO(serverFixture())
+      uri  = srv.baseUri / "graphql"
+      cli <- ItcClient.create[IO](uri, c)
+    } yield cli
+
+  private val itcClient: Resource[IO, ItcClient[IO]] =
+    for {
+      h <- JdkHttpClient.simple[IO]
+      c <- Resource.eval(itcClientFor(h))
+    } yield c
+
   def spectroscopy(
     in:       SpectroscopyModeInput,
     expected: Either[String, List[SpectroscopyResult]]
   ): IO[Unit] =
-    Resource
-      .eval {
-        for {
-          srv <- IO(serverFixture())
-          uri  = srv.baseUri / "graphql"
-          cli <- ItcClient.create[IO](uri)
-        } yield cli
-      }
-      .use { client =>
-        client
-          .spectroscopy(in)
-          .map(_.leftMap(_.getMessage))
-          .assertEquals(expected)
-      }
+    itcClient.use {
+      _.spectroscopy(in)
+       .map(_.leftMap(_.getMessage))
+       .assertEquals(expected)
+    }
 
 }

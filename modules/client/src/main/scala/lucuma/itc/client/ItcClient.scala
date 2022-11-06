@@ -17,6 +17,7 @@ import clue.http4s.Http4sBackend
 import io.circe.syntax.*
 import lucuma.core.model.Observation
 import org.http4s.Uri
+import org.http4s.client.Client
 import org.http4s.jdkhttpclient.JdkHttpClient
 import org.typelevel.log4cats.Logger
 
@@ -37,7 +38,8 @@ trait ItcClient[F[_]] {
 object ItcClient {
 
   def create[F[_]: Async: Logger](
-    uri: Uri
+    uri:    Uri,
+    client: Client[F]
   ): F[ItcClient[F]] =
     Ref
       .of[F, Map[SpectroscopyModeInput, Either[Throwable, List[SpectroscopyResult]]]](Map.empty)
@@ -47,10 +49,7 @@ object ItcClient {
 
         new ItcClient[F] {
           val httpClient: Resource[F, TransactionalClient[F, Unit]] =
-            for {
-              b <- JdkHttpClient.simple.map(Http4sBackend[F](_))
-              c <- Resource.eval(TransactionalClient.of[F, Unit](uri)(Async[F], b, Logger[F]))
-            } yield c
+            Resource.eval(TransactionalClient.of[F, Unit](uri)(Async[F], Http4sBackend(client), Logger[F]))
 
           override def spectroscopy(
             input:    SpectroscopyModeInput,
@@ -65,7 +64,7 @@ object ItcClient {
 
             for {
               _    <- Logger[F].info(s"ITC Input: \n${input.asJson.spaces2}")
-              cval <- if (useCache) cache.get.map(_.get(input)) else Async[F].pure(None)
+              cval <- if (useCache) cache.get.map(_.get(input)) else Applicative[F].pure(None)
               res  <- cval.fold(callAndCache)(Applicative[F].pure)
               _    <- Logger[F].info(s"ITC Result (${cval.fold("remote")(_ => "cached")}):\n$res")
             } yield res
