@@ -8,8 +8,8 @@ import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.model.SpectralDefinition.EmissionLines
 
-implicit def EncoderEmissionLines[T]: Encoder[EmissionLines[T]] =
-  (el: EmissionLines[T]) =>
+given [T]: Encoder[EmissionLines[T]] with
+  def apply (el: EmissionLines[T]): Json =
     Json.obj(
       "lines"                -> Json.arr(el.lines.toList.map { case (w, l) =>
         Json.obj(

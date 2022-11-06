@@ -7,5 +7,6 @@ import eu.timepit.refined.types.numeric.PosBigDecimal
 import io.circe.*
 import io.circe.syntax.*
 
-implicit val EncoderPosBigDecimal: Encoder[PosBigDecimal] =
-  (pbd: PosBigDecimal) => pbd.value.asJson
+given Encoder[PosBigDecimal] with
+  def apply(pbd: PosBigDecimal): Json =
+    pbd.value.asJson

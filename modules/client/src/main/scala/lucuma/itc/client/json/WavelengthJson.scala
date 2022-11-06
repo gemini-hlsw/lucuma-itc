@@ -7,8 +7,8 @@ import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength
 
-implicit val EncoderWavelength: Encoder[Wavelength] =
-  (a: Wavelength) =>
+given Encoder[Wavelength] with
+  def apply(a: Wavelength): Json =
     Json.obj(
       "picometers" -> Wavelength.picometers.reverseGet(a).value.asJson
     )

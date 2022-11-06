@@ -8,7 +8,7 @@ import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.model.SourceProfile
 
-implicit val EncoderSourceProfile: Encoder[SourceProfile] = {
+given Encoder[SourceProfile] = {
   case SourceProfile.Point(s) =>
     Json.obj("point" -> s.asJson)
 

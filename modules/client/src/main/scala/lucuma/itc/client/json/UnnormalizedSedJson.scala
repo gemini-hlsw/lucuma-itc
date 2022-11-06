@@ -10,7 +10,7 @@ import lucuma.core.model.UnnormalizedSED
 
 import syntax.*
 
-implicit val EncoderUnnormalizedSED: Encoder[UnnormalizedSED] = {
+given Encoder[UnnormalizedSED] = {
   case UnnormalizedSED.StellarLibrary(s) =>
     Json.obj("stellarLibrary" -> s.asScreamingJson)
 
