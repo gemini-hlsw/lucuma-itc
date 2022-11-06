@@ -12,8 +12,8 @@ import munit.CatsEffectSuite
 import natchez.Trace.Implicits.noop
 import org.http4s._
 import org.http4s.blaze.server.BlazeServerBuilder
-import org.http4s.jdkhttpclient.JdkHttpClient
 import org.http4s.client.Client
+import org.http4s.jdkhttpclient.JdkHttpClient
 import org.http4s.server.Server
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
@@ -61,8 +61,8 @@ trait ClientSuite extends CatsEffectSuite {
   ): IO[Unit] =
     itcClient.use {
       _.spectroscopy(in)
-       .map(_.leftMap(_.getMessage))
-       .assertEquals(expected)
+        .map(_.leftMap(_.getMessage))
+        .assertEquals(expected)
     }
 
 }

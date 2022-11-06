@@ -49,7 +49,9 @@ object ItcClient {
 
         new ItcClient[F] {
           val httpClient: Resource[F, TransactionalClient[F, Unit]] =
-            Resource.eval(TransactionalClient.of[F, Unit](uri)(Async[F], Http4sBackend(client), Logger[F]))
+            Resource.eval(
+              TransactionalClient.of[F, Unit](uri)(Async[F], Http4sBackend(client), Logger[F])
+            )
 
           override def spectroscopy(
             input:    SpectroscopyModeInput,
