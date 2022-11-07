@@ -35,7 +35,7 @@ object GmosFpuInput {
         Json.obj(
           a.fpu.fold(
             m => "customMask" -> m.asJson,
-            b => "builtin"    -> b.asScreamingJson
+            b => "builtin" -> b.asScreamingJson
           )
         )
 
@@ -62,11 +62,10 @@ object GmosFpuInput {
         Json.obj(
           a.fpu.fold(
             m => "customMask" -> m.asJson,
-            b => "builtin"    -> b.asScreamingJson
+            b => "builtin" -> b.asScreamingJson
           )
         )
 
   }
-
 
 }

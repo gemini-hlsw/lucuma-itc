@@ -20,7 +20,7 @@ object GmosCustomMaskInput {
     def apply(a: GmosCustomMaskInput): Json =
       Json.obj(
         "slitWidth" -> a.slitWidth.asScreamingJson,
-        "filename"  -> a.fileName.asJson  // NOTE: all lower case tag "filename"
+        "filename"  -> a.fileName.asJson // NOTE: all lower case tag "filename"
       )
 
 }
