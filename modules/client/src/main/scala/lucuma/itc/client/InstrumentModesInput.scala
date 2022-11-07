@@ -22,7 +22,7 @@ object InstrumentModesInput {
   final case class GmosNorth(
     grating: GmosNorthGrating,
     filter:  Option[GmosNorthFilter],
-    fpu:     GmosNorthFpu
+    fpu:     GmosFpuInput.North
   ) extends InstrumentModesInput
 
   object GmosNorth {
@@ -34,7 +34,7 @@ object InstrumentModesInput {
             Json.fromFields(
               List(
                 "grating" -> a.grating.asScreamingJson,
-                "fpu"     -> Json.obj("builtin" -> a.fpu.asScreamingJson)
+                "fpu"     -> a.fpu.asJson
               ) ++ a.filter.map(_.asScreamingJson).tupleLeft("filter").toList
             )
         )
@@ -44,7 +44,7 @@ object InstrumentModesInput {
   final case class GmosSouth(
     grating: GmosSouthGrating,
     filter:  Option[GmosSouthFilter],
-    fpu:     GmosSouthFpu
+    fpu:     GmosFpuInput.South
   ) extends InstrumentModesInput
 
   object GmosSouth {
@@ -56,7 +56,7 @@ object InstrumentModesInput {
             Json.fromFields(
               List(
                 "grating" -> a.grating.asScreamingJson,
-                "fpu"     -> Json.obj("builtin" -> a.fpu.asScreamingJson)
+                "fpu"     -> a.fpu.asJson
               ) ++ a.filter.map(_.asScreamingJson).tupleLeft("filter").toList
             )
         )

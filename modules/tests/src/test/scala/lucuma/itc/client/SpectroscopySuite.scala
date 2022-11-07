@@ -77,7 +77,7 @@ object SpectroscopySuite {
         InstrumentModesInput.GmosNorth(
           GmosNorthGrating.B1200_G5301,
           GmosNorthFilter.GPrime.some,
-          GmosNorthFpu.LongSlit_0_25
+          GmosFpuInput.North.builtin(GmosNorthFpu.LongSlit_0_25)
         )
       )
     )
