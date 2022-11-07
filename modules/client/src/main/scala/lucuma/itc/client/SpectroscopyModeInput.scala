@@ -22,7 +22,7 @@ final case class SpectroscopyModeInput(
   band:           Band,
   radialVelocity: RadialVelocity,
   constraints:    ConstraintSet,
-  modes:          List[InstrumentModesInput]
+  modes:          List[InstrumentMode]
 )
 
 object SpectroscopyModeInput {

@@ -74,10 +74,10 @@ object SpectroscopySuite {
         AirMass.Default
       ),
       List(
-        InstrumentModesInput.GmosNorth(
+        InstrumentMode.GmosNorth(
           GmosNorthGrating.B1200_G5301,
           GmosNorthFilter.GPrime.some,
-          GmosFpuInput.North.builtin(GmosNorthFpu.LongSlit_0_25)
+          GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25)
         )
       )
     )

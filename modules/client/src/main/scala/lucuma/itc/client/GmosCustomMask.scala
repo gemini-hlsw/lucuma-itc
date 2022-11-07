@@ -3,24 +3,34 @@
 
 package lucuma.itc.client
 
+import io.circe.Decoder
+import io.circe.DecodingFailure
 import io.circe.Encoder
+import io.circe.HCursor
 import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.enums.GmosCustomSlitWidth
 import lucuma.itc.client.json.syntax.*
 
-final case class GmosCustomMaskInput(
+final case class GmosCustomMask(
   slitWidth: GmosCustomSlitWidth,
   fileName:  String
 )
 
-object GmosCustomMaskInput {
+object GmosCustomMask {
 
-  given Encoder[GmosCustomMaskInput] with
-    def apply(a: GmosCustomMaskInput): Json =
+  given Encoder[GmosCustomMask] with
+    def apply(a: GmosCustomMask): Json =
       Json.obj(
         "slitWidth" -> a.slitWidth.asScreamingJson,
         "filename"  -> a.fileName.asJson // NOTE: all lower case tag "filename"
       )
+
+  given Decoder[GmosCustomMask] with
+    def apply(c: HCursor): Decoder.Result[GmosCustomMask] =
+      for {
+        s <- c.downField("slitWidth").as[GmosCustomSlitWidth]
+        f <- c.downField("filename").as[String]
+      } yield GmosCustomMask(s, f)
 
 }
