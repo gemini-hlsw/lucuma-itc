@@ -151,9 +151,10 @@ lazy val service = project
   )
   .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
 
-lazy val client = project
+lazy val client = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Pure)
   .in(file("modules/client"))
-  .dependsOn(model.jvm)
+  .dependsOn(model)
   .settings(commonSettings)
   .settings(
     name := "lucuma-itc-client",
@@ -198,7 +199,7 @@ val MUnitFramework = new TestFramework("munit.Framework")
 lazy val tests = project
   .in(file("modules/tests"))
   .enablePlugins(NoPublishPlugin)
-  .dependsOn(service, client)
+  .dependsOn(service, client.jvm)
   .settings(
     name := "lucuma-itc-tests",
     libraryDependencies ++= Seq(
