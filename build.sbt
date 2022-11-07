@@ -7,7 +7,7 @@ val circeVersion                = "0.14.3"
 val cirisVersion                = "3.0.0"
 val clueVersion                 = "0.23.1"
 val http4sVersion               = "0.23.16"
-val http4sJdkHttpClientVersion  = "0.5.0"
+val http4sJdkHttpClientVersion  = "0.7.0"
 val fs2Version                  = "3.3.0"
 val kindProjectorVersion        = "0.13.2"
 val lucumaCoreVersion           = "0.58.0"
@@ -151,6 +151,36 @@ lazy val service = project
   )
   .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
 
+lazy val client = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("modules/client"))
+  .dependsOn(model)
+  .settings(commonSettings)
+  .settings(
+    name := "lucuma-itc-client",
+    libraryDependencies ++= Seq(
+      "edu.gemini"     %% "lucuma-core"            % lucumaCoreVersion,
+      "edu.gemini"    %%% "lucuma-refined"         % lucumaRefinedVersion,
+      "org.typelevel"  %% "cats-core"              % catsVersion,
+      "org.typelevel"  %% "cats-effect"            % catsEffectVersion,
+      "org.http4s"     %% "http4s-jdk-http-client" % http4sJdkHttpClientVersion,
+      "org.http4s"     %% "http4s-circe"           % http4sVersion,
+      "org.http4s"     %% "http4s-dsl"             % http4sVersion,
+      "io.circe"       %% "circe-literal"          % circeVersion,
+      "edu.gemini"     %% "clue-model"             % clueVersion,
+      "edu.gemini"     %% "clue-http4s"            % clueVersion,
+      "edu.gemini"     %% "clue-core"              % clueVersion,
+      "io.circe"       %% "circe-generic"          % circeVersion,
+      "org.tpolecat"   %% "natchez-http4s"         % natcchezHttp4sVersion,
+      "org.typelevel"  %% "log4cats-slf4j"         % log4catsVersion,
+      "org.typelevel" %%% "spire"                  % spireVersion,
+      "org.typelevel" %%% "spire-extras"           % spireVersion,
+      "org.typelevel" %%% "kittens"                % kittensVersion,
+      "org.typelevel"  %% "munit-cats-effect-3"    % munitCatsEffectVersion % Test,
+      "com.lihaoyi"   %%% "pprint"                 % pprintVersion          % Test
+    )
+  )
+
 lazy val benchmark = project
   .in(file("modules/benchmarks"))
   .enablePlugins(GatlingPlugin)
@@ -163,3 +193,18 @@ lazy val benchmark = project
     )
   )
   .dependsOn(service)
+
+val MUnitFramework = new TestFramework("munit.Framework")
+
+lazy val tests = project
+  .in(file("modules/tests"))
+  .enablePlugins(NoPublishPlugin)
+  .dependsOn(service, client.jvm)
+  .settings(
+    name := "lucuma-itc-tests",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
+      "com.lihaoyi"  %%% "pprint"              % pprintVersion          % Test
+    ),
+    testFrameworks += MUnitFramework
+  )
