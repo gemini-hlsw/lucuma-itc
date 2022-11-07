@@ -11,8 +11,8 @@ import lucuma.itc.tests.FixedItc
 import munit.CatsEffectSuite
 import natchez.Trace.Implicits.noop
 import org.http4s._
-import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.client.Client
+import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.jdkhttpclient.JdkHttpClient
 import org.http4s.server.Server
 import org.http4s.server.websocket.WebSocketBuilder2
@@ -31,10 +31,16 @@ trait ClientSuite extends CatsEffectSuite {
 
   private val server: Resource[IO, Server] =
     httpApp.flatMap { app =>
-      BlazeServerBuilder[IO]
+      EmberServerBuilder
+        .default[IO]
+        .withHost(ipv4"0.0.0.0")
         .withHttpWebSocketApp(app)
-        .bindAny()
-        .resource
+        .withShutdownTimeout(2.seconds)
+        .build
+//      BlazeServerBuilder[IO]
+//        .withHttpWebSocketApp(app)
+//        .bindAny()
+//        .resource
     }
 
   private val serverFixture: Fixture[Server] =

@@ -7,7 +7,6 @@ val circeVersion                = "0.14.3"
 val cirisVersion                = "3.0.0"
 val clueVersion                 = "0.23.1"
 val http4sVersion               = "0.23.16"
-val http4sBlazeVersion          = "0.23.12"
 val http4sJdkHttpClientVersion  = "0.7.0"
 val fs2Version                  = "3.3.0"
 val kindProjectorVersion        = "0.13.2"
@@ -204,8 +203,7 @@ lazy val tests = project
     name := "lucuma-itc-tests",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
-      "com.lihaoyi"  %%% "pprint"              % pprintVersion          % Test,
-      "org.http4s"    %% "http4s-blaze-server" % http4sBlazeVersion     % Test
+      "com.lihaoyi"  %%% "pprint"              % pprintVersion          % Test
     ),
     testFrameworks += MUnitFramework
   )
