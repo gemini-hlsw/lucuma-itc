@@ -3,6 +3,8 @@
 
 package lucuma.itc.client
 
+import cats.Eq
+import cats.syntax.eq.*
 import io.circe.Decoder
 import io.circe.DecodingFailure
 import io.circe.Encoder
@@ -33,4 +35,8 @@ object GmosCustomMask {
         f <- c.downField("filename").as[String]
       } yield GmosCustomMask(s, f)
 
+  given Eq[GmosCustomMask] with
+    def eqv(x: GmosCustomMask, y: GmosCustomMask): Boolean =
+      (x.slitWidth === y.slitWidth) &&
+        (x.fileName === y.fileName)
 }

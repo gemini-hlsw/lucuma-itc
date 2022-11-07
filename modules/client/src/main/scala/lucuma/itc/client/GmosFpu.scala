@@ -3,7 +3,9 @@
 
 package lucuma.itc.client
 
+import cats.Eq
 import cats.syntax.either.*
+import cats.syntax.eq.*
 import cats.syntax.option.*
 import io.circe.Decoder
 import io.circe.DecodingFailure
@@ -41,6 +43,10 @@ object GmosFpu {
     given Decoder[North] =
       decoder[North, GmosNorthFpu](North(_))
 
+    given Eq[North] with
+      def eqv(x: North, y: North): Boolean =
+        x.fpu === y.fpu
+
   }
 
   final case class South(fpu: Either[GmosCustomMask, GmosSouthFpu]) {
@@ -65,6 +71,11 @@ object GmosFpu {
 
     given Decoder[South] =
       decoder[South, GmosSouthFpu](South(_))
+
+    given Eq[South] with
+      def eqv(x: South, y: South): Boolean =
+        x.fpu === y.fpu
+
   }
 
   private def json[U: Enumerated](e: Either[GmosCustomMask, U]): Json =

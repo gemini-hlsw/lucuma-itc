@@ -3,7 +3,9 @@
 
 package lucuma.itc.client
 
+import cats.Eq
 import cats.syntax.either.*
+import cats.syntax.eq.*
 import cats.syntax.functor.*
 import io.circe.Decoder
 import io.circe.DecodingFailure
@@ -48,6 +50,12 @@ object InstrumentMode {
           u <- c.downField("fpu").as[GmosFpu.North]
         } yield GmosNorth(g, f, u)
 
+    given Eq[GmosNorth] with
+      def eqv(x: GmosNorth, y: GmosNorth): Boolean =
+        (x.grating === y.grating) &&
+          (x.filter === y.filter) &&
+          (x.fpu === y.fpu)
+
   }
 
   final case class GmosSouth(
@@ -75,6 +83,12 @@ object InstrumentMode {
           u <- c.downField("fpu").as[GmosFpu.South]
         } yield GmosSouth(g, f, u)
 
+    given Eq[GmosSouth] with
+      def eqv(x: GmosSouth, y: GmosSouth): Boolean =
+        (x.grating === y.grating) &&
+          (x.filter === y.filter) &&
+          (x.fpu === y.fpu)
+
   }
 
   given Encoder[InstrumentMode] with
@@ -95,4 +109,12 @@ object InstrumentMode {
           case _               => DecodingFailure("Expected exactly one of 'gmosN' or 'gmosS'.", c.history).asLeft
         })
       } yield m
+
+   given Eq[InstrumentMode] with
+     def eqv(x: InstrumentMode, y: InstrumentMode): Boolean =
+       (x, y) match {
+         case (x0: GmosNorth, y0: GmosNorth) => x0 === y0
+         case (x0: GmosSouth, y0: GmosSouth) => x0 === y0
+         case _                              => false
+       }
 }

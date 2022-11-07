@@ -15,6 +15,7 @@ import lucuma.core.enums.GmosNorthFilter
 import lucuma.core.enums.GmosNorthFpu
 import lucuma.core.enums.GmosNorthGrating
 import lucuma.core.enums.ImageQuality
+import lucuma.core.enums.Instrument
 import lucuma.core.enums.SkyBackground
 import lucuma.core.enums.WaterVapor
 import lucuma.core.math.BrightnessUnits.Integrated
@@ -43,6 +44,16 @@ class SpectroscopySuite extends ClientSuite {
           None,
           List(
             Result(
+              ObservingModeSpectroscopy(
+                Wavelength.fromPicometers.getOption(1).get,
+                1.0,
+                InstrumentMode.GmosNorth(
+                  GmosNorthGrating.B1200_G5301,
+                  Some(GmosNorthFilter.GPrime),
+                  GmosFpu.North(GmosNorthFpu.LongSlit_0_25.asRight)
+                ),
+                Instrument.GmosNorth
+              ),
               ItcResult.Success(
                 NonNegDuration.unsafeFrom(Duration.parse("PT1S")),
                 NonNegInt.unsafeFrom(10),

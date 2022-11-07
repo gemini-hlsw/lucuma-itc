@@ -10,18 +10,23 @@ import io.circe.DecodingFailure
 import io.circe.HCursor
 
 final case class Result(
-  // TODO: echo the mode from the input?
-  itc: ItcResult
+  mode: ObservingModeSpectroscopy,
+  itc:  ItcResult
 )
 
 object Result {
 
   given Decoder[Result] with
     def apply(c: HCursor): Decoder.Result[Result] =
-      c.downField("itc").as[ItcResult].map(Result(_))
+      for {
+        o <- c.downField("mode").as[ObservingModeSpectroscopy]
+        i <- c.downField("itc").as[ItcResult]
+      } yield Result(o, i)
+
 
   given Eq[Result] with
     def eqv(x: Result, y: Result): Boolean =
-      x.itc === y.itc
+      (x.mode === y.mode) &&
+        (x.itc === y.itc)
 
 }

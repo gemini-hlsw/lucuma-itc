@@ -22,6 +22,37 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
           serverVersion
           dataVersion
           results {
+            mode {
+              wavelength {
+                picometers
+              }
+              resolution
+              params {
+                ... on GmosNITCParams {
+                  grating
+                  fpu {
+                    customMask {
+                      filename
+                      slitWidth
+                    }
+                    builtin
+                  }
+                  filter
+                }
+                ... on GmosSITCParams {
+                  grating
+                  fpu {
+                    customMask {
+                      filename
+                      slitWidth
+                    }
+                    builtin
+                  }
+                  filter
+                }
+              }
+              instrument
+            }
             itc {
               ... on ItcSuccess {
                 exposures
