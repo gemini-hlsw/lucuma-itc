@@ -4,6 +4,7 @@
 package lucuma.itc.client
 
 import cats.Applicative
+import cats.ApplicativeError
 import cats.effect.Async
 import cats.effect.Ref
 import cats.effect.Resource
@@ -32,9 +33,9 @@ trait ItcClient[F[_]] {
   def spectroscopy(
     input:    SpectroscopyModeInput,
     useCache: Boolean = true
-  ): F[Either[Throwable, SpectroscopyResult]]
+  ): F[SpectroscopyResult]
 
-  def versions: F[Either[Throwable, ItcVersions]]
+  def versions: F[ItcVersions]
 
 }
 
@@ -45,10 +46,9 @@ object ItcClient {
     client: Client[F]
   ): F[ItcClient[F]] =
     Ref
-      .of[F, Map[SpectroscopyModeInput, Either[Throwable, SpectroscopyResult]]](Map.empty)
+      .of[F, Map[SpectroscopyModeInput, SpectroscopyResult]](Map.empty)
       .map { cache =>
-        // TODO: Cache contains failed results and is not flushed until the next server restart.
-        // TOOD: Likely we don't want to cache failures and should flush at least when the version changes.
+        // TOOD: Likely we should flush at least when the version changes.
 
         new ItcClient[F] {
           val httpClient: Resource[F, TransactionalClient[F, Unit]] =
@@ -59,15 +59,15 @@ object ItcClient {
           override def spectroscopy(
             input:    SpectroscopyModeInput,
             useCache: Boolean = true
-          ): F[Either[Throwable, SpectroscopyResult]] = {
+          ): F[SpectroscopyResult] = {
 
-            val callAndCache: F[Either[Throwable, SpectroscopyResult]] =
+            val callAndCache: F[SpectroscopyResult] =
               for {
-                r <- httpClient.use(_.request(SpectroscopyQuery)(input)).attempt
-                rʹ = r.flatMap(
-                       _.headOption.toRight(new RuntimeException("No results returned by ITC."))
-                     )
-                _ <- cache.update(_ + (input -> rʹ))
+                r  <- httpClient.use(_.request(SpectroscopyQuery)(input))
+                rʹ <-
+                  ApplicativeError[F, Throwable]
+                    .fromOption(r.headOption, new RuntimeException("No results returned by ITC."))
+                _  <- cache.update(_ + (input -> rʹ))
               } yield rʹ
 
             for {
@@ -78,8 +78,8 @@ object ItcClient {
             } yield res
           }
 
-          override val versions: F[Either[Throwable, ItcVersions]] =
-            httpClient.use(_.request(VersionsQuery)).attempt
+          override val versions: F[ItcVersions] =
+            httpClient.use(_.request(VersionsQuery))
 
         }
       }
