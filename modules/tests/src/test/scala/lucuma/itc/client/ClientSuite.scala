@@ -66,9 +66,17 @@ trait ClientSuite extends CatsEffectSuite {
     expected: Either[String, SpectroscopyResult]
   ): IO[Unit] =
     itcClient.use {
-      _.spectroscopy(in)
+      _.spectroscopy(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
     }
 
+  def versions(
+    expected: Either[String, ItcVersions]
+  ): IO[Unit] =
+    itcClient.use {
+      _.versions.attempt
+        .map(_.leftMap(_.getMessage))
+        .assertEquals(expected)
+    }
 }

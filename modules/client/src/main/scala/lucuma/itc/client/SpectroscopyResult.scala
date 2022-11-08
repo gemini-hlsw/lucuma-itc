@@ -11,9 +11,8 @@ import io.circe.DecodingFailure
 import io.circe.HCursor
 
 final case class SpectroscopyResult(
-  serverVersion: String,
-  dataVersion:   Option[String],
-  result:        Option[ItcResult]
+  versions: ItcVersions,
+  result:   Option[ItcResult]
 )
 
 object SpectroscopyResult {
@@ -21,15 +20,13 @@ object SpectroscopyResult {
   given Decoder[SpectroscopyResult] with
     def apply(c: HCursor): Decoder.Result[SpectroscopyResult] =
       for {
-        s <- c.downField("serverVersion").as[String]
-        d <- c.downField("dataVersion").as[Option[String]]
+        v <- c.as[ItcVersions]
         r <- c.downField("results").downArray.downField("itc").success.traverse(_.as[ItcResult])
-      } yield SpectroscopyResult(s, d, r)
+      } yield SpectroscopyResult(v, r)
 
   given Eq[SpectroscopyResult] with
     def eqv(x: SpectroscopyResult, y: SpectroscopyResult): Boolean =
-      x.serverVersion === y.serverVersion &&
-        x.dataVersion === y.dataVersion &&
+      x.versions === y.versions &&
         x.result === y.result
 
 }
