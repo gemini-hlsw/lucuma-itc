@@ -12,6 +12,7 @@ import cats.syntax.apply.*
 import cats.syntax.either.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
+import cats.syntax.option.*
 import clue.TransactionalClient
 import clue.http4s.Http4sBackend
 import io.circe.syntax.*
@@ -31,7 +32,7 @@ trait ItcClient[F[_]] {
   def spectroscopy(
     input:    SpectroscopyModeInput,
     useCache: Boolean = true
-  ): F[Either[Throwable, List[SpectroscopyResult]]]
+  ): F[Either[Throwable, SpectroscopyResult]]
 
 }
 
@@ -42,7 +43,7 @@ object ItcClient {
     client: Client[F]
   ): F[ItcClient[F]] =
     Ref
-      .of[F, Map[SpectroscopyModeInput, Either[Throwable, List[SpectroscopyResult]]]](Map.empty)
+      .of[F, Map[SpectroscopyModeInput, Either[Throwable, SpectroscopyResult]]](Map.empty)
       .map { cache =>
         // TODO: Cache contains failed results and is not flushed until the next server restart.
         // TOOD: Likely we don't want to cache failures and should flush at least when the version changes.
@@ -56,13 +57,16 @@ object ItcClient {
           override def spectroscopy(
             input:    SpectroscopyModeInput,
             useCache: Boolean = true
-          ): F[Either[Throwable, List[SpectroscopyResult]]] = {
+          ): F[Either[Throwable, SpectroscopyResult]] = {
 
-            val callAndCache: F[Either[Throwable, List[SpectroscopyResult]]] =
+            val callAndCache: F[Either[Throwable, SpectroscopyResult]] =
               for {
                 r <- httpClient.use(_.request(SpectroscopyQuery)(input)).attempt
-                _ <- cache.update(_ + (input -> r))
-              } yield r
+                rʹ = r.flatMap(
+                       _.headOption.toRight(new RuntimeException("No results returned by ITC."))
+                     )
+                _ <- cache.update(_ + (input -> rʹ))
+              } yield rʹ
 
             for {
               _    <- Logger[F].info(s"ITC Input: \n${input.asJson.spaces2}")

@@ -63,7 +63,7 @@ trait ClientSuite extends CatsEffectSuite {
 
   def spectroscopy(
     in:       SpectroscopyModeInput,
-    expected: Either[String, List[SpectroscopyResult]]
+    expected: Either[String, SpectroscopyResult]
   ): IO[Unit] =
     itcClient.use {
       _.spectroscopy(in)

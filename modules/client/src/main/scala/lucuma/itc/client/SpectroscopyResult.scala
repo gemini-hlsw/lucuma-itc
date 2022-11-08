@@ -5,6 +5,7 @@ package lucuma.itc.client
 
 import cats.Eq
 import cats.syntax.eq.*
+import cats.syntax.traverse.*
 import io.circe.Decoder
 import io.circe.DecodingFailure
 import io.circe.HCursor
@@ -12,7 +13,7 @@ import io.circe.HCursor
 final case class SpectroscopyResult(
   serverVersion: String,
   dataVersion:   Option[String],
-  results:       List[Result]
+  result:        Option[ItcResult]
 )
 
 object SpectroscopyResult {
@@ -22,13 +23,13 @@ object SpectroscopyResult {
       for {
         s <- c.downField("serverVersion").as[String]
         d <- c.downField("dataVersion").as[Option[String]]
-        r <- c.downField("results").as[List[Result]]
+        r <- c.downField("results").downArray.downField("itc").success.traverse(_.as[ItcResult])
       } yield SpectroscopyResult(s, d, r)
 
   given Eq[SpectroscopyResult] with
     def eqv(x: SpectroscopyResult, y: SpectroscopyResult): Boolean =
       x.serverVersion === y.serverVersion &&
         x.dataVersion === y.dataVersion &&
-        x.results === y.results
+        x.result === y.result
 
 }

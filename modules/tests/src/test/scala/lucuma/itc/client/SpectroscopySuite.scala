@@ -15,6 +15,7 @@ import lucuma.core.enums.GmosNorthFilter
 import lucuma.core.enums.GmosNorthFpu
 import lucuma.core.enums.GmosNorthGrating
 import lucuma.core.enums.ImageQuality
+import lucuma.core.enums.Instrument
 import lucuma.core.enums.SkyBackground
 import lucuma.core.enums.WaterVapor
 import lucuma.core.math.BrightnessUnits.Integrated
@@ -37,20 +38,16 @@ class SpectroscopySuite extends ClientSuite {
   test("ItcClient basic wiring and sanity check") {
     spectroscopy(
       SpectroscopySuite.Input,
-      List(
-        SpectroscopyResult(
-          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          None,
-          List(
-            Result(
-              ItcResult.Success(
-                NonNegDuration.unsafeFrom(Duration.parse("PT1S")),
-                NonNegInt.unsafeFrom(10),
-                PosBigDecimal.unsafeFrom(10.0)
-              )
-            )
+      SpectroscopyResult(
+        versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+        None,
+        ItcResult
+          .Success(
+            NonNegDuration.unsafeFrom(Duration.parse("PT1S")),
+            NonNegInt.unsafeFrom(10),
+            PosBigDecimal.unsafeFrom(10.0)
           )
-        )
+          .some
       ).asRight
     )
   }
@@ -73,12 +70,10 @@ object SpectroscopySuite {
         WaterVapor.VeryDry,
         AirMass.Default
       ),
-      List(
-        InstrumentModesInput.GmosNorth(
-          GmosNorthGrating.B1200_G5301,
-          GmosNorthFilter.GPrime.some,
-          GmosFpuInput.North.builtin(GmosNorthFpu.LongSlit_0_25)
-        )
+      InstrumentMode.GmosNorth(
+        GmosNorthGrating.B1200_G5301,
+        GmosNorthFilter.GPrime.some,
+        GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25)
       )
     )
 

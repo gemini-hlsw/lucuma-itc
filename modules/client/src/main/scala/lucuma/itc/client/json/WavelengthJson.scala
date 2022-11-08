@@ -3,6 +3,8 @@
 
 package lucuma.itc.client.json
 
+import cats.syntax.either.*
+import cats.syntax.option.*
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength
@@ -12,3 +14,13 @@ given Encoder[Wavelength] with
     Json.obj(
       "picometers" -> Wavelength.picometers.reverseGet(a).value.asJson
     )
+
+given Decoder[Wavelength] with
+  def apply(c: HCursor): Decoder.Result[Wavelength] =
+    c.downField("picometers").as[Int].flatMap { pm =>
+      Wavelength.fromPicometers
+        .getOption(pm)
+        .toRight(
+          DecodingFailure("Expected positive integer wavelength value for 'picometers'.", c.history)
+        )
+    }
