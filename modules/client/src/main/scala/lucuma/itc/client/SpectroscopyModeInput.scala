@@ -22,7 +22,7 @@ final case class SpectroscopyModeInput(
   band:           Band,
   radialVelocity: RadialVelocity,
   constraints:    ConstraintSet,
-  modes:          List[InstrumentMode]
+  mode:           InstrumentMode
 )
 
 object SpectroscopyModeInput {
@@ -40,7 +40,7 @@ object SpectroscopyModeInput {
             .asJson
         ),
         "constraints"    -> a.constraints.asJson,
-        "modes"          -> a.modes.asJson
+        "modes"          -> List(a.mode).asJson
       )
 
 }

@@ -38,30 +38,14 @@ class SpectroscopySuite extends ClientSuite {
   test("ItcClient basic wiring and sanity check") {
     spectroscopy(
       SpectroscopySuite.Input,
-      List(
-        SpectroscopyResult(
-          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          None,
-          List(
-            Result(
-              ObservingModeSpectroscopy(
-                Wavelength.fromPicometers.getOption(1).get,
-                1.0,
-                InstrumentMode.GmosNorth(
-                  GmosNorthGrating.B1200_G5301,
-                  Some(GmosNorthFilter.GPrime),
-                  GmosFpu.North(GmosNorthFpu.LongSlit_0_25.asRight)
-                ),
-                Instrument.GmosNorth
-              ),
-              ItcResult.Success(
-                NonNegDuration.unsafeFrom(Duration.parse("PT1S")),
-                NonNegInt.unsafeFrom(10),
-                PosBigDecimal.unsafeFrom(10.0)
-              )
-            )
-          )
-        )
+      SpectroscopyResult(
+        versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+        None,
+        ItcResult.Success(
+          NonNegDuration.unsafeFrom(Duration.parse("PT1S")),
+          NonNegInt.unsafeFrom(10),
+          PosBigDecimal.unsafeFrom(10.0)
+        ).some
       ).asRight
     )
   }
@@ -84,12 +68,10 @@ object SpectroscopySuite {
         WaterVapor.VeryDry,
         AirMass.Default
       ),
-      List(
-        InstrumentMode.GmosNorth(
-          GmosNorthGrating.B1200_G5301,
-          GmosNorthFilter.GPrime.some,
-          GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25)
-        )
+      InstrumentMode.GmosNorth(
+        GmosNorthGrating.B1200_G5301,
+        GmosNorthFilter.GPrime.some,
+        GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25)
       )
     )
 
