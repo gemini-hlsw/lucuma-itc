@@ -61,9 +61,11 @@ object ItcClient {
 
             val callAndCache: F[Either[Throwable, SpectroscopyResult]] =
               for {
-                r  <- httpClient.use(_.request(SpectroscopyQuery)(input)).attempt
-                rʹ  = r.flatMap(_.headOption.toRight(new RuntimeException("No results returned by ITC.")))
-                _  <- cache.update(_ + (input -> rʹ))
+                r <- httpClient.use(_.request(SpectroscopyQuery)(input)).attempt
+                rʹ = r.flatMap(
+                       _.headOption.toRight(new RuntimeException("No results returned by ITC."))
+                     )
+                _ <- cache.update(_ + (input -> rʹ))
               } yield rʹ
 
             for {

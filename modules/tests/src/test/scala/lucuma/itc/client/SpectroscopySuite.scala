@@ -41,11 +41,13 @@ class SpectroscopySuite extends ClientSuite {
       SpectroscopyResult(
         versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
         None,
-        ItcResult.Success(
-          NonNegDuration.unsafeFrom(Duration.parse("PT1S")),
-          NonNegInt.unsafeFrom(10),
-          PosBigDecimal.unsafeFrom(10.0)
-        ).some
+        ItcResult
+          .Success(
+            NonNegDuration.unsafeFrom(Duration.parse("PT1S")),
+            NonNegInt.unsafeFrom(10),
+            PosBigDecimal.unsafeFrom(10.0)
+          )
+          .some
       ).asRight
     )
   }

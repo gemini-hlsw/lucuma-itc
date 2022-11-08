@@ -18,9 +18,9 @@ given Encoder[Wavelength] with
 given Decoder[Wavelength] with
   def apply(c: HCursor): Decoder.Result[Wavelength] =
     c.downField("picometers").as[Int].flatMap { pm =>
-      Wavelength
-        .fromPicometers
+      Wavelength.fromPicometers
         .getOption(pm)
-        .toRight(DecodingFailure("Expected positive integer wavelength value for 'picometers'.", c.history))
+        .toRight(
+          DecodingFailure("Expected positive integer wavelength value for 'picometers'.", c.history)
+        )
     }
-

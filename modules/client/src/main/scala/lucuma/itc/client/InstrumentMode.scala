@@ -103,18 +103,19 @@ object InstrumentMode {
       for {
         n <- c.downField("gmosN").as[Option[GmosNorth]]
         s <- c.downField("gmosS").as[Option[GmosSouth]]
-        m <- ((n, s) match {
-          case (Some(n), None) => (n: InstrumentMode).asRight
-          case (None, Some(s)) => (s: InstrumentMode).asRight
-          case _               => DecodingFailure("Expected exactly one of 'gmosN' or 'gmosS'.", c.history).asLeft
-        })
+        m <- (n, s) match {
+               case (Some(n), None) => (n: InstrumentMode).asRight
+               case (None, Some(s)) => (s: InstrumentMode).asRight
+               case _               =>
+                 DecodingFailure("Expected exactly one of 'gmosN' or 'gmosS'.", c.history).asLeft
+             }
       } yield m
 
-   given Eq[InstrumentMode] with
-     def eqv(x: InstrumentMode, y: InstrumentMode): Boolean =
-       (x, y) match {
-         case (x0: GmosNorth, y0: GmosNorth) => x0 === y0
-         case (x0: GmosSouth, y0: GmosSouth) => x0 === y0
-         case _                              => false
-       }
+  given Eq[InstrumentMode] with
+    def eqv(x: InstrumentMode, y: InstrumentMode): Boolean =
+      (x, y) match {
+        case (x0: GmosNorth, y0: GmosNorth) => x0 === y0
+        case (x0: GmosSouth, y0: GmosSouth) => x0 === y0
+        case _                              => false
+      }
 }

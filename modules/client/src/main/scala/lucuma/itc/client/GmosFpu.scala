@@ -93,10 +93,13 @@ object GmosFpu {
           m <- c.downField("customMask").as[Option[GmosCustomMask]]
           b <- c.downField("builtin").as[Option[U]]
           u <- (m, b) match {
-            case (Some(m), None) => m.asLeft[U].asRight[DecodingFailure]
-            case (None, Some(b)) => b.asRight[GmosCustomMask].asRight[DecodingFailure]
-            case _               => DecodingFailure("Expected exactly one of `customMask` or `builtin`", c.history).asLeft
-          }
+                 case (Some(m), None) => m.asLeft[U].asRight[DecodingFailure]
+                 case (None, Some(b)) => b.asRight[GmosCustomMask].asRight[DecodingFailure]
+                 case _               =>
+                   DecodingFailure("Expected exactly one of `customMask` or `builtin`",
+                                   c.history
+                   ).asLeft
+               }
         } yield f(u)
     }
 
