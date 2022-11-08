@@ -9,7 +9,6 @@ import io.circe.Decoder
 import io.circe.DecodingFailure
 import io.circe.HCursor
 
-
 // ITC versions reported by the server.  You cannot infer ordering from the
 // information but they can be used for equality comparisons.
 final case class ItcVersions(
