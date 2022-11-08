@@ -71,4 +71,12 @@ trait ClientSuite extends CatsEffectSuite {
         .assertEquals(expected)
     }
 
+  def versions(
+    expected: Either[String, ItcVersions]
+  ): IO[Unit] =
+    itcClient.use {
+      _.versions
+        .map(_.leftMap(_.getMessage))
+        .assertEquals(expected)
+    }
 }

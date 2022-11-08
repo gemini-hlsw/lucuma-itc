@@ -33,14 +33,16 @@ import java.time.Duration
 import java.time.Instant
 import scala.collection.immutable.SortedMap
 
-class SpectroscopySuite extends ClientSuite {
+class WiringSuite extends ClientSuite {
 
-  test("ItcClient basic wiring and sanity check") {
+  test("ItcClient spectroscopy basic wiring and sanity check") {
     spectroscopy(
-      SpectroscopySuite.Input,
+      WiringSuite.Input,
       SpectroscopyResult(
-        versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-        None,
+        ItcVersions(
+          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+          None
+        ),
         ItcResult
           .Success(
             NonNegDuration.unsafeFrom(Duration.parse("PT1S")),
@@ -52,9 +54,18 @@ class SpectroscopySuite extends ClientSuite {
     )
   }
 
+  test("ItcClient versions") {
+    versions(
+      ItcVersions(
+        versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+        Some("versionToken")
+      ).asRight
+    )
+  }
+
 }
 
-object SpectroscopySuite {
+object WiringSuite {
 
   val Input: SpectroscopyModeInput =
     SpectroscopyModeInput(

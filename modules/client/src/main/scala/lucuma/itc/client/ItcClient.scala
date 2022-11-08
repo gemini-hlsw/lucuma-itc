@@ -27,12 +27,14 @@ import org.typelevel.log4cats.Logger
  */
 trait ItcClient[F[_]] {
 
-  // TODO: chart, version, etc.
+  // TODO: chart
 
   def spectroscopy(
     input:    SpectroscopyModeInput,
     useCache: Boolean = true
   ): F[Either[Throwable, SpectroscopyResult]]
+
+  def versions: F[Either[Throwable, ItcVersions]]
 
 }
 
@@ -75,6 +77,9 @@ object ItcClient {
               _    <- Logger[F].info(s"ITC Result (${cval.fold("remote")(_ => "cached")}):\n$res")
             } yield res
           }
+
+          override val versions: F[Either[Throwable, ItcVersions]] =
+            httpClient.use(_.request(VersionsQuery)).attempt
 
         }
       }
