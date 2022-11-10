@@ -33,9 +33,8 @@ trait ItcCache[F[_], K, V] {
 
 object ItcCache {
 
-  def simple[F[_]: Sync, K, V]: Resource[F, ItcCache[F, K, V]] = {
-
-    def cache(ref: Ref[F, Map[K, V]]): ItcCache[F, K, V] =
+  def simple[F[_]: Sync, K, V]: F[ItcCache[F, K, V]] =
+    Ref.of[F, Map[K, V]](Map.empty[K, V]).map { ref =>
       new ItcCache[F, K, V] {
 
         override def get(key: K): F[Option[V]] =
@@ -62,9 +61,6 @@ object ItcCache {
           ref.set(Map.empty[K, V])
 
       }
-
-    Resource.eval(Ref.of[F, Map[K, V]](Map.empty[K, V]).map(cache))
-
-  }
+    }
 
 }

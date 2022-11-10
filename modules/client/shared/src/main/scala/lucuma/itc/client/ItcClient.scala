@@ -46,7 +46,7 @@ object ItcClient {
     client: Client[F]
   ): Resource[F, ItcClient[F]] =
     for {
-      cache <- ItcCache.simple[F, SpectroscopyModeInput, SpectroscopyResult]
+      cache <- Resource.eval(ItcCache.simple[F, SpectroscopyModeInput, SpectroscopyResult])
       http  <- Resource.eval(
                  TransactionalClient.of[F, Unit](uri)(Async[F], Http4sBackend(client), Logger[F])
                )
