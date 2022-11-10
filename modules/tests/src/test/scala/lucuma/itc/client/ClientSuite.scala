@@ -48,17 +48,19 @@ trait ClientSuite extends CatsEffectSuite {
 
   override def munitFixtures = List(serverFixture)
 
-  private def itcClientFor(c: Client[IO]): IO[ItcClient[IO]] =
-    for {
-      srv <- IO(serverFixture())
-      uri  = srv.baseUri / "graphql"
-      cli <- ItcClient.create[IO](uri, c)
-    } yield cli
+  private def itcClientFor(c: Client[IO]): IO[Uri] =
+    IO(serverFixture()).map(_.baseUri / "graphql")
+//    for {
+//      srv <- IO(serverFixture())
+//      uri  = srv.baseUri / "graphql"
+//      cli <- ItcClient.create[IO](uri, c)
+//    } yield cli
 
   private val itcClient: Resource[IO, ItcClient[IO]] =
     for {
       h <- JdkHttpClient.simple[IO]
-      c <- Resource.eval(itcClientFor(h))
+      u <- Resource.eval(IO(serverFixture()).map(_.baseUri / "graphql"))
+      c <- ItcClient.create[IO](u, h)
     } yield c
 
   def spectroscopy(
