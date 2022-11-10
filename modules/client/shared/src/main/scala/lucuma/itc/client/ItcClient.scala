@@ -47,35 +47,35 @@ object ItcClient {
   ): Resource[F, ItcClient[F]] =
     for {
       cache <- ItcCache.simple[F, SpectroscopyModeInput, SpectroscopyResult]
-      http  <- Resource.eval(TransactionalClient.of[F, Unit](uri)(Async[F], Http4sBackend(client), Logger[F]))
-    } yield
-      new ItcClient[F] {
-        override def spectroscopy(
-          input:    SpectroscopyModeInput,
-          useCache: Boolean = true
-        ): F[SpectroscopyResult] = {
+      http  <- Resource.eval(
+                 TransactionalClient.of[F, Unit](uri)(Async[F], Http4sBackend(client), Logger[F])
+               )
+    } yield new ItcClient[F] {
+      override def spectroscopy(
+        input:    SpectroscopyModeInput,
+        useCache: Boolean = true
+      ): F[SpectroscopyResult] = {
 
-          val callOut: F[SpectroscopyResult] =
-            for {
-              r  <- http.request(SpectroscopyQuery)(input)
-              rʹ <- ApplicativeError.liftFromOption[F](
-                r.headOption,
-                new RuntimeException("No results returned by ITC.")
-              )
-            } yield rʹ
-
+        val callOut: F[SpectroscopyResult] =
           for {
-            _ <- Logger[F].info(s"ITC Input: \n${input.asJson.spaces2}")
-            v <- if (useCache) cache.getOrCalcF(input)(callOut)
-                 else callOut.flatTap(cache.put(input))
-            _ <- Logger[F].info(s"ITC Result:\n$v")
-          } yield v
-        }
+            r  <- http.request(SpectroscopyQuery)(input)
+            rʹ <- ApplicativeError.liftFromOption[F](
+                    r.headOption,
+                    new RuntimeException("No results returned by ITC.")
+                  )
+          } yield rʹ
 
-        override val versions: F[ItcVersions] =
-          http.request(VersionsQuery)
-
+        for {
+          _ <- Logger[F].info(s"ITC Input: \n${input.asJson.spaces2}")
+          v <- if (useCache) cache.getOrCalcF(input)(callOut)
+               else callOut.flatTap(cache.put(input))
+          _ <- Logger[F].info(s"ITC Result:\n$v")
+        } yield v
       }
 
+      override val versions: F[ItcVersions] =
+        http.request(VersionsQuery)
+
+    }
 
 }

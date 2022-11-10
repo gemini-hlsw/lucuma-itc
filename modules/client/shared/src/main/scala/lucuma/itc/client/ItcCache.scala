@@ -10,6 +10,7 @@ import cats.effect.Resource
 import cats.effect.Sync
 import cats.effect.std.Semaphore
 import cats.syntax.all.*
+
 import java.time.Duration
 import java.time.Instant
 import scala.util.Try
@@ -65,6 +66,5 @@ object ItcCache {
     Resource.eval(Ref.of[F, Map[K, V]](Map.empty[K, V]).map(cache))
 
   }
-
 
 }
