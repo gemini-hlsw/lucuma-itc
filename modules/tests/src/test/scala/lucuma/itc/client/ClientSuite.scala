@@ -51,7 +51,7 @@ trait ClientSuite extends CatsEffectSuite {
     for {
       h <- JdkHttpClient.simple[IO]
       u <- Resource.eval(IO(serverFixture()).map(_.baseUri / "graphql"))
-      c <- ItcClient.create[IO](u, h)
+      c <- Resource.eval(ItcClient.create[IO](u, h))
     } yield c
 
   def spectroscopy(

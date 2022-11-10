@@ -44,12 +44,10 @@ object ItcClient {
   def create[F[_]: Async: Logger](
     uri:    Uri,
     client: Client[F]
-  ): Resource[F, ItcClient[F]] =
+  ): F[ItcClient[F]] =
     for {
-      cache <- Resource.eval(ItcCache.simple[F, SpectroscopyModeInput, SpectroscopyResult])
-      http  <- Resource.eval(
-                 TransactionalClient.of[F, Unit](uri)(Async[F], Http4sBackend(client), Logger[F])
-               )
+      cache <- ItcCache.simple[F, SpectroscopyModeInput, SpectroscopyResult]
+      http  <- TransactionalClient.of[F, Unit](uri)(Async[F], Http4sBackend(client), Logger[F])
     } yield new ItcClient[F] {
       override def spectroscopy(
         input:    SpectroscopyModeInput,
