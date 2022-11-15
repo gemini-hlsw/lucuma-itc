@@ -1,6 +1,6 @@
 val catsEffectVersion           = "3.3.14"
 val catsTestkitScalaTestVersion = "2.1.5"
-val catsVersion                 = "2.8.0"
+val catsVersion                 = "2.9.0"
 val catsScalacheckVersion       = "0.3.1"
 val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.3"
@@ -152,32 +152,35 @@ lazy val service = project
   .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
 
 lazy val client = crossProject(JVMPlatform, JSPlatform)
-  .crossType(CrossType.Pure)
   .in(file("modules/client"))
   .dependsOn(model)
   .settings(commonSettings)
   .settings(
     name := "lucuma-itc-client",
     libraryDependencies ++= Seq(
-      "edu.gemini"     %% "lucuma-core"            % lucumaCoreVersion,
-      "edu.gemini"    %%% "lucuma-refined"         % lucumaRefinedVersion,
-      "org.typelevel"  %% "cats-core"              % catsVersion,
-      "org.typelevel"  %% "cats-effect"            % catsEffectVersion,
-      "org.http4s"     %% "http4s-jdk-http-client" % http4sJdkHttpClientVersion,
-      "org.http4s"     %% "http4s-circe"           % http4sVersion,
-      "org.http4s"     %% "http4s-dsl"             % http4sVersion,
-      "io.circe"       %% "circe-literal"          % circeVersion,
-      "edu.gemini"     %% "clue-model"             % clueVersion,
-      "edu.gemini"     %% "clue-http4s"            % clueVersion,
-      "edu.gemini"     %% "clue-core"              % clueVersion,
-      "io.circe"       %% "circe-generic"          % circeVersion,
-      "org.tpolecat"   %% "natchez-http4s"         % natcchezHttp4sVersion,
-      "org.typelevel"  %% "log4cats-slf4j"         % log4catsVersion,
-      "org.typelevel" %%% "spire"                  % spireVersion,
-      "org.typelevel" %%% "spire-extras"           % spireVersion,
-      "org.typelevel" %%% "kittens"                % kittensVersion,
-      "org.typelevel"  %% "munit-cats-effect-3"    % munitCatsEffectVersion % Test,
-      "com.lihaoyi"   %%% "pprint"                 % pprintVersion          % Test
+      "edu.gemini"    %%% "lucuma-core"         % lucumaCoreVersion,
+      "edu.gemini"    %%% "lucuma-refined"      % lucumaRefinedVersion,
+      "org.typelevel" %%% "cats-core"           % catsVersion,
+      "org.typelevel" %%% "cats-effect"         % catsEffectVersion,
+      "org.http4s"    %%% "http4s-circe"        % http4sVersion,
+      "org.http4s"    %%% "http4s-dsl"          % http4sVersion,
+      "io.circe"      %%% "circe-literal"       % circeVersion,
+      "edu.gemini"    %%% "clue-model"          % clueVersion,
+      "edu.gemini"    %%% "clue-http4s"         % clueVersion,
+      "edu.gemini"    %%% "clue-core"           % clueVersion,
+      "io.circe"      %%% "circe-generic"       % circeVersion,
+      "org.tpolecat"  %%% "natchez-http4s"      % natcchezHttp4sVersion,
+      "org.typelevel" %%% "spire"               % spireVersion,
+      "org.typelevel" %%% "spire-extras"        % spireVersion,
+      "org.typelevel" %%% "kittens"             % kittensVersion,
+      "org.typelevel" %%% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
+      "com.lihaoyi"   %%% "pprint"              % pprintVersion          % Test
+    )
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.http4s"    %% "http4s-jdk-http-client" % http4sJdkHttpClientVersion,
+      "org.typelevel" %% "log4cats-slf4j"         % log4catsVersion
     )
   )
 
