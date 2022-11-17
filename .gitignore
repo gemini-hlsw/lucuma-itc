@@ -5,6 +5,7 @@ target
 .bsp
 project/project
 project/metals.sbt
+.jvmopts
 
 # We ignore the lib/ directory because we copy stuff over
 lib
@@ -12,4 +13,3 @@ lib
 .direnv
 .idea
 node_modules
-

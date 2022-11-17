@@ -37,10 +37,6 @@ trait ClientSuite extends CatsEffectSuite {
         .withHttpWebSocketApp(app)
         .withShutdownTimeout(2.seconds)
         .build
-//      BlazeServerBuilder[IO]
-//        .withHttpWebSocketApp(app)
-//        .bindAny()
-//        .resource
     }
 
   private val serverFixture: Fixture[Server] =
@@ -48,17 +44,14 @@ trait ClientSuite extends CatsEffectSuite {
 
   override def munitFixtures = List(serverFixture)
 
-  private def itcClientFor(c: Client[IO]): IO[ItcClient[IO]] =
-    for {
-      srv <- IO(serverFixture())
-      uri  = srv.baseUri / "graphql"
-      cli <- ItcClient.create[IO](uri, c)
-    } yield cli
+  private def itcClientFor(c: Client[IO]): IO[Uri] =
+    IO(serverFixture()).map(_.baseUri / "graphql")
 
   private val itcClient: Resource[IO, ItcClient[IO]] =
     for {
       h <- JdkHttpClient.simple[IO]
-      c <- Resource.eval(itcClientFor(h))
+      u <- Resource.eval(IO(serverFixture()).map(_.baseUri / "graphql"))
+      c <- Resource.eval(ItcClient.create[IO](u, h))
     } yield c
 
   def spectroscopy(
