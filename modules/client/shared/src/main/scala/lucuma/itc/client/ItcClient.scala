@@ -20,7 +20,6 @@ import io.circe.syntax.*
 import lucuma.core.model.Observation
 import org.http4s.Uri
 import org.http4s.client.Client
-import org.http4s.jdkhttpclient.JdkHttpClient
 import org.typelevel.log4cats.Logger
 
 /**
