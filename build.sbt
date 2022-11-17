@@ -200,10 +200,10 @@ lazy val tests = project
   .settings(
     name := "lucuma-itc-tests",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "munit-cats-effect-3"    % munitCatsEffectVersion     % Test,
-      "com.lihaoyi"  %%% "pprint"                 % pprintVersion              % Test,
-      "org.http4s"    %% "http4s-jdk-http-client" % http4sJdkHttpClientVersion % Test,
-      "org.typelevel" %% "log4cats-slf4j"         % log4catsVersion            % Test
+      "org.typelevel" %%% "munit-cats-effect-3"    % munitCatsEffectVersion     % Test,
+      "com.lihaoyi"   %%% "pprint"                 % pprintVersion              % Test,
+      "org.http4s"     %% "http4s-jdk-http-client" % http4sJdkHttpClientVersion % Test,
+      "org.typelevel" %%% "log4cats-slf4j"         % log4catsVersion            % Test
     ),
     testFrameworks += MUnitFramework
   )
