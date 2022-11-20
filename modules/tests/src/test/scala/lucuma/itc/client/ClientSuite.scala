@@ -47,18 +47,18 @@ trait ClientSuite extends CatsEffectSuite {
   private def itcClientFor(c: Client[IO]): IO[Uri] =
     IO(serverFixture()).map(_.baseUri / "graphql")
 
-  private val itcClient: Resource[IO, ItcClient[IO]] =
+  private val itcClient: IO[ItcClient[IO]] =
     for {
       h <- JdkHttpClient.simple[IO]
-      u <- Resource.eval(IO(serverFixture()).map(_.baseUri / "graphql"))
-      c <- Resource.eval(ItcClient.create[IO](u, h))
+      u <- IO(serverFixture()).map(_.baseUri / "graphql")
+      c <- ItcClient.create[IO](u, h)
     } yield c
 
   def spectroscopy(
     in:       SpectroscopyModeInput,
     expected: Either[String, SpectroscopyResult]
   ): IO[Unit] =
-    itcClient.use {
+    itcClient.flatMap {
       _.spectroscopy(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
@@ -67,7 +67,7 @@ trait ClientSuite extends CatsEffectSuite {
   def versions(
     expected: Either[String, ItcVersions]
   ): IO[Unit] =
-    itcClient.use {
+    itcClient.flatMap {
       _.versions.attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
