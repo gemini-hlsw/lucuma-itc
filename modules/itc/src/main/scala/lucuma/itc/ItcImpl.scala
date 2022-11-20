@@ -254,6 +254,10 @@ object ItcImpl {
           Itc.GraphResult.fromLegacy(r.versionToken, r.ccds, r.groups)
         }
 
+      /**
+       * Compute the exposure time and number of exposures required to achieve the desired
+       * signal-to-noise under the requested conditions. Only for spectroscopy modes
+       */
       def spectroscopy(
         targetProfile:   TargetProfile,
         observingMode:   ObservingMode,
@@ -333,7 +337,7 @@ object ItcImpl {
           L.info(
             s"Target brightness ${targetProfile} at band ${targetProfile.band}"
           ) *>
-          Trace[F].span("itc") {
+          Trace[F].span("itc.calctime.spectroscopy") {
 
             itc(targetProfile,
                 observingMode,
