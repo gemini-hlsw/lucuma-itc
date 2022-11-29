@@ -30,19 +30,21 @@ object SpectroscopyModeInput {
 
   given Encoder[SpectroscopyModeInput] with
     def apply(a: SpectroscopyModeInput): Json =
-      Json.obj(
-        "wavelength"      -> a.wavelength.asJson,
-        "signalToNoise"   -> a.signalToNoise.asJson,
-        "signalToNoiseAt" -> a.signalToNoiseAt.asJson,
-        "sourceProfile"   -> a.sourceProfile.asJson,
-        "band"            -> a.band.asScreamingJson,
-        "radialVelocity"  -> Json.obj(
-          "metersPerSecond" -> RadialVelocity.fromMetersPerSecond
-            .reverseGet(a.radialVelocity)
-            .asJson
-        ),
-        "constraints"     -> a.constraints.asJson,
-        "modes"           -> List(a.mode).asJson
-      ).dropNullValues
+      Json
+        .obj(
+          "wavelength"      -> a.wavelength.asJson,
+          "signalToNoise"   -> a.signalToNoise.asJson,
+          "signalToNoiseAt" -> a.signalToNoiseAt.asJson,
+          "sourceProfile"   -> a.sourceProfile.asJson,
+          "band"            -> a.band.asScreamingJson,
+          "radialVelocity"  -> Json.obj(
+            "metersPerSecond" -> RadialVelocity.fromMetersPerSecond
+              .reverseGet(a.radialVelocity)
+              .asJson
+          ),
+          "constraints"     -> a.constraints.asJson,
+          "modes"           -> List(a.mode).asJson
+        )
+        .dropNullValues
 
 }

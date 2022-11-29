@@ -57,17 +57,13 @@ class WiringSuite extends ClientSuite {
   }
 
   test("SignalToNoiseAt null is removed") {
-    WiringSuite
-      .Input
-      .asJson
-      .asObject
+    WiringSuite.Input.asJson.asObject
       .exists(!_.contains("signalToNoiseAt"))
   }
 
   test("SignalToNoiseAt non-null is included") {
     import lucuma.itc.client.json.given
-    WiringSuite
-      .Input
+    WiringSuite.Input
       .copy(signalToNoiseAt = Wavelength.Min.some)
       .asJson
       .asObject
