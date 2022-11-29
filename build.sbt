@@ -180,7 +180,7 @@ lazy val client = crossProject(JVMPlatform, JSPlatform)
 
 lazy val benchmark = project
   .in(file("modules/benchmarks"))
-  .enablePlugins(GatlingPlugin)
+  .enablePlugins(GatlingPlugin, NoPublishPlugin)
   .settings(
     libraryDependencies ++= Seq(
       // ("io.suzaku" %% "boopickle" % "1.4.0").cross(CrossVersion.for3Use2_13),
