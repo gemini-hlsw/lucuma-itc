@@ -8,6 +8,7 @@ import cats.ApplicativeThrow
 import cats.syntax.applicative.*
 import cats.syntax.option.*
 import dev.profunktor.redis4cats.algebra.StringCommands
+import dev.profunktor.redis4cats.effects.GetExArg
 import dev.profunktor.redis4cats.effects.SetArgs
 import io.lettuce.core.RedisFuture
 import io.lettuce.core.cluster.api.async.RedisClusterAsyncCommands
@@ -15,6 +16,8 @@ import io.lettuce.core.cluster.api.async.RedisClusterAsyncCommands
 import scala.concurrent.duration._
 
 class NoOpRedis[F[_]: ApplicativeThrow, K, V] extends StringCommands[F, K, V] {
+  override def getEx(key: K, getExArg: GetExArg): F[Option[V]] =
+    none.pure[F]
 
   override def unsafe[A](f: RedisClusterAsyncCommands[K, V] => RedisFuture[A]): F[A] =
     ApplicativeThrow[F].raiseError(new RuntimeException("unsuppported"))
