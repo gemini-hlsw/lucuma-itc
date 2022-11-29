@@ -39,6 +39,8 @@ ThisBuild / tlCiReleaseBranches := Seq("master")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
+enablePlugins(NoPublishPlugin)
+
 addCommandAlias(
   "fixImports",
   "; scalafix OrganizeImports; Test/scalafix OrganizeImports; scalafmtAll"
