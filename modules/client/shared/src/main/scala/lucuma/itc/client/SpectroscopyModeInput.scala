@@ -16,31 +16,35 @@ import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
 
 final case class SpectroscopyModeInput(
-  wavelength:     Wavelength,
-  signalToNoise:  PosBigDecimal,
-  sourceProfile:  SourceProfile,
-  band:           Band,
-  radialVelocity: RadialVelocity,
-  constraints:    ConstraintSet,
-  mode:           InstrumentMode
+  wavelength:      Wavelength,
+  signalToNoise:   PosBigDecimal,
+  signalToNoiseAt: Option[Wavelength],
+  sourceProfile:   SourceProfile,
+  band:            Band,
+  radialVelocity:  RadialVelocity,
+  constraints:     ConstraintSet,
+  mode:            InstrumentMode
 )
 
 object SpectroscopyModeInput {
 
   given Encoder[SpectroscopyModeInput] with
     def apply(a: SpectroscopyModeInput): Json =
-      Json.obj(
-        "wavelength"     -> a.wavelength.asJson,
-        "signalToNoise"  -> a.signalToNoise.asJson,
-        "sourceProfile"  -> a.sourceProfile.asJson,
-        "band"           -> a.band.asScreamingJson,
-        "radialVelocity" -> Json.obj(
-          "metersPerSecond" -> RadialVelocity.fromMetersPerSecond
-            .reverseGet(a.radialVelocity)
-            .asJson
-        ),
-        "constraints"    -> a.constraints.asJson,
-        "modes"          -> List(a.mode).asJson
-      )
+      Json
+        .obj(
+          "wavelength"      -> a.wavelength.asJson,
+          "signalToNoise"   -> a.signalToNoise.asJson,
+          "signalToNoiseAt" -> a.signalToNoiseAt.asJson,
+          "sourceProfile"   -> a.sourceProfile.asJson,
+          "band"            -> a.band.asScreamingJson,
+          "radialVelocity"  -> Json.obj(
+            "metersPerSecond" -> RadialVelocity.fromMetersPerSecond
+              .reverseGet(a.radialVelocity)
+              .asJson
+          ),
+          "constraints"     -> a.constraints.asJson,
+          "modes"           -> List(a.mode).asJson
+        )
+        .dropNullValues
 
 }
