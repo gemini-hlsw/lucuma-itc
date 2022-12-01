@@ -9,6 +9,7 @@ import lucuma.itc.legacy
 import lucuma.itc.legacy.given
 
 case class LocalItc(classLoader: ClassLoader) {
+  // We need to keep a single refernce to the reflected method
   val method = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculationImpl")
     .getMethod("calculation", classOf[String], classOf[String])
