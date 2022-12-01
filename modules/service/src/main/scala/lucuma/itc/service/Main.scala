@@ -16,6 +16,7 @@ import dev.profunktor.redis4cats.log4cats.*
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
+import lucuma.itc.legacy.LocalItc
 import lucuma.itc.service.config.ExecutionEnvironment._
 import lucuma.itc.service.config._
 import natchez.EntryPoint
@@ -39,13 +40,12 @@ import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
-import scala.concurrent.duration._
 import java.io.File
 import java.io.FileFilter
-import java.net.URLClassLoader
 import java.net.URL
+import java.net.URLClassLoader
+import scala.concurrent.duration._
 import scala.util.Try
-import lucuma.itc.legacy.LocalItc
 
 // #server
 object Main extends IOApp with ItcCacheOrRemote {

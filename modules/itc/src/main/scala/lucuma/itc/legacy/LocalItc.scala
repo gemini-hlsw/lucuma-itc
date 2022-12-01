@@ -25,7 +25,7 @@ case class LocalItc(classLoader: ClassLoader) {
 
     val LegacyRight = """Right\((.*)\)""".r
     val LegacyLeft  = """Left\((.*)\)""".r
-    
+
     res match {
       case LegacyRight(result) =>
         decode[legacy.ItcRemoteResult](result).leftMap(_.getMessage())
