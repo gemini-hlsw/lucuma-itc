@@ -107,9 +107,11 @@ lazy val core = project
     )
   )
 
-lazy val ocslibHash = Def.setting {
-  val hashes = IO.listFiles((core / baseDirectory).value / "ocslib").sorted.map(Hash(_))
-  Hash.toHex(Hash(hashes.flatten))
+lazy val ocslibHash = taskKey[String]("hash of ocslib")
+ThisBuild / ocslibHash / fileInputs += (core / baseDirectory).value.toGlob / "ocslib" / "*.jar"
+ThisBuild / ocslibHash := {
+  val hashes = ocslibHash.inputFiles.sorted.map(_.toFile).map(Hash(_))
+  Hash.toHex(Hash(hashes.toArray.flatten))
 }
 
 // Contains the grackle server
@@ -154,7 +156,7 @@ lazy val service = project
       git.gitHeadCommit,
       "herokuSourceVersion" -> sys.env.get("SOURCE_VERSION"),
       "buildDateTime"       -> System.currentTimeMillis(),
-      "ocslibHash"          -> ocslibHash.value
+      ocslibHash
     )
   )
   .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
