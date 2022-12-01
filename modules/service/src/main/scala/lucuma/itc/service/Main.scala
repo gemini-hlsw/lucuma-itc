@@ -40,6 +40,12 @@ import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.duration._
+import java.io.File
+import java.io.FileFilter
+import java.net.URLClassLoader
+import java.net.URL
+import scala.util.Try
+import lucuma.itc.legacy.LocalItc
 
 // #server
 object Main extends IOApp with ItcCacheOrRemote {
@@ -112,10 +118,11 @@ object Main extends IOApp with ItcCacheOrRemote {
       .build
 
   def routes[F[_]: Async: Concurrent: Logger: Parallel: Trace](
-    cfg: Config
+    cfg: Config,
+    itc: LocalItc
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
-      itc     <- ItcImpl.forUri(cfg.itcUrl)
+      itc     <- ItcImpl.forUri(cfg.itcUrl, itc)
       redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
       // Check the cache staleness every 1 hours
       _       <- Resource
@@ -134,15 +141,45 @@ object Main extends IOApp with ItcCacheOrRemote {
         )
       )
 
+  class ReverseClassLoader(urls: Array[URL], parent: ClassLoader)
+      extends URLClassLoader(urls, parent) {
+    override def loadClass(name: String): Class[?] =
+      // First check whether it's already been loaded, if so use it
+      if (name.startsWith("java.lang")) super.loadClass(name)
+      else {
+        Option(findLoadedClass(name)).getOrElse {
+
+          // Not loaded, try to load it
+          Try(findClass(name)).getOrElse {
+            // If not found locally, use normal parent delegation in URLClassloader
+            super.loadClass(name);
+          }
+        }
+      }
+  }
+
+  def legacyItcLoader[F[_]: Sync: Logger]: F[LocalItc] =
+    Sync[F]
+      .delay {
+        val jarFiles = new File("../itc/ocslib").listFiles(new FileFilter() {
+          override def accept(file: File): Boolean =
+            file.getName().endsWith(".jar");
+        })
+        LocalItc(
+          new ReverseClassLoader(jarFiles.map(_.toURI.toURL), ClassLoader.getSystemClassLoader())
+        )
+      }
+
   /**
    * Our main server, as a resource that starts up our server on acquire and shuts it all down in
    * cleanup, yielding an `ExitCode`. Users will `use` this resource and hold it forever.
    */
   def server[F[_]: Async: Parallel: Logger](cfg: Config): Resource[F, ExitCode] =
     for
+      cl <- Resource.eval(legacyItcLoader[F])
       _  <- Resource.eval(banner(cfg))
       ep <- entryPointResource(cfg.honeycomb)
-      ap <- ep.wsLiftR(routes(cfg)).map(_.map(_.orNotFound))
+      ap <- ep.wsLiftR(routes(cfg, cl)).map(_.map(_.orNotFound))
       _  <- serverResource(ap, cfg)
     yield ExitCode.Success
 

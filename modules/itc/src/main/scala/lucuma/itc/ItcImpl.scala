@@ -24,6 +24,7 @@ import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.itc.Itc
+import lucuma.itc.legacy.LocalItc
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
 import lucuma.refined.*
@@ -90,19 +91,26 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
 object ItcImpl {
   opaque type NumberOfExposures = Int
 
-  def forHeroku[F[_]: Async: Logger: Trace]: Resource[F, Itc[F]] =
-    forUri(uri"https://gemini-new-itc.herokuapp.com")
+  def forHeroku[F[_]: Async: Logger: Trace](legacyClassLoader: LocalItc): Resource[F, Itc[F]] =
+    forUri(uri"https://gemini-new-itc.herokuapp.com", legacyClassLoader)
 
   val Error400Regex = "<title>Error 400 (.*)</title>".r
 
-  def forUri[F[_]: Async: Logger: Trace](uri: Uri): Resource[F, Itc[F]] =
+  def forUri[F[_]: Async: Logger: Trace](
+    uri:               Uri,
+    legacyClassLoader: LocalItc
+  ): Resource[F, Itc[F]] =
     EmberClientBuilder.default.build
       .map(NatchezMiddleware.client[F])
       .map(RequestLogger(true, false))
       .map(ResponseLogger(true, false))
-      .map(forClientAndUri[F](_, uri))
+      .map(forClientAndUri[F](_, uri, legacyClassLoader))
 
-  def forClientAndUri[F[_]: Concurrent: Logger: Trace](c: Client[F], uri: Uri): Itc[F] =
+  def forClientAndUri[F[_]: Concurrent: Logger: Trace](
+    c:        Client[F],
+    uri:      Uri,
+    itcLocal: LocalItc
+  ): Itc[F] =
     new Itc[F] with Http4sClientDsl[F] with SignalToNoiseCalculation[F] {
       val L = Logger[F]
 
@@ -161,26 +169,32 @@ object ItcImpl {
             Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
             Trace[F].put("itc.exposures" -> exposures) *>
             Trace[F].put("itc.level" -> level.value) *>
-            c.run(POST(json, uri / "jsonchart")).use {
-              case Status.Successful(resp) =>
-                given EntityDecoder[F, ItcRemoteResult] = jsonOf[F, ItcRemoteResult]
-                resp.as[ItcRemoteResult]
-              case resp                    =>
-                resp.bodyText
-                  .through(fs2.text.lines)
-                  .filter(_.startsWith("<title>"))
-                  .compile
-                  .last
-                  .flatMap {
-                    case Some(Error400Regex(msg)) =>
-                      L.warn(s"Upstream error $msg") *>
-                        ApplicativeError[F, Throwable].raiseError(new UpstreamException(msg))
-                    case u                        =>
-                      L.warn(s"Upstream error ${u}") *>
-                        ApplicativeError[F, Throwable]
-                          .raiseError(new UpstreamException(u.getOrElse("Upstream Exception")))
-                  }
-            }
+            (itcLocal.callLocal(json.noSpaces) match {
+              case Right(r)  => r.pure[F]
+              case Left(msg) =>
+                L.warn(s"Upstream error $msg") *>
+                  ApplicativeError[F, Throwable].raiseError(new UpstreamException(msg))
+            })
+          // c.run(POST(json, uri / "jsonchart")).use {
+          // case Status.Successful(resp) =>
+          //   given EntityDecoder[F, ItcRemoteResult] = jsonOf[F, ItcRemoteResult]
+          //   resp.as[ItcRemoteResult]
+          // case resp                    =>
+          //   resp.bodyText
+          //     .through(fs2.text.lines)
+          //     .filter(_.startsWith("<title>"))
+          //     .compile
+          //     .last
+          //     .flatMap {
+          //       case Some(Error400Regex(msg)) =>
+          //         L.warn(s"Upstream error $msg") *>
+          //           ApplicativeError[F, Throwable].raiseError(new UpstreamException(msg))
+          //       case u                        =>
+          //         L.warn(s"Upstream error ${u}") *>
+          //           ApplicativeError[F, Throwable]
+          //             .raiseError(new UpstreamException(u.getOrElse("Upstream Exception")))
+          //     }
+          // }
         }
 
       override def itcVersions: F[String] =
@@ -219,26 +233,32 @@ object ItcImpl {
             Trace[F].put("itc.query" -> json.spaces2) *>
             Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
             Trace[F].put("itc.exposures" -> exposures.toInt) *>
-            c.run(POST(json, uri / "jsonchart")).use {
-              case Status.Successful(resp) =>
-                given EntityDecoder[F, ItcRemoteResult] = jsonOf[F, ItcRemoteResult]
-                resp.as[ItcRemoteResult]
-              case resp                    =>
-                resp.bodyText
-                  .through(fs2.text.lines)
-                  .filter(_.startsWith("<title>"))
-                  .compile
-                  .last
-                  .flatMap {
-                    case Some(Error400Regex(msg)) =>
-                      L.warn(s"Upstream error $msg") *>
-                        ApplicativeError[F, Throwable].raiseError(new UpstreamException(msg))
-                    case u                        =>
-                      L.warn(s"Upstream error ${u}") *>
-                        ApplicativeError[F, Throwable]
-                          .raiseError(new UpstreamException(u.getOrElse("Upstream Exception")))
-                  }
-            }
+            (itcLocal.callLocal(json.noSpaces) match {
+              case Right(r)  => r.pure[F]
+              case Left(msg) =>
+                L.warn(s"Upstream error $msg") *>
+                  ApplicativeError[F, Throwable].raiseError(new UpstreamException(msg))
+            })
+          // c.run(POST(json, uri / "jsonchart")).use {
+          //   case Status.Successful(resp) =>
+          //     given EntityDecoder[F, ItcRemoteResult] = jsonOf[F, ItcRemoteResult]
+          //     resp.as[ItcRemoteResult]
+          //   case resp                    =>
+          //     resp.bodyText
+          //       .through(fs2.text.lines)
+          //       .filter(_.startsWith("<title>"))
+          //       .compile
+          //       .last
+          //       .flatMap {
+          //         case Some(Error400Regex(msg)) =>
+          //           L.warn(s"Upstream error $msg") *>
+          //             ApplicativeError[F, Throwable].raiseError(new UpstreamException(msg))
+          //         case u                        =>
+          //           L.warn(s"Upstream error ${u}") *>
+          //             ApplicativeError[F, Throwable]
+          //               .raiseError(new UpstreamException(u.getOrElse("Upstream Exception")))
+          //       }
+          // }
         }
 
       val MaxIterations = 10
