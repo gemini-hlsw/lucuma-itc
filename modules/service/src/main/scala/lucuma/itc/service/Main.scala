@@ -61,8 +61,8 @@ object Main extends IOApp with ItcCacheOrRemote {
             | / / /_/ / /__/ /_/ / / / / / / /_/ /_____/ / /_/ /__
             |/_/\\__,_/\\___/\\__,_/_/ /_/ /_/\\__,_/     /_/\\__/\\___/
             |
-            | old-itc-url ${cfg.itcUrl}
             | redis-url ${cfg.redisUrl}
+            | port ${cfg.port}
             |
             |""".stripMargin
     banner.linesIterator.toList.traverse_(Logger[F].info(_))
@@ -122,7 +122,7 @@ object Main extends IOApp with ItcCacheOrRemote {
     itc: LocalItc
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
-      itc     <- ItcImpl.forUri(cfg.itcUrl, itc)
+      itc     <- Resource.eval(ItcImpl.build(itc).pure[F])
       redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
       // Check the cache staleness every 1 hours
       _       <- Resource

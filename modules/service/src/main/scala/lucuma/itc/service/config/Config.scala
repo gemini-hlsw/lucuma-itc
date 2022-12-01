@@ -13,7 +13,6 @@ import org.http4s.Uri
 final case class Config(
   environment: ExecutionEnvironment,
   port:        Int,
-  itcUrl:      Uri,
   redisUrl:    Uri,
   honeycomb:   Option[HoneycombConfig]
 )
@@ -33,7 +32,6 @@ object Config:
        .or(envOrProp("PORT"))
        .or(ConfigValue.default("6060"))
        .as[Int],
-     envOrProp("ITC_URL").as[Uri],
      envOrProp("REDISCLOUD_URL")
        .or(envOrProp("REDIS_URL"))
        .as[Uri],

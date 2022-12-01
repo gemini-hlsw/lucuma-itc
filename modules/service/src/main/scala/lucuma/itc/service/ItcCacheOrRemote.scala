@@ -54,6 +54,7 @@ trait ItcCacheOrRemote extends Version:
         fromRedis
           .flatMap(b => Either.catchNonFatal(Unpickle[B].fromBytes(ByteBuffer.wrap(b))).toOption)
           .pure[F]
+      _         <- L.info(s"$hash found on redis").unlessA(fromRedis.isEmpty && decoded.isEmpty)
       r         <- decoded.map(_.pure[F]).getOrElse(request(a))
       _         <-
         redis
