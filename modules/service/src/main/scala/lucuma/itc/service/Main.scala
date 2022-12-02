@@ -164,8 +164,13 @@ object Main extends IOApp with ItcCacheOrRemote {
   def legacyItcLoader[F[_]: Sync: Logger]: F[LocalItc] =
     Sync[F]
       .delay {
-        println(new File("../itc/ocslib"))
-        val jarFiles = new File("../itc/ocslib").listFiles(new FileFilter() {
+        import java.nio.file.Paths
+        import scala.jdk.CollectionConverters.*
+        val currentRelativePath = Paths.get("")
+        System.getenv().asScala.foreach(println)
+        println(currentRelativePath.toAbsolutePath().toString())
+        println(new File("modules/service/target/universal/stage/ocslib").getAbsolutePath())
+        val jarFiles            = new File("modules/service/target/universal/stage/ocslib").listFiles(new FileFilter() {
           override def accept(file: File): Boolean =
             file.getName().endsWith(".jar");
         })

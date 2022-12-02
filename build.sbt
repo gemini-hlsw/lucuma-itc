@@ -1,3 +1,5 @@
+import NativePackagerHelper._
+
 val catsEffectVersion           = "3.4.2"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsVersion                 = "2.9.0"
@@ -157,7 +159,14 @@ lazy val service = project
       "herokuSourceVersion" -> sys.env.get("SOURCE_VERSION"),
       "buildDateTime"       -> System.currentTimeMillis(),
       ocslibHash
-    )
+    ),
+    Universal / mappings ++= {
+      val dir = baseDirectory.value / "ocslib"
+      println(dir)
+      (dir ** AllPassFilter) pair relativeTo(dir.getParentFile)
+      // val ocsJars = directory("ocslib")
+      // ocsJars -> ("lib/" + ocsJars.getName)
+    }
   )
   .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
 
