@@ -51,6 +51,11 @@ with a custom classloader
 
 In case the code in ocs2 changes we need to update the jar files using the update.sh script
 
+## jar files
+
+The jar files are fairly large (they contain the data files used to calculate the itc results)
+Given github limitations these need to be stored in git lfs
+
 ## Long term
 Ideally we'd port the old ITC codebase and integrate it here. This is no small task but an initial
 attempt was started on the `legacy-port` branch

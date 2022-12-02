@@ -128,7 +128,6 @@ object Main extends IOApp with ItcCacheOrRemote {
       itc     <- Resource.eval(ItcImpl.build(itc).pure[F])
       redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
       _       <- Resource.eval(checkVersionToPurge[F](redis, itc))
-      _       <- Resource.eval(Logger[F].info("START"))
       mapping <- Resource.eval(ItcMapping(cfg.environment, redis, itc))
     yield wsb =>
       // Routes for the ITC GraphQL service
@@ -145,8 +144,7 @@ object Main extends IOApp with ItcCacheOrRemote {
   // Custom class loader to give prioritiy to the jars in the urls over the parent classloader
   class ReverseClassLoader(urls: Array[URL], parent: ClassLoader)
       extends URLClassLoader(urls, parent) {
-    override def loadClass(name: String): Class[?] = {
-      println(s"Requested $name")
+    override def loadClass(name: String): Class[?] =
       // First check whether it's already been loaded, if so use it
       if (name.startsWith("java.lang")) super.loadClass(name)
       else {
@@ -159,7 +157,6 @@ object Main extends IOApp with ItcCacheOrRemote {
           }
         }
       }
-    }
   }
 
   // Build a custom class loader to read and call the legacy ocs2 libs
@@ -170,15 +167,10 @@ object Main extends IOApp with ItcCacheOrRemote {
       .delay {
         val dir      =
           if (config.dyno.isDefined) "modules/service/target/universal/stage/ocslib" else "ocslib"
-        // println(new File(dir).getAbsolutePath())
         val jarFiles =
           new File(dir).listFiles(new FileFilter() {
-            override def accept(file: File): Boolean = {
-              println(file.getName())
-              println(file.exists())
-              println(s"sivze ${Files.size(file.toPath())}")
+            override def accept(file: File): Boolean =
               file.getName().endsWith(".jar");
-            }
           })
         jarFiles.foreach(println)
         LocalItc(
