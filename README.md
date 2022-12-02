@@ -17,8 +17,6 @@ https://github.com/spray/sbt-revolver/issues/99
 ## Env
 
 The app needs two environment variable
-* ITC_URL which needs to point to the address where old ocs2-based itc runs. e.g.
-    ITC_URL = "https://itc-server-exp.herokuapp.com/"
 * REDISCLOUD_URL which points to the redis server used for caching. e.g.
     REDISCLOUD_URL = "redis://localhost"
 
@@ -27,7 +25,7 @@ ITC calculations are relatively expensive and they are pure (a given input alway
 the lucuma ITC server uses redis to store the results linking them from the request parameters to the results
 
 The cache design is optimized to use minimal space given some of the responses (graphs) are fairly large.
-We are also asuming we'll never need to go inside the cached data to edit the data and we can
+We are also assuming we'll never need to go inside the cached data to edit the data and we can
 discard items at any moment.
 
 The keys are stored as `itc:prefix:hash` where hash is just the hash of the parameters
@@ -40,7 +38,18 @@ A few diferent encodings were tested to reduce size. Here are some measurement
 
 ## Cache flushing
 The only reason for the remote values to be stale is if the old itc changes (happens not very often)
-`lucuma-itc` will check every 1h and verify if the itc data has changed. If so it will flush the whole cache
+`lucuma-itc` will check on startup and verify if the itc data has changed. If so it will flush the whole cache
+
+## Use legacy itc code
+The itc calculations are mostly done in java and scala using legacy technologies, in particular libraries
+like scala 2.11, scalaz, argonaut.
+We were wrapping this code in an http server but that incurred considerable overhead especially when the graph data was needed.
+As an alternative we can now directly call the java code but given the use of legacy libraries this
+
+requires the jar files to be loaded dynamically by the application and be called via reflection
+with a custom classloader
+
+In case the code in ocs2 changes we need to update the jar files using the update.sh script
 
 ## Long term
 Ideally we'd port the old ITC codebase and integrate it here. This is no small task but an initial

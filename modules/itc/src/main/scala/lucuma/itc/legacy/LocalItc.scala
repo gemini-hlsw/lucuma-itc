@@ -28,7 +28,10 @@ case class LocalItc(classLoader: ClassLoader) {
 
     res match {
       case LegacyRight(result) =>
-        decode[legacy.ItcRemoteResult](result).leftMap(_.getMessage())
+        decode[legacy.ItcRemoteResult](result).leftMap { e =>
+          println(result)
+          e.printStackTrace(); e.getMessage()
+        }
       case LegacyLeft(result)  =>
         Left(result)
       case m                   =>

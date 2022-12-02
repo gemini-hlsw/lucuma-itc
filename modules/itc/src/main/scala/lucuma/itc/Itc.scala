@@ -53,8 +53,6 @@ trait Itc[F[_]]:
     signalToNoiseAt: Option[Wavelength]
   ): F[Itc.SNCalcResult]
 
-  def itcVersions: F[String]
-
 object Itc:
 
   def apply[F[_]](using ev: Itc[F]): ev.type = ev

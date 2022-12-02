@@ -174,9 +174,6 @@ object ItcImpl {
           // }
         }
 
-      override def itcVersions: F[String] =
-        "".pure[F]
-
       def itcGraph(
         targetProfile:    TargetProfile,
         observingMode:    ObservingMode,

@@ -46,6 +46,7 @@ import java.net.URL
 import java.net.URLClassLoader
 import scala.concurrent.duration._
 import scala.util.Try
+import buildinfo.BuildInfo
 
 // #server
 object Main extends IOApp with ItcCacheOrRemote {
@@ -63,6 +64,7 @@ object Main extends IOApp with ItcCacheOrRemote {
             |
             | redis-url ${cfg.redisUrl}
             | port ${cfg.port}
+            | data checksum ${BuildInfo.ocslibHash}
             |
             |""".stripMargin
     banner.linesIterator.toList.traverse_(Logger[F].info(_))
@@ -124,10 +126,7 @@ object Main extends IOApp with ItcCacheOrRemote {
     for
       itc     <- Resource.eval(ItcImpl.build(itc).pure[F])
       redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
-      // Check the cache staleness every 1 hours
-      _       <- Resource
-                   .eval((checkVersionToPurge[F](redis, itc) *> Async[F].sleep(1.hour)).foreverM)
-                   .start
+      _       <- Resource.eval(checkVersionToPurge[F](redis, itc) *> Async[F].sleep(1.hour))
       mapping <- Resource.eval(ItcMapping(cfg.environment, redis, itc))
     yield wsb =>
       // Routes for the ITC GraphQL service
@@ -141,6 +140,7 @@ object Main extends IOApp with ItcCacheOrRemote {
         )
       )
 
+  // Custom class loader to give prioritiy to the jars in the urls over the parent classloader
   class ReverseClassLoader(urls: Array[URL], parent: ClassLoader)
       extends URLClassLoader(urls, parent) {
     override def loadClass(name: String): Class[?] =
@@ -158,6 +158,9 @@ object Main extends IOApp with ItcCacheOrRemote {
       }
   }
 
+  // Build a custom class loader to read and call the legacy ocs2 libs
+  // without affecting the current classes. This is mostly because ocs2 uses scala 2.11
+  // and it will conflict with the current scala 3 classes
   def legacyItcLoader[F[_]: Sync: Logger]: F[LocalItc] =
     Sync[F]
       .delay {
@@ -165,6 +168,7 @@ object Main extends IOApp with ItcCacheOrRemote {
           override def accept(file: File): Boolean =
             file.getName().endsWith(".jar");
         })
+        jarFiles.foreach(println)
         LocalItc(
           new ReverseClassLoader(jarFiles.map(_.toURI.toURL), ClassLoader.getSystemClassLoader())
         )
