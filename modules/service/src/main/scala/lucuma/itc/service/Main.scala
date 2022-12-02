@@ -144,7 +144,8 @@ object Main extends IOApp with ItcCacheOrRemote {
   // Custom class loader to give prioritiy to the jars in the urls over the parent classloader
   class ReverseClassLoader(urls: Array[URL], parent: ClassLoader)
       extends URLClassLoader(urls, parent) {
-    override def loadClass(name: String): Class[?] =
+    override def loadClass(name: String): Class[?] = {
+      println(s"Requested $name")
       // First check whether it's already been loaded, if so use it
       if (name.startsWith("java.lang")) super.loadClass(name)
       else {
@@ -157,6 +158,7 @@ object Main extends IOApp with ItcCacheOrRemote {
           }
         }
       }
+    }
   }
 
   // Build a custom class loader to read and call the legacy ocs2 libs
@@ -165,19 +167,17 @@ object Main extends IOApp with ItcCacheOrRemote {
   def legacyItcLoader[F[_]: Sync: Logger](config: Config): F[LocalItc] =
     Sync[F]
       .delay {
-        import java.nio.file.Paths
-        import scala.jdk.CollectionConverters.*
-        val currentRelativePath = Paths.get("")
-        println(config.dyno.isDefined)
-        System.getenv().asScala.foreach(println)
-        println(currentRelativePath.toAbsolutePath().toString())
-        val dir                 =
+        val dir      =
           if (config.dyno.isDefined) "modules/service/target/universal/stage/ocslib" else "ocslib"
-        println(new File(dir).getAbsolutePath())
-        val jarFiles            =
+        // println(new File(dir).getAbsolutePath())
+        val jarFiles =
           new File(dir).listFiles(new FileFilter() {
-            override def accept(file: File): Boolean =
+            override def accept(file: File): Boolean = {
+              println(file.getName())
+              println(file.exists())
+              println(file.getTotalSpace())
               file.getName().endsWith(".jar");
+            }
           })
         jarFiles.foreach(println)
         LocalItc(

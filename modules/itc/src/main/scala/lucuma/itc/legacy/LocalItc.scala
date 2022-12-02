@@ -13,6 +13,7 @@ case class LocalItc(classLoader: ClassLoader) {
   val method = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculation", classOf[String], classOf[String])
+  println(method)
 
   def callLocal(call: String): Either[String, ItcRemoteResult] = {
     val res = method
