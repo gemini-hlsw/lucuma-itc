@@ -8,8 +8,8 @@ if [ -z $1 ]; then
 fi
 
 if [ -d $1 ]; then
-  BUNDLE=$(greadlink -f "$1")
-  LIB="$(dirname "$(greadlink -f "$0")")/lib"
+  BUNDLE=$(readlink -f "$1")
+  LIB="$(dirname "$(readlink -f "$0")")/modules/service/ocslib"
   mkdir -p "$LIB"
   echo "🔸 Reading from $BUNDLE"
   echo "🔸 Writing to   $LIB"
@@ -25,7 +25,7 @@ rm "$LIB"/*.jar
 echo "🔸 Copying bundles."
 cp "$BUNDLE"/argonaut_2.11*.jar "$LIB"
 cp "$BUNDLE"/edu-gemini-itc-shared_2.11*.jar "$LIB"
-# cp "$BUNDLE"/edu-gemini-itc-web_2.11*.jar "$LIB"
+cp "$BUNDLE"/edu-gemini-itc-web_2.11*.jar "$LIB"
 cp "$BUNDLE"/edu-gemini-itc_2.11*.jar "$LIB"
 cp "$BUNDLE"/edu-gemini-json_2.11*.jar "$LIB"
 cp "$BUNDLE"/edu-gemini-pot_2.11*.jar "$LIB"
@@ -37,4 +37,5 @@ cp "$BUNDLE"/edu-gemini-util-skycalc_2.11*.jar "$LIB"
 cp "$BUNDLE"/org-jfree_*.jar "$LIB"
 cp "$BUNDLE"/scalaz-core_2.11*.jar "$LIB"
 cp "$BUNDLE"/squants_2.11*.jar "$LIB"
+cp "$BUNDLE"/scala-library-2.11.12.jar "$LIB"
 

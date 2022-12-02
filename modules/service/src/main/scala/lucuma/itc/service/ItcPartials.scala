@@ -4,7 +4,6 @@
 package lucuma.itc.service
 
 import algebra.instances.all.given
-import buildinfo.BuildInfo
 import cats.*
 import cats.data.*
 import cats.effect.*

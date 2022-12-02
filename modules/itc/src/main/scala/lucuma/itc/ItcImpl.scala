@@ -4,8 +4,7 @@
 package lucuma.itc
 
 import algebra.instances.all.given
-import cats.ApplicativeError
-import cats.ApplicativeThrow
+import cats.*
 import cats.data.NonEmptyList
 import cats.effect.*
 import cats.syntax.all.*
@@ -24,6 +23,7 @@ import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.itc.Itc
+import lucuma.itc.legacy.LocalItc
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
 import lucuma.refined.*
@@ -31,11 +31,7 @@ import natchez.Trace
 import natchez.http4s.NatchezMiddleware
 import org.http4s.*
 import org.http4s.circe.*
-import org.http4s.client.Client
-import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.client.middleware.*
 import org.http4s.dsl.io.*
-import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.syntax.all.*
 import org.typelevel.log4cats.Logger
 
@@ -90,20 +86,10 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
 object ItcImpl {
   opaque type NumberOfExposures = Int
 
-  def forHeroku[F[_]: Async: Logger: Trace]: Resource[F, Itc[F]] =
-    forUri(uri"https://gemini-new-itc.herokuapp.com")
-
   val Error400Regex = "<title>Error 400 (.*)</title>".r
 
-  def forUri[F[_]: Async: Logger: Trace](uri: Uri): Resource[F, Itc[F]] =
-    EmberClientBuilder.default.build
-      .map(NatchezMiddleware.client[F])
-      .map(RequestLogger(true, false))
-      .map(ResponseLogger(true, false))
-      .map(forClientAndUri[F](_, uri))
-
-  def forClientAndUri[F[_]: Concurrent: Logger: Trace](c: Client[F], uri: Uri): Itc[F] =
-    new Itc[F] with Http4sClientDsl[F] with SignalToNoiseCalculation[F] {
+  def build[F[_]: MonadThrow: Logger: Trace](itcLocal: LocalItc): Itc[F] =
+    new Itc[F] with SignalToNoiseCalculation[F] {
       val L = Logger[F]
 
       def calculateExposureTime(
@@ -149,53 +135,24 @@ object ItcImpl {
         import lucuma.itc.legacy.*
 
         Trace[F].span("legacy-itc-query") {
-          val json =
+          val request =
             spectroscopyParams(targetProfile,
                                observingMode,
                                exposureDuration.value.toDouble.seconds,
                                constraints,
                                exposures
             ).asJson
-          L.info(s"ITC remote query ${uri / "jsonchart"} ${json.noSpaces}") *>
-            Trace[F].put("itc.query" -> json.spaces2) *>
+          Trace[F].put("itc.query"              -> request.spaces2) *>
             Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
             Trace[F].put("itc.exposures" -> exposures) *>
             Trace[F].put("itc.level" -> level.value) *>
-            c.run(POST(json, uri / "jsonchart")).use {
-              case Status.Successful(resp) =>
-                given EntityDecoder[F, ItcRemoteResult] = jsonOf[F, ItcRemoteResult]
-                resp.as[ItcRemoteResult]
-              case resp                    =>
-                resp.bodyText
-                  .through(fs2.text.lines)
-                  .filter(_.startsWith("<title>"))
-                  .compile
-                  .last
-                  .flatMap {
-                    case Some(Error400Regex(msg)) =>
-                      L.warn(s"Upstream error $msg") *>
-                        ApplicativeError[F, Throwable].raiseError(new UpstreamException(msg))
-                    case u                        =>
-                      L.warn(s"Upstream error ${u}") *>
-                        ApplicativeError[F, Throwable]
-                          .raiseError(new UpstreamException(u.getOrElse("Upstream Exception")))
-                  }
-            }
+            (itcLocal.callLocal(request.noSpaces) match {
+              case Right(r)  => r.pure[F]
+              case Left(msg) =>
+                L.warn(s"Upstream error $msg") *>
+                  ApplicativeThrow[F].raiseError(new UpstreamException(msg))
+            })
         }
-
-      override def itcVersions: F[String] =
-        import lucuma.itc.legacy.*
-
-        L.info(s"ITC remote query for versions") *>
-          c.run(GET(uri / "version")).use {
-            case Status.Successful(resp) =>
-              given EntityDecoder[F, ItcRemoteVersion] = jsonOf[F, ItcRemoteVersion]
-              resp.as[ItcRemoteVersion].map(_.versionToken)
-            case resp                    =>
-              L.warn(s"Upstream error ${resp}") *>
-                ApplicativeError[F, Throwable]
-                  .raiseError(new UpstreamException("Upstream Exception"))
-          }
 
       def itcGraph(
         targetProfile:    TargetProfile,
@@ -215,30 +172,15 @@ object ItcImpl {
                                constraints,
                                exposures.toInt
             ).asJson
-          L.info(s"ITC remote query ${uri / "jsonchart"} ${json.noSpaces}") *>
-            Trace[F].put("itc.query" -> json.spaces2) *>
+          Trace[F].put("itc.query"              -> json.spaces2) *>
             Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
             Trace[F].put("itc.exposures" -> exposures.toInt) *>
-            c.run(POST(json, uri / "jsonchart")).use {
-              case Status.Successful(resp) =>
-                given EntityDecoder[F, ItcRemoteResult] = jsonOf[F, ItcRemoteResult]
-                resp.as[ItcRemoteResult]
-              case resp                    =>
-                resp.bodyText
-                  .through(fs2.text.lines)
-                  .filter(_.startsWith("<title>"))
-                  .compile
-                  .last
-                  .flatMap {
-                    case Some(Error400Regex(msg)) =>
-                      L.warn(s"Upstream error $msg") *>
-                        ApplicativeError[F, Throwable].raiseError(new UpstreamException(msg))
-                    case u                        =>
-                      L.warn(s"Upstream error ${u}") *>
-                        ApplicativeError[F, Throwable]
-                          .raiseError(new UpstreamException(u.getOrElse("Upstream Exception")))
-                  }
-            }
+            (itcLocal.callLocal(json.noSpaces) match {
+              case Right(r)  => r.pure[F]
+              case Left(msg) =>
+                L.warn(s"Upstream error $msg") *>
+                  ApplicativeThrow[F].raiseError(new UpstreamException(msg))
+            })
         }
 
       val MaxIterations = 10
@@ -254,6 +196,10 @@ object ItcImpl {
           Itc.GraphResult.fromLegacy(r.versionToken, r.ccds, r.groups)
         }
 
+      /**
+       * Compute the exposure time and number of exposures required to achieve the desired
+       * signal-to-noise under the requested conditions. Only for spectroscopy modes
+       */
       def spectroscopy(
         targetProfile:   TargetProfile,
         observingMode:   ObservingMode,
@@ -277,7 +223,7 @@ object ItcImpl {
           counter:    NonNegInt
         ): F[Itc.CalcResult] =
           if (snr === 0.0) {
-            Concurrent[F].raiseError(new ItcCalculationError("S/N obtained is 0"))
+            ApplicativeThrow[F].raiseError(new ItcCalculationError("S/N obtained is 0"))
           } else {
             val totalTime: Quantity[BigDecimal, Second] =
               expTime * nExp.withUnit[1] * pow(requestedSN / snr, 2).withUnit[1]
@@ -333,7 +279,7 @@ object ItcImpl {
           L.info(
             s"Target brightness ${targetProfile} at band ${targetProfile.band}"
           ) *>
-          Trace[F].span("itc") {
+          Trace[F].span("itc.calctime.spectroscopy") {
 
             itc(targetProfile,
                 observingMode,

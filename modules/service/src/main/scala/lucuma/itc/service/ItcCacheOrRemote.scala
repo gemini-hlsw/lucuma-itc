@@ -4,6 +4,7 @@
 package lucuma.itc.service
 
 import boopickle.DefaultBasic.*
+import buildinfo.BuildInfo
 import cats.*
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
@@ -54,6 +55,7 @@ trait ItcCacheOrRemote extends Version:
         fromRedis
           .flatMap(b => Either.catchNonFatal(Unpickle[B].fromBytes(ByteBuffer.wrap(b))).toOption)
           .pure[F]
+      _         <- L.info(s"$hash found on redis").unlessA(fromRedis.isEmpty && decoded.isEmpty)
       r         <- decoded.map(_.pure[F]).getOrElse(request(a))
       _         <-
         redis
@@ -107,33 +109,6 @@ trait ItcCacheOrRemote extends Version:
     )
 
   /**
-   * Request and store the itc version
-   */
-  def versionFromCacheOrRemote[F[_]: MonadThrow: Logger](
-    environment: ExecutionEnvironment,
-    redis:       StringCommands[F, Array[Byte], Array[Byte]],
-    itc:         Itc[F]
-  ): F[ItcVersions] = {
-    val L = Logger[F]
-    for
-      fromRedis <- redis
-                     .get(VersionKey)
-                     .handleErrorWith(e => L.error(e)(s"Error reading $VersionKey") *> none.pure[F])
-      version   <- fromRedis.fold(
-                     itc.itcVersions
-                       .map { r =>
-                         ItcVersions(version(environment).value, r.some)
-                       }
-                   )(v => ItcVersions(version(environment).value, String(v, KeyCharset).some).pure[F])
-      _         <-
-        redis
-          .setEx(VersionKey, version.dataVersion.orEmpty.getBytes(KeyCharset), TTL)
-          .handleErrorWith(L.error(_)(s"Error writing $VersionKey"))
-          .whenA(fromRedis.isEmpty)
-    yield version
-  }
-
-  /**
    * This method will get the version from the remote itc and compare it with the one on redis. If
    * there is none in redis we just store it If the remote is different than the local flush the
    * cache
@@ -145,15 +120,16 @@ trait ItcCacheOrRemote extends Version:
     val L      = Logger[F]
     val result = for
       _              <- L.info("Check for stale cache")
-      remoteVersion  <- itc.itcVersions // Remote itc version
-      _              <- L.info(s"Remote itc version $remoteVersion")
+      _              <- L.info(s"Current itc data checksum ${BuildInfo.ocslibHash}")
       fromRedis      <- redis.get(VersionKey)
-      _              <- L.info(s"Local itc version $remoteVersion")
       versionOnRedis <- fromRedis.map(v => String(v, KeyCharset)).pure[F]
+      _              <- L.info(s"itc data checksum on redis $versionOnRedis")
       // if the version changes flush redis
-      _              <- (L.info("Flush redis cache on itc version change") *> redis.flushAll)
-                          .whenA(versionOnRedis.exists(_ =!= remoteVersion))
-      _              <- redis.setEx(VersionKey, remoteVersion.getBytes(KeyCharset), TTL)
+      _              <- (L.info(
+                          s"Flush redis cache on itc version change, set to ${BuildInfo.ocslibHash}"
+                        ) *> redis.flushAll)
+                          .whenA(versionOnRedis.exists(_ =!= BuildInfo.ocslibHash))
+      _              <- redis.setEx(VersionKey, BuildInfo.ocslibHash.getBytes(KeyCharset), TTL)
     yield ()
     result.handleErrorWith(e => L.error(e)("Error doing version check to purge"))
   }

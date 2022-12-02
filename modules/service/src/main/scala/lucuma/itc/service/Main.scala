@@ -3,6 +3,7 @@
 
 package lucuma.itc.service
 
+import buildinfo.BuildInfo
 import cats.Applicative
 import cats.Functor
 import cats.Parallel
@@ -16,6 +17,7 @@ import dev.profunktor.redis4cats.log4cats.*
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
+import lucuma.itc.legacy.LocalItc
 import lucuma.itc.service.config.ExecutionEnvironment._
 import lucuma.itc.service.config._
 import natchez.EntryPoint
@@ -39,7 +41,13 @@ import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
+import java.io.File
+import java.io.FileFilter
+import java.net.URL
+import java.net.URLClassLoader
+import java.nio.file.Files
 import scala.concurrent.duration._
+import scala.util.Try
 
 // #server
 object Main extends IOApp with ItcCacheOrRemote {
@@ -55,8 +63,9 @@ object Main extends IOApp with ItcCacheOrRemote {
             | / / /_/ / /__/ /_/ / / / / / / /_/ /_____/ / /_/ /__
             |/_/\\__,_/\\___/\\__,_/_/ /_/ /_/\\__,_/     /_/\\__/\\___/
             |
-            | old-itc-url ${cfg.itcUrl}
             | redis-url ${cfg.redisUrl}
+            | port ${cfg.port}
+            | data checksum ${BuildInfo.ocslibHash}
             |
             |""".stripMargin
     banner.linesIterator.toList.traverse_(Logger[F].info(_))
@@ -112,15 +121,13 @@ object Main extends IOApp with ItcCacheOrRemote {
       .build
 
   def routes[F[_]: Async: Concurrent: Logger: Parallel: Trace](
-    cfg: Config
+    cfg: Config,
+    itc: LocalItc
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
-      itc     <- ItcImpl.forUri(cfg.itcUrl)
+      itc     <- Resource.eval(ItcImpl.build(itc).pure[F])
       redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
-      // Check the cache staleness every 1 hours
-      _       <- Resource
-                   .eval((checkVersionToPurge[F](redis, itc) *> Async[F].sleep(1.hour)).foreverM)
-                   .start
+      _       <- Resource.eval(checkVersionToPurge[F](redis, itc))
       mapping <- Resource.eval(ItcMapping(cfg.environment, redis, itc))
     yield wsb =>
       // Routes for the ITC GraphQL service
@@ -134,15 +141,52 @@ object Main extends IOApp with ItcCacheOrRemote {
         )
       )
 
+  // Custom class loader to give prioritiy to the jars in the urls over the parent classloader
+  class ReverseClassLoader(urls: Array[URL], parent: ClassLoader)
+      extends URLClassLoader(urls, parent) {
+    override def loadClass(name: String): Class[?] =
+      // First check whether it's already been loaded, if so use it
+      if (name.startsWith("java.lang")) super.loadClass(name)
+      else {
+        Option(findLoadedClass(name)).getOrElse {
+
+          // Not loaded, try to load it
+          Try(findClass(name)).getOrElse {
+            // If not found locally, use normal parent delegation in URLClassloader
+            super.loadClass(name);
+          }
+        }
+      }
+  }
+
+  // Build a custom class loader to read and call the legacy ocs2 libs
+  // without affecting the current classes. This is mostly because ocs2 uses scala 2.11
+  // and it will conflict with the current scala 3 classes
+  def legacyItcLoader[F[_]: Sync: Logger](config: Config): F[LocalItc] =
+    Sync[F]
+      .delay {
+        val dir      =
+          if (config.dyno.isDefined) "modules/service/target/universal/stage/ocslib" else "ocslib"
+        val jarFiles =
+          new File(dir).listFiles(new FileFilter() {
+            override def accept(file: File): Boolean =
+              file.getName().endsWith(".jar");
+          })
+        LocalItc(
+          new ReverseClassLoader(jarFiles.map(_.toURI.toURL), ClassLoader.getSystemClassLoader())
+        )
+      }
+
   /**
    * Our main server, as a resource that starts up our server on acquire and shuts it all down in
    * cleanup, yielding an `ExitCode`. Users will `use` this resource and hold it forever.
    */
   def server[F[_]: Async: Parallel: Logger](cfg: Config): Resource[F, ExitCode] =
     for
+      cl <- Resource.eval(legacyItcLoader[F](cfg))
       _  <- Resource.eval(banner(cfg))
       ep <- entryPointResource(cfg.honeycomb)
-      ap <- ep.wsLiftR(routes(cfg)).map(_.map(_.orNotFound))
+      ap <- ep.wsLiftR(routes(cfg, cl)).map(_.map(_.orNotFound))
       _  <- serverResource(ap, cfg)
     yield ExitCode.Success
 

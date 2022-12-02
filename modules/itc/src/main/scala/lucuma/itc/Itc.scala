@@ -22,8 +22,8 @@ final case class UpstreamException(msg: String) extends RuntimeException(msg)
 trait Itc[F[_]]:
 
   /**
-   * Compute the exposure time and number required to achieve the desired signal-to-noise under
-   * average conditions.
+   * Compute the exposure time and number of exposures required to achieve the desired
+   * signal-to-noise under the requested conditions.
    */
   def calculateExposureTime(
     targetProfile:   TargetProfile,
@@ -45,14 +45,13 @@ trait Itc[F[_]]:
   ): F[Itc.GraphResult]
 
   /**
-   * Calculate the signal to noise from graph data for the given mode and exposureTime and exposures
+   * Calculate the signal to noise from graph data for the given mode and exposureTime and amount of
+   * exposures
    */
   def calculateSignalToNoise(
     graph:           NonEmptyList[ItcChartGroup],
     signalToNoiseAt: Option[Wavelength]
   ): F[Itc.SNCalcResult]
-
-  def itcVersions: F[String]
 
 object Itc:
 

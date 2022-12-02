@@ -3,6 +3,7 @@
 
 package lucuma.itc.service
 
+import buildinfo.BuildInfo
 import cats._
 import cats.data.*
 import cats.derived.*
@@ -42,9 +43,9 @@ import scala.concurrent.duration._
 import scala.io.Source
 import scala.util.Using
 
-import Query._
-import Value._
-import QueryCompiler._
+import Query.*
+import Value.*
+import QueryCompiler.*
 
 case class GraphRequest(
   targetProfile: TargetProfile,
@@ -221,18 +222,15 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
       _.getOrElse(Problem(s"Missing parameters for signal to noise calculation$env").leftIorNec)
     )
 
-  def versions[F[_]: MonadThrow: Logger](
+  def versions[F[_]: Applicative: Logger](
     environment: ExecutionEnvironment,
-    redis:       StringCommands[F, Array[Byte], Array[Byte]],
-    itc:         Itc[F]
+    redis:       StringCommands[F, Array[Byte], Array[Byte]]
   )(
     env:         Cursor.Env
   ): F[Result[ItcVersions]] =
-    versionFromCacheOrRemote(environment, redis, itc)
-      .map(_.rightIor[NonEmptyChain[Problem]])
-      .handleError { case x =>
-        Problem(s"Error getting the itc version $x").leftIorNec
-      }
+    ItcVersions(version(environment).value, BuildInfo.ocslibHash.some)
+      .rightIor[NonEmptyChain[Problem]]
+      .pure[F]
 
   def apply[F[_]: Sync: Logger: Parallel: Trace](
     environment: ExecutionEnvironment,
@@ -262,10 +260,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                                                       QueryType,
                                                       spectroscopyGraph[F](environment, redis, itc)
                 ),
-                ComputeRoot[ItcVersions]("versions",
-                                         QueryType,
-                                         versions[F](environment, redis, itc)
-                ),
+                ComputeRoot[ItcVersions]("versions", QueryType, versions[F](environment, redis)),
                 ComputeRoot[Itc.SNCalcResult]("spectroscopySignalToNoiseBeta",
                                               QueryType,
                                               spectroscopySN[F](environment, redis, itc)

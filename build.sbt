@@ -1,3 +1,5 @@
+import NativePackagerHelper._
+
 val catsEffectVersion           = "3.4.2"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsVersion                 = "2.9.0"
@@ -34,7 +36,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.2.1"
 ThisBuild / crossScalaVersions  := Seq("3.2.1")
-ThisBuild / tlBaseVersion       := "0.2"
+ThisBuild / tlBaseVersion       := "0.3"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -91,7 +93,6 @@ lazy val core = project
       "edu.gemini"    %%% "lucuma-refined"      % lucumaRefinedVersion,
       "org.typelevel"  %% "cats-core"           % catsVersion,
       "org.typelevel"  %% "cats-effect"         % catsEffectVersion,
-      "org.http4s"     %% "http4s-ember-client" % http4sVersion,
       "org.http4s"     %% "http4s-circe"        % http4sVersion,
       "org.http4s"     %% "http4s-dsl"          % http4sVersion,
       "io.circe"       %% "circe-literal"       % circeVersion,
@@ -106,6 +107,13 @@ lazy val core = project
       "com.lihaoyi"   %%% "pprint"              % pprintVersion          % Test
     )
   )
+
+lazy val ocslibHash = taskKey[String]("hash of ocslib")
+ThisBuild / ocslibHash / fileInputs += (service / baseDirectory).value.toGlob / "ocslib" / "*.jar"
+ThisBuild / ocslibHash := {
+  val hashes = ocslibHash.inputFiles.sorted.map(_.toFile).map(Hash(_))
+  Hash.toHex(Hash(hashes.toArray.flatten))
+}
 
 // Contains the grackle server
 lazy val service = project
@@ -148,8 +156,13 @@ lazy val service = project
       sbtVersion,
       git.gitHeadCommit,
       "herokuSourceVersion" -> sys.env.get("SOURCE_VERSION"),
-      "buildDateTime"       -> System.currentTimeMillis()
-    )
+      "buildDateTime"       -> System.currentTimeMillis(),
+      ocslibHash
+    ),
+    Universal / mappings ++= {
+      val dir = baseDirectory.value / "ocslib"
+      (dir ** AllPassFilter).pair(relativeTo(dir.getParentFile))
+    }
   )
   .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
 

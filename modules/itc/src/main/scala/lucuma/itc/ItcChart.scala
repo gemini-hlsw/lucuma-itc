@@ -30,8 +30,9 @@ enum SeriesDataType(val tag: String) derives Enumerated:
   case PixBackData    extends SeriesDataType("pix_back_data")
 
 enum ChartType(val tag: String) derives Enumerated:
-  case SignalChart extends ChartType("signal_chart")
-  case S2NChart    extends ChartType("s2n_chart")
+  case SignalChart      extends ChartType("signal_chart")
+  case SignalPixelChart extends ChartType("signal_chart")
+  case S2NChart         extends ChartType("s2n_chart")
 
 case class ItcAxis(start: Double, end: Double, min: Double, max: Double, count: Int)
     derives Decoder,
