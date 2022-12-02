@@ -47,6 +47,7 @@ import java.net.URL
 import java.net.URLClassLoader
 import scala.concurrent.duration._
 import scala.util.Try
+import java.nio.file.Files
 
 // #server
 object Main extends IOApp with ItcCacheOrRemote {
@@ -175,7 +176,7 @@ object Main extends IOApp with ItcCacheOrRemote {
             override def accept(file: File): Boolean = {
               println(file.getName())
               println(file.exists())
-              println(file.getTotalSpace())
+              println(s"sivze ${Files.size(file.toPath())}")
               file.getName().endsWith(".jar");
             }
           })
