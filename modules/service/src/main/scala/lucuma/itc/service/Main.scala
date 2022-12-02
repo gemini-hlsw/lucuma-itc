@@ -3,6 +3,7 @@
 
 package lucuma.itc.service
 
+import buildinfo.BuildInfo
 import cats.Applicative
 import cats.Functor
 import cats.Parallel
@@ -46,7 +47,6 @@ import java.net.URL
 import java.net.URLClassLoader
 import scala.concurrent.duration._
 import scala.util.Try
-import buildinfo.BuildInfo
 
 // #server
 object Main extends IOApp with ItcCacheOrRemote {
@@ -164,6 +164,7 @@ object Main extends IOApp with ItcCacheOrRemote {
   def legacyItcLoader[F[_]: Sync: Logger]: F[LocalItc] =
     Sync[F]
       .delay {
+        println(new File("../itc/ocslib"))
         val jarFiles = new File("../itc/ocslib").listFiles(new FileFilter() {
           override def accept(file: File): Boolean =
             file.getName().endsWith(".jar");

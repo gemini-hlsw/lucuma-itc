@@ -3,6 +3,7 @@
 
 package lucuma.itc.service
 
+import buildinfo.BuildInfo
 import cats._
 import cats.data.*
 import cats.derived.*
@@ -41,7 +42,6 @@ import org.typelevel.log4cats.Logger
 import scala.concurrent.duration._
 import scala.io.Source
 import scala.util.Using
-import buildinfo.BuildInfo
 
 import Query.*
 import Value.*

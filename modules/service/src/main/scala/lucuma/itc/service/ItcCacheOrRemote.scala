@@ -4,6 +4,7 @@
 package lucuma.itc.service
 
 import boopickle.DefaultBasic.*
+import buildinfo.BuildInfo
 import cats.*
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
@@ -17,7 +18,6 @@ import org.typelevel.log4cats.Logger
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import scala.concurrent.duration.*
-import buildinfo.BuildInfo
 
 /**
  * Methods to check if a values is on the cache and if not retrieve them from old itc and store them

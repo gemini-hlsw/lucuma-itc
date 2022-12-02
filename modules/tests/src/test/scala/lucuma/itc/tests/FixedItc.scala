@@ -75,5 +75,4 @@ object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
       )
       .pure[IO]
 
-  override def itcVersions = IO.pure("versionToken")
 }
