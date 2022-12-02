@@ -13,8 +13,17 @@ case class LocalItc(classLoader: ClassLoader) {
   val method = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculation", classOf[String], classOf[String])
-  println(method)
 
+  /**
+   * This method does a call to the method ItcCalculation.calculation via reflection. This is done
+   * because the itc-server runs on scala 3 while the ItcCalculation method is based on scala 2
+   *
+   * Doing the call via reflection with a custom class loader lets us have both scala sversion
+   * playing in harmony.
+   *
+   * Note that the param is passed as a String for the same reason avoiding conflicts across classes
+   * that may not be compatible. INstead we pass back and forth
+   */
   def callLocal(call: String): Either[String, ItcRemoteResult] = {
     val res = method
       .invoke(
