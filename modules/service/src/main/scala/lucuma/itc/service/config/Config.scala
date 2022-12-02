@@ -14,7 +14,8 @@ final case class Config(
   environment: ExecutionEnvironment,
   port:        Int,
   redisUrl:    Uri,
-  honeycomb:   Option[HoneycombConfig]
+  honeycomb:   Option[HoneycombConfig],
+  dyno:        Option[String]
 )
 
 object Config:
@@ -35,5 +36,6 @@ object Config:
      envOrProp("REDISCLOUD_URL")
        .or(envOrProp("REDIS_URL"))
        .as[Uri],
-     HoneycombConfig.config.option
+     HoneycombConfig.config.option,
+     env("DYNO").option
     ).parMapN(Config.apply)

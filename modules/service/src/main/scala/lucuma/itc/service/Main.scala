@@ -126,7 +126,8 @@ object Main extends IOApp with ItcCacheOrRemote {
     for
       itc     <- Resource.eval(ItcImpl.build(itc).pure[F])
       redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
-      _       <- Resource.eval(checkVersionToPurge[F](redis, itc) *> Async[F].sleep(1.hour))
+      _       <- Resource.eval(checkVersionToPurge[F](redis, itc))
+      _       <- Resource.eval(Logger[F].info("START"))
       mapping <- Resource.eval(ItcMapping(cfg.environment, redis, itc))
     yield wsb =>
       // Routes for the ITC GraphQL service
@@ -161,19 +162,23 @@ object Main extends IOApp with ItcCacheOrRemote {
   // Build a custom class loader to read and call the legacy ocs2 libs
   // without affecting the current classes. This is mostly because ocs2 uses scala 2.11
   // and it will conflict with the current scala 3 classes
-  def legacyItcLoader[F[_]: Sync: Logger]: F[LocalItc] =
+  def legacyItcLoader[F[_]: Sync: Logger](config: Config): F[LocalItc] =
     Sync[F]
       .delay {
         import java.nio.file.Paths
         import scala.jdk.CollectionConverters.*
         val currentRelativePath = Paths.get("")
+        println(config.dyno.isDefined)
         System.getenv().asScala.foreach(println)
         println(currentRelativePath.toAbsolutePath().toString())
-        println(new File("modules/service/target/universal/stage/ocslib").getAbsolutePath())
-        val jarFiles            = new File("modules/service/target/universal/stage/ocslib").listFiles(new FileFilter() {
-          override def accept(file: File): Boolean =
-            file.getName().endsWith(".jar");
-        })
+        val dir                 =
+          if (config.dyno.isDefined) "modules/service/target/universal/stage/ocslib" else "ocslib"
+        println(new File(dir).getAbsolutePath())
+        val jarFiles            =
+          new File(dir).listFiles(new FileFilter() {
+            override def accept(file: File): Boolean =
+              file.getName().endsWith(".jar");
+          })
         jarFiles.foreach(println)
         LocalItc(
           new ReverseClassLoader(jarFiles.map(_.toURI.toURL), ClassLoader.getSystemClassLoader())
@@ -186,7 +191,7 @@ object Main extends IOApp with ItcCacheOrRemote {
    */
   def server[F[_]: Async: Parallel: Logger](cfg: Config): Resource[F, ExitCode] =
     for
-      cl <- Resource.eval(legacyItcLoader[F])
+      cl <- Resource.eval(legacyItcLoader[F](cfg))
       _  <- Resource.eval(banner(cfg))
       ep <- entryPointResource(cfg.honeycomb)
       ap <- ep.wsLiftR(routes(cfg, cl)).map(_.map(_.orNotFound))

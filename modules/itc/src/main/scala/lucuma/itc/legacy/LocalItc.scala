@@ -11,7 +11,7 @@ import lucuma.itc.legacy.given
 case class LocalItc(classLoader: ClassLoader) {
   // We need to keep a single refernce to the reflected method
   val method = classLoader
-    .loadClass("edu.gemini.itc.web.servlets.ItcCalculationImpl")
+    .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculation", classOf[String], classOf[String])
 
   def callLocal(call: String): Either[String, ItcRemoteResult] = {
@@ -29,8 +29,7 @@ case class LocalItc(classLoader: ClassLoader) {
     res match {
       case LegacyRight(result) =>
         decode[legacy.ItcRemoteResult](result).leftMap { e =>
-          println(result)
-          e.printStackTrace(); e.getMessage()
+          e.getMessage()
         }
       case LegacyLeft(result)  =>
         Left(result)

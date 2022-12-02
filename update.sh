@@ -9,7 +9,7 @@ fi
 
 if [ -d $1 ]; then
   BUNDLE=$(readlink -f "$1")
-  LIB="$(dirname "$(readlink -f "$0")")/modules/itc/ocslib"
+  LIB="$(dirname "$(readlink -f "$0")")/modules/service/ocslib"
   mkdir -p "$LIB"
   echo "🔸 Reading from $BUNDLE"
   echo "🔸 Writing to   $LIB"

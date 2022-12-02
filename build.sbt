@@ -110,7 +110,7 @@ lazy val core = project
   )
 
 lazy val ocslibHash = taskKey[String]("hash of ocslib")
-ThisBuild / ocslibHash / fileInputs += (core / baseDirectory).value.toGlob / "ocslib" / "*.jar"
+ThisBuild / ocslibHash / fileInputs += (service / baseDirectory).value.toGlob / "ocslib" / "*.jar"
 ThisBuild / ocslibHash := {
   val hashes = ocslibHash.inputFiles.sorted.map(_.toFile).map(Hash(_))
   Hash.toHex(Hash(hashes.toArray.flatten))
@@ -163,9 +163,7 @@ lazy val service = project
     Universal / mappings ++= {
       val dir = baseDirectory.value / "ocslib"
       println(dir)
-      (dir ** AllPassFilter) pair relativeTo(dir.getParentFile)
-      // val ocsJars = directory("ocslib")
-      // ocsJars -> ("lib/" + ocsJars.getName)
+      (dir ** AllPassFilter).pair(relativeTo(dir.getParentFile))
     }
   )
   .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
