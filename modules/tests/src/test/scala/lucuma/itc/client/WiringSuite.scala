@@ -72,15 +72,6 @@ class WiringSuite extends ClientSuite {
       .contains(Wavelength.Min.asJson)
   }
 
-  test("ItcClient versions") {
-    versions(
-      ItcVersions(
-        versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-        Some("versionToken")
-      ).asRight
-    )
-  }
-
 }
 
 object WiringSuite {

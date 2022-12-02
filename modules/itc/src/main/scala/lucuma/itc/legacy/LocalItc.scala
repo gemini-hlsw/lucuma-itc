@@ -22,15 +22,12 @@ case class LocalItc(classLoader: ClassLoader) {
    * playing in harmony.
    *
    * Note that the param is passed as a String for the same reason avoiding conflicts across classes
-   * that may not be compatible. INstead we pass back and forth
+   * that may not be compatible. Instead we pass back and forth json encoded version of the params
+   * essentially the same as if ITC were a server accepting json and responding json
    */
   def callLocal(call: String): Either[String, ItcRemoteResult] = {
     val res = method
-      .invoke(
-        null,
-        call,
-        "token"
-      )
+      .invoke(null, call, "token") // null as it is a static method
       .asInstanceOf[String]
 
     val LegacyRight = """Right\((.*)\)""".r

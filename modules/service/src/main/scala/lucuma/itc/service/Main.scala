@@ -45,9 +45,9 @@ import java.io.File
 import java.io.FileFilter
 import java.net.URL
 import java.net.URLClassLoader
+import java.nio.file.Files
 import scala.concurrent.duration._
 import scala.util.Try
-import java.nio.file.Files
 
 // #server
 object Main extends IOApp with ItcCacheOrRemote {
@@ -172,7 +172,6 @@ object Main extends IOApp with ItcCacheOrRemote {
             override def accept(file: File): Boolean =
               file.getName().endsWith(".jar");
           })
-        jarFiles.foreach(println)
         LocalItc(
           new ReverseClassLoader(jarFiles.map(_.toURI.toURL), ClassLoader.getSystemClassLoader())
         )

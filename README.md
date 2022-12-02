@@ -59,3 +59,17 @@ Given github limitations these need to be stored in git lfs
 ## Long term
 Ideally we'd port the old ITC codebase and integrate it here. This is no small task but an initial
 attempt was started on the `legacy-port` branch
+
+## Buildpacks
+This project needs the following buildpacks to be used in heroku (order is important)
+
+```
+=== itc-master Buildpack URLs
+1. https://github.com/radian-software/heroku-buildpack-git-lfs
+2. heroku/scala
+3. https://github.com/opencounter/heroku-buildpack-post-build-clean.git
+```
+
+First we need git lfs to get the files stored in github lfs
+Then scala to build the app
+And finally post-build-clean to reduce the slug size

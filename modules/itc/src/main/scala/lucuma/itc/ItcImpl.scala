@@ -152,26 +152,6 @@ object ItcImpl {
                 L.warn(s"Upstream error $msg") *>
                   ApplicativeThrow[F].raiseError(new UpstreamException(msg))
             })
-          // c.run(POST(json, uri / "jsonchart")).use {
-          // case Status.Successful(resp) =>
-          //   given EntityDecoder[F, ItcRemoteResult] = jsonOf[F, ItcRemoteResult]
-          //   resp.as[ItcRemoteResult]
-          // case resp                    =>
-          //   resp.bodyText
-          //     .through(fs2.text.lines)
-          //     .filter(_.startsWith("<title>"))
-          //     .compile
-          //     .last
-          //     .flatMap {
-          //       case Some(Error400Regex(msg)) =>
-          //         L.warn(s"Upstream error $msg") *>
-          //           ApplicativeError[F, Throwable].raiseError(new UpstreamException(msg))
-          //       case u                        =>
-          //         L.warn(s"Upstream error ${u}") *>
-          //           ApplicativeError[F, Throwable]
-          //             .raiseError(new UpstreamException(u.getOrElse("Upstream Exception")))
-          //     }
-          // }
         }
 
       def itcGraph(
@@ -201,26 +181,6 @@ object ItcImpl {
                 L.warn(s"Upstream error $msg") *>
                   ApplicativeThrow[F].raiseError(new UpstreamException(msg))
             })
-          // c.run(POST(json, uri / "jsonchart")).use {
-          //   case Status.Successful(resp) =>
-          //     given EntityDecoder[F, ItcRemoteResult] = jsonOf[F, ItcRemoteResult]
-          //     resp.as[ItcRemoteResult]
-          //   case resp                    =>
-          //     resp.bodyText
-          //       .through(fs2.text.lines)
-          //       .filter(_.startsWith("<title>"))
-          //       .compile
-          //       .last
-          //       .flatMap {
-          //         case Some(Error400Regex(msg)) =>
-          //           L.warn(s"Upstream error $msg") *>
-          //             ApplicativeError[F, Throwable].raiseError(new UpstreamException(msg))
-          //         case u                        =>
-          //           L.warn(s"Upstream error ${u}") *>
-          //             ApplicativeError[F, Throwable]
-          //               .raiseError(new UpstreamException(u.getOrElse("Upstream Exception")))
-          //       }
-          // }
         }
 
       val MaxIterations = 10

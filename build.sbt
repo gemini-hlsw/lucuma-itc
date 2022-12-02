@@ -93,7 +93,6 @@ lazy val core = project
       "edu.gemini"    %%% "lucuma-refined"      % lucumaRefinedVersion,
       "org.typelevel"  %% "cats-core"           % catsVersion,
       "org.typelevel"  %% "cats-effect"         % catsEffectVersion,
-      "org.http4s"     %% "http4s-ember-client" % http4sVersion,
       "org.http4s"     %% "http4s-circe"        % http4sVersion,
       "org.http4s"     %% "http4s-dsl"          % http4sVersion,
       "io.circe"       %% "circe-literal"       % circeVersion,
@@ -162,7 +161,6 @@ lazy val service = project
     ),
     Universal / mappings ++= {
       val dir = baseDirectory.value / "ocslib"
-      println(dir)
       (dir ** AllPassFilter).pair(relativeTo(dir.getParentFile))
     }
   )
