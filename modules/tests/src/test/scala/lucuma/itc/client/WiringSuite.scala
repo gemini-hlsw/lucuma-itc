@@ -81,7 +81,7 @@ object WiringSuite {
       Wavelength.Min,
       PosBigDecimal.unsafeFrom(BigDecimal(1.0)),
       Option.empty[Wavelength],
-      SourceProfile.Point(BandNormalized[Integrated](Galaxy(Spiral), SortedMap.empty)),
+      SourceProfile.Point(BandNormalized[Integrated](Galaxy(Spiral).some, SortedMap.empty)),
       Band.SloanU,
       RadialVelocity.fromMetersPerSecond.getOption(1.0).get,
       ConstraintSet(
