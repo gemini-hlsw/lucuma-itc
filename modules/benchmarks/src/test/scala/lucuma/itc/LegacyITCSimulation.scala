@@ -47,7 +47,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
   val sourceDefinition = ItcSourceDefinition(
     SourceProfile.Point(
       SpectralDefinition.BandNormalized(
-        UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V),
+        UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
         SortedMap(
           Band.R -> BigDecimal(5).withUnit[VegaMagnitude].toMeasureTagged
         )
@@ -258,7 +258,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     ItcParameters(
       sourceDefinition.copy(profile =
         SourceProfile.unnormalizedSED
-          .modifyOption(_ => c)(sourceDefinition.profile)
+          .modifyOption(_ => c.some)(sourceDefinition.profile)
           .getOrElse(sourceDefinition.profile)
       ),
       obs,
@@ -389,7 +389,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       sourceDefinition.copy(profile =
         SourceProfile.Uniform(
           SpectralDefinition.BandNormalized(
-            UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V),
+            UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
             SortedMap(
               Band.R -> c
             )
@@ -426,7 +426,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         SourceProfile.Gaussian(
           Angle.fromDoubleArcseconds(10),
           SpectralDefinition.BandNormalized(
-            UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V),
+            UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
             SortedMap(
               Band.R -> c
             )
@@ -463,7 +463,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         SourceProfile.Gaussian(
           Angle.fromDoubleArcseconds(10),
           SpectralDefinition.BandNormalized(
-            UnnormalizedSED.PowerLaw(c),
+            UnnormalizedSED.PowerLaw(c).some,
             SortedMap(
               Band.R -> BigDecimal(5).withUnit[VegaMagnitude].toMeasureTagged
             )
@@ -498,7 +498,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         SourceProfile.Gaussian(
           Angle.fromDoubleArcseconds(10),
           SpectralDefinition.BandNormalized(
-            UnnormalizedSED.BlackBody(c.withUnit[Kelvin]),
+            UnnormalizedSED.BlackBody(c.withUnit[Kelvin]).some,
             SortedMap(
               Band.R -> BigDecimal(5).withUnit[VegaMagnitude].toMeasureTagged
             )

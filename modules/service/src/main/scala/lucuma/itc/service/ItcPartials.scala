@@ -43,6 +43,7 @@ import lucuma.core.model.UnnormalizedSED.*
 import lucuma.core.syntax.enumerated.*
 import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
+import lucuma.core.util.Of
 import lucuma.itc.GmosNITCParams
 import lucuma.itc.GmosSITCParams
 import lucuma.itc.Itc
@@ -434,7 +435,7 @@ trait GracklePartials extends GrackleParsers:
                   val sedResult   = sedReader(sed)
                   (sedResult, brightesses).mapN((s, b) =>
                     SourceProfile.Uniform(
-                      SpectralDefinition.BandNormalized(s, b)
+                      SpectralDefinition.BandNormalized(s.some, b)
                     )
                   )
                 case _ => "Error parsing uniform profile".leftIorNec
@@ -459,7 +460,7 @@ trait GracklePartials extends GrackleParsers:
 
                   (sedResult, brightesses).mapN((s, b) =>
                     SourceProfile.Point(
-                      SpectralDefinition.BandNormalized(s, b)
+                      SpectralDefinition.BandNormalized(s.some, b)
                     )
                   )
                 case _ => "Error parsing point profile".leftIorNec
@@ -492,7 +493,7 @@ trait GracklePartials extends GrackleParsers:
                       (fwhmResult, sedResult, brightesses).mapN((f, s, b) =>
                         SourceProfile.Gaussian(
                           f,
-                          SpectralDefinition.BandNormalized(s, b)
+                          SpectralDefinition.BandNormalized(s.some, b)
                         )
                       )
                     case _ => "Error parsing band normalized values".leftIorNec
