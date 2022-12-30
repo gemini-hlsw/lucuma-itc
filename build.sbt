@@ -1,6 +1,6 @@
 import NativePackagerHelper._
 
-val catsEffectVersion           = "3.4.3"
+val catsEffectVersion           = "3.4.4"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsVersion                 = "2.9.0"
 val catsScalacheckVersion       = "0.3.1"
