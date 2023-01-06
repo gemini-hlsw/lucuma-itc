@@ -45,7 +45,7 @@ given Pickler[FiniteDuration] =
 
 given Pickler[Wavelength] =
   transformPickler((i: Int) =>
-    Wavelength.fromPicometers
+    Wavelength.intPicometers
       .getOption(i)
       .getOrElse(sys.error("cannot unpickle"))
   )(_.toPicometers.value.value)

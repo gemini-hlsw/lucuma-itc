@@ -116,7 +116,7 @@ trait GrackleParsers:
   def parseWavelength(units: List[(String, Value)]): Option[Wavelength] =
     units.find(_._2 != Value.AbsentValue) match
       case Some(("picometers", IntValue(n))) =>
-        Wavelength.fromPicometers.getOption(n)
+        Wavelength.intPicometers.getOption(n)
       case Some(("angstroms", n))            =>
         bigDecimalValue(n).flatMap(Wavelength.decimalAngstroms.getOption)
       case Some(("nanometers", n))           =>

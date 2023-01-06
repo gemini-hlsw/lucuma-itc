@@ -41,15 +41,7 @@ object encoders:
   given Encoder[Wavelength] = w =>
     Json.obj(
       ("picometers", Json.fromInt(w.toPicometers.value.value)),
-      ("angstrom", Json.fromBigDecimal(w.angstrom.value.toBigDecimal(2, RoundingMode.CEILING))),
-      ("nanometers",
-       Json.fromBigDecimal(
-         w.nanometer.value.toBigDecimal(2, RoundingMode.CEILING)
-       )
-      ),
-      ("micrometers",
-       Json.fromBigDecimal(
-         w.micrometer.value.toBigDecimal(2, RoundingMode.CEILING)
-       )
-      )
+      ("angstrom", Json.fromBigDecimal(w.toAngstroms.value.value)),
+      ("nanometers", Json.fromBigDecimal(w.toNanometers.value.value)),
+      ("micrometers", Json.fromBigDecimal(w.toMicrometers.value.value))
     )
