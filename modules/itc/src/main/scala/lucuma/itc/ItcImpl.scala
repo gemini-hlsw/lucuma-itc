@@ -55,7 +55,7 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
       val sorted               = finalS2NData.sortBy(_._1)
       val sn: Itc.SNCalcResult = signalToNoiseAt
         .fold(Itc.SNCalcResult.SNCalcSuccess(sorted.maxBy(_._2)._2)) { w =>
-          val nanos = w.nanometer.value.toDouble
+          val nanos = Wavelength.decimalNanometers.reverseGet(w).doubleValue
           if (nanos < sorted.head._1) Itc.SNCalcResult.WavelengthAtBelowRange(w)
           else if (nanos > sorted.last._1) Itc.SNCalcResult.WavelengthAtAboveRange(w)
           else
@@ -314,13 +314,13 @@ object ItcImpl {
                         case Itc.SNCalcResult.WavelengthAtAboveRange(w) =>
                           Itc.CalcResult
                             .CalculationError(
-                              f"S/N at ${w.nanometer.value.toDouble}%.0f nm above range"
+                              f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm above range"
                             )
                             .pure[F]
                         case Itc.SNCalcResult.WavelengthAtBelowRange(w) =>
                           Itc.CalcResult
                             .CalculationError(
-                              f"S/N at ${w.nanometer.value.toDouble}%.0f nm below range"
+                              f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm below range"
                             )
                             .pure[F]
                         case r                                          =>

@@ -102,11 +102,11 @@ object Itc:
         chart.series
           .filter(_.seriesType === seriesDataType)
           .zip(ccds.toList)
-          .map { case (sn, ccd) =>
+          .map { case (sn, _) =>
             sn.data
               .maxByOption(_._2)
               .map(_._1)
-              .flatMap(i => Wavelength.fromPicometers.getOption((i * 1000).toInt))
+              .flatMap(d => Wavelength.intPicometers.getOption((d * 1000).toInt))
           }
           .flattenOption
 
@@ -114,7 +114,7 @@ object Itc:
         chart.series
           .filter(_.seriesType === seriesDataType)
           .zip(ccds.toList)
-          .map { case (sn, ccd) =>
+          .map { case (sn, _) =>
             sn.data
               .maxByOption(_._2)
               .map(_._2)

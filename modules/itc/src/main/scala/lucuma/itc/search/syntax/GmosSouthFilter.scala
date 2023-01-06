@@ -12,10 +12,10 @@ import lucuma.core.math.Wavelength
 extension (self: GmosSouthFilter)
   // see http://www.gemini.edu/node/10621
   def coverageGS: Coverage =
-    import Wavelength.fromPicometers
+    import Wavelength.intPicometers
 
     def cov(a: Int, b: Int = Int.MaxValue): Coverage =
-      (fromPicometers.getOption(a), fromPicometers.getOption(b))
+      (intPicometers.getOption(a), intPicometers.getOption(b))
         .mapN(Coverage.apply)
         .getOrElse(sys.error("Invalid constant coverage."))
 
