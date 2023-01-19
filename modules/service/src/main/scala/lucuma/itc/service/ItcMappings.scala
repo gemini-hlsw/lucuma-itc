@@ -225,8 +225,6 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
   def versions[F[_]: Applicative: Logger](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
-  )(
-    env:         Cursor.Env
   ): F[Result[ItcVersions]] =
     ItcVersions(version(environment).value, BuildInfo.ocslibHash.some)
       .rightIor[NonEmptyChain[Problem]]
@@ -238,7 +236,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     itc:         Itc[F]
   ): F[Mapping[F]] =
     loadSchema[F].map { loadedSchema =>
-      new CirceMapping[F] with ComputeMapping[F] {
+      new CirceMapping[F] {
 
         val schema: Schema = loadedSchema
         val QueryType      = schema.ref("Query")
@@ -252,18 +250,17 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
             ObjectMapping(
               tpe = QueryType,
               fieldMappings = List(
-                ComputeRoot[List[SpectroscopyResults]]("spectroscopy",
-                                                       QueryType,
-                                                       spectroscopy[F](environment, redis, itc)
+                RootEffect.computeEncodable("versions")((_, p, env) =>
+                  versions(environment, redis)
                 ),
-                ComputeRoot[SpectroscopyGraphResults]("spectroscopyGraph",
-                                                      QueryType,
-                                                      spectroscopyGraph[F](environment, redis, itc)
+                RootEffect.computeEncodable("spectroscopy")((_, p, env) =>
+                  spectroscopy(environment, redis, itc)(env)
                 ),
-                ComputeRoot[ItcVersions]("versions", QueryType, versions[F](environment, redis)),
-                ComputeRoot[Itc.SNCalcResult]("spectroscopySignalToNoiseBeta",
-                                              QueryType,
-                                              spectroscopySN[F](environment, redis, itc)
+                RootEffect.computeEncodable("spectroscopySignalToNoiseBeta")((_, p, env) =>
+                  spectroscopySN(environment, redis, itc)(env)
+                ),
+                RootEffect.computeEncodable("spectroscopyGraph")((_, p, env) =>
+                  spectroscopyGraph(environment, redis, itc)(env)
                 )
               )
             ),
