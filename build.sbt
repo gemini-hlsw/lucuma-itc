@@ -18,11 +18,11 @@ val slf4jVersion                = "2.0.6"
 val log4catsVersion             = "2.5.0"
 val monocleVersion              = "3.1.0"
 val munitCatsEffectVersion      = "1.0.7"
-val graphQLRoutesVersion        = "0.5.4"
+val graphQLRoutesVersion        = "0.5.8"
 val refinedVersion              = "0.10.1"
-val grackleVersion              = "0.7.0"
-val natcchezHttp4sVersion       = "0.3.2"
-val natchezVersion              = "0.1.6"
+val grackleVersion              = "0.10.1"
+val natcchezHttp4sVersion       = "0.5.0"
+val natchezVersion              = "0.3.0"
 val munitVersion                = "0.7.29"
 val disciplineMunitVersion      = "1.0.9"
 val gatlingVersion              = "3.9.0"
@@ -36,7 +36,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.2.1"
 ThisBuild / crossScalaVersions  := Seq("3.2.1")
-ThisBuild / tlBaseVersion       := "0.4"
+ThisBuild / tlBaseVersion       := "0.5"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
