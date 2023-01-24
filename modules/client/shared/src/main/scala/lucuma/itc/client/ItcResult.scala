@@ -101,7 +101,11 @@ object ItcResult {
                  .downField("microseconds")
                  .as[Long]
                  .flatMap(l =>
-                   TimeSpan.fromMicroseconds(l).toRight(DecodingFailure(s"Negative exposure time is not supported: $l", c.history))
+                   TimeSpan
+                     .fromMicroseconds(l)
+                     .toRight(
+                       DecodingFailure(s"Negative exposure time is not supported: $l", c.history)
+                     )
                  )
           n <- c.downField("exposures")
                  .as[Int]
