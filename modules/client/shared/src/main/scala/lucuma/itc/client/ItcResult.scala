@@ -10,8 +10,8 @@ import eu.timepit.refined.types.numeric.*
 import io.circe.Decoder
 import io.circe.DecodingFailure
 import io.circe.HCursor
-import lucuma.core.model.NonNegDuration
 import lucuma.core.syntax.time.*
+import lucuma.core.util.TimeSpan
 
 import java.math.MathContext
 
@@ -75,7 +75,7 @@ object ItcResult {
   }
 
   final case class Success(
-    exposureTime:  NonNegDuration,
+    exposureTime:  TimeSpan,
     exposures:     NonNegInt,
     signalToNoise: PosBigDecimal
   ) extends ItcResult {
@@ -101,7 +101,11 @@ object ItcResult {
                  .downField("microseconds")
                  .as[Long]
                  .flatMap(l =>
-                   NonNegDuration.from(l.microseconds).leftMap(m => DecodingFailure(m, c.history))
+                   TimeSpan
+                     .fromMicroseconds(l)
+                     .toRight(
+                       DecodingFailure(s"Negative exposure time is not supported: $l", c.history)
+                     )
                  )
           n <- c.downField("exposures")
                  .as[Int]
@@ -114,7 +118,7 @@ object ItcResult {
     given Eq[Success] =
       Eq.by { a =>
         (
-          a.exposureTime.value.toNanos,
+          a.exposureTime.toMicroseconds,
           a.exposures,
           a.signalToNoise.value
         )
@@ -126,7 +130,7 @@ object ItcResult {
     Error(msg)
 
   def success(
-    exposureTime:  NonNegDuration,
+    exposureTime:  TimeSpan,
     exposures:     NonNegInt,
     signalToNoise: PosBigDecimal
   ): ItcResult =

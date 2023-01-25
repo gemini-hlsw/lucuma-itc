@@ -24,14 +24,13 @@ import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange.AirMass
-import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED.Galaxy
+import lucuma.core.util.TimeSpan
 import lucuma.itc.client.SpectroscopyModeInput
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
 
-import java.time.Duration
 import java.time.Instant
 import scala.collection.immutable.SortedMap
 
@@ -47,7 +46,7 @@ class WiringSuite extends ClientSuite {
         ),
         ItcResult
           .Success(
-            NonNegDuration.unsafeFrom(Duration.parse("PT1S")),
+            TimeSpan.FromString.getOption("PT1S").get,
             NonNegInt.unsafeFrom(10),
             PosBigDecimal.unsafeFrom(10.0)
           )
