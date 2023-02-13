@@ -34,8 +34,8 @@ val boopickleVersion            = "1.4.0"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / scalaVersion        := "3.2.1"
-ThisBuild / crossScalaVersions  := Seq("3.2.1")
+ThisBuild / scalaVersion        := "3.2.2"
+ThisBuild / crossScalaVersions  := Seq("3.2.2")
 ThisBuild / tlBaseVersion       := "0.5"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 
