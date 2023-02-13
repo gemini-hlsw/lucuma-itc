@@ -50,7 +50,10 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       SpectralDefinition.BandNormalized(
         UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
         SortedMap(
-          Band.R -> BrightnessValue.unsafeFrom(BigDecimal(5)).withUnit[VegaMagnitude].toMeasureTagged
+          Band.R -> BrightnessValue
+            .unsafeFrom(BigDecimal(5))
+            .withUnit[VegaMagnitude]
+            .toMeasureTagged
         )
       )
     ),
@@ -466,7 +469,10 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
           SpectralDefinition.BandNormalized(
             UnnormalizedSED.PowerLaw(c).some,
             SortedMap(
-              Band.R -> BrightnessValue.unsafeFrom(BigDecimal(5)).withUnit[VegaMagnitude].toMeasureTagged
+              Band.R -> BrightnessValue
+                .unsafeFrom(BigDecimal(5))
+                .withUnit[VegaMagnitude]
+                .toMeasureTagged
             )
           )
         )
@@ -501,7 +507,10 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
           SpectralDefinition.BandNormalized(
             UnnormalizedSED.BlackBody(c.withUnit[Kelvin]).some,
             SortedMap(
-              Band.R -> BrightnessValue.unsafeFrom(BigDecimal(5)).withUnit[VegaMagnitude].toMeasureTagged
+              Band.R -> BrightnessValue
+                .unsafeFrom(BigDecimal(5))
+                .withUnit[VegaMagnitude]
+                .toMeasureTagged
             )
           )
         )
