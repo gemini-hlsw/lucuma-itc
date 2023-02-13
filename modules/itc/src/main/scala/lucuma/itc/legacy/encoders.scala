@@ -7,6 +7,7 @@ import cats.data.NonEmptyList
 import cats.syntax.all._
 import io.circe.*
 import io.circe.generic.semiauto._
+import io.circe.refined.*
 import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.core.math.Angle
@@ -264,23 +265,20 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
         if brightnesses.contains(s.normBand) =>
       brightnesses
         .get(s.normBand)
-        .map(_.value.value.value.toDouble)
-        .flatMap(Json.fromDouble)
-        .getOrElse(Json.Null)
+        .map(_.value)
+        .asJson
     case SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses))
         if brightnesses.contains(s.normBand) =>
       brightnesses
         .get(s.normBand)
-        .map(_.value.value.value.toDouble)
-        .flatMap(Json.fromDouble)
-        .getOrElse(Json.Null)
+        .map(_.value)
+        .asJson
     case SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses))
         if brightnesses.contains(s.normBand) =>
       brightnesses
         .get(s.normBand)
-        .map(_.value.value.value.toDouble)
-        .flatMap(Json.fromDouble)
-        .getOrElse(Json.Null)
+        .map(_.value)
+        .asJson
     // FIXME: Handle emission line
     case _ => Json.Null
   }

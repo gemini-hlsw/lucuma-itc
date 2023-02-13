@@ -5,6 +5,7 @@ package lucuma.itc.client.json
 
 import io.circe.Encoder
 import io.circe.Json
+import io.circe.refined.*
 import io.circe.syntax.*
 import lucuma.core.model.SpectralDefinition.BandNormalized
 
@@ -18,7 +19,7 @@ given [T]: Encoder[BandNormalized[T]] with
         Json.fromFields(
           List(
             "band"  -> b.asScreamingJson,
-            "value" -> m.value.value.value.asJson,
+            "value" -> m.value.asJson,
             "units" -> m.units.serialized.asJson
           ) ++ m.error.toList.map(v => "error" -> v.value.value.asJson)
         )
