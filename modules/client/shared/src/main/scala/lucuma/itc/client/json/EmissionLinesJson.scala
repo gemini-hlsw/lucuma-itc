@@ -14,17 +14,17 @@ given [T]: Encoder[EmissionLines[T]] with
       "lines"                -> Json.arr(el.lines.toList.map { case (w, l) =>
         Json.obj(
           "wavelength" -> w.asJson,
-          "lineWidth"  -> l.lineWidth.value.asJson,
+          "lineWidth"  -> l.lineWidth.value.value.value.asJson,
           "lineFlux"   ->
             Json.obj(
-              "value" -> l.lineFlux.value.value.asJson,
+              "value" -> l.lineFlux.value.value.value.asJson,
               "units" -> l.lineFlux.units.serialized.asJson
             )
         )
       }: _*),
       "fluxDensityContinuum" ->
         Json.obj(
-          "value" -> el.fluxDensityContinuum.value.value.asJson,
+          "value" -> el.fluxDensityContinuum.value.value.value.asJson,
           "units" -> el.fluxDensityContinuum.units.serialized.asJson
         )
     )
