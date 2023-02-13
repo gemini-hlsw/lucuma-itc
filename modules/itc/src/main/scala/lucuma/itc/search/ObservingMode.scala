@@ -111,7 +111,7 @@ object ObservingMode {
         disperser.resolution(λ, fpu.effectiveSlitWidth)
 
       def coverage: Interval[Wavelength] =
-        filter.foldLeft(disperser.coverage(λ).toInterval)((a,b) => a.intersect(b.coverageGS))
+        filter.foldLeft(disperser.coverage(λ).toInterval)((a, b) => a.intersect(b.coverageGS))
     }
 
     object GmosSouth:
