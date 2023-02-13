@@ -227,11 +227,11 @@ trait GracklePartials extends GrackleParsers:
             )
           ) =>
         val band  = bandItems.get(b)
-        val value = bigDecimalValue(v)
+        val value = bigDecimalValue(v).flatMap(bd => BrightnessValue.from(bd).toOption)
         val units = unitsItems.get(u)
         (band, value, units)
           .mapN { (b, v, u) =>
-            b -> u.withValueTagged(BrightnessValue(v))
+            b -> u.withValueTagged(v)
           }
           .toRightIorNec("Invalid brightness")
       case e => s"Invalid brightness entry $e".leftIorNec

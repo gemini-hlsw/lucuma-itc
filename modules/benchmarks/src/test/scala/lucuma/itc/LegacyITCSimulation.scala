@@ -50,7 +50,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       SpectralDefinition.BandNormalized(
         UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
         SortedMap(
-          Band.R -> BrightnessValue(BigDecimal(5)).withUnit[VegaMagnitude].toMeasureTagged
+          Band.R -> BrightnessValue.unsafeFrom(BigDecimal(5)).withUnit[VegaMagnitude].toMeasureTagged
         )
       )
     ),
@@ -378,7 +378,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodyIntMagUnits(
-              f.withValueTagged(BrightnessValue(BigDecimal(5)))
+              f.withValueTagged(BrightnessValue.unsafeFrom(BigDecimal(5)))
             ).asJson.noSpaces
           )
         )
@@ -414,7 +414,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodySurfaceMagUnits(
-              f.withValueTagged(BrightnessValue(BigDecimal(5)))
+              f.withValueTagged(BrightnessValue.unsafeFrom(BigDecimal(5)))
             ).asJson.noSpaces
           )
         )
@@ -451,7 +451,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodyIntGaussianMagUnits(
-              f.withValueTagged(BrightnessValue(BigDecimal(5)))
+              f.withValueTagged(BrightnessValue.unsafeFrom(BigDecimal(5)))
             ).asJson.noSpaces
           )
         )
@@ -466,7 +466,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
           SpectralDefinition.BandNormalized(
             UnnormalizedSED.PowerLaw(c).some,
             SortedMap(
-              Band.R -> BrightnessValue(BigDecimal(5)).withUnit[VegaMagnitude].toMeasureTagged
+              Band.R -> BrightnessValue.unsafeFrom(BigDecimal(5)).withUnit[VegaMagnitude].toMeasureTagged
             )
           )
         )
@@ -501,7 +501,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
           SpectralDefinition.BandNormalized(
             UnnormalizedSED.BlackBody(c.withUnit[Kelvin]).some,
             SortedMap(
-              Band.R -> BrightnessValue(BigDecimal(5)).withUnit[VegaMagnitude].toMeasureTagged
+              Band.R -> BrightnessValue.unsafeFrom(BigDecimal(5)).withUnit[VegaMagnitude].toMeasureTagged
             )
           )
         )

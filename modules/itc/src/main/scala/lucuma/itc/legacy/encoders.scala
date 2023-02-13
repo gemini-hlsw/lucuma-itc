@@ -264,21 +264,21 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
         if brightnesses.contains(s.normBand) =>
       brightnesses
         .get(s.normBand)
-        .map(_.value.value.toDouble)
+        .map(_.value.value.value.toDouble)
         .flatMap(Json.fromDouble)
         .getOrElse(Json.Null)
     case SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses))
         if brightnesses.contains(s.normBand) =>
       brightnesses
         .get(s.normBand)
-        .map(_.value.value.toDouble)
+        .map(_.value.value.value.toDouble)
         .flatMap(Json.fromDouble)
         .getOrElse(Json.Null)
     case SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses))
         if brightnesses.contains(s.normBand) =>
       brightnesses
         .get(s.normBand)
-        .map(_.value.value.toDouble)
+        .map(_.value.value.value.toDouble)
         .flatMap(Json.fromDouble)
         .getOrElse(Json.Null)
     // FIXME: Handle emission line

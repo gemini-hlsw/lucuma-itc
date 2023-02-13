@@ -18,9 +18,9 @@ given [T]: Encoder[BandNormalized[T]] with
         Json.fromFields(
           List(
             "band"  -> b.asScreamingJson,
-            "value" -> m.value.asJson,
+            "value" -> m.value.value.value.asJson,
             "units" -> m.units.serialized.asJson
-          ) ++ m.error.toList.map(v => "error" -> v.asJson)
+          ) ++ m.error.toList.map(v => "error" -> v.value.value.asJson)
         )
       }: _*)
     )
