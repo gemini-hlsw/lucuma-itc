@@ -9,7 +9,6 @@ import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.core.math.Angle
-import lucuma.core.math.BoundedInterval
 import lucuma.core.math.Wavelength
 import lucuma.itc.GmosNITCParams
 import lucuma.itc.GmosSITCParams
