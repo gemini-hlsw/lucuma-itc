@@ -6,7 +6,6 @@ package lucuma.itc.search.syntax
 import cats.implicits._
 import lucuma.core.enums.GmosNorthFilter
 import lucuma.core.enums.GmosNorthFilter._
-import lucuma.core.math.BoundedInterval
 import lucuma.core.math.Wavelength
 import spire.math.Interval
 
