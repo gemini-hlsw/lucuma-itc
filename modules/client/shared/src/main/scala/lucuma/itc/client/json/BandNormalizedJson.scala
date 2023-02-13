@@ -21,7 +21,7 @@ given [T]: Encoder[BandNormalized[T]] with
             "band"  -> b.asScreamingJson,
             "value" -> m.value.asJson,
             "units" -> m.units.serialized.asJson
-          ) ++ m.error.toList.map(v => "error" -> v.value.value.asJson)
+          ) ++ m.error.toList.map(v => "error" -> v.asJson)
         )
       }: _*)
     )
