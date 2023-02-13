@@ -30,6 +30,7 @@ import io.circe.Json
 import lucuma.core.enums.*
 import lucuma.core.math.Angle
 import lucuma.core.math.BrightnessUnits.*
+import lucuma.core.math.BrightnessValue
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.Units.*
@@ -230,10 +231,10 @@ trait GracklePartials extends GrackleParsers:
         val units = unitsItems.get(u)
         (band, value, units)
           .mapN { (b, v, u) =>
-            b -> u.withValueTagged(v)
+            b -> u.withValueTagged(BrightnessValue(v))
           }
           .toRightIorNec("Invalid brightness")
-      case e => s"Invalid brighness entry $e".leftIorNec
+      case e => s"Invalid brightness entry $e".leftIorNec
     }
     .sequence
     .map(v => SortedMap(v: _*))

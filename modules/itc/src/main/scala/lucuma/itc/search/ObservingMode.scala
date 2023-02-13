@@ -9,13 +9,14 @@ import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.core.math.Angle
-import lucuma.core.math.Coverage
+import lucuma.core.math.BoundedInterval
 import lucuma.core.math.Wavelength
 import lucuma.itc.GmosNITCParams
 import lucuma.itc.GmosSITCParams
 import lucuma.itc.encoders.given
 import lucuma.itc.search.hashes.given
 import lucuma.itc.search.syntax.*
+import spire.math.Interval
 import spire.math.Rational
 
 case class GmosNorthFpuParam(
@@ -42,7 +43,7 @@ object ObservingMode {
   sealed trait Spectroscopy extends ObservingMode derives Hash {
     def λ: Wavelength
     def resolution: Rational
-    def coverage: Coverage
+    def coverage: Interval[Wavelength]
   }
 
   object Spectroscopy {
@@ -81,8 +82,8 @@ object ObservingMode {
       def resolution: Rational =
         disperser.resolution(λ, fpu.effectiveSlitWidth)
 
-      def coverage: Coverage =
-        filter.foldLeft(disperser.coverage(λ))(_ ⋂ _.coverageGN)
+      def coverage: Interval[Wavelength] =
+        filter.foldLeft(disperser.coverage(λ).toInterval)(_ intersect _.coverageGN)
     }
 
     object GmosNorth:
@@ -109,8 +110,8 @@ object ObservingMode {
       def resolution: Rational =
         disperser.resolution(λ, fpu.effectiveSlitWidth)
 
-      def coverage: Coverage =
-        filter.foldLeft(disperser.coverage(λ))(_ ⋂ _.coverageGS)
+      def coverage: Interval[Wavelength] =
+        filter.foldLeft(disperser.coverage(λ).toInterval)(_ intersect _.coverageGS)
     }
 
     object GmosSouth:

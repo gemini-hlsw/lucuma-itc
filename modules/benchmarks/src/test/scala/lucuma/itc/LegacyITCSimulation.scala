@@ -16,6 +16,7 @@ import io.gatling.http.funspec.GatlingHttpFunSpec
 import lucuma.core.enums.*
 import lucuma.core.math.Angle
 import lucuma.core.math.BrightnessUnits.*
+import lucuma.core.math.BrightnessValue
 import lucuma.core.math.Redshift
 import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.*
@@ -49,7 +50,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       SpectralDefinition.BandNormalized(
         UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
         SortedMap(
-          Band.R -> BigDecimal(5).withUnit[VegaMagnitude].toMeasureTagged
+          Band.R -> BrightnessValue(BigDecimal(5)).withUnit[VegaMagnitude].toMeasureTagged
         )
       )
     ),
@@ -377,7 +378,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodyIntMagUnits(
-              f.withValueTagged(BigDecimal(5))
+              f.withValueTagged(BrightnessValue(BigDecimal(5)))
             ).asJson.noSpaces
           )
         )
@@ -413,7 +414,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodySurfaceMagUnits(
-              f.withValueTagged(BigDecimal(5))
+              f.withValueTagged(BrightnessValue(BigDecimal(5)))
             ).asJson.noSpaces
           )
         )
@@ -450,7 +451,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodyIntGaussianMagUnits(
-              f.withValueTagged(BigDecimal(5))
+              f.withValueTagged(BrightnessValue(BigDecimal(5)))
             ).asJson.noSpaces
           )
         )
@@ -465,7 +466,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
           SpectralDefinition.BandNormalized(
             UnnormalizedSED.PowerLaw(c).some,
             SortedMap(
-              Band.R -> BigDecimal(5).withUnit[VegaMagnitude].toMeasureTagged
+              Band.R -> BrightnessValue(BigDecimal(5)).withUnit[VegaMagnitude].toMeasureTagged
             )
           )
         )
@@ -500,7 +501,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
           SpectralDefinition.BandNormalized(
             UnnormalizedSED.BlackBody(c.withUnit[Kelvin]).some,
             SortedMap(
-              Band.R -> BigDecimal(5).withUnit[VegaMagnitude].toMeasureTagged
+              Band.R -> BrightnessValue(BigDecimal(5)).withUnit[VegaMagnitude].toMeasureTagged
             )
           )
         )
