@@ -51,7 +51,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
         SortedMap(
           Band.R -> BrightnessValue
-            .unsafeFrom(BigDecimal(5))
+            .unsafeFrom(5)
             .withUnit[VegaMagnitude]
             .toMeasureTagged
         )
@@ -381,7 +381,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodyIntMagUnits(
-              f.withValueTagged(BrightnessValue.unsafeFrom(BigDecimal(5)))
+              f.withValueTagged(BrightnessValue.unsafeFrom(5))
             ).asJson.noSpaces
           )
         )
@@ -417,7 +417,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodySurfaceMagUnits(
-              f.withValueTagged(BrightnessValue.unsafeFrom(BigDecimal(5)))
+              f.withValueTagged(BrightnessValue.unsafeFrom(5))
             ).asJson.noSpaces
           )
         )
@@ -454,7 +454,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
         .body(
           StringBody(
             bodyIntGaussianMagUnits(
-              f.withValueTagged(BrightnessValue.unsafeFrom(BigDecimal(5)))
+              f.withValueTagged(BrightnessValue.unsafeFrom(5))
             ).asJson.noSpaces
           )
         )
@@ -470,7 +470,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
             UnnormalizedSED.PowerLaw(c).some,
             SortedMap(
               Band.R -> BrightnessValue
-                .unsafeFrom(BigDecimal(5))
+                .unsafeFrom(5)
                 .withUnit[VegaMagnitude]
                 .toMeasureTagged
             )
@@ -508,7 +508,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
             UnnormalizedSED.BlackBody(c.withUnit[Kelvin]).some,
             SortedMap(
               Band.R -> BrightnessValue
-                .unsafeFrom(BigDecimal(5))
+                .unsafeFrom(5)
                 .withUnit[VegaMagnitude]
                 .toMeasureTagged
             )
