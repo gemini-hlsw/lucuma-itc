@@ -6,17 +6,17 @@ package lucuma.itc.search.syntax
 import cats.implicits._
 import lucuma.core.enums.GmosSouthFilter
 import lucuma.core.enums.GmosSouthFilter._
-import lucuma.core.math.Coverage
 import lucuma.core.math.Wavelength
+import spire.math.Interval
 
 extension (self: GmosSouthFilter)
   // see http://www.gemini.edu/node/10621
-  def coverageGS: Coverage =
+  def coverageGS: Interval[Wavelength] =
     import Wavelength.intPicometers
 
-    def cov(a: Int, b: Int = Int.MaxValue): Coverage =
+    def cov(a: Int, b: Int = Int.MaxValue): Interval[Wavelength] =
       (intPicometers.getOption(a), intPicometers.getOption(b))
-        .mapN(Coverage.apply)
+        .mapN(Interval.closed)
         .getOrElse(sys.error("Invalid constant coverage."))
 
     self match
@@ -49,8 +49,8 @@ extension (self: GmosSouthFilter)
 
       // These are only used for engineering and will never be selected by search algorithm, but
       // we still need to handle them. For now we'll just pretend they have no coverage at all.
-      case HartmannA_RPrime => Coverage.Empty
-      case HartmannB_RPrime => Coverage.Empty
+      case HartmannA_RPrime => Interval.empty
+      case HartmannB_RPrime => Interval.empty
 
       // Allowed Filter Combinations
       case GPrime_GG455 => cov(460000, 552000)

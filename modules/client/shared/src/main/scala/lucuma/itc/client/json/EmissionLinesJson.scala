@@ -5,6 +5,7 @@ package lucuma.itc.client.json
 
 import io.circe.Encoder
 import io.circe.Json
+import io.circe.refined.*
 import io.circe.syntax.*
 import lucuma.core.model.SpectralDefinition.EmissionLines
 
@@ -17,14 +18,14 @@ given [T]: Encoder[EmissionLines[T]] with
           "lineWidth"  -> l.lineWidth.value.asJson,
           "lineFlux"   ->
             Json.obj(
-              "value" -> l.lineFlux.value.value.asJson,
+              "value" -> l.lineFlux.value.asJson,
               "units" -> l.lineFlux.units.serialized.asJson
             )
         )
       }: _*),
       "fluxDensityContinuum" ->
         Json.obj(
-          "value" -> el.fluxDensityContinuum.value.value.asJson,
+          "value" -> el.fluxDensityContinuum.value.asJson,
           "units" -> el.fluxDensityContinuum.units.serialized.asJson
         )
     )
