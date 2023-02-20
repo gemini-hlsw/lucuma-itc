@@ -20,6 +20,8 @@ import lucuma.core.enums.GmosSouthFilter
 import lucuma.core.enums.GmosSouthFpu
 import lucuma.core.enums.GmosSouthGrating
 import lucuma.itc.client.json.syntax.*
+import monocle.Prism
+import monocle.macros.GenPrism
 
 sealed trait InstrumentMode
 
@@ -118,4 +120,11 @@ object InstrumentMode {
         case (x0: GmosSouth, y0: GmosSouth) => x0 === y0
         case _                              => false
       }
+
+  val gmosNorth: Prism[InstrumentMode, GmosNorth] =
+    GenPrism[InstrumentMode, GmosNorth]
+
+  val gmosSouth: Prism[InstrumentMode, GmosSouth] =
+    GenPrism[InstrumentMode, GmosSouth]
+
 }

@@ -3,6 +3,8 @@
 
 package lucuma.itc.client
 
+import cats.Eq
+import eu.timepit.refined.cats.*
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import io.circe.Encoder
 import io.circe.Json
@@ -47,4 +49,15 @@ object SpectroscopyModeInput {
         )
         .dropNullValues
 
+  given Eq[SpectroscopyModeInput] =
+    Eq.by { a => (
+      a.wavelength,
+      a.signalToNoise,
+      a.signalToNoiseAt,
+      a.sourceProfile,
+      a.band,
+      a.radialVelocity,
+      a.constraints,
+      a.mode
+    )}
 }
