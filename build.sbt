@@ -223,8 +223,7 @@ lazy val testkit = crossProject(JVMPlatform, JSPlatform)
       "eu.timepit"        %%% "refined-scalacheck"  % refinedVersion,
       "io.circe"          %%% "circe-testing"       % circeVersion,
       "io.chrisdavenport" %%% "cats-scalacheck"     % catsScalacheckVersion
-    ),
-    testFrameworks += MUnitFramework
+    )
   )
 
 lazy val tests = project
