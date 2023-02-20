@@ -9,8 +9,8 @@ import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.enums.Band
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
-import lucuma.core.math.arb.ArbRefined
 import lucuma.core.math.arb.ArbRadialVelocity
+import lucuma.core.math.arb.ArbRefined
 import lucuma.core.math.arb.ArbWavelength
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.SourceProfile
@@ -62,25 +62,29 @@ trait ArbSpectroscopyModeInput {
     }
 
   given Cogen[SpectroscopyModeInput] =
-    Cogen[(
-      Wavelength,
-      PosBigDecimal,
-      Option[Wavelength],
-      SourceProfile,
-      Band,
-      RadialVelocity,
-      ConstraintSet,
-      InstrumentMode
-    )].contramap { a => (
-      a.wavelength,
-      a.signalToNoise,
-      a.signalToNoiseAt,
-      a.sourceProfile,
-      a.band,
-      a.radialVelocity,
-      a.constraints,
-      a.mode
-    )}
+    Cogen[
+      (
+        Wavelength,
+        PosBigDecimal,
+        Option[Wavelength],
+        SourceProfile,
+        Band,
+        RadialVelocity,
+        ConstraintSet,
+        InstrumentMode
+      )
+    ].contramap { a =>
+      (
+        a.wavelength,
+        a.signalToNoise,
+        a.signalToNoiseAt,
+        a.sourceProfile,
+        a.band,
+        a.radialVelocity,
+        a.constraints,
+        a.mode
+      )
+    }
 }
 
 object ArbSpectroscopyModeInput extends ArbSpectroscopyModeInput

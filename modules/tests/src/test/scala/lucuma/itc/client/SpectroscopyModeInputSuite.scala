@@ -4,9 +4,9 @@
 package lucuma.itc.client
 
 import cats.kernel.laws.discipline.*
+import lucuma.itc.client.arb.ArbSpectroscopyModeInput
 import monocle.law.discipline._
 import munit._
-import lucuma.itc.client.arb.ArbSpectroscopyModeInput
 
 final class SpectroscopyModeInputSuite extends DisciplineSuite {
 

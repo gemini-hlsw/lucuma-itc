@@ -22,13 +22,17 @@ trait ArbGmosCustomMask {
     }
 
   given Cogen[GmosCustomMask] =
-    Cogen[(
-      GmosCustomSlitWidth,
-      String
-    )].contramap { a => (
-      a.slitWidth,
-      a.fileName
-    )}
+    Cogen[
+      (
+        GmosCustomSlitWidth,
+        String
+      )
+    ].contramap { a =>
+      (
+        a.slitWidth,
+        a.fileName
+      )
+    }
 
 }
 

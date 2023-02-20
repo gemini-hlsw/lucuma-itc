@@ -50,14 +50,16 @@ object SpectroscopyModeInput {
         .dropNullValues
 
   given Eq[SpectroscopyModeInput] =
-    Eq.by { a => (
-      a.wavelength,
-      a.signalToNoise,
-      a.signalToNoiseAt,
-      a.sourceProfile,
-      a.band,
-      a.radialVelocity,
-      a.constraints,
-      a.mode
-    )}
+    Eq.by { a =>
+      (
+        a.wavelength,
+        a.signalToNoise,
+        a.signalToNoiseAt,
+        a.sourceProfile,
+        a.band,
+        a.radialVelocity,
+        a.constraints,
+        a.mode
+      )
+    }
 }

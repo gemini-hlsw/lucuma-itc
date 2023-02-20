@@ -18,7 +18,7 @@ trait ArbInstrumentMode {
 
   import ArbEnumerated.*
   import ArbGmosFpu.given
-  
+
   import InstrumentMode.GmosNorth
   import InstrumentMode.GmosSouth
 
@@ -32,15 +32,19 @@ trait ArbInstrumentMode {
     }
 
   given Cogen[GmosNorth] =
-    Cogen[(
-      GmosNorthGrating,
-      Option[GmosNorthFilter],
-      GmosFpu.North
-    )].contramap { a => (
-      a.grating,
-      a.filter,
-      a.fpu
-    )}
+    Cogen[
+      (
+        GmosNorthGrating,
+        Option[GmosNorthFilter],
+        GmosFpu.North
+      )
+    ].contramap { a =>
+      (
+        a.grating,
+        a.filter,
+        a.fpu
+      )
+    }
 
   given Arbitrary[GmosSouth] =
     Arbitrary {
@@ -52,15 +56,19 @@ trait ArbInstrumentMode {
     }
 
   given Cogen[GmosSouth] =
-    Cogen[(
-      GmosSouthGrating,
-      Option[GmosSouthFilter],
-      GmosFpu.South
-    )].contramap { a => (
-      a.grating,
-      a.filter,
-      a.fpu
-    )}
+    Cogen[
+      (
+        GmosSouthGrating,
+        Option[GmosSouthFilter],
+        GmosFpu.South
+      )
+    ].contramap { a =>
+      (
+        a.grating,
+        a.filter,
+        a.fpu
+      )
+    }
 
   given Arbitrary[InstrumentMode] =
     Arbitrary {
@@ -71,13 +79,17 @@ trait ArbInstrumentMode {
     }
 
   given Cogen[InstrumentMode] =
-    Cogen[(
-      Option[GmosNorth],
-      Option[GmosSouth]
-    )].contramap { a => (
-      InstrumentMode.gmosNorth.getOption(a),
-      InstrumentMode.gmosSouth.getOption(a)
-    )}
+    Cogen[
+      (
+        Option[GmosNorth],
+        Option[GmosSouth]
+      )
+    ].contramap { a =>
+      (
+        InstrumentMode.gmosNorth.getOption(a),
+        InstrumentMode.gmosSouth.getOption(a)
+      )
+    }
 }
 
 object ArbInstrumentMode extends ArbInstrumentMode

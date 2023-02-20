@@ -4,9 +4,9 @@
 package lucuma.itc.client
 
 import cats.kernel.laws.discipline.*
+import lucuma.itc.client.arb.ArbInstrumentMode
 import monocle.law.discipline.*
 import munit.*
-import lucuma.itc.client.arb.ArbInstrumentMode
 
 final class InstrumentModeSuite extends DisciplineSuite {
 
@@ -14,5 +14,6 @@ final class InstrumentModeSuite extends DisciplineSuite {
 
   checkAll("InstrumentMode", EqTests[InstrumentMode].eqv)
   checkAll("InstrumentMode.gmosNorth", PrismTests(InstrumentMode.gmosNorth))
+  checkAll("InstrumentMode.gmosSouth", PrismTests(InstrumentMode.gmosSouth))
 
 }
