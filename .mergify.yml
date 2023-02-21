@@ -56,6 +56,14 @@ pull_request_rules:
       add:
       - service
       remove: []
+- name: Label testkit PRs
+  conditions:
+  - files~=^modules/testkit/
+  actions:
+    label:
+      add:
+      - testkit
+      remove: []
 - name: Label tests PRs
   conditions:
   - files~=^modules/tests/

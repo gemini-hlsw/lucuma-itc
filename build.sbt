@@ -36,7 +36,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.2.2"
 ThisBuild / crossScalaVersions  := Seq("3.2.2")
-ThisBuild / tlBaseVersion       := "0.6"
+ThisBuild / tlBaseVersion       := "0.7"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -208,17 +208,37 @@ lazy val benchmark = project
 
 val MUnitFramework = new TestFramework("munit.Framework")
 
+lazy val testkit = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("modules/testkit"))
+  .dependsOn(client)
+  .settings(commonSettings)
+  .settings(
+    name := "lucuma-itc-testkit",
+    libraryDependencies ++= Seq(
+      "edu.gemini"        %%% "lucuma-core-testkit" % lucumaCoreVersion,
+      "org.typelevel"     %%% "cats-testkit"        % catsVersion,
+      "dev.optics"        %%% "monocle-law"         % monocleVersion,
+      "org.typelevel"     %%% "spire-laws"          % spireVersion,
+      "eu.timepit"        %%% "refined-scalacheck"  % refinedVersion,
+      "io.circe"          %%% "circe-testing"       % circeVersion,
+      "io.chrisdavenport" %%% "cats-scalacheck"     % catsScalacheckVersion
+    )
+  )
+
 lazy val tests = project
   .in(file("modules/tests"))
   .enablePlugins(NoPublishPlugin)
-  .dependsOn(service, client.jvm)
+  .dependsOn(service, client.jvm, testkit.jvm)
   .settings(
     name := "lucuma-itc-tests",
     libraryDependencies ++= Seq(
       "org.typelevel" %%% "munit-cats-effect-3"    % munitCatsEffectVersion     % Test,
       "com.lihaoyi"   %%% "pprint"                 % pprintVersion              % Test,
       "org.http4s"     %% "http4s-jdk-http-client" % http4sJdkHttpClientVersion % Test,
-      "org.typelevel" %%% "log4cats-slf4j"         % log4catsVersion            % Test
+      "org.typelevel" %%% "log4cats-slf4j"         % log4catsVersion            % Test,
+      "org.scalameta" %%% "munit"                  % munitVersion               % Test,
+      "org.typelevel" %%% "discipline-munit"       % disciplineMunitVersion     % Test
     ),
     testFrameworks += MUnitFramework
   )
