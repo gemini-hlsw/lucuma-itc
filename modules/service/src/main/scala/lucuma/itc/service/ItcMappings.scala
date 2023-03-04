@@ -80,7 +80,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(env:         Cursor.Env): F[Result[List[SpectroscopyResults]]] =
+  )(env: Cursor.Env): F[Result[List[SpectroscopyResults]]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[PosBigDecimal]("signalToNoise"),
@@ -140,7 +140,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(env:         Cursor.Env): F[Result[SpectroscopyGraphResults]] =
+  )(env: Cursor.Env): F[Result[SpectroscopyGraphResults]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[NonNegDuration]("exposureTime"),
@@ -185,7 +185,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(env:         Cursor.Env): F[Result[Itc.SNCalcResult]] =
+  )(env: Cursor.Env): F[Result[Itc.SNCalcResult]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[NonNegDuration]("exposureTime"),

@@ -82,7 +82,7 @@ trait ItcCacheOrRemote extends Version:
    */
   def graphFromCacheOrRemote[F[_]: MonadThrow: Logger](
     request: GraphRequest
-  )(itc:     Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.GraphResult] =
+  )(itc: Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.GraphResult] =
     cacheOrRemote(request, requestGraph(itc))("itc:graph:spec", redis)
 
   private val requestCalc = [F[_]] =>
@@ -102,7 +102,7 @@ trait ItcCacheOrRemote extends Version:
    */
   def calcFromCacheOrRemote[F[_]: MonadThrow: Logger](
     calcRequest: CalcRequest
-  )(itc:         Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.CalcResultWithVersion] =
+  )(itc: Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.CalcResultWithVersion] =
     Logger[F].info(calcRequest.toString) *> cacheOrRemote(calcRequest, requestCalc(itc))(
       "itc:calc:spec",
       redis

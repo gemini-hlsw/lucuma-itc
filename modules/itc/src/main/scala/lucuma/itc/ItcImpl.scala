@@ -142,7 +142,7 @@ object ItcImpl {
                                constraints,
                                exposures
             ).asJson
-          Trace[F].put("itc.query"              -> request.spaces2) *>
+          Trace[F].put("itc.query" -> request.spaces2) *>
             Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
             Trace[F].put("itc.exposures" -> exposures) *>
             Trace[F].put("itc.level" -> level.value) *>
@@ -172,7 +172,7 @@ object ItcImpl {
                                constraints,
                                exposures.toInt
             ).asJson
-          Trace[F].put("itc.query"              -> json.spaces2) *>
+          Trace[F].put("itc.query" -> json.spaces2) *>
             Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
             Trace[F].put("itc.exposures" -> exposures.toInt) *>
             (itcLocal.callLocal(json.noSpaces) match {
