@@ -10,7 +10,6 @@ import eu.timepit.refined.types.numeric.PosLong
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.itc.ChartType
-import lucuma.itc.Itc
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcChartGroup
@@ -18,6 +17,7 @@ import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
 import lucuma.itc.SignalToNoiseCalculation
+import lucuma.itc.*
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
 
@@ -31,8 +31,8 @@ object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
     constraints:     ItcObservingConditions,
     signalToNoise:   BigDecimal,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[Itc.ExposureCalculationResult] =
-    Itc.ExposureCalculationResult.Success(1.seconds, 10, 10).pure[IO]
+  ): IO[ExposureCalculationResult] =
+    ExposureCalculationResult.Success(1.seconds, 10, 10).pure[IO]
 
   override def calculateGraph(
     targetProfile: TargetProfile,
@@ -40,39 +40,35 @@ object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
     constraints:   ItcObservingConditions,
     exposureTime:  NonNegDuration,
     exposures:     PosLong
-  ): IO[Itc.GraphResult] =
-    Itc
-      .GraphResult(
-        "1",
-        NonEmptyList.of(
-          ItcCcd(1,
-                 1,
-                 2,
-                 2,
-                 Wavelength.fromIntNanometers(1001).get,
-                 Wavelength.fromIntNanometers(1001).get,
-                 3,
-                 4,
-                 5,
-                 Nil
-          )
-        ),
-        NonEmptyList.of(
-          ItcChartGroup(
-            NonEmptyList.of(
-              ItcChart(
-                ChartType.S2NChart,
-                List(
-                  ItcSeries("title",
-                            SeriesDataType.FinalS2NData,
-                            List((1.0, 1000.0), (2.0, 1001.0))
-                  )
-                )
+  ): IO[GraphResult] =
+    GraphResult(
+      "1",
+      NonEmptyList.of(
+        ItcCcd(1,
+               1,
+               2,
+               2,
+               Wavelength.fromIntNanometers(1001).get,
+               Wavelength.fromIntNanometers(1001).get,
+               3,
+               4,
+               5,
+               Nil
+        )
+      ),
+      NonEmptyList.of(
+        ItcChartGroup(
+          NonEmptyList.of(
+            ItcChart(
+              ChartType.S2NChart,
+              List(
+                ItcSeries("title", SeriesDataType.FinalS2NData, List((1.0, 1000.0), (2.0, 1001.0)))
               )
             )
           )
         )
       )
+    )
       .pure[IO]
 
 }

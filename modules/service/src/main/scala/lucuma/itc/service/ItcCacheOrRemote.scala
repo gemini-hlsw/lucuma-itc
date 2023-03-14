@@ -10,7 +10,7 @@ import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
 import dev.profunktor.redis4cats.algebra.StringCommands
-import lucuma.itc.Itc
+import lucuma.itc.*
 import lucuma.itc.search.ItcVersions
 import lucuma.itc.service.config.ExecutionEnvironment
 import lucuma.itc.service.redis.given
@@ -89,7 +89,7 @@ trait ItcCacheOrRemote extends Version:
    */
   def graphFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
     request: GraphRequest
-  )(itc:     Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.GraphResult] =
+  )(itc:     Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[GraphResult] =
     cacheOrRemote(request, requestGraph(itc))("itc:graph:spec", redis)
 
   private val requestCalc = [F[_]] =>
@@ -112,7 +112,7 @@ trait ItcCacheOrRemote extends Version:
   )(
     itc:         Itc[F],
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
-  ): F[Itc.ExposureCalculationResult] =
+  ): F[ExposureCalculationResult] =
     Logger[F].info(calcRequest.toString) *> cacheOrRemote(calcRequest, requestCalc(itc))(
       "itc:calc:spec",
       redis

@@ -11,7 +11,7 @@ import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.enums._
-import lucuma.itc.Itc
+import lucuma.itc.ExposureCalculationResult
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcObservingConditions
@@ -19,10 +19,10 @@ import lucuma.itc.given
 
 sealed trait Result:
   def mode: ObservingMode
-  def itc: Itc.ExposureCalculationResult
+  def itc: ExposureCalculationResult
 
 object Result:
-  case class Spectroscopy(mode: ObservingMode.Spectroscopy, itc: Itc.ExposureCalculationResult)
+  case class Spectroscopy(mode: ObservingMode.Spectroscopy, itc: ExposureCalculationResult)
       derives Encoder.AsObject
 
 case class SpectroscopyResults(
@@ -42,5 +42,3 @@ case class ItcVersions(
   serverVersion: String,
   dataVersion:   Option[String]
 ) derives Encoder.AsObject
-
-type SNCalcResult = lucuma.itc.Itc.SNCalcResult

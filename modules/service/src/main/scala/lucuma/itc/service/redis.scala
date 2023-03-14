@@ -50,16 +50,15 @@ given Pickler[Wavelength] =
       .getOrElse(sys.error("cannot unpickle"))
   )(_.toPicometers.value.value)
 
-given Pickler[ItcChart]                                       = generatePickler
-given Pickler[ItcChartGroup]                                  = generatePickler
-given Pickler[ItcWarning]                                     = generatePickler
-given Pickler[ItcCcd]                                         = generatePickler
-given Pickler[Itc.GraphResult]                                = generatePickler
-given Pickler[Itc.ExposureCalculationResult.Success]          = generatePickler
-given Pickler[Itc.ExposureCalculationResult.SourceTooBright]  = generatePickler
-given Pickler[Itc.ExposureCalculationResult.CalculationError] = generatePickler
-given Pickler[Itc.ExposureCalculationResult]                  = compositePickler[Itc.ExposureCalculationResult]
-  .addConcreteType[Itc.ExposureCalculationResult.Success]
-  .addConcreteType[Itc.ExposureCalculationResult.SourceTooBright]
-  .addConcreteType[Itc.ExposureCalculationResult.CalculationError]
-given Pickler[Itc.ExposureCalculationResultWithVersion]       = generatePickler
+given Pickler[ItcChart]                                   = generatePickler
+given Pickler[ItcChartGroup]                              = generatePickler
+given Pickler[ItcWarning]                                 = generatePickler
+given Pickler[ItcCcd]                                     = generatePickler
+given Pickler[GraphResult]                                = generatePickler
+given Pickler[ExposureCalculationResult.Success]          = generatePickler
+given Pickler[ExposureCalculationResult.SourceTooBright]  = generatePickler
+given Pickler[ExposureCalculationResult.CalculationError] = generatePickler
+given Pickler[ExposureCalculationResult]                  = compositePickler[ExposureCalculationResult]
+  .addConcreteType[ExposureCalculationResult.Success]
+  .addConcreteType[ExposureCalculationResult.SourceTooBright]
+  .addConcreteType[ExposureCalculationResult.CalculationError]

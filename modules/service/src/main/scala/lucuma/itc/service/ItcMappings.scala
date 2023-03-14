@@ -76,7 +76,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         }.liftTo[F]
       }
 
-  def spectroscopy[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+  def calculateSpectroscopyExposureTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
@@ -113,12 +113,12 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
               )(itc, redis)
                 .handleErrorWith {
                   case UpstreamException(msg) =>
-                    Itc.ExposureCalculationResult
+                    ExposureCalculationResult
                       .CalculationError(msg)
                       .pure[F]
                       .widen
                   case x                      =>
-                    Itc.ExposureCalculationResult
+                    ExposureCalculationResult
                       .CalculationError(s"Error calculating itc $x")
                       .pure[F]
                       .widen
@@ -135,7 +135,9 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         .handleErrorWith { case x =>
           Problem(s"Error calculating itc $x").leftIorNec.pure[F]
         }
-    }.map(_.getOrElse(Problem("Missing parameters for spectroscopy").leftIorNec))
+    }.map(
+      _.getOrElse(Problem("Missing parameters for calculateSpectroscopyExposureTime").leftIorNec)
+    )
 
   def spectroscopyGraph[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
@@ -180,13 +182,17 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         .handleError { case x =>
           Problem(s"Error calculating itc $x").leftIorNec
         }
-    }.map(_.getOrElse(Problem(s"Missing parameters for spectroscopy graph $env").leftIorNec))
+    }.map(
+      _.getOrElse(
+        Problem(s"Missing parameters for calculateSpectroscopyExposureTime graph $env").leftIorNec
+      )
+    )
 
-  def spectroscopySN[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+  def calculateSignalToNoise[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(env:         Cursor.Env): F[Result[Itc.SNCalcResult]] =
+  )(env:         Cursor.Env): F[Result[SNCalcResult]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[NonNegDuration]("exposureTime"),
@@ -256,10 +262,10 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                   versions(environment, redis)
                 ),
                 RootEffect.computeEncodable("spectroscopy")((_, p, env) =>
-                  spectroscopy(environment, redis, itc)(env)
+                  calculateSpectroscopyExposureTime(environment, redis, itc)(env)
                 ),
                 RootEffect.computeEncodable("spectroscopySignalToNoiseBeta")((_, p, env) =>
-                  spectroscopySN(environment, redis, itc)(env)
+                  calculateSignalToNoise(environment, redis, itc)(env)
                 ),
                 RootEffect.computeEncodable("spectroscopyGraph")((_, p, env) =>
                   spectroscopyGraph(environment, redis, itc)(env)
