@@ -6,6 +6,7 @@ package lucuma.itc.service
 import boopickle.DefaultBasic.*
 import buildinfo.BuildInfo
 import cats.*
+import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
 import dev.profunktor.redis4cats.algebra.StringCommands
@@ -13,6 +14,7 @@ import lucuma.itc.Itc
 import lucuma.itc.search.ItcVersions
 import lucuma.itc.service.config.ExecutionEnvironment
 import lucuma.itc.service.redis.given
+import natchez.Trace
 import org.typelevel.log4cats.Logger
 
 import java.nio.ByteBuffer
@@ -35,7 +37,7 @@ trait ItcCacheOrRemote extends Version:
   /**
    * Generic method to stora a value on redis or request it locally
    */
-  private def cacheOrRemote[F[_]: MonadThrow: Logger, A: Hash, B: Pickler](
+  private def cacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock, A: Hash, B: Pickler](
     a:       A,
     request: A => F[B]
   )(
@@ -45,24 +47,29 @@ trait ItcCacheOrRemote extends Version:
     val hash        = Hash[A].hash(a)
     val redisKeyStr = s"$prefix:$hash"
     val redisKey    = redisKeyStr.getBytes(KeyCharset)
+    val redisKey2   = s"$redisKeyStr 1".getBytes(KeyCharset)
     val L           = Logger[F]
-    for
-      _         <- L.info(s"Read key $redisKeyStr")
-      fromRedis <- redis
-                     .get(redisKey)
-                     .handleErrorWith(e => L.error(e)(s"Error reading $redisKey") *> none.pure[F])
-      decoded   <-
-        fromRedis
-          .flatMap(b => Either.catchNonFatal(Unpickle[B].fromBytes(ByteBuffer.wrap(b))).toOption)
-          .pure[F]
-      _         <- L.info(s"$hash found on redis").unlessA(fromRedis.isEmpty && decoded.isEmpty)
-      r         <- decoded.map(_.pure[F]).getOrElse(request(a))
-      _         <-
-        redis
-          .setEx(redisKey, Pickle.intoBytes(r).compact().array(), TTL)
-          .handleErrorWith(L.error(_)(s"Error writing $redisKey"))
-          .whenA(fromRedis.isEmpty || decoded.isEmpty)
-    yield r
+
+    Trace[F].span("redis-cache-read") {
+      for
+        _         <- Trace[F].put("redis.key" -> redisKeyStr)
+        _         <- L.info(s"Read key $redisKeyStr")
+        fromRedis <- redis
+                       .get(redisKey2)
+                       .handleErrorWith(e => L.error(e)(s"Error reading $redisKey") *> none.pure[F])
+        decoded   <-
+          fromRedis
+            .flatMap(b => Either.catchNonFatal(Unpickle[B].fromBytes(ByteBuffer.wrap(b))).toOption)
+            .pure[F]
+        _         <- L.info(s"$hash found on redis").unlessA(fromRedis.isEmpty && decoded.isEmpty)
+        r         <- decoded.map(_.pure[F]).getOrElse(Trace[F].span("request-call")(request(a)))
+        _         <-
+          redis
+            .setEx(redisKey, Pickle.intoBytes(r).compact().array(), TTL)
+            .handleErrorWith(L.error(_)(s"Error writing $redisKey"))
+            .whenA(fromRedis.isEmpty || decoded.isEmpty)
+      yield r
+    }
   }
 
   private val requestGraph = [F[_]] =>
@@ -80,7 +87,7 @@ trait ItcCacheOrRemote extends Version:
   /**
    * Request a graph
    */
-  def graphFromCacheOrRemote[F[_]: MonadThrow: Logger](
+  def graphFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
     request: GraphRequest
   )(itc:     Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.GraphResult] =
     cacheOrRemote(request, requestGraph(itc))("itc:graph:spec", redis)
@@ -100,7 +107,7 @@ trait ItcCacheOrRemote extends Version:
   /**
    * Request exposure time calculation
    */
-  def calcFromCacheOrRemote[F[_]: MonadThrow: Logger](
+  def calcFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
     calcRequest: CalcRequest
   )(
     itc:         Itc[F],

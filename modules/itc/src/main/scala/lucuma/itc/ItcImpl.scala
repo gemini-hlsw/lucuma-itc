@@ -88,7 +88,7 @@ object ItcImpl {
 
   val Error400Regex = "<title>Error 400 (.*)</title>".r
 
-  def build[F[_]: MonadThrow: Logger: Trace](itcLocal: LocalItc): Itc[F] =
+  def build[F[_]: MonadThrow: Logger: Trace](itcLocal: LocalItc, dataVersion: String): Itc[F] =
     new Itc[F] with SignalToNoiseCalculation[F] {
       val L = Logger[F]
 
@@ -99,14 +99,16 @@ object ItcImpl {
         signalToNoise:   BigDecimal,
         signalToNoiseAt: Option[Wavelength]
       ): F[Itc.ExposureCalculationResult] =
-        observingMode match
-          case _: ObservingMode.Spectroscopy =>
-            signalToNoiseAt match
-              case None     =>
-                spectroscopy(targetProfile, observingMode, constraints, signalToNoise, none)
-              case Some(at) =>
-                spectroscopySNAt(targetProfile, observingMode, constraints, signalToNoise, at)
-          // TODO: imaging
+        Trace[F].span("calculate-exposure-time") {
+          observingMode match
+            case _: ObservingMode.Spectroscopy =>
+              signalToNoiseAt match
+                case None     =>
+                  spectroscopy(targetProfile, observingMode, constraints, signalToNoise, none)
+                case Some(at) =>
+                  spectroscopySNAt(targetProfile, observingMode, constraints, signalToNoise, at)
+            // TODO: imaging
+        }
 
       def calculateGraph(
         targetProfile: TargetProfile,
@@ -227,7 +229,7 @@ object ItcImpl {
         exposures:        Long
       ): F[Itc.GraphResult] =
         itcGraph(targetProfile, observingMode, constraints, exposureDuration, exposures).map { r =>
-          Itc.GraphResult.fromLegacy(r.versionToken, r.ccds, r.groups)
+          Itc.GraphResult.fromLegacy(dataVersion, r.ccds, r.groups)
         }
 
       /**
@@ -313,61 +315,62 @@ object ItcImpl {
           L.info(
             s"Target brightness ${targetProfile} at band ${targetProfile.band}"
           ) *>
-          Trace[F].span("itc.calctime.spectroscopy") {
+          Trace[F]
+            .span("itc.calctime.spectroscopy") {
 
-            itc(targetProfile,
-                observingMode,
-                constraints,
-                startExpTime,
-                numberOfExposures,
-                1.refined
-            )
-              .flatMap { r =>
-                val halfWellTime = r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime.value
-                L.info(
-                  s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} $halfWellTime"
-                ) *> {
-                  if (halfWellTime < 1.0) {
-                    val msg = s"Target is too bright. Well half filled in $halfWellTime"
-                    L.error(msg) *>
-                      Itc.ExposureCalculationResult
-                        .SourceTooBright(msg)
-                        .pure[F]
-                        .widen
-                  } else {
-                    val maxTime = startExpTime.value.min(halfWellTime)
-                    calculateSignalToNoise(r.groups, signalToNoiseAt)
-                      .flatMap {
-                        case Itc.SNCalcResult.SNCalcSuccess(snr)        =>
-                          itcStep(numberOfExposures,
-                                  0,
-                                  startExpTime,
-                                  BigDecimal(0).withUnit[Second],
-                                  snr.toDouble,
-                                  maxTime.withUnit[Second],
-                                  r,
-                                  0.refined
-                          )
-                        case Itc.SNCalcResult.WavelengthAtAboveRange(w) =>
-                          Itc.ExposureCalculationResult
-                            .CalculationError(
-                              f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm above range"
+              itc(targetProfile,
+                  observingMode,
+                  constraints,
+                  startExpTime,
+                  numberOfExposures,
+                  1.refined
+              )
+                .flatMap { r =>
+                  val halfWellTime = r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime.value
+                  L.info(
+                    s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} $halfWellTime"
+                  ) *> {
+                    if (halfWellTime < 1.0) {
+                      val msg = s"Target is too bright. Well half filled in $halfWellTime"
+                      L.error(msg) *>
+                        Itc.ExposureCalculationResult
+                          .SourceTooBright(msg)
+                          .pure[F]
+                          .widen
+                    } else {
+                      val maxTime = startExpTime.value.min(halfWellTime)
+                      calculateSignalToNoise(r.groups, signalToNoiseAt)
+                        .flatMap {
+                          case Itc.SNCalcResult.SNCalcSuccess(snr)        =>
+                            itcStep(numberOfExposures,
+                                    0,
+                                    startExpTime,
+                                    BigDecimal(0).withUnit[Second],
+                                    snr.toDouble,
+                                    maxTime.withUnit[Second],
+                                    r,
+                                    0.refined
                             )
-                            .pure[F]
-                        case Itc.SNCalcResult.WavelengthAtBelowRange(w) =>
-                          Itc.ExposureCalculationResult
-                            .CalculationError(
-                              f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm below range"
-                            )
-                            .pure[F]
-                        case r                                          =>
-                          Itc.ExposureCalculationResult.CalculationError(r.toString).pure[F]
-                      }
+                          case Itc.SNCalcResult.WavelengthAtAboveRange(w) =>
+                            Itc.ExposureCalculationResult
+                              .CalculationError(
+                                f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm above range"
+                              )
+                              .pure[F]
+                          case Itc.SNCalcResult.WavelengthAtBelowRange(w) =>
+                            Itc.ExposureCalculationResult
+                              .CalculationError(
+                                f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm below range"
+                              )
+                              .pure[F]
+                          case r                                          =>
+                            Itc.ExposureCalculationResult.CalculationError(r.toString).pure[F]
+                        }
+                    }
                   }
-                }
 
-              }
-          }
+                }
+            }
 
       }
 
@@ -390,19 +393,19 @@ object ItcImpl {
           L.info(
             s"Target brightness ${targetProfile} at band ${targetProfile.band}"
           ) *>
-          Trace[F].span("itc.calctime.spectroscopy-exp-time-at") {
-
-            itcWithSNAt(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
-              .flatMap { r =>
-                Itc.ExposureCalculationResult
-                  .Success(
-                    r.exposureCalculation.exposureTime.seconds,
-                    r.exposureCalculation.exposures,
-                    r.exposureCalculation.signalToNoise
-                  )
-                  .pure[F]
-              }
-          }
+          Trace[F]
+            .span("itc.calctime.spectroscopy-exp-time-at") {
+              itcWithSNAt(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
+                .flatMap { r =>
+                  Itc.ExposureCalculationResult
+                    .Success(
+                      r.exposureCalculation.exposureTime.seconds,
+                      r.exposureCalculation.exposures,
+                      r.exposureCalculation.signalToNoise
+                    )
+                    .pure[F]
+                }
+            }
 
       }
     }

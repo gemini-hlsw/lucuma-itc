@@ -23,11 +23,11 @@ case class LocalItc(classLoader: ClassLoader):
   // We need to keep a single reference to the reflected method
   val calculateChartsMethod = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
-    .getMethod("calculateCharts", classOf[String], classOf[String])
+    .getMethod("calculateCharts", classOf[String])
 
   val calculateMethod = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
-    .getMethod("calculate", classOf[String], classOf[String])
+    .getMethod("calculateExposureTime", classOf[String])
 
   private val LegacyRight = """Right\((.*)\)""".r
   private val LegacyLeft  = """Left\((.*)\)""".r
@@ -37,7 +37,7 @@ case class LocalItc(classLoader: ClassLoader):
    */
   def calculateCharts(jsonParams: String): Either[String, GraphsRemoteResult] =
     val res = calculateChartsMethod
-      .invoke(null, jsonParams, "token") // null as it is a static method
+      .invoke(null, jsonParams) // null as it is a static method
       .asInstanceOf[String]
 
     res match
@@ -55,7 +55,7 @@ case class LocalItc(classLoader: ClassLoader):
    */
   def calculateExposureTime(jsonParams: String): Either[String, ExposureTimeRemoteResult] =
     val res = calculateMethod
-      .invoke(null, jsonParams, "token") // null as it is a static method
+      .invoke(null, jsonParams) // null as it is a static method
       .asInstanceOf[String]
 
     res match

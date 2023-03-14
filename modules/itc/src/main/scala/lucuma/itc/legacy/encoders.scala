@@ -348,14 +348,13 @@ given Decoder[ItcChartGroup] = (c: HCursor) =>
 
 given Decoder[GraphsRemoteResult] = (c: HCursor) =>
   for
-    v      <- c.downField("versionToken").as[String]
     charts <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
                 .downField("chartGroups")
                 .as[NonEmptyList[ItcChartGroup]]
     ccd    <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
                 .downField("ccds")
                 .as[NonEmptyList[ItcRemoteCcd]]
-  yield GraphsRemoteResult(v, ccd, charts)
+  yield GraphsRemoteResult(ccd, charts)
 
 given Decoder[ExposureCalculation] = (c: HCursor) =>
   for
@@ -365,8 +364,6 @@ given Decoder[ExposureCalculation] = (c: HCursor) =>
   yield ExposureCalculation(time, count, sn)
 
 given Decoder[ExposureTimeRemoteResult] = (c: HCursor) =>
-  for
-    v    <- c.downField("versionToken").as[String]
-    calc <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
-              .as[ExposureCalculation]
-  yield ExposureTimeRemoteResult(v, calc)
+  for calc <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
+                .as[ExposureCalculation]
+  yield ExposureTimeRemoteResult(calc)

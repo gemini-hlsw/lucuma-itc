@@ -76,7 +76,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         }.liftTo[F]
       }
 
-  def spectroscopy[F[_]: MonadThrow: Logger: Parallel: Trace](
+  def spectroscopy[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
@@ -125,7 +125,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                 }
                 .map { r =>
                   SpectroscopyResults(version(environment).value,
-                                      "r.dataVersion".some,
+                                      BuildInfo.ocslibHash.some,
                                       List(Spectroscopy(specMode, r))
                   )
                 }
@@ -137,7 +137,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         }
     }.map(_.getOrElse(Problem("Missing parameters for spectroscopy").leftIorNec))
 
-  def spectroscopyGraph[F[_]: MonadThrow: Logger: Parallel: Trace](
+  def spectroscopyGraph[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
@@ -182,7 +182,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         }
     }.map(_.getOrElse(Problem(s"Missing parameters for spectroscopy graph $env").leftIorNec))
 
-  def spectroscopySN[F[_]: MonadThrow: Logger: Parallel: Trace](
+  def spectroscopySN[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]

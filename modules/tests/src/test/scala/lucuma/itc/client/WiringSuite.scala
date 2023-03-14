@@ -3,6 +3,7 @@
 
 package lucuma.itc.client
 
+import buildinfo.BuildInfo
 import cats.syntax.either.*
 import cats.syntax.option.*
 import eu.timepit.refined.auto.*
@@ -42,7 +43,7 @@ class WiringSuite extends ClientSuite {
       SpectroscopyResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          None
+          BuildInfo.ocslibHash.some
         ),
         ItcResult
           .Success(

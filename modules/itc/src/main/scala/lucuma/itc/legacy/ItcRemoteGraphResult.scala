@@ -9,9 +9,8 @@ import io.circe.Decoder
 import lucuma.itc.ItcChartGroup
 
 case class GraphsRemoteResult(
-  versionToken: String,
-  ccds:         NonEmptyList[ItcRemoteCcd],
-  groups:       NonEmptyList[ItcChartGroup]
+  ccds:   NonEmptyList[ItcRemoteCcd],
+  groups: NonEmptyList[ItcChartGroup]
 ) {
   val maxTotalSNRatio: Double = ccds.map(_.totalSNRatio).maximum
   val maxWellDepth: Double    = ccds.map(_.wellDepth).maximum
@@ -20,7 +19,4 @@ case class GraphsRemoteResult(
 
 case class ExposureCalculation(exposureTime: Double, exposures: Int, signalToNoise: Double)
 
-case class ExposureTimeRemoteResult(
-  versionToken:        String,
-  exposureCalculation: ExposureCalculation
-)
+case class ExposureTimeRemoteResult(exposureCalculation: ExposureCalculation)
