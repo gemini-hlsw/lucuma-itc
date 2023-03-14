@@ -31,7 +31,7 @@ trait Itc[F[_]]:
     constraints:     ItcObservingConditions,
     signalToNoise:   BigDecimal,
     signalToNoiseAt: Option[Wavelength]
-  ): F[Itc.CalcResultWithVersion]
+  ): F[Itc.ExposureCalculationResult]
 
   /**
    * Retrieve the graph data for the given mode and exposureTime and exposures
@@ -57,34 +57,38 @@ object Itc:
 
   def apply[F[_]](using ev: Itc[F]): ev.type = ev
 
-  sealed trait CalcResult extends Product with Serializable {}
-  object CalcResult:
+  // Contains the result of exposure calculations either success or error
+  sealed trait ExposureCalculationResult extends Product with Serializable {}
+  object ExposureCalculationResult:
 
     case class Success(
       exposureTime:  FiniteDuration,
       exposures:     Int,
       signalToNoise: BigDecimal
-    ) extends CalcResult
+    ) extends ExposureCalculationResult
         derives Encoder.AsObject
 
     /** Object is too bright to be observed in the specified mode. */
-    case class SourceTooBright(msg: String) extends CalcResult
+    case class SourceTooBright(msg: String) extends ExposureCalculationResult
 
     /** Generic calculation error */
-    case class CalculationError(msg: String) extends CalcResult
+    case class CalculationError(msg: String) extends ExposureCalculationResult
 
-    given Encoder[Itc.CalcResult] = Encoder.instance {
-      case f: Itc.CalcResult.Success          =>
+    given Encoder[Itc.ExposureCalculationResult] = Encoder.instance {
+      case f: Itc.ExposureCalculationResult.Success          =>
         Json.obj(("resultType", Json.fromString("Success"))).deepMerge(f.asJson)
-      case Itc.CalcResult.CalculationError(m) =>
+      case Itc.ExposureCalculationResult.CalculationError(m) =>
         Json.obj(("resultType", Json.fromString("Error")), ("msg", Json.fromString(m)))
-      case Itc.CalcResult.SourceTooBright(m)  =>
+      case Itc.ExposureCalculationResult.SourceTooBright(m)  =>
         Json.obj(("resultType", Json.fromString("Error")),
                  ("msg", Json.fromString(s"Source too bright $m"))
         )
     }
 
-  case class CalcResultWithVersion(result: CalcResult, dataVersion: Option[String] = None)
+  case class ExposureCalculationResultWithVersion(
+    result:      ExposureCalculationResult,
+    dataVersion: Option[String] = None
+  )
 
   case class GraphResult(
     dataVersion: String,

@@ -113,19 +113,20 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
               )(itc, redis)
                 .handleErrorWith {
                   case UpstreamException(msg) =>
-                    Itc.CalcResultWithVersion(Itc.CalcResult.CalculationError(msg)).pure[F].widen
+                    Itc.ExposureCalculationResult
+                      .CalculationError(msg)
+                      .pure[F]
+                      .widen
                   case x                      =>
-                    Itc
-                      .CalcResultWithVersion(
-                        Itc.CalcResult.CalculationError(s"Error calculating itc $x")
-                      )
+                    Itc.ExposureCalculationResult
+                      .CalculationError(s"Error calculating itc $x")
                       .pure[F]
                       .widen
                 }
                 .map { r =>
                   SpectroscopyResults(version(environment).value,
-                                      r.dataVersion,
-                                      List(Spectroscopy(specMode, r.result))
+                                      "r.dataVersion".some,
+                                      List(Spectroscopy(specMode, r))
                   )
                 }
             }

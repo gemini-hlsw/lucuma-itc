@@ -102,7 +102,10 @@ trait ItcCacheOrRemote extends Version:
    */
   def calcFromCacheOrRemote[F[_]: MonadThrow: Logger](
     calcRequest: CalcRequest
-  )(itc:         Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[Itc.CalcResultWithVersion] =
+  )(
+    itc:         Itc[F],
+    redis:       StringCommands[F, Array[Byte], Array[Byte]]
+  ): F[Itc.ExposureCalculationResult] =
     Logger[F].info(calcRequest.toString) *> cacheOrRemote(calcRequest, requestCalc(itc))(
       "itc:calc:spec",
       redis

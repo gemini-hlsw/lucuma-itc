@@ -98,7 +98,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   BigDecimal,
         signalToNoiseAt: Option[Wavelength]
-      ): F[Itc.CalcResultWithVersion] =
+      ): F[Itc.ExposureCalculationResult] =
         observingMode match
           case _: ObservingMode.Spectroscopy =>
             signalToNoiseAt match
@@ -180,7 +180,7 @@ object ItcImpl {
             Trace[F].put("itc.sigma" -> sigma.toDouble) *>
             Logger[F].info(request.noSpaces) *>
             // Trace[F].put("itc.wavelength" -> wavelength.asJson) *>
-            (itcLocal.calculate(request.noSpaces) match {
+            (itcLocal.calculateExposureTime(request.noSpaces) match {
               case Right(r)  => r.pure[F]
               case Left(msg) =>
                 L.warn(s"Upstream 1 error $msg") *>
@@ -240,7 +240,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   BigDecimal,
         signalToNoiseAt: Option[Wavelength]
-      ): F[Itc.CalcResultWithVersion] = {
+      ): F[Itc.ExposureCalculationResult] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise.toDouble
@@ -255,7 +255,7 @@ object ItcImpl {
           maxTime:    Quantity[BigDecimal, Second],
           s:          legacy.GraphsRemoteResult,
           counter:    NonNegInt
-        ): F[Itc.CalcResult] =
+        ): F[Itc.ExposureCalculationResult] =
           if (snr === 0.0) {
             ApplicativeThrow[F].raiseError(new ItcCalculationError("S/N obtained is 0"))
           } else {
@@ -298,14 +298,14 @@ object ItcImpl {
                                     next
                             )
                           case r                                   =>
-                            Itc.CalcResult.CalculationError(r.toString).pure[F]
+                            Itc.ExposureCalculationResult.CalculationError(r.toString).pure[F]
                         }
                     }
                 } else
-                  Itc.CalcResult
+                  Itc.ExposureCalculationResult
                     .Success(newExpTime.toDouble.seconds, newNExp.toInt, s.maxTotalSNRatio)
                     .pure[F]
-                    .widen[Itc.CalcResult]
+                    .widen[Itc.ExposureCalculationResult]
               }
           }
 
@@ -330,7 +330,10 @@ object ItcImpl {
                   if (halfWellTime < 1.0) {
                     val msg = s"Target is too bright. Well half filled in $halfWellTime"
                     L.error(msg) *>
-                      Itc.CalcResultWithVersion(Itc.CalcResult.SourceTooBright(msg)).pure[F].widen
+                      Itc.ExposureCalculationResult
+                        .SourceTooBright(msg)
+                        .pure[F]
+                        .widen
                   } else {
                     val maxTime = startExpTime.value.min(halfWellTime)
                     calculateSignalToNoise(r.groups, signalToNoiseAt)
@@ -346,21 +349,20 @@ object ItcImpl {
                                   0.refined
                           )
                         case Itc.SNCalcResult.WavelengthAtAboveRange(w) =>
-                          Itc.CalcResult
+                          Itc.ExposureCalculationResult
                             .CalculationError(
                               f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm above range"
                             )
                             .pure[F]
                         case Itc.SNCalcResult.WavelengthAtBelowRange(w) =>
-                          Itc.CalcResult
+                          Itc.ExposureCalculationResult
                             .CalculationError(
                               f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm below range"
                             )
                             .pure[F]
                         case r                                          =>
-                          Itc.CalcResult.CalculationError(r.toString).pure[F]
+                          Itc.ExposureCalculationResult.CalculationError(r.toString).pure[F]
                       }
-                      .map(x => Itc.CalcResultWithVersion(x, r.versionToken.some))
                   }
                 }
 
@@ -379,7 +381,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   BigDecimal,
         signalToNoiseAt: Wavelength
-      ): F[Itc.CalcResultWithVersion] = {
+      ): F[Itc.ExposureCalculationResult] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise.toDouble
@@ -392,13 +394,11 @@ object ItcImpl {
 
             itcWithSNAt(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
               .flatMap { r =>
-                Itc
-                  .CalcResultWithVersion(
-                    Itc.CalcResult.Success(r.exposureCalculation.exposureTime.seconds,
-                                           r.exposureCalculation.exposures,
-                                           r.exposureCalculation.signalToNoise
-                    ),
-                    r.versionToken.some
+                Itc.ExposureCalculationResult
+                  .Success(
+                    r.exposureCalculation.exposureTime.seconds,
+                    r.exposureCalculation.exposures,
+                    r.exposureCalculation.signalToNoise
                   )
                   .pure[F]
               }
