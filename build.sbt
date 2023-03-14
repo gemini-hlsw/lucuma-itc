@@ -148,6 +148,7 @@ lazy val service = project
       "eu.timepit"     %% "refined-cats"                  % refinedVersion,
       "dev.profunktor" %% "redis4cats-effects"            % redis4CatsVersion,
       "dev.profunktor" %% "redis4cats-log4cats"           % redis4CatsVersion,
+      "com.lihaoyi"    %% "pprint"                        % pprintVersion,
       "io.suzaku"      %% "boopickle"                     % boopickleVersion,
       "org.typelevel"  %% "munit-cats-effect-3"           % munitCatsEffectVersion % Test
     ),

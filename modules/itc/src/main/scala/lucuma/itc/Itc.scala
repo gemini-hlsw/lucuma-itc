@@ -46,7 +46,7 @@ trait Itc[F[_]]:
 
   /**
    * Calculate the signal to noise from graph data for the given mode and exposureTime and amount of
-   * exposures
+   * exposures at a specific wavelength
    */
   def calculateSignalToNoise(
     graph:           NonEmptyList[ItcChartGroup],

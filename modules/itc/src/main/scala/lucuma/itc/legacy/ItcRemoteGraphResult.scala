@@ -8,7 +8,7 @@ import cats.syntax.all.*
 import io.circe.Decoder
 import lucuma.itc.ItcChartGroup
 
-case class ItcRemoteResult(
+case class GraphsRemoteResult(
   versionToken: String,
   ccds:         NonEmptyList[ItcRemoteCcd],
   groups:       NonEmptyList[ItcChartGroup]
@@ -18,6 +18,9 @@ case class ItcRemoteResult(
   val maxPeakPixelFlux: Int   = ccds.map(_.peakPixelFlux).maximum.toInt
 }
 
-case class ItcRemoteVersion(
-  versionToken: String
-) derives Decoder
+case class ExposureCalculation(exposureTime: Double, exposures: Int, signalToNoise: Double)
+
+case class ExposureTimeRemoteResult(
+  versionToken:        String,
+  exposureCalculation: ExposureCalculation
+)

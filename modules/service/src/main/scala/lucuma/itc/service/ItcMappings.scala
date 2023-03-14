@@ -207,6 +207,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
             ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
         }
         import io.circe.syntax.*
+
         graphFromCacheOrRemote(
           GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp)
         )(itc, redis)
