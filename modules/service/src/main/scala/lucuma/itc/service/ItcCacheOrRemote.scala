@@ -11,7 +11,7 @@ import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
 import dev.profunktor.redis4cats.algebra.StringCommands
 import lucuma.itc.*
-import lucuma.itc.search.ItcVersions
+import lucuma.itc.ItcVersions
 import lucuma.itc.service.config.ExecutionEnvironment
 import lucuma.itc.service.redis.given
 import natchez.Trace
@@ -112,7 +112,7 @@ trait ItcCacheOrRemote extends Version:
   )(
     itc:         Itc[F],
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
-  ): F[ExposureCalculationResult] =
+  ): F[ExposureTimeResult] =
     Logger[F].info(calcRequest.toString) *> cacheOrRemote(calcRequest, requestCalc(itc))(
       "itc:calc:spec",
       redis

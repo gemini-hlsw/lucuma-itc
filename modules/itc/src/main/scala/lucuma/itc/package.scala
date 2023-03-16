@@ -19,39 +19,6 @@ import scala.concurrent.duration.FiniteDuration
 
 case class UpstreamException(msg: String) extends RuntimeException(msg)
 
-// Contains the result of exposure calculations either success or error
-sealed trait ExposureCalculationResult extends Product with Serializable {}
-object ExposureCalculationResult:
-
-  case class Success(
-    exposureTime:  FiniteDuration,
-    exposures:     Int,
-    signalToNoise: BigDecimal
-  ) extends ExposureCalculationResult
-      derives Encoder.AsObject
-
-  /** Object is too bright to be observed in the specified mode. */
-  case class SourceTooBright(msg: String) extends ExposureCalculationResult
-
-  /** Generic calculation error */
-  case class CalculationError(msg: String) extends ExposureCalculationResult
-
-  given Encoder[ExposureCalculationResult] = Encoder.instance {
-    case f: ExposureCalculationResult.Success          =>
-      Json.obj(("resultType", Json.fromString("Success"))).deepMerge(f.asJson)
-    case ExposureCalculationResult.CalculationError(m) =>
-      Json.obj(("resultType", Json.fromString("Error")), ("msg", Json.fromString(m)))
-    case ExposureCalculationResult.SourceTooBright(m)  =>
-      Json.obj(("resultType", Json.fromString("Error")),
-               ("msg", Json.fromString(s"Source too bright $m"))
-      )
-  }
-
-case class ExposureCalculationResultWithVersion(
-  result:      ExposureCalculationResult,
-  dataVersion: Option[String] = None
-)
-
 case class GraphResult(
   dataVersion: String,
   ccds:        NonEmptyList[ItcCcd],

@@ -50,15 +50,25 @@ given Pickler[Wavelength] =
       .getOrElse(sys.error("cannot unpickle"))
   )(_.toPicometers.value.value)
 
-given Pickler[ItcChart]                                   = generatePickler
-given Pickler[ItcChartGroup]                              = generatePickler
-given Pickler[ItcWarning]                                 = generatePickler
-given Pickler[ItcCcd]                                     = generatePickler
-given Pickler[GraphResult]                                = generatePickler
-given Pickler[ExposureCalculationResult.Success]          = generatePickler
-given Pickler[ExposureCalculationResult.SourceTooBright]  = generatePickler
-given Pickler[ExposureCalculationResult.CalculationError] = generatePickler
-given Pickler[ExposureCalculationResult]                  = compositePickler[ExposureCalculationResult]
-  .addConcreteType[ExposureCalculationResult.Success]
-  .addConcreteType[ExposureCalculationResult.SourceTooBright]
-  .addConcreteType[ExposureCalculationResult.CalculationError]
+given Pickler[ItcChart]                                         = generatePickler
+given Pickler[ItcChartGroup]                                    = generatePickler
+given Pickler[ItcWarning]                                       = generatePickler
+given Pickler[ItcCcd]                                           = generatePickler
+given Pickler[GraphResult]                                      = generatePickler
+given Pickler[LegacyExposureCalculationResult.Success]          = generatePickler
+given Pickler[LegacyExposureCalculationResult.SourceTooBright]  = generatePickler
+given Pickler[LegacyExposureCalculationResult.CalculationError] = generatePickler
+given Pickler[LegacyExposureCalculationResult]                  =
+  compositePickler[LegacyExposureCalculationResult]
+    .addConcreteType[LegacyExposureCalculationResult.Success]
+    .addConcreteType[LegacyExposureCalculationResult.SourceTooBright]
+    .addConcreteType[LegacyExposureCalculationResult.CalculationError]
+
+given Pickler[ExposureTimeResult.ExposureTimeSuccess]                   = generatePickler
+given newSourceTooBright: Pickler[ExposureTimeResult.SourceTooBright]   = generatePickler
+given newCalculationError: Pickler[ExposureTimeResult.CalculationError] = generatePickler
+given Pickler[ExposureTimeResult]                                       =
+  compositePickler[ExposureTimeResult]
+    .addConcreteType[ExposureTimeResult.ExposureTimeSuccess]
+    .addConcreteType[ExposureTimeResult.SourceTooBright]
+    .addConcreteType[ExposureTimeResult.CalculationError]

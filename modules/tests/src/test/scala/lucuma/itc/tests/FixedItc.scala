@@ -31,8 +31,8 @@ object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
     constraints:     ItcObservingConditions,
     signalToNoise:   BigDecimal,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[ExposureCalculationResult] =
-    ExposureCalculationResult.Success(1.seconds, 10, 10).pure[IO]
+  ): IO[LegacyExposureCalculationResult] =
+    LegacyExposureCalculationResult.Success(1.seconds, 10, 10).pure[IO]
 
   override def calculateGraph(
     targetProfile: TargetProfile,

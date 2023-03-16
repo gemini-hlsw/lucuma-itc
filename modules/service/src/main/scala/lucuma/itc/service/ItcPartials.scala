@@ -58,8 +58,8 @@ import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosNorth
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
-import lucuma.itc.search.Result.Spectroscopy
-import lucuma.itc.search.SpectroscopyResults
+import lucuma.itc.LegacyResult.Spectroscopy
+import lucuma.itc.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.service.config.*
 import lucuma.itc.service.syntax.all.*

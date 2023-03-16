@@ -27,11 +27,11 @@ import lucuma.core.model.SourceProfile
 import lucuma.itc.*
 import lucuma.itc.encoders.given
 import lucuma.itc.search.ItcObservationDetails
-import lucuma.itc.search.ItcVersions
+import lucuma.itc.ItcVersions
 import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.Result.Spectroscopy
-import lucuma.itc.search.SpectroscopyGraphResults
-import lucuma.itc.search.SpectroscopyResults
+import lucuma.itc.LegacyResult.Spectroscopy
+import lucuma.itc.SpectroscopyGraphResults
+import lucuma.itc.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.search.hashes.given
 import lucuma.itc.service.config.*
@@ -75,12 +75,13 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           Schema(src.mkString).right.get
         }.liftTo[F]
       }
+    // .attemptTap(e => Logger[F].error(e.toString))
 
   def calculateSpectroscopyExposureTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(env:         Cursor.Env): F[Result[List[SpectroscopyResults]]] =
+  )(env:         Cursor.Env): F[Result[ExposureTimeCalculationResult]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[PosBigDecimal]("signalToNoise"),
@@ -113,25 +114,28 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
               )(itc, redis)
                 .handleErrorWith {
                   case UpstreamException(msg) =>
-                    ExposureCalculationResult
+                    ExposureTimeResult
                       .CalculationError(msg)
                       .pure[F]
                       .widen
                   case x                      =>
-                    ExposureCalculationResult
+                    ExposureTimeResult
                       .CalculationError(s"Error calculating itc $x")
                       .pure[F]
                       .widen
                 }
                 .map { r =>
-                  SpectroscopyResults(version(environment).value,
-                                      BuildInfo.ocslibHash.some,
-                                      List(Spectroscopy(specMode, r))
-                  )
+                  ExposureTimeModeResult(specMode, r)
                 }
             }
         }
-        .map(_.rightIor[NonEmptyChain[Problem]])
+        .map(r =>
+          ExposureTimeCalculationResult(
+            version(environment).value,
+            BuildInfo.ocslibHash,
+            r
+          ).rightIor[NonEmptyChain[Problem]]
+        )
         .handleErrorWith { case x =>
           Problem(s"Error calculating itc $x").leftIorNec.pure[F]
         }
@@ -262,8 +266,15 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                   versions(environment, redis)
                 ),
                 RootEffect.computeEncodable("spectroscopy")((_, p, env) =>
-                  calculateSpectroscopyExposureTime(environment, redis, itc)(env)
+                  calculateSpectroscopyExposureTime(environment, redis, itc)(
+                    env
+                  ) // .map(_.toLegacy)
                 ),
+                RootEffect.computeEncodable("spectroscopyExposureTime") { (_, p, env) =>
+                  val m = calculateSpectroscopyExposureTime(environment, redis, itc)(env)
+                  pprint.pprintln(m)
+                  m
+                },
                 RootEffect.computeEncodable("spectroscopySignalToNoiseBeta")((_, p, env) =>
                   calculateSignalToNoise(environment, redis, itc)(env)
                 ),
@@ -301,6 +312,25 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                           fallback
                         )
                   }.map(e => e.copy(child = Select("spectroscopy", Nil, child)))
+                case Select("spectroscopyExposureTime",
+                            List(Binding("input", ObjectValue(wv))),
+                            child
+                    ) =>
+                  wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
+                    case (e, c) =>
+                      wavelengthPartial
+                        .orElse(radialVelocityPartial)
+                        .orElse(signalToNoisePartial)
+                        .orElse(sourceProfilePartial)
+                        .orElse(bandPartial)
+                        .orElse(instrumentModesPartial)
+                        .orElse(constraintsPartial)
+                        .orElse(signalToNoiseAtPartial)
+                        .applyOrElse(
+                          (e, c),
+                          fallback
+                        )
+                  }.map(e => e.copy(child = Select("spectroscopyExposureTime", Nil, child)))
                 case Select("spectroscopyGraph", List(Binding("input", ObjectValue(wv))), child) =>
                   wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
                     case (e, c) =>

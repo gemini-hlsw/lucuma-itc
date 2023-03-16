@@ -14,6 +14,8 @@ import coulomb.policy.spire.standard.given
 import coulomb.syntax.*
 import coulomb.units.si.*
 import coulomb.units.si.given
+import eu.timepit.refined.refineV
+import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.numeric.PosLong
@@ -98,7 +100,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   BigDecimal,
         signalToNoiseAt: Option[Wavelength]
-      ): F[ExposureCalculationResult] =
+      ): F[ExposureTimeResult] =
         Trace[F].span("calculate-exposure-time") {
           observingMode match
             case _: ObservingMode.Spectroscopy =>
@@ -181,7 +183,6 @@ object ItcImpl {
           Trace[F].put("itc.query"   -> request.spaces2) *>
             Trace[F].put("itc.sigma" -> sigma.toDouble) *>
             Logger[F].info(request.noSpaces) *>
-            // Trace[F].put("itc.wavelength" -> wavelength.asJson) *>
             (itcLocal.calculateExposureTime(request.noSpaces) match {
               case Right(r)  => r.pure[F]
               case Left(msg) =>
@@ -242,7 +243,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   BigDecimal,
         signalToNoiseAt: Option[Wavelength]
-      ): F[ExposureCalculationResult] = {
+      ): F[ExposureTimeResult] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise.toDouble
@@ -257,7 +258,7 @@ object ItcImpl {
           maxTime:    Quantity[BigDecimal, Second],
           s:          legacy.GraphsRemoteResult,
           counter:    NonNegInt
-        ): F[ExposureCalculationResult] =
+        ): F[ExposureTimeResult] =
           if (snr === 0.0) {
             ApplicativeThrow[F].raiseError(new ItcCalculationError("S/N obtained is 0"))
           } else {
@@ -300,14 +301,18 @@ object ItcImpl {
                                     next
                             )
                           case r                               =>
-                            ExposureCalculationResult.CalculationError(r.toString).pure[F]
+                            ExposureTimeResult.CalculationError(r.toString).pure[F]
                         }
                     }
                 } else
-                  ExposureCalculationResult
-                    .Success(newExpTime.toDouble.seconds, newNExp.toInt, s.maxTotalSNRatio)
+                  (refineV[Positive](newNExp.toInt).toOption match
+                    case Some(count) =>
+                      ExposureTimeResult
+                        .ExposureTimeSuccess(newExpTime.toDouble.seconds, count, s.maxTotalSNRatio)
+                    case _           => ExposureTimeResult.CalculationError("Negative exposure count")
+                  )
                     .pure[F]
-                    .widen[ExposureCalculationResult]
+                    .widen[ExposureTimeResult]
               }
           }
 
@@ -333,8 +338,8 @@ object ItcImpl {
                     if (halfWellTime < 1.0) {
                       val msg = s"Target is too bright. Well half filled in $halfWellTime"
                       L.error(msg) *>
-                        ExposureCalculationResult
-                          .SourceTooBright(msg)
+                        ExposureTimeResult
+                          .SourceTooBright(halfWellTime)
                           .pure[F]
                           .widen
                     } else {
@@ -352,19 +357,19 @@ object ItcImpl {
                                     0.refined
                             )
                           case SNCalcResult.WavelengthAtAboveRange(w) =>
-                            ExposureCalculationResult
+                            ExposureTimeResult
                               .CalculationError(
                                 f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm above range"
                               )
                               .pure[F]
                           case SNCalcResult.WavelengthAtBelowRange(w) =>
-                            ExposureCalculationResult
+                            ExposureTimeResult
                               .CalculationError(
                                 f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm below range"
                               )
                               .pure[F]
                           case r                                      =>
-                            ExposureCalculationResult.CalculationError(r.toString).pure[F]
+                            ExposureTimeResult.CalculationError(r.toString).pure[F]
                         }
                     }
                   }
@@ -384,7 +389,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   BigDecimal,
         signalToNoiseAt: Wavelength
-      ): F[ExposureCalculationResult] = {
+      ): F[ExposureTimeResult] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise.toDouble
@@ -397,13 +402,16 @@ object ItcImpl {
             .span("itc.calctime.spectroscopy-exp-time-at") {
               itcWithSNAt(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
                 .flatMap { r =>
-                  ExposureCalculationResult
-                    .Success(
-                      r.exposureCalculation.exposureTime.seconds,
-                      r.exposureCalculation.exposures,
-                      r.exposureCalculation.signalToNoise
-                    )
-                    .pure[F]
+                  (refineV[Positive](r.exposureCalculation.exposures).toOption match
+                    case Some(exposures) =>
+                      ExposureTimeResult
+                        .ExposureTimeSuccess(
+                          r.exposureCalculation.exposureTime.seconds,
+                          exposures,
+                          r.exposureCalculation.signalToNoise
+                        )
+                    case _               => ExposureTimeResult.CalculationError("Negative exposure count")
+                  ).pure[F]
                 }
             }
 

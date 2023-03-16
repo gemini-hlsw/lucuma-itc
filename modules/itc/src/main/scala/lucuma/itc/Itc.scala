@@ -29,7 +29,7 @@ trait Itc[F[_]]:
     constraints:     ItcObservingConditions,
     signalToNoise:   BigDecimal,
     signalToNoiseAt: Option[Wavelength]
-  ): F[ExposureCalculationResult]
+  ): F[ExposureTimeResult]
 
   /**
    * Retrieve the graph data for the given mode and exposureTime and exposures
