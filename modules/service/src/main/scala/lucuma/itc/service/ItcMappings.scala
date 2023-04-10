@@ -240,11 +240,12 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
       new CirceMapping[F] {
 
         val schema: Schema = loadedSchema
-        val QueryType      = schema.ref("Query")
-        val BigDecimalType = schema.ref("BigDecimal")
-        val LongType       = schema.ref("Long")
-        val DurationType   = schema.ref("Duration")
-        val PosIntType     = schema.ref("PosInt")
+        val QueryType         = schema.ref("Query")
+        val BigDecimalType    = schema.ref("BigDecimal")
+        val LongType          = schema.ref("Long")
+        val DurationType      = schema.ref("Duration")
+        val PosIntType        = schema.ref("PosInt")
+        val SignalToNoiseType = schema.ref("SignalToNoise")
 
         val typeMappings =
           List(
@@ -268,7 +269,8 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
             LeafMapping[BigDecimal](BigDecimalType),
             LeafMapping[Long](LongType),
             LeafMapping[PosInt](PosIntType),
-            LeafMapping[FiniteDuration](DurationType)
+            LeafMapping[FiniteDuration](DurationType),
+            LeafMapping[SignalToNoise](SignalToNoiseType)
           )
 
         def fallback(a: (IorNec[Problem, Environment], (String, Value))) =

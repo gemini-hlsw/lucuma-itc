@@ -20,6 +20,7 @@ import eu.timepit.refined.types.numeric.PosLong
 import io.circe.Decoder
 import io.circe.syntax.*
 import lucuma.core.math.Angle
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.itc.Itc
@@ -46,37 +47,46 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
   ): F[Itc.SNCalcResult] =
     (for {
       s2nChart     <- graph.flatMap(_.charts).find(_.chartType === ChartType.S2NChart)
-      finalS2NData <- s2nChart.series
+      finalS2NData <- s2nChart
+                        .series
                         .filter(_.seriesType === SeriesDataType.FinalS2NData)
                         .map(_.data)
                         .flatten
                         .some
     } yield {
+      def resultFromDouble(d: Double): Itc.SNCalcResult =
+        SignalToNoise
+          .FromBigDecimalRounding
+          .getOption(d)
+          .fold(Itc.SNCalcResult.CalculationError(s"Computed invalid signal-to-noise: $d")) { sn =>
+            Itc.SNCalcResult.SNCalcSuccess(sn)
+          }
+
       val sorted               = finalS2NData.sortBy(_._1)
-      val sn: Itc.SNCalcResult = signalToNoiseAt
-        .fold(Itc.SNCalcResult.SNCalcSuccess(sorted.maxBy(_._2)._2)) { w =>
-          val nanos = Wavelength.decimalNanometers.reverseGet(w).doubleValue
-          if (nanos < sorted.head._1) Itc.SNCalcResult.WavelengthAtBelowRange(w)
-          else if (nanos > sorted.last._1) Itc.SNCalcResult.WavelengthAtAboveRange(w)
-          else
-            val sortedList = sorted.toList
-            val index      = sortedList.indexWhere(_._1 >= nanos)
-            sortedList.lift(index).fold(Itc.SNCalcResult.NoData()) { secondPoint =>
-              val (w2, s2) = secondPoint
-              if (w2 === nanos) {
-                Itc.SNCalcResult.SNCalcSuccess(s2)
-              } else {
-                sortedList.lift(index - 1) match
-                  case Some((w1, s1)) =>
-                    // Linear interpolation
-                    val sn = (s1 * (w2 - nanos) + s2 * (nanos - w1)) / (w2 - w1)
-                    Itc.SNCalcResult.SNCalcSuccess(sn)
-                  case _              =>
-                    // We are checking the limits before, this shouldn't happen
-                    Itc.SNCalcResult.NoData()
+      val sn: Itc.SNCalcResult =
+        signalToNoiseAt
+          .fold(resultFromDouble(sorted.maxBy(_._2)._2)) { w =>
+            val nanos = Wavelength.decimalNanometers.reverseGet(w).doubleValue
+            if (nanos < sorted.head._1) Itc.SNCalcResult.WavelengthAtBelowRange(w)
+            else if (nanos > sorted.last._1) Itc.SNCalcResult.WavelengthAtAboveRange(w)
+            else
+              val index      = sorted.indexWhere(_._1 >= nanos)
+              sorted.lift(index).fold(Itc.SNCalcResult.NoData()) { secondPoint =>
+                val (w2, s2) = secondPoint
+                if (w2 === nanos) {
+                  resultFromDouble(s2)
+                } else {
+                  sorted.lift(index - 1) match
+                    case Some((w1, s1)) =>
+                      // Linear interpolation
+                      val sn = (s1 * (w2 - nanos) + s2 * (nanos - w1)) / (w2 - w1)
+                      resultFromDouble(sn)
+                    case _              =>
+                      // We are checking the limits before, this shouldn't happen
+                      Itc.SNCalcResult.NoData()
+                }
               }
-            }
-        }
+          }
       sn.pure[F]
     }).getOrElse(Itc.SNCalcResult.NoData().pure[F])
 
@@ -96,7 +106,7 @@ object ItcImpl {
         targetProfile:   TargetProfile,
         observingMode:   ObservingMode,
         constraints:     ItcObservingConditions,
-        signalToNoise:   BigDecimal,
+        signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
       ): F[Itc.CalcResultWithVersion] =
         observingMode match
@@ -204,12 +214,12 @@ object ItcImpl {
         targetProfile:   TargetProfile,
         observingMode:   ObservingMode,
         constraints:     ItcObservingConditions,
-        signalToNoise:   BigDecimal,
+        signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
       ): F[Itc.CalcResultWithVersion] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
-        val requestedSN       = signalToNoise.toDouble
+        val requestedSN       = signalToNoise.toBigDecimal.doubleValue
 
         // This loops should be necessary only a few times but put a circuit breaker just in case
         def itcStep(
@@ -258,7 +268,7 @@ object ItcImpl {
                                     nExp,
                                     newExpTime.withUnit[Second],
                                     expTime,
-                                    snr.toDouble,
+                                    snr.toBigDecimal.doubleValue,
                                     maxTime,
                                     s,
                                     next
@@ -268,8 +278,13 @@ object ItcImpl {
                         }
                     }
                 } else
-                  Itc.CalcResult
-                    .Success(newExpTime.toDouble.seconds, newNExp.toInt, s.maxTotalSNRatio)
+                  SignalToNoise
+                    .FromBigDecimalRounding
+                    .getOption(s.maxTotalSNRatio)
+                    .fold(Itc.CalcResult.CalculationError(s"Calculated invalid signal-to-noise: ${s.maxTotalSNRatio}")) { sn =>
+                      Itc.CalcResult
+                        .Success(newExpTime.toDouble.seconds, newNExp.toInt, sn)
+                    }
                     .pure[F]
                     .widen[Itc.CalcResult]
               }
@@ -306,7 +321,7 @@ object ItcImpl {
                                   0,
                                   startExpTime,
                                   BigDecimal(0).withUnit[Second],
-                                  snr.toDouble,
+                                  snr.toBigDecimal.doubleValue,
                                   maxTime.withUnit[Second],
                                   r,
                                   0.refined

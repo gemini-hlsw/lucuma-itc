@@ -17,6 +17,11 @@ Note, it is important to have [`git lfs`](https://git-lfs.com) installed in
 order to obtain the necessary classes for running the ITC.  See (`git lfs` and
 Legacy ITC Code below).
 
+You can then open the playground to work with the API by pointing your browser to
+
+http://localhost:6060/playground.html
+
+
 ## Env
 
 The app needs an environment variable, `REDISCLOUD_URL`, which points to the

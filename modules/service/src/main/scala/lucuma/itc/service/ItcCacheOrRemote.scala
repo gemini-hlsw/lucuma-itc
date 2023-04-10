@@ -93,7 +93,7 @@ trait ItcCacheOrRemote extends Version:
             calcRequest.targetProfile,
             calcRequest.specMode,
             calcRequest.constraints,
-            calcRequest.signalToNoise.toBigDecimal,
+            calcRequest.signalToNoise,
             calcRequest.signalToNoiseAt
         )
 

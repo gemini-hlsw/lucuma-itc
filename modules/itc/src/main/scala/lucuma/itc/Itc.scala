@@ -8,6 +8,7 @@ import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.PosLong
 import io.circe.*
 import io.circe.syntax.*
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.core.util.Enumerated
@@ -29,7 +30,7 @@ trait Itc[F[_]]:
     targetProfile:   TargetProfile,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
-    signalToNoise:   BigDecimal,
+    signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
   ): F[Itc.CalcResultWithVersion]
 
@@ -63,7 +64,7 @@ object Itc:
     case class Success(
       exposureTime:  FiniteDuration,
       exposures:     Int,
-      signalToNoise: BigDecimal
+      signalToNoise: SignalToNoise
     ) extends CalcResult
         derives Encoder.AsObject
 
@@ -187,7 +188,7 @@ object Itc:
     }
 
     case class SNCalcSuccess(
-      signalToNoise: BigDecimal
+      signalToNoise: SignalToNoise
     ) extends SNCalcResult
         derives Encoder.AsObject {
       val resultType = SNResultType.Success
