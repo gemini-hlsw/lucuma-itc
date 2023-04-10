@@ -212,7 +212,7 @@ trait GracklePartials extends GrackleParsers:
       signalToNoiseValue(r) match
         case Some(r) =>
           cursorEnvAdd("signalToNoise", r)(i)
-        case _                =>
+        case _       =>
           i.addProblem(s"Not valid signalToNoise value $r")
 
   def brightnessesReader[A](
