@@ -46,8 +46,7 @@ given Pickler[FiniteDuration] =
 
 given Pickler[SignalToNoise] =
   transformPickler((bd: BigDecimal) =>
-    SignalToNoise
-      .FromBigDecimalExact
+    SignalToNoise.FromBigDecimalExact
       .getOption(bd)
       .getOrElse(sys.error("cannot unpickle"))
   )(_.toBigDecimal)

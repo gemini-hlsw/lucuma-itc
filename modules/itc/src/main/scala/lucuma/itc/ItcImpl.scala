@@ -47,16 +47,14 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
   ): F[Itc.SNCalcResult] =
     (for {
       s2nChart     <- graph.flatMap(_.charts).find(_.chartType === ChartType.S2NChart)
-      finalS2NData <- s2nChart
-                        .series
+      finalS2NData <- s2nChart.series
                         .filter(_.seriesType === SeriesDataType.FinalS2NData)
                         .map(_.data)
                         .flatten
                         .some
     } yield {
       def resultFromDouble(d: Double): Itc.SNCalcResult =
-        SignalToNoise
-          .FromBigDecimalRounding
+        SignalToNoise.FromBigDecimalRounding
           .getOption(d)
           .fold(Itc.SNCalcResult.CalculationError(s"Computed invalid signal-to-noise: $d")) { sn =>
             Itc.SNCalcResult.SNCalcSuccess(sn)
@@ -70,7 +68,7 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
             if (nanos < sorted.head._1) Itc.SNCalcResult.WavelengthAtBelowRange(w)
             else if (nanos > sorted.last._1) Itc.SNCalcResult.WavelengthAtAboveRange(w)
             else
-              val index      = sorted.indexWhere(_._1 >= nanos)
+              val index = sorted.indexWhere(_._1 >= nanos)
               sorted.lift(index).fold(Itc.SNCalcResult.NoData()) { secondPoint =>
                 val (w2, s2) = secondPoint
                 if (w2 === nanos) {
@@ -278,10 +276,13 @@ object ItcImpl {
                         }
                     }
                 } else
-                  SignalToNoise
-                    .FromBigDecimalRounding
+                  SignalToNoise.FromBigDecimalRounding
                     .getOption(s.maxTotalSNRatio)
-                    .fold(Itc.CalcResult.CalculationError(s"Calculated invalid signal-to-noise: ${s.maxTotalSNRatio}")) { sn =>
+                    .fold(
+                      Itc.CalcResult.CalculationError(
+                        s"Calculated invalid signal-to-noise: ${s.maxTotalSNRatio}"
+                      )
+                    ) { sn =>
                       Itc.CalcResult
                         .Success(newExpTime.toDouble.seconds, newNExp.toInt, sn)
                     }

@@ -239,7 +239,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     loadSchema[F].map { loadedSchema =>
       new CirceMapping[F] {
 
-        val schema: Schema = loadedSchema
+        val schema: Schema    = loadedSchema
         val QueryType         = schema.ref("Query")
         val BigDecimalType    = schema.ref("BigDecimal")
         val LongType          = schema.ref("Long")
