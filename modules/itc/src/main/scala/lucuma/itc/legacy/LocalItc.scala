@@ -8,9 +8,11 @@ import io.circe.parser.decode
 import lucuma.itc.legacy
 import lucuma.itc.legacy.given
 
+import java.lang.reflect.Method
+
 case class LocalItc(classLoader: ClassLoader) {
-  // We need to keep a single refernce to the reflected method
-  val method = classLoader
+  // We need to keep a single reference to the reflected method
+  val method: Method = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculation", classOf[String], classOf[String])
 
@@ -18,7 +20,7 @@ case class LocalItc(classLoader: ClassLoader) {
    * This method does a call to the method ItcCalculation.calculation via reflection. This is done
    * because the itc-server runs on scala 3 while the ItcCalculation method is based on scala 2
    *
-   * Doing the call via reflection with a custom class loader lets us have both scala sversion
+   * Doing the call via reflection with a custom class loader lets us have both scala versions
    * playing in harmony.
    *
    * Note that the param is passed as a String for the same reason avoiding conflicts across classes

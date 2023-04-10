@@ -40,6 +40,8 @@ extension (self: GmosSouthFilter)
       case Ha     => cov(654000, 661000)
       case HaC    => cov(659000, 665000)
       case SII    => cov(669400, 673700)
+      case OVIC   => cov(676100, 680900)
+      case OVI    => cov(681600, 686500)
 
       // Spectroscopy Blocking Filters
       case GG455 => cov(460000)
