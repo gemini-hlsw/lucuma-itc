@@ -89,7 +89,7 @@ trait ItcCacheOrRemote extends Version:
    */
   def graphFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
     request: GraphRequest
-  )(itc:     Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[GraphResult] =
+  )(itc: Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[GraphResult] =
     cacheOrRemote(request, requestGraph(itc))("itc:graph:spec", redis)
 
   private val requestCalc = [F[_]] =>
@@ -100,7 +100,7 @@ trait ItcCacheOrRemote extends Version:
             calcRequest.targetProfile,
             calcRequest.specMode,
             calcRequest.constraints,
-            calcRequest.signalToNoise.value,
+            calcRequest.signalToNoise,
             calcRequest.signalToNoiseAt
         )
 

@@ -10,6 +10,7 @@ import eu.timepit.refined.api.Refined
 import eu.timepit.refined.api.Validate
 import lucuma.core.enums.Band
 import lucuma.core.math.Redshift
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
@@ -26,4 +27,5 @@ given Hash[Redshift]       = Hash.by(_.z)
 given Hash[Duration]       = Hash.by(_.getNano())
 given Hash[NonNegDuration] = Hash.by(_.value)
 given Hash[SourceProfile]  = Hash.fromUniversalHashCode[SourceProfile]
+given Hash[SignalToNoise]  = Hash.by(_.toBigDecimal)
 given Hash[Wavelength]     = Hash.by(_.toPicometers.value)

@@ -7,6 +7,7 @@ import cats.syntax.all.*
 import io.circe.parser.decode
 import lucuma.itc.legacy
 import lucuma.itc.legacy.given
+import java.lang.reflect.Method
 
 /**
  * This class contains methods to call to methods in ItcCalculation via reflection. This is done
@@ -19,9 +20,9 @@ import lucuma.itc.legacy.given
  * that may not be compatible. Instead we pass back and forth json encoded version of the params
  * essentially the same as if ITC were a server accepting json and responding json
  */
-case class LocalItc(classLoader: ClassLoader):
+case class LocalItc(classLoader: ClassLoader) {
   // We need to keep a single reference to the reflected method
-  val calculateChartsMethod = classLoader
+  val method: Method = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculateCharts", classOf[String])
 
@@ -33,7 +34,15 @@ case class LocalItc(classLoader: ClassLoader):
   private val LegacyLeft  = """Left\((.*)\)""".r
 
   /**
-   * This method does a call to the method ItcCalculation.calculateCharts via reflection.
+   * This method does a call to the method ItcCalculation.calculation via reflection. This is done
+   * because the itc-server runs on scala 3 while the ItcCalculation method is based on scala 2
+   *
+   * Doing the call via reflection with a custom class loader lets us have both scala versions
+   * playing in harmony.
+   *
+   * Note that the param is passed as a String for the same reason avoiding conflicts across classes
+   * that may not be compatible. Instead we pass back and forth json encoded version of the params
+   * essentially the same as if ITC were a server accepting json and responding json
    */
   def calculateCharts(jsonParams: String): Either[String, GraphsRemoteResult] =
     val res = calculateChartsMethod

@@ -30,18 +30,19 @@ extension (self: GmosNorthFilter)
       case ZPrime => cov(848000)
       case Z      => cov(830000, 925000)
       case Y      => cov(970000, 1070000)
-      // ri -- not in OCS3 … need to add
+      case Ri     => cov(560000, 850000)
 
       // Narrow Band Imaging Filters
-      case HeII   => cov(464000, 472000)
-      case HeIIC  => cov(474000, 482000)
-      case OIII   => cov(496500, 501500)
-      case OIIIC  => cov(509000, 519000)
-      case Ha     => cov(654000, 661000)
-      case HaC    => cov(659000, 665000)
-      case SII    => cov(669400, 673700)
-      // OVIC? OVI? -- these aren't in OCS3 … need to add
-      case DS920  => cov(912800, 931400)
+      case HeII  => cov(464000, 472000)
+      case HeIIC => cov(474000, 482000)
+      case OIII  => cov(496500, 501500)
+      case OIIIC => cov(509000, 519000)
+      case Ha    => cov(654000, 661000)
+      case HaC   => cov(659000, 665000)
+      case SII   => cov(669400, 673700)
+      case OVI   => cov(681600, 686500)
+      case OVIC  => cov(676100, 680900)
+      case DS920 => cov(912800, 931400)
 
       // Spectroscopy Blocking Filters
       case GG455 => cov(460000)

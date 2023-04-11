@@ -7,6 +7,7 @@ import boopickle.DefaultBasic.*
 import cats.data.NonEmptyList
 import eu.timepit.refined.*
 import eu.timepit.refined.api.*
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.Enumerated
 import lucuma.itc.*
@@ -42,6 +43,13 @@ given Pickler[ItcSeries]      =
   transformPickler(Function.tupled(ItcSeries.apply _))(x => (x.title, x.seriesType, x.data))
 given Pickler[FiniteDuration] =
   transformPickler(n => new FiniteDuration(n, NANOSECONDS))(_.toNanos)
+
+given Pickler[SignalToNoise] =
+  transformPickler((bd: BigDecimal) =>
+    SignalToNoise.FromBigDecimalExact
+      .getOption(bd)
+      .getOrElse(sys.error("cannot unpickle"))
+  )(_.toBigDecimal)
 
 given Pickler[Wavelength] =
   transformPickler((i: Int) =>

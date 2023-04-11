@@ -4,13 +4,14 @@
 package lucuma.itc.client
 package arb
 
-//import eu.timepit.refined.scalacheck.all.*
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.enums.Band
 import lucuma.core.math.RadialVelocity
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.math.arb.ArbRadialVelocity
 import lucuma.core.math.arb.ArbRefined
+import lucuma.core.math.arb.ArbSignalToNoise
 import lucuma.core.math.arb.ArbWavelength
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.SourceProfile
@@ -27,6 +28,7 @@ trait ArbSpectroscopyModeInput {
   import ArbInstrumentMode.given
   import ArbRadialVelocity.*
   import ArbRefined.given
+  import ArbSignalToNoise.given
   import ArbSourceProfile.given
   import ArbWavelength.*
 
@@ -35,7 +37,7 @@ trait ArbSpectroscopyModeInput {
   ): Gen[SpectroscopyModeInput] =
     for {
       w   <- arbitrary[Wavelength]
-      s2n <- arbitrary[PosBigDecimal]
+      s2n <- arbitrary[SignalToNoise]
       sat <- arbitrary[Option[Wavelength]]
       sp  <- arbitrary[SourceProfile]
       b   <- arbitrary[Band]
@@ -65,7 +67,7 @@ trait ArbSpectroscopyModeInput {
     Cogen[
       (
         Wavelength,
-        PosBigDecimal,
+        SignalToNoise,
         Option[Wavelength],
         SourceProfile,
         Band,

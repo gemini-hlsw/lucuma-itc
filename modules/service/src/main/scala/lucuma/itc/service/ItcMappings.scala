@@ -21,6 +21,7 @@ import eu.timepit.refined.types.numeric.PosLong
 import eu.timepit.refined.types.string.NonEmptyString
 import lucuma.core.enums.*
 import lucuma.core.math.RadialVelocity
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
@@ -59,7 +60,7 @@ case class CalcRequest(
   targetProfile:   TargetProfile,
   specMode:        ObservingMode.Spectroscopy,
   constraints:     ItcObservingConditions,
-  signalToNoise:   PosBigDecimal,
+  signalToNoise:   SignalToNoise,
   signalToNoiseAt: Option[Wavelength]
 ) derives Hash
 
@@ -81,10 +82,10 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(env:         Cursor.Env): F[Result[ExposureTimeCalculationResult]] =
+  )(env: Cursor.Env): F[Result[ExposureTimeCalculationResult]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
-     env.get[PosBigDecimal]("signalToNoise"),
+     env.get[SignalToNoise]("signalToNoise"),
      env.get[SourceProfile]("sourceProfile"),
      env.get[Band]("band"),
      env.get[List[SpectroscopyParams]]("modes"),
@@ -147,7 +148,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(env:         Cursor.Env): F[Result[SpectroscopyGraphResults]] =
+  )(env: Cursor.Env): F[Result[SpectroscopyGraphResults]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[NonNegDuration]("exposureTime"),
@@ -196,7 +197,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(env:         Cursor.Env): F[Result[SNCalcResult]] =
+  )(env: Cursor.Env): F[Result[SNCalcResult]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[NonNegDuration]("exposureTime"),
@@ -250,12 +251,13 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     loadSchema[F].map { loadedSchema =>
       new CirceMapping[F] {
 
-        val schema: Schema = loadedSchema
-        val QueryType      = schema.ref("Query")
-        val BigDecimalType = schema.ref("BigDecimal")
-        val LongType       = schema.ref("Long")
-        val DurationType   = schema.ref("Duration")
-        val PosIntType     = schema.ref("PosInt")
+        val schema: Schema    = loadedSchema
+        val QueryType         = schema.ref("Query")
+        val BigDecimalType    = schema.ref("BigDecimal")
+        val LongType          = schema.ref("Long")
+        val DurationType      = schema.ref("Duration")
+        val PosIntType        = schema.ref("PosInt")
+        val SignalToNoiseType = schema.ref("SignalToNoise")
 
         val typeMappings =
           List(
@@ -286,7 +288,8 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
             LeafMapping[BigDecimal](BigDecimalType),
             LeafMapping[Long](LongType),
             LeafMapping[PosInt](PosIntType),
-            LeafMapping[FiniteDuration](DurationType)
+            LeafMapping[FiniteDuration](DurationType),
+            LeafMapping[SignalToNoise](SignalToNoiseType)
           )
 
         def fallback(a: (IorNec[Problem, Environment], (String, Value))) =

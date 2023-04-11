@@ -32,6 +32,7 @@ import lucuma.core.math.Angle
 import lucuma.core.math.BrightnessUnits.*
 import lucuma.core.math.BrightnessValue
 import lucuma.core.math.RadialVelocity
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.Units.*
 import lucuma.core.math.dimensional.*
@@ -88,6 +89,9 @@ trait GrackleParsers:
       case FloatValue(r)  => BigDecimal(r).some
       case StringValue(r) => Either.catchNonFatal(BigDecimal(r)).toOption
       case _              => none
+
+  def signalToNoiseValue(v: Value): Option[SignalToNoise] =
+    bigDecimalValue(v).flatMap(SignalToNoise.FromBigDecimalExact.getOption)
 
   def parseFwhw(units: List[(String, Value)]): Option[Angle] =
     units.find(_._2 != Value.AbsentValue) match
@@ -205,13 +209,10 @@ trait GracklePartials extends GrackleParsers:
   def signalToNoisePartial: PartialFunction[(Partial, (String, Value)), Partial] =
     // signalToNoise
     case (i, ("signalToNoise", r)) =>
-      bigDecimalValue(r) match
-        case Some(r) if r > 0 =>
-          refineV[Positive](r)
-            .fold(i.addProblem, v => cursorEnvAdd("signalToNoise", v)(i))
-        case Some(r)          =>
-          i.addProblem(s"signalToNoise value $r must be positive")
-        case _                =>
+      signalToNoiseValue(r) match
+        case Some(r) =>
+          cursorEnvAdd("signalToNoise", r)(i)
+        case _       =>
           i.addProblem(s"Not valid signalToNoise value $r")
 
   def brightnessesReader[A](
