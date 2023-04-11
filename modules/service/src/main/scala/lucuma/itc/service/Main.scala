@@ -141,7 +141,7 @@ object Main extends IOApp with ItcCacheOrRemote {
         )
       )
 
-  // Custom class loader to give prioritiy to the jars in the urls over the parent classloader
+  // Custom class loader to give priority to the jars in the urls over the parent classloader
   class ReverseClassLoader(urls: Array[URL], parent: ClassLoader)
       extends URLClassLoader(urls, parent) {
     override def loadClass(name: String): Class[?] =

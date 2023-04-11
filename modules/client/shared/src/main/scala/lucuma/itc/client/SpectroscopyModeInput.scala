@@ -5,12 +5,12 @@ package lucuma.itc.client
 
 import cats.Eq
 import eu.timepit.refined.cats.*
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.enums.Band
 import lucuma.core.math.RadialVelocity
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.SourceProfile
@@ -19,7 +19,7 @@ import lucuma.itc.client.json.syntax.*
 
 final case class SpectroscopyModeInput(
   wavelength:      Wavelength,
-  signalToNoise:   PosBigDecimal,
+  signalToNoise:   SignalToNoise,
   signalToNoiseAt: Option[Wavelength],
   sourceProfile:   SourceProfile,
   band:            Band,

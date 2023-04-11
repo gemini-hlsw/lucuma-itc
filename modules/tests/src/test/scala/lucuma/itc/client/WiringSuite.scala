@@ -21,6 +21,7 @@ import lucuma.core.enums.SkyBackground
 import lucuma.core.enums.WaterVapor
 import lucuma.core.math.BrightnessUnits.Integrated
 import lucuma.core.math.RadialVelocity
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange.AirMass
@@ -48,7 +49,7 @@ class WiringSuite extends ClientSuite {
           .Success(
             TimeSpan.FromString.getOption("PT1S").get,
             NonNegInt.unsafeFrom(10),
-            PosBigDecimal.unsafeFrom(10.0)
+            SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
           )
           .some
       ).asRight
@@ -78,7 +79,7 @@ object WiringSuite {
   val Input: SpectroscopyModeInput =
     SpectroscopyModeInput(
       Wavelength.Min,
-      PosBigDecimal.unsafeFrom(BigDecimal(1.0)),
+      SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
       Option.empty[Wavelength],
       SourceProfile.Point(BandNormalized[Integrated](Galaxy(Spiral).some, SortedMap.empty)),
       Band.SloanU,

@@ -7,6 +7,7 @@ import cats.data.NonEmptyList
 import cats.effect.IO
 import cats.syntax.applicative.*
 import eu.timepit.refined.types.numeric.PosLong
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.itc.ChartType
@@ -29,10 +30,12 @@ object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
     targetProfile:   TargetProfile,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
-    signalToNoise:   BigDecimal,
+    signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
   ): IO[Itc.CalcResultWithVersion] =
-    Itc.CalcResultWithVersion(Itc.CalcResult.Success(1.seconds, 10, 10)).pure[IO]
+    Itc
+      .CalcResultWithVersion(Itc.CalcResult.Success(1.seconds, 10, SignalToNoise.fromInt(10).get))
+      .pure[IO]
 
   override def calculateGraph(
     targetProfile: TargetProfile,

@@ -73,6 +73,8 @@ trait GmosSouthFilterSyntax:
         case HeII             => "HeII_G0320"
         case HeIIC            => "HeIIC_G0321"
         case Lya395           => "Lya395_G0342"
+        case OVI              => "OVI_G0347"
+        case OVIC             => "OVIC_G0348"
         case HartmannA_RPrime => "HartmannA_G0313_r_G0303"
         case HartmannB_RPrime => "HartmannB_G0314_r_G0303"
         case GPrime_GG455     => "g_G0301_GG455_G0305"

@@ -10,6 +10,7 @@ import eu.timepit.refined.types.numeric.*
 import io.circe.Decoder
 import io.circe.DecodingFailure
 import io.circe.HCursor
+import lucuma.core.math.SignalToNoise
 import lucuma.core.syntax.time.*
 import lucuma.core.util.TimeSpan
 
@@ -77,16 +78,17 @@ object ItcResult {
   final case class Success(
     exposureTime:  TimeSpan,
     exposures:     NonNegInt,
-    signalToNoise: PosBigDecimal
+    signalToNoise: SignalToNoise
   ) extends ItcResult {
 
-    def stepSignalToNoise: PosBigDecimal =
-      PosBigDecimal.unsafeFrom(
-        (signalToNoise.value * signalToNoise.value / exposures.value)
-          .underlying()
-          .sqrt(MathContext.DECIMAL128)
+    def stepSignalToNoise: Option[SignalToNoise] =
+      SignalToNoise.FromBigDecimalRounding.getOption(
+        BigDecimal(
+          (signalToNoise.toBigDecimal * signalToNoise.toBigDecimal / exposures.value)
+            .underlying()
+            .sqrt(MathContext.DECIMAL128)
+        )
       )
-
   }
 
   object Success {
@@ -111,8 +113,7 @@ object ItcResult {
                  .as[Int]
                  .flatMap(n => NonNegInt.from(n).leftMap(m => DecodingFailure(m, c.history)))
           s <- c.downField("signalToNoise")
-                 .as[BigDecimal]
-                 .flatMap(d => PosBigDecimal.from(d).leftMap(m => DecodingFailure(m, c.history)))
+                 .as[SignalToNoise]
         } yield Success(t, n, s)
 
     given Eq[Success] =
@@ -120,7 +121,7 @@ object ItcResult {
         (
           a.exposureTime.toMicroseconds,
           a.exposures,
-          a.signalToNoise.value
+          a.signalToNoise
         )
       }
 
@@ -132,7 +133,7 @@ object ItcResult {
   def success(
     exposureTime:  TimeSpan,
     exposures:     NonNegInt,
-    signalToNoise: PosBigDecimal
+    signalToNoise: SignalToNoise
   ): ItcResult =
     Success(exposureTime, exposures, signalToNoise)
 
