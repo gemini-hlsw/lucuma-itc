@@ -5,9 +5,11 @@ package lucuma.itc
 
 import cats.data.NonEmptyList
 import cats.syntax.all.*
+import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.numeric.PosLong
 import io.circe.*
 import io.circe.syntax.*
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.core.util.Enumerated
@@ -17,11 +19,9 @@ import lucuma.itc.search.*
 
 import scala.concurrent.duration.FiniteDuration
 
-sealed trait LegacyResult:
-  def mode: ObservingMode
-  def itc: LegacyExposureCalculationResult
+case class LegacyItcResult(mode: ObservingMode, itc: LegacyExposureCalculationResult)
 
-object LegacyResult:
+object LegacyItcResult:
   case class Spectroscopy(mode: ObservingMode.Spectroscopy, itc: LegacyExposureCalculationResult)
       derives Encoder.AsObject
 
@@ -36,8 +36,8 @@ object LegacyExposureCalculationResult:
 
   case class Success(
     exposureTime:  FiniteDuration,
-    exposures:     Int,
-    signalToNoise: BigDecimal
+    exposures:     PosInt,
+    signalToNoise: SignalToNoise
   ) extends LegacyExposureCalculationResult
       derives Encoder.AsObject
 
@@ -58,7 +58,11 @@ object LegacyExposureCalculationResult:
       )
   }
 
-case class LegacyExposureCalculationResultWithVersion(
-  result:      LegacyExposureCalculationResult,
-  dataVersion: Option[String] = None
-)
+case class LegacyResult(mode: ObservingMode.Spectroscopy, itc: LegacyExposureCalculationResult)
+    derives Encoder.AsObject
+
+case class LegacySpectroscopyResult(
+  serverVersion: String,
+  dataVersion:   Option[String] = None,
+  results:       List[LegacyResult]
+) derives Encoder.AsObject

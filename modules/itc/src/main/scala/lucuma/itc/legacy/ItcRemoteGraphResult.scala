@@ -5,7 +5,9 @@ package lucuma.itc.legacy
 
 import cats.data.NonEmptyList
 import cats.syntax.all.*
+import eu.timepit.refined.types.numeric.PosInt
 import io.circe.Decoder
+import lucuma.core.math.SignalToNoise
 import lucuma.itc.ItcChartGroup
 
 case class GraphsRemoteResult(
@@ -17,6 +19,10 @@ case class GraphsRemoteResult(
   val maxPeakPixelFlux: Int   = ccds.map(_.peakPixelFlux).maximum.toInt
 }
 
-case class ExposureCalculation(exposureTime: Double, exposures: Int, signalToNoise: Double)
+case class ExposureCalculation(
+  exposureTime:  Double,
+  exposures:     PosInt,
+  signalToNoise: SignalToNoise
+)
 
 case class ExposureTimeRemoteResult(exposureCalculation: ExposureCalculation)

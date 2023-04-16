@@ -10,8 +10,8 @@ import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
 import dev.profunktor.redis4cats.algebra.StringCommands
-import lucuma.itc.*
 import lucuma.itc.ItcVersions
+import lucuma.itc.*
 import lucuma.itc.service.config.ExecutionEnvironment
 import lucuma.itc.service.redis.given
 import natchez.Trace
@@ -53,7 +53,7 @@ trait ItcCacheOrRemote extends Version:
     Trace[F].span("redis-cache-read") {
       for
         _         <- Trace[F].put("redis.key" -> redisKeyStr)
-        _         <- L.info(s"Read key $redisKeyStr")
+        _         <- L.debug(s"Read key $redisKeyStr")
         fromRedis <- redis
                        .get(redisKey2)
                        .handleErrorWith(e => L.error(e)(s"Error reading $redisKey") *> none.pure[F])
@@ -61,7 +61,7 @@ trait ItcCacheOrRemote extends Version:
           fromRedis
             .flatMap(b => Either.catchNonFatal(Unpickle[B].fromBytes(ByteBuffer.wrap(b))).toOption)
             .pure[F]
-        _         <- L.info(s"$hash found on redis").unlessA(fromRedis.isEmpty && decoded.isEmpty)
+        _         <- L.debug(s"$hash found on redis").unlessA(fromRedis.isEmpty && decoded.isEmpty)
         r         <- decoded.map(_.pure[F]).getOrElse(Trace[F].span("request-call")(request(a)))
         _         <-
           redis
@@ -113,7 +113,7 @@ trait ItcCacheOrRemote extends Version:
     itc:         Itc[F],
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
   ): F[ExposureTimeResult] =
-    Logger[F].info(calcRequest.toString) *> cacheOrRemote(calcRequest, requestCalc(itc))(
+    cacheOrRemote(calcRequest, requestCalc(itc))(
       "itc:calc:spec",
       redis
     )

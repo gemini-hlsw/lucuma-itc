@@ -9,7 +9,7 @@ import io.circe.*
 case class SpectroscopyResults(
   serverVersion: String,
   dataVersion:   Option[String],
-  results:       List[LegacyResult.Spectroscopy]
+  results:       List[LegacyItcResult.Spectroscopy]
 ) derives Encoder.AsObject
 
 case class SpectroscopyGraphResults(
@@ -27,5 +27,5 @@ case class ItcVersions(
 case class ExposureTimeResults(
   serverVersion: String,
   dataVersion:   Option[String],
-  results:       List[LegacyResult.SpectroscopyExposureTime]
+  results:       List[LegacyItcResult.SpectroscopyExposureTime]
 ) derives Encoder.AsObject

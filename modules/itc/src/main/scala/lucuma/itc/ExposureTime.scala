@@ -3,28 +3,30 @@
 
 package lucuma.itc
 
+import cats.syntax.all.*
+import eu.timepit.refined.types.numeric.PosInt
 import io.circe.*
 import io.circe.syntax.*
-import lucuma.itc.encoders.given
-import eu.timepit.refined.types.numeric.PosInt
-import lucuma.core.util.Enumerated
-import scala.concurrent.duration.FiniteDuration
+import lucuma.core.math.SignalToNoise
 import lucuma.core.model.NonNegDuration
+import lucuma.core.util.Enumerated
+import lucuma.itc.encoders.given
 import lucuma.itc.search.ObservingMode
+
+import scala.concurrent.duration.FiniteDuration
 
 enum ExposureTimeResultType(val tag: String) derives Enumerated:
   case Success          extends ExposureTimeResultType("success")
   case SourceTooBright  extends ExposureTimeResultType("source_too_bright")
   case CalculationError extends ExposureTimeResultType("calculation_error")
 
-sealed trait ExposureTimeResult extends Product with Serializable { // derives Encoder.AsObject {
+sealed trait ExposureTimeResult extends Product with Serializable {
   val resultType: ExposureTimeResultType
   def toLegacy: LegacyExposureCalculationResult
 }
 
 object ExposureTimeResult:
   given Encoder[ExposureTimeResult] = Encoder.instance { a =>
-    println(a)
     Json
       .obj(("resultType", a.resultType.asJson))
       .deepMerge(a match {
@@ -37,15 +39,12 @@ object ExposureTimeResult:
   case class ExposureTimeSuccess(
     exposureTime:  FiniteDuration,
     exposures:     PosInt,
-    signalToNoise: BigDecimal
+    signalToNoise: SignalToNoise
   ) extends ExposureTimeResult
       derives Encoder.AsObject {
     val resultType                                = ExposureTimeResultType.Success
-    def toLegacy: LegacyExposureCalculationResult = LegacyExposureCalculationResult.Success(
-      exposureTime = exposureTime,
-      exposures.value,
-      signalToNoise
-    )
+    def toLegacy: LegacyExposureCalculationResult =
+      LegacyExposureCalculationResult.Success(exposureTime, exposures, signalToNoise)
   }
 
   case class SourceTooBright(halfWellTime: BigDecimal) extends ExposureTimeResult
@@ -66,10 +65,22 @@ object ExposureTimeResult:
 case class ExposureTimeModeResult(
   mode:   ObservingMode.Spectroscopy,
   result: ExposureTimeResult
-) derives Encoder.AsObject
+) derives Encoder.AsObject {
+  def toLegacy: List[LegacyResult] =
+    List(LegacyResult(mode, result.toLegacy))
+}
 
 case class ExposureTimeCalculationResult(
   serverVersion: String,
   dataVersion:   String,
   results:       List[ExposureTimeModeResult]
-) derives Encoder.AsObject
+) derives Encoder.AsObject {
+  def toLegacy: List[LegacySpectroscopyResult] =
+    results.map(x =>
+      LegacySpectroscopyResult(
+        serverVersion = serverVersion,
+        dataVersion = dataVersion.some,
+        x.toLegacy
+      )
+    )
+}

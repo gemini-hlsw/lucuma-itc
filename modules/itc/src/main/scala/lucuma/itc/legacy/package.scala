@@ -6,6 +6,7 @@ package lucuma.itc.legacy
 import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.Redshift
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.SourceProfile
 import lucuma.itc.ItcObservingConditions
@@ -81,7 +82,7 @@ def spectroscopyWithSNAtParams(
   targetProfile: TargetProfile,
   observingMode: ObservingMode,
   conditions:    ItcObservingConditions,
-  sigma:         BigDecimal,
+  sigma:         SignalToNoise,
   wavelength:    Wavelength
 ): ItcParameters =
   ItcParameters(
@@ -89,7 +90,7 @@ def spectroscopyWithSNAtParams(
     observation = ItcObservationDetails(
       calculationMethod =
         ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
-          sigma = sigma.toDouble,
+          sigma = sigma.toBigDecimal.toDouble,
           coadds = None,
           wavelength = wavelength,
           sourceFraction = 1.0,

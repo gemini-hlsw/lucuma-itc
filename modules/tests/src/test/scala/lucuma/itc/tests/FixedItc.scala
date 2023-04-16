@@ -11,6 +11,7 @@ import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.itc.ChartType
+import lucuma.itc.ExposureTimeResult
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcChartGroup
@@ -21,6 +22,7 @@ import lucuma.itc.SignalToNoiseCalculation
 import lucuma.itc.*
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
+import lucuma.refined.*
 
 import scala.concurrent.duration._
 
@@ -32,8 +34,10 @@ object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
     constraints:     ItcObservingConditions,
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[LegacyExposureCalculationResult] =
-    LegacyExposureCalculationResult.Success(1.seconds, 10, SignalToNoise.fromInt(10).get).pure[IO]
+  ): IO[ExposureTimeResult] =
+    ExposureTimeResult
+      .ExposureTimeSuccess(1.seconds, 10.refined, SignalToNoise.fromInt(10).get)
+      .pure[IO]
 
   override def calculateGraph(
     targetProfile: TargetProfile,

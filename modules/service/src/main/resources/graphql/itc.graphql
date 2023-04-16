@@ -4609,6 +4609,11 @@ type ItcSuccess implements ItcResult {
   resultType: String!
 }
 #
+type ImagingMode {
+  # instrument
+  instrument: InstrumentType
+}
+
 type ObservingModeSpectroscopy {
   # Wavelength in appropriate units
   wavelength: Wavelength!
@@ -4882,9 +4887,25 @@ type ExposureTimeError {
   resultType: ExposureTimeResultType!
 }
 
+type SpectroscopyMode {
+  # Wavelength in appropriate units
+  wavelength: Wavelength!
+
+  # Resolution
+  resolution: BigDecimal!
+
+  # params
+  params: InstrumentITCParams!
+
+  # instrument
+  instrument: InstrumentType
+}
+
+union ObservingMode = SpectroscopyMode | ImagingMode
+
 type ExposureTimeModeResult {
   # Spectroscopy mode
-  mode: ObservingModeSpectroscopy!
+  mode: ObservingMode!
 
   # ITC results
   result: ExposureTimeResult!

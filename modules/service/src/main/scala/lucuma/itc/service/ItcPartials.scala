@@ -50,8 +50,10 @@ import lucuma.itc.GmosNITCParams
 import lucuma.itc.GmosSITCParams
 import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
+import lucuma.itc.LegacyItcResult.Spectroscopy
 import lucuma.itc.SignificantFigures
 import lucuma.itc.SpectroscopyParams
+import lucuma.itc.SpectroscopyResults
 import lucuma.itc.UpstreamException
 import lucuma.itc.given
 import lucuma.itc.search.GmosNorthFpuParam
@@ -59,8 +61,6 @@ import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosNorth
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
-import lucuma.itc.LegacyResult.Spectroscopy
-import lucuma.itc.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.service.config.*
 import lucuma.itc.service.syntax.all.*

@@ -14,8 +14,8 @@ import coulomb.policy.spire.standard.given
 import coulomb.syntax.*
 import coulomb.units.si.*
 import coulomb.units.si.given
-import eu.timepit.refined.refineV
 import eu.timepit.refined.numeric.Positive
+import eu.timepit.refined.refineV
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.numeric.PosLong
@@ -55,16 +55,16 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
                         .flatten
                         .some
     } yield {
-      def resultFromDouble(d: Double): Itc.SNCalcResult =
+      def resultFromDouble(d: Double): SNCalcResult =
         SignalToNoise.FromBigDecimalRounding
           .getOption(d)
-          .fold(Itc.SNCalcResult.CalculationError(s"Computed invalid signal-to-noise: $d")) { sn =>
-            Itc.SNCalcResult.SNCalcSuccess(sn)
+          .fold(SNCalcResult.CalculationError(s"Computed invalid signal-to-noise: $d")) { sn =>
+            SNCalcResult.SNCalcSuccess(sn)
           }
 
       val sorted           = finalS2NData.sortBy(_._1)
       val sn: SNCalcResult = signalToNoiseAt
-        .fold(SNCalcResult.SNCalcSuccess(sorted.maxBy(_._2)._2)) { w =>
+        .fold(resultFromDouble(sorted.maxBy(_._2)._2)) { w =>
           val nanos = Wavelength.decimalNanometers.reverseGet(w).doubleValue
           if (nanos < sorted.head._1) SNCalcResult.WavelengthAtBelowRange(w)
           else if (nanos > sorted.last._1) SNCalcResult.WavelengthAtAboveRange(w)
@@ -74,42 +74,20 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
             sortedList.lift(index).fold(SNCalcResult.NoData()) { secondPoint =>
               val (w2, s2) = secondPoint
               if (w2 === nanos) {
-                SNCalcResult.SNCalcSuccess(s2)
+                resultFromDouble(s2)
               } else {
                 sortedList.lift(index - 1) match
                   case Some((w1, s1)) =>
                     // Linear interpolation
                     val sn = (s1 * (w2 - nanos) + s2 * (nanos - w1)) / (w2 - w1)
-                    SNCalcResult.SNCalcSuccess(sn)
+                    resultFromDouble(sn)
                   case _              =>
                     // We are checking the limits before, this shouldn't happen
                     SNCalcResult.NoData()
+              }
+            }
+        }
 
-      // val sorted               = finalS2NData.sortBy(_._1)
-      // val sn: Itc.SNCalcResult =
-      //   signalToNoiseAt
-      //     .fold(resultFromDouble(sorted.maxBy(_._2)._2)) { w =>
-      //       val nanos = Wavelength.decimalNanometers.reverseGet(w).doubleValue
-      //       if (nanos < sorted.head._1) Itc.SNCalcResult.WavelengthAtBelowRange(w)
-      //       else if (nanos > sorted.last._1) Itc.SNCalcResult.WavelengthAtAboveRange(w)
-      //       else
-      //         val index = sorted.indexWhere(_._1 >= nanos)
-      //         sorted.lift(index).fold(Itc.SNCalcResult.NoData()) { secondPoint =>
-      //           val (w2, s2) = secondPoint
-      //           if (w2 === nanos) {
-      //             resultFromDouble(s2)
-      //           } else {
-      //             sorted.lift(index - 1) match
-      //               case Some((w1, s1)) =>
-      //                 // Linear interpolation
-      //                 val sn = (s1 * (w2 - nanos) + s2 * (nanos - w1)) / (w2 - w1)
-      //                 resultFromDouble(sn)
-      //               case _              =>
-      //                 // We are checking the limits before, this shouldn't happen
-      //                 Itc.SNCalcResult.NoData()
-      //           }
-      //         }
-      //     }
       sn.pure[F]
     }).getOrElse(SNCalcResult.NoData().pure[F])
 
@@ -197,7 +175,7 @@ object ItcImpl {
         targetProfile: TargetProfile,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
-        sigma:         BigDecimal,
+        sigma:         SignalToNoise,
         wavelength:    Wavelength
       ): F[legacy.ExposureTimeRemoteResult] =
         import lucuma.itc.legacy.given
@@ -211,8 +189,8 @@ object ItcImpl {
                                        sigma,
                                        wavelength
             ).asJson
-          Trace[F].put("itc.query"   -> request.spaces2) *>
-            Trace[F].put("itc.sigma" -> sigma.toDouble) *>
+          Trace[F].put("itc.query" -> request.spaces2) *>
+            Trace[F].put("itc.sigma" -> sigma.toBigDecimal.toDouble) *>
             Logger[F].info(request.noSpaces) *>
             (itcLocal.calculateExposureTime(request.noSpaces) match {
               case Right(r)  => r.pure[F]
@@ -277,7 +255,7 @@ object ItcImpl {
       ): F[ExposureTimeResult] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
-        val requestedSN       = signalToNoise.toBigDecimal.doubleValue
+        val requestedSN       = signalToNoise
 
         // This loops should be necessary only a few times but put a circuit breaker just in case
         def itcStep(
@@ -285,67 +263,71 @@ object ItcImpl {
           oldNExp:    Int,
           expTime:    Quantity[BigDecimal, Second],
           oldExpTime: Quantity[BigDecimal, Second],
-          snr:        Double,
+          snr:        SignalToNoise,
           maxTime:    Quantity[BigDecimal, Second],
           s:          legacy.GraphsRemoteResult,
           counter:    NonNegInt
         ): F[ExposureTimeResult] =
-          if (snr === 0.0) {
-            ApplicativeThrow[F].raiseError(new ItcCalculationError("S/N obtained is 0"))
-          } else {
-            val totalTime: Quantity[BigDecimal, Second] =
-              expTime * nExp.withUnit[1] * pow(requestedSN / snr, 2).withUnit[1]
+          val totalTime: Quantity[BigDecimal, Second] =
+            expTime * nExp
+              .withUnit[1] * pow(requestedSN.toBigDecimal.toDouble / snr.toBigDecimal.toDouble, 2)
+              .withUnit[1]
 
-            val newNExp: BigDecimal = spire.math.ceil((totalTime / maxTime).value)
+          val newNExp: BigDecimal = spire.math.ceil((totalTime / maxTime).value)
 
-            val newExpTime: BigDecimal =
-              spire.math.ceil((totalTime / newNExp.withUnit[1]).value)
+          val newExpTime: BigDecimal =
+            spire.math.ceil((totalTime / newNExp.withUnit[1]).value)
 
-            val next = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
-            L.info(s"Total time: $totalTime maxTime: $maxTime") *>
-              L.info(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
-                if (
-                  nExp != oldNExp ||
-                  ((expTime - oldExpTime) > 1.withUnit[Second] || (oldExpTime - expTime) > 1
-                    .withUnit[Second]) &&
-                  counter.value < MaxIterations &&
-                  newExpTime < (pow(2, 63) - 1)
-                ) {
-                  itc(targetProfile,
-                      observingMode,
-                      constraints,
-                      newExpTime.withUnit[Second],
-                      newNExp.toInt,
-                      next
-                  )
-                    .flatMap { s =>
-                      L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *>
-                        calculateSignalToNoise(s.groups, signalToNoiseAt).flatMap {
-                          case SNCalcResult.SNCalcSuccess(snr) =>
-                            itcStep(newNExp.toInt,
-                                    nExp,
-                                    newExpTime.withUnit[Second],
-                                    expTime,
-                                    snr.toBigDecimal.doubleValue,
-                                    maxTime,
-                                    s,
-                                    next
-                            )
-                          case r                               =>
-                            ExposureTimeResult.CalculationError(r.toString).pure[F]
-                        }
-                    }
-                } else
-                  SignalToNoise.FromBigDecimalRounding
-                    .getOption(s.maxTotalSNRatio) match
-                    case Some(count) =>
-                      ExposureTimeResult
-                        .ExposureTimeSuccess(newExpTime.toDouble.seconds, count, s.maxTotalSNRatio)
-                    case _           => ExposureTimeResult.CalculationError("Negative exposure count")
-                    .pure[F]
-                    .widen[ExposureTimeResult]
+          val next = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
+          L.info(s"Total time: $totalTime maxTime: $maxTime") *>
+            L.info(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
+              if (
+                nExp != oldNExp ||
+                ((expTime - oldExpTime) > 1.withUnit[Second] || (oldExpTime - expTime) > 1
+                  .withUnit[Second]) &&
+                counter.value < MaxIterations &&
+                newExpTime < (pow(2, 63) - 1)
+              ) {
+                itc(targetProfile,
+                    observingMode,
+                    constraints,
+                    newExpTime.withUnit[Second],
+                    newNExp.toInt,
+                    next
+                )
+                  .flatMap { s =>
+                    L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *>
+                      calculateSignalToNoise(s.groups, signalToNoiseAt).flatMap {
+                        case SNCalcResult.SNCalcSuccess(snr) =>
+                          itcStep(newNExp.toInt,
+                                  nExp,
+                                  newExpTime.withUnit[Second],
+                                  expTime,
+                                  snr,
+                                  maxTime,
+                                  s,
+                                  next
+                          )
+                        case r                               =>
+                          ExposureTimeResult.CalculationError(r.toString).pure[F]
+                      }
+                  }
+              } else {
+                ((SignalToNoise.FromBigDecimalRounding.getOption(s.maxTotalSNRatio),
+                  refineV[Positive](newNExp.toInt).toOption
+                ) match {
+                  case (Some(sn), Some(count)) =>
+                    ExposureTimeResult
+                      .ExposureTimeSuccess(newExpTime.toDouble.seconds, count, sn)
+                  case _                       =>
+                    ExposureTimeResult.CalculationError(
+                      "Negative signal to noise or exposure count"
+                    )
+                })
+                  .pure[F]
+                  .widen[ExposureTimeResult]
               }
-          }
+            }
 
         L.info(s"Desired S/N $signalToNoise") *>
           L.info(
@@ -382,7 +364,7 @@ object ItcImpl {
                                     0,
                                     startExpTime,
                                     BigDecimal(0).withUnit[Second],
-                                    snr.toDouble,
+                                    snr,
                                     maxTime.withUnit[Second],
                                     r,
                                     0.refined
@@ -418,12 +400,12 @@ object ItcImpl {
         targetProfile:   TargetProfile,
         observingMode:   ObservingMode,
         constraints:     ItcObservingConditions,
-        signalToNoise:   BigDecimal,
+        signalToNoise:   SignalToNoise,
         signalToNoiseAt: Wavelength
       ): F[ExposureTimeResult] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
-        val requestedSN       = signalToNoise.toDouble
+        val requestedSN       = signalToNoise
 
         L.info(s"Desired S/N $signalToNoise") *>
           L.info(
@@ -433,16 +415,13 @@ object ItcImpl {
             .span("itc.calctime.spectroscopy-exp-time-at") {
               itcWithSNAt(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
                 .flatMap { r =>
-                  (refineV[Positive](r.exposureCalculation.exposures).toOption match
-                    case Some(exposures) =>
-                      ExposureTimeResult
-                        .ExposureTimeSuccess(
-                          r.exposureCalculation.exposureTime.seconds,
-                          exposures,
-                          r.exposureCalculation.signalToNoise
-                        )
-                    case _               => ExposureTimeResult.CalculationError("Negative exposure count")
-                  ).pure[F]
+                  ExposureTimeResult
+                    .ExposureTimeSuccess(
+                      r.exposureCalculation.exposureTime.seconds,
+                      r.exposureCalculation.exposures,
+                      r.exposureCalculation.signalToNoise
+                    )
+                    .pure[F]
                 }
             }
 

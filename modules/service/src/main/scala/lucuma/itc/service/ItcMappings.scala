@@ -25,14 +25,14 @@ import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
+import lucuma.itc.ItcVersions
+import lucuma.itc.LegacyItcResult.Spectroscopy
+import lucuma.itc.SpectroscopyGraphResults
+import lucuma.itc.SpectroscopyResults
 import lucuma.itc.*
 import lucuma.itc.encoders.given
 import lucuma.itc.search.ItcObservationDetails
-import lucuma.itc.ItcVersions
 import lucuma.itc.search.ObservingMode
-import lucuma.itc.LegacyResult.Spectroscopy
-import lucuma.itc.SpectroscopyGraphResults
-import lucuma.itc.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.search.hashes.given
 import lucuma.itc.service.config.*
@@ -72,7 +72,6 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     Sync[F]
       .defer {
         Using(Source.fromResource("graphql/itc.graphql", getClass().getClassLoader())) { src =>
-          // println(Schema(src.mkString))
           Schema(src.mkString).right.get
         }.liftTo[F]
       }
@@ -270,12 +269,10 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                 RootEffect.computeEncodable("spectroscopy")((_, p, env) =>
                   calculateSpectroscopyExposureTime(environment, redis, itc)(
                     env
-                  ) // .map(_.toLegacy)
+                  ).map(_.map(x => x.toLegacy))
                 ),
                 RootEffect.computeEncodable("spectroscopyExposureTime") { (_, p, env) =>
-                  val m = calculateSpectroscopyExposureTime(environment, redis, itc)(env)
-                  pprint.pprintln(m)
-                  m
+                  calculateSpectroscopyExposureTime(environment, redis, itc)(env)
                 },
                 RootEffect.computeEncodable("spectroscopySignalToNoiseBeta")((_, p, env) =>
                   calculateSignalToNoise(environment, redis, itc)(env)

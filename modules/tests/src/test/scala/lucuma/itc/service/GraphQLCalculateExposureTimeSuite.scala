@@ -11,13 +11,13 @@ import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcObservingConditions
 
-class GraphQLSpectroscopySuite extends GraphQLSuite {
+class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
 
   test("gmos north case") {
     query(
       """
         query {
-          spectroscopy(input: {
+          spectroscopyExposureTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -77,19 +77,22 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
           }) {
             results {
                 mode {
-                  instrument
-                  resolution
-                  params {
-                    ... on GmosNITCParams {
-                      grating
+                  ... on SpectroscopyMode {
+                    instrument
+                    resolution
+                    params {
+                      ... on GmosNITCParams {
+                        grating
+                      }
+                    }
+                    wavelength {
+                      nanometers
                     }
                   }
-                  wavelength {
-                    nanometers
-                  }
                 }
-                itc {
-                  ... on ItcSuccess {
+                result {
+                  resultType
+                  ... on ExposureTimeSuccess {
                     exposures
                     exposureTime {
                       seconds
@@ -103,8 +106,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopy" : [
-              {
+            "spectroscopyExposureTime" : {
                 "results" : [
                   {
                     "mode" : {
@@ -117,17 +119,14 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                         "nanometers" : 60.000
                       }
                     },
-                    "itc" : {
+                    "result" : {
+                      "resultType": "SUCCESS",
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1.000000000
                       }
                     }
-                  }
-                ]
-              },
-              {
-                "results" : [
+                  },
                   {
                     "mode" : {
                       "instrument" : "GMOS_NORTH",
@@ -139,7 +138,8 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                         "nanometers" : 60.000
                       }
                     },
-                    "itc" : {
+                    "result" : {
+                      "resultType": "SUCCESS",
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1.000000000
@@ -148,7 +148,6 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   }
                 ]
               }
-            ]
           }
         }
         """
@@ -159,7 +158,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopy(input: {
+          spectroscopyExposureTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -220,19 +219,21 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
           }) {
             results {
                 mode {
-                  instrument
-                  resolution
-                  params {
-                    ... on GmosSITCParams {
-                      grating
+                  ... on SpectroscopyMode {
+                    instrument
+                    resolution
+                    params {
+                      ... on GmosSITCParams {
+                        grating
+                      }
+                    }
+                    wavelength {
+                      nanometers
                     }
                   }
-                  wavelength {
-                    nanometers
-                  }
                 }
-                itc {
-                  ... on ItcSuccess {
+                result {
+                  ... on ExposureTimeSuccess {
                     exposures
                     exposureTime {
                       seconds
@@ -246,52 +247,47 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopy" : [
+            "spectroscopyExposureTime" : {
+              "results" : [
               {
-                "results" : [
-                  {
-                    "mode" : {
-                      "instrument" : "GMOS_SOUTH",
-                      "resolution" : 970,
-                      "params": {
-                        "grating": "B1200_G5321"
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.00
-                      }
-                    },
-                    "itc" : {
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1
-                      }
-                    }
+                "mode" : {
+                  "instrument" : "GMOS_SOUTH",
+                  "resolution" : 970,
+                  "params": {
+                    "grating": "B1200_G5321"
+                  },
+                  "wavelength" : {
+                    "nanometers" : 60.000
                   }
-                ]
+                },
+                "result" : {
+                  "exposures" : 10,
+                  "exposureTime" : {
+                    "seconds" : 1.000000000
+                  }
+                }
               },
               {
-                "results" : [
-                  {
-                    "mode" : {
-                      "instrument" : "GMOS_SOUTH",
-                      "resolution" : 970,
-                      "params": {
-                        "grating": "B1200_G5321"
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.00
-                      }
-                    },
-                    "itc" : {
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1
-                      }
-                    }
+                "mode" : {
+                  "instrument" : "GMOS_SOUTH",
+                  "resolution" : 970,
+                  "params": {
+                    "grating": "B1200_G5321"
+                  },
+                  "wavelength" : {
+                    "nanometers" : 60.000
                   }
-                ]
+                },
+                "result" : {
+                  "exposures" : 10,
+                  "exposureTime" : {
+                    "seconds" : 1.000000000
+                  }
+                }
               }
-            ]
+              ]
+            }
+
           }
         }
         """
@@ -301,11 +297,11 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
   test("gmos north case with variables") {
     query(
       """
-        query($input: SpectroscopyModeInput) {\n          spectroscopy(input: $input) {\n            results {\n              mode {\n                instrument\n              }\n            }\n          }\n        }\n
+        query($spectroscopy: SpectroscopyModeInput) {\n          spectroscopyExposureTime(input: $spectroscopy) {\n            results {\n              mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n          }\n        }\n
       """,
       """
         {
-          "input" : {
+          "spectroscopy" : {
             "wavelength" : {
               "nanometers" : "600"
             },
@@ -368,18 +364,14 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopy" : [
+            "spectroscopyExposureTime" :
               {
                 "results" : [
                   {
                     "mode" : {
                       "instrument" : "GMOS_NORTH"
                     }
-                  }
-                ]
-              },
-              {
-                "results" : [
+                  },
                   {
                     "mode" : {
                       "instrument" : "GMOS_NORTH"
@@ -387,7 +379,6 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   }
                 ]
               }
-            ]
           }
         }
         """
@@ -414,7 +405,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopy(input: {
+          spectroscopyExposureTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -474,19 +465,21 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
           }) {
             results {
                 mode {
-                  instrument
-                  resolution
-                  params {
-                    ... on GmosNITCParams {
-                      grating
+                  ... on SpectroscopyMode {
+                    instrument
+                    resolution
+                    params {
+                      ... on GmosNITCParams {
+                        grating
+                      }
+                    }
+                    wavelength {
+                      nanometers
                     }
                   }
-                  wavelength {
-                    nanometers
-                  }
                 }
-                itc {
-                  ... on ItcSuccess {
+                result {
+                  ... on ExposureTimeSuccess {
                     exposures
                     exposureTime {
                       seconds
@@ -500,7 +493,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopy" : [
+            "spectroscopyExposureTime" :
               {
                 "results" : [
                   {
@@ -514,17 +507,13 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                         "nanometers" : 60.000
                       }
                     },
-                    "itc" : {
+                    "result" : {
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1.000000000
                       }
                     }
-                  }
-                ]
-              },
-              {
-                "results" : [
+                  },
                   {
                     "mode" : {
                       "instrument" : "GMOS_NORTH",
@@ -536,7 +525,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                         "nanometers" : 60.000
                       }
                     },
-                    "itc" : {
+                    "result" : {
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1.000000000
@@ -545,7 +534,6 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   }
                 ]
               }
-            ]
           }
         }
         """
@@ -557,7 +545,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopy(input: {
+          spectroscopyExposureTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -617,19 +605,21 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
           }) {
             results {
                 mode {
-                  instrument
-                  resolution
-                  params {
-                    ... on GmosNITCParams {
-                      grating
+                  ... on SpectroscopyMode {
+                    instrument
+                    resolution
+                    params {
+                      ... on GmosNITCParams {
+                        grating
+                      }
+                    }
+                    wavelength {
+                      nanometers
                     }
                   }
-                  wavelength {
-                    nanometers
-                  }
                 }
-                itc {
-                  ... on ItcSuccess {
+                result {
+                  ... on ExposureTimeSuccess {
                     exposures
                     exposureTime {
                       seconds
@@ -657,7 +647,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopy(input: {
+          spectroscopyExposureTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -709,18 +699,20 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
           }) {
             results {
                 mode {
-                  instrument
-                  params {
-                    ... on GmosNITCParams {
-                      grating
+                  ... on SpectroscopyMode {
+                    instrument
+                    params {
+                      ... on GmosNITCParams {
+                        grating
+                      }
+                    }
+                    wavelength {
+                      nanometers
                     }
                   }
-                  wavelength {
-                    nanometers
-                  }
                 }
-                itc {
-                  ... on ItcSuccess {
+                result {
+                  ... on ExposureTimeSuccess {
                     exposures
                     exposureTime {
                       seconds
@@ -734,7 +726,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopy" : [
+            "spectroscopyExposureTime" :
               {
                 "results" : [
                   {
@@ -747,7 +739,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                         "nanometers" : 60.00
                       }
                     },
-                    "itc" : {
+                    "result" : {
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1
@@ -756,7 +748,6 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   }
                 ]
               }
-            ]
           }
         }
         """
@@ -769,7 +760,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopy(input: {
+          spectroscopyExposureTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -826,18 +817,20 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
           }) {
             results {
                 mode {
-                  instrument
-                  params {
-                    ... on GmosSITCParams {
-                      grating
+                  ... on SpectroscopyMode {
+                    instrument
+                    params {
+                      ... on GmosSITCParams {
+                        grating
+                      }
+                    }
+                    wavelength {
+                      nanometers
                     }
                   }
-                  wavelength {
-                    nanometers
-                  }
                 }
-                itc {
-                  ... on ItcSuccess {
+                result {
+                  ... on ExposureTimeSuccess {
                     exposures
                     exposureTime {
                       seconds
@@ -851,7 +844,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopy" : [
+            "spectroscopyExposureTime" :
               {
                 "results" : [
                   {
@@ -864,7 +857,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                         "nanometers" : 60.00
                       }
                     },
-                    "itc" : {
+                    "result" : {
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1
@@ -873,7 +866,6 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                   }
                 ]
               }
-            ]
           }
         }
         """
@@ -886,7 +878,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
       query(
         s"""
           query {
-            spectroscopy(input: {
+            spectroscopyExposureTime(input: {
               wavelength: {
                 nanometers: 60,
               },
@@ -943,20 +935,22 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
             }) {
               results {
                   mode {
-                    instrument
-                    params {
-                      ... on GmosNITCParams {
-                        fpu {
-                          builtin
+                    ... on SpectroscopyMode {
+                      instrument
+                      params {
+                        ... on GmosNITCParams {
+                          fpu {
+                            builtin
+                          }
                         }
                       }
-                    }
-                    wavelength {
-                      nanometers
+                      wavelength {
+                        nanometers
+                      }
                     }
                   }
-                  itc {
-                    ... on ItcSuccess {
+                  result {
+                    ... on ExposureTimeSuccess {
                       exposures
                       exposureTime {
                         seconds
@@ -970,7 +964,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
         json"""
       {
         "data": {
-          "spectroscopy" : [
+          "spectroscopyExposureTime" :
             {
               "results" : [
                 {
@@ -985,16 +979,15 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                       "nanometers" : 60.00
                     }
                   },
-                  "itc" : {
+                  "result" : {
                     "exposures" : 10,
                     "exposureTime" : {
-                      "seconds" : 1
+                      "seconds" : 1.000000000
                     }
                   }
                 }
               ]
             }
-          ]
         }
       }
       """
@@ -1007,7 +1000,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopy(input: {
+          spectroscopyExposureTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -1059,20 +1052,22 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
           }) {
             results {
                 mode {
-                  instrument
-                  params {
-                    ... on GmosSITCParams {
-                      fpu {
-                        builtin
+                  ... on SpectroscopyMode {
+                    instrument
+                    params {
+                      ... on GmosSITCParams {
+                        fpu {
+                          builtin
+                        }
                       }
                     }
-                  }
-                  wavelength {
-                    nanometers
+                    wavelength {
+                      nanometers
+                    }
                   }
                 }
-                itc {
-                  ... on ItcSuccess {
+                result {
+                  ... on ExposureTimeSuccess {
                     exposures
                     exposureTime {
                       seconds
@@ -1086,7 +1081,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopy" : [
+            "spectroscopyExposureTime" :
               {
                 "results" : [
                   {
@@ -1101,16 +1096,15 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                         "nanometers" : 60.00
                       }
                     },
-                    "itc" : {
+                    "result" : {
                       "exposures" : 10,
                       "exposureTime" : {
-                        "seconds" : 1
+                        "seconds" : 1.000000000
                       }
                     }
                   }
                 ]
               }
-            ]
           }
         }
         """
@@ -1123,7 +1117,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopy(input: {
+          spectroscopyExposureTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -1175,18 +1169,20 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
           }) {
             results {
                 mode {
-                  instrument
-                  params {
-                    ... on GmosNITCParams {
-                      filter
+                  ... on SpectroscopyMode {
+                    instrument
+                    params {
+                      ... on GmosNITCParams {
+                        filter
+                      }
+                    }
+                    wavelength {
+                      nanometers
                     }
                   }
-                  wavelength {
-                    nanometers
-                  }
                 }
-                itc {
-                  ... on ItcSuccess {
+                result {
+                  ... on ExposureTimeSuccess {
                     exposures
                     exposureTime {
                       seconds
@@ -1200,7 +1196,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopy" : [
+            "spectroscopyExposureTime" :
               {
                 "results" : [
                   {
@@ -1210,19 +1206,18 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                         "filter": ${d.tag.toScreamingSnakeCase}
                       },
                       "wavelength" : {
-                        "nanometers" : 60.00
+                        "nanometers" : 60.000
                       }
                     },
-                    "itc" : {
+                    "result" : {
                       "exposures" : 10,
                       "exposureTime" : {
-                        "seconds" : 1
+                        "seconds" : 1.000000000
                       }
                     }
                   }
                 ]
               }
-            ]
           }
         }
         """
@@ -1235,7 +1230,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopy(input: {
+          spectroscopyExposureTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -1287,18 +1282,20 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
           }) {
             results {
                 mode {
-                  instrument
-                  params {
-                    ... on GmosSITCParams {
-                      filter
+                  ... on SpectroscopyMode {
+                    instrument
+                    params {
+                      ... on GmosSITCParams {
+                        filter
+                      }
+                    }
+                    wavelength {
+                      nanometers
                     }
                   }
-                  wavelength {
-                    nanometers
-                  }
                 }
-                itc {
-                  ... on ItcSuccess {
+                result {
+                  ... on ExposureTimeSuccess {
                     exposures
                     exposureTime {
                       seconds
@@ -1312,7 +1309,7 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopy" : [
+            "spectroscopyExposureTime" :
               {
                 "results" : [
                   {
@@ -1322,19 +1319,18 @@ class GraphQLSpectroscopySuite extends GraphQLSuite {
                         "filter": ${d.tag.toScreamingSnakeCase}
                       },
                       "wavelength" : {
-                        "nanometers" : 60.00
+                        "nanometers" : 60.000
                       }
                     },
-                    "itc" : {
+                    "result" : {
                       "exposures" : 10,
                       "exposureTime" : {
-                        "seconds" : 1
+                        "seconds" : 1.000000000
                       }
                     }
                   }
                 ]
               }
-            ]
           }
         }
         """

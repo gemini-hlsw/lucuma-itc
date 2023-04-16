@@ -8,6 +8,7 @@ import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.PosLong
 import io.circe.*
 import io.circe.syntax.*
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.core.util.Enumerated
@@ -120,7 +121,7 @@ object SNCalcResult:
   }
 
   case class SNCalcSuccess(
-    signalToNoise: BigDecimal
+    signalToNoise: SignalToNoise
   ) extends SNCalcResult
       derives Encoder.AsObject {
     val resultType = SNResultType.Success

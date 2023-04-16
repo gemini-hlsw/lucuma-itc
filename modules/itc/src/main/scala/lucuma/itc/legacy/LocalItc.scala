@@ -7,6 +7,7 @@ import cats.syntax.all.*
 import io.circe.parser.decode
 import lucuma.itc.legacy
 import lucuma.itc.legacy.given
+
 import java.lang.reflect.Method
 
 /**
@@ -20,13 +21,13 @@ import java.lang.reflect.Method
  * that may not be compatible. Instead we pass back and forth json encoded version of the params
  * essentially the same as if ITC were a server accepting json and responding json
  */
-case class LocalItc(classLoader: ClassLoader) {
+case class LocalItc(classLoader: ClassLoader):
   // We need to keep a single reference to the reflected method
-  val method: Method = classLoader
+  val calculateChartsMethod: Method = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculateCharts", classOf[String])
 
-  val calculateMethod = classLoader
+  val calculateExposureTimeMethod = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculateExposureTime", classOf[String])
 
@@ -63,7 +64,7 @@ case class LocalItc(classLoader: ClassLoader) {
    * This method does a call to the method ItcCalculation.calculate via reflection.
    */
   def calculateExposureTime(jsonParams: String): Either[String, ExposureTimeRemoteResult] =
-    val res = calculateMethod
+    val res = calculateExposureTimeMethod
       .invoke(null, jsonParams) // null as it is a static method
       .asInstanceOf[String]
 
