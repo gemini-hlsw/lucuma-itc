@@ -1,6 +1,6 @@
 import NativePackagerHelper._
 
-val catsEffectVersion           = "3.4.8"
+val catsEffectVersion           = "3.4.9"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsVersion                 = "2.9.0"
 val catsScalacheckVersion       = "0.3.2"
@@ -12,7 +12,7 @@ val http4sVersion               = "0.23.18"
 val http4sJdkHttpClientVersion  = "0.9.0"
 val fs2Version                  = "3.6.1"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.73.0"
+val lucumaCoreVersion           = "0.74.0"
 val lucumaRefinedVersion        = "0.1.1"
 val slf4jVersion                = "2.0.7"
 val log4catsVersion             = "2.5.0"
