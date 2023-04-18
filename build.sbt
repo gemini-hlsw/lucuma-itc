@@ -7,7 +7,7 @@ val catsScalacheckVersion       = "0.3.2"
 val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.5"
 val cirisVersion                = "3.1.0"
-val clueVersion                 = "0.25.1"
+val clueVersion                 = "0.30.0"
 val http4sVersion               = "0.23.18"
 val http4sJdkHttpClientVersion  = "0.9.0"
 val fs2Version                  = "3.6.1"
@@ -18,7 +18,7 @@ val slf4jVersion                = "2.0.7"
 val log4catsVersion             = "2.5.0"
 val monocleVersion              = "3.2.0"
 val munitCatsEffectVersion      = "1.0.7"
-val graphQLRoutesVersion        = "0.5.11"
+val graphQLRoutesVersion        = "0.6.0"
 val refinedVersion              = "0.10.3"
 val grackleVersion              = "0.10.3"
 val natcchezHttp4sVersion       = "0.5.0"
@@ -36,7 +36,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.2.2"
 ThisBuild / crossScalaVersions  := Seq("3.2.2")
-ThisBuild / tlBaseVersion       := "0.8"
+ThisBuild / tlBaseVersion       := "0.9"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
