@@ -10,6 +10,7 @@ import eu.timepit.refined.types.numeric.PosLong
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
+import lucuma.core.util.TimeSpan
 import lucuma.itc.ChartType
 import lucuma.itc.IntegrationTimeResult
 import lucuma.itc.ItcCcd
@@ -36,7 +37,7 @@ object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
     signalToNoiseAt: Option[Wavelength]
   ): IO[IntegrationTimeResult] =
     IntegrationTimeResult
-      .ExposureTimeSuccess(1.seconds, 10.refined, SignalToNoise.fromInt(10).get)
+      .ExposureTimeSuccess(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get)
       .pure[IO]
 
   override def calculateGraph(

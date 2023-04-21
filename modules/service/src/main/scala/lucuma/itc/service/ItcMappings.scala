@@ -250,7 +250,6 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         val QueryType         = schema.ref("Query")
         val BigDecimalType    = schema.ref("BigDecimal")
         val LongType          = schema.ref("Long")
-        val DurationType      = schema.ref("Duration")
         val PosIntType        = schema.ref("PosInt")
         val SignalToNoiseType = schema.ref("SignalToNoise")
 
@@ -276,7 +275,6 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
             LeafMapping[BigDecimal](BigDecimalType),
             LeafMapping[Long](LongType),
             LeafMapping[PosInt](PosIntType),
-            LeafMapping[FiniteDuration](DurationType),
             LeafMapping[SignalToNoise](SignalToNoiseType)
           )
 

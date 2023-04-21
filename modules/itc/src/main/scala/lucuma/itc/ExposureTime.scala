@@ -10,6 +10,7 @@ import io.circe.syntax.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.model.NonNegDuration
 import lucuma.core.util.Enumerated
+import lucuma.core.util.TimeSpan
 import lucuma.itc.encoders.given
 import lucuma.itc.search.ObservingMode
 
@@ -27,7 +28,7 @@ object IntegrationTimeResult:
   }
 
   case class ExposureTimeSuccess(
-    exposureTime:  FiniteDuration,
+    exposureTime:  TimeSpan,
     exposures:     PosInt,
     signalToNoise: SignalToNoise
   ) extends IntegrationTimeResult

@@ -10,6 +10,7 @@ import eu.timepit.refined.api.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.Enumerated
+import lucuma.core.util.TimeSpan
 import lucuma.itc.*
 
 import scala.concurrent.duration.*
@@ -50,6 +51,13 @@ given Pickler[SignalToNoise] =
       .getOption(bd)
       .getOrElse(sys.error("cannot unpickle"))
   )(_.toBigDecimal)
+
+given Pickler[TimeSpan] =
+  transformPickler((d: Long) =>
+    TimeSpan
+      .fromMicroseconds(d)
+      .getOrElse(sys.error("cannot unpickle"))
+  )(_.toMicroseconds)
 
 given Pickler[Wavelength] =
   transformPickler((i: Int) =>

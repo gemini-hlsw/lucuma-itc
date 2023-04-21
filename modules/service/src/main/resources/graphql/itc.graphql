@@ -4576,6 +4576,27 @@ scalar NonNegBigDecimal
 """An `Long` in the range from 1 to 9223372036854775807"""
 scalar PosLong
 
+# Equivalent time amount in several unit options (e.g., 120 seconds or 2 minutes)
+type TimeSpan {
+  # TimeSpan in µs
+  microseconds: Long!
+
+  # TimeSpan in ms
+  milliseconds: BigDecimal!
+
+  # TimeSpan in seconds
+  seconds: BigDecimal!
+
+  # TimeSpan in minutes
+  minutes: BigDecimal!
+
+  # TimeSpan in hours
+  hours: BigDecimal!
+
+  # TimeSpan as an ISO-8601 string
+  iso: String!
+}
+
 ##############
 # ITC schema
 ##############

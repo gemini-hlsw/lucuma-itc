@@ -23,7 +23,7 @@ object ItcResult {
   given Decoder[ItcResult] with
     def apply(c: HCursor): Decoder.Result[ItcResult] =
       c.downField("__typename").as[String].flatMap {
-        case "IntegrationTime" => c.as[IntegrationTime].widen[ItcResult]
+        case "IntegrationTime"  => c.as[IntegrationTime].widen[ItcResult]
         case "SourceTooBright"  => c.as[SourceTooBright].widen[ItcResult]
         case "CalculationError" => c.as[CalculationError].widen[ItcResult]
         case rt                 =>
@@ -33,7 +33,7 @@ object ItcResult {
   given Eq[ItcResult] with
     def eqv(x: ItcResult, y: ItcResult): Boolean =
       (x, y) match {
-        case (s0: IntegrationTime, s1: IntegrationTime) => s0 === s1
+        case (s0: IntegrationTime, s1: IntegrationTime)   => s0 === s1
         case (e0: SourceTooBright, e1: SourceTooBright)   => e0 === e1
         case (e0: CalculationError, e1: CalculationError) => e0 === e1
         case _                                            => false

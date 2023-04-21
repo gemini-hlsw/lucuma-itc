@@ -25,6 +25,7 @@ import lucuma.core.math.Angle
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
+import lucuma.core.util.TimeSpan
 import lucuma.itc.Itc
 import lucuma.itc.legacy.LocalItc
 import lucuma.itc.search.ObservingMode
@@ -314,12 +315,13 @@ object ItcImpl {
                   }
               } else {
                 ((SignalToNoise.FromBigDecimalRounding.getOption(s.maxTotalSNRatio),
+                  TimeSpan.fromSeconds(newExpTime),
                   refineV[Positive](newNExp.toInt).toOption
                 ) match {
-                  case (Some(sn), Some(count)) =>
+                  case (Some(sn), Some(expTime), Some(count)) =>
                     IntegrationTimeResult
-                      .ExposureTimeSuccess(newExpTime.toDouble.seconds, count, sn)
-                  case _                       =>
+                      .ExposureTimeSuccess(expTime, count, sn)
+                  case _                                      =>
                     IntegrationTimeResult.CalculationError(
                       "Negative signal to noise or exposure count"
                     )
@@ -415,13 +417,24 @@ object ItcImpl {
             .span("itc.calctime.spectroscopy-exp-time-at") {
               itcWithSNAt(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
                 .flatMap { r =>
-                  IntegrationTimeResult
-                    .ExposureTimeSuccess(
-                      r.exposureCalculation.exposureTime.seconds,
-                      r.exposureCalculation.exposures,
-                      r.exposureCalculation.signalToNoise
+                  TimeSpan
+                    .fromSeconds(r.exposureCalculation.exposureTime)
+                    .map(expTime =>
+                      IntegrationTimeResult
+                        .ExposureTimeSuccess(
+                          expTime,
+                          r.exposureCalculation.exposures,
+                          r.exposureCalculation.signalToNoise
+                        )
+                        .pure[F]
                     )
-                    .pure[F]
+                    .getOrElse {
+                      IntegrationTimeResult
+                        .CalculationError(
+                          s"Negative exposure time ${r.exposureCalculation.exposureTime}"
+                        )
+                        .pure[F]
+                    }
                 }
             }
 

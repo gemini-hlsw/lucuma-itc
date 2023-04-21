@@ -14,9 +14,9 @@ import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength
+import lucuma.core.util.TimeSpan
 
 import java.math.RoundingMode
-import scala.concurrent.duration.FiniteDuration
 
 type Nanosecond  = Nano * Second
 type Microsecond = Micro * Second
@@ -27,16 +27,18 @@ object encoders:
   given Encoder[NonEmptyString] = (s: NonEmptyString) => s.value.asJson
   given Encoder[PosInt]         = (s: PosInt) => s.value.asJson
 
-  given Encoder[FiniteDuration] = d =>
-    val value: Quantity[Long, Nanosecond] = d.toNanos.withUnit[Nanosecond]
-
-    Json.obj(
-      ("microseconds", Json.fromLong(value.tToUnit[Microsecond].value)),
-      ("milliseconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Millisecond].value)),
-      ("seconds", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Second].value)),
-      ("minutes", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Minute].value)),
-      ("hours", Json.fromBigDecimal(value.toValue[BigDecimal].toUnit[Hour].value))
-    )
+  // TODO get this directly from odb schemas
+  given Encoder[TimeSpan] =
+    Encoder { (ts: TimeSpan) =>
+      Json.obj(
+        "microseconds" -> TimeSpan.FromMicroseconds.reverseGet(ts).asJson,
+        "milliseconds" -> TimeSpan.FromMilliseconds.reverseGet(ts).asJson,
+        "seconds"      -> TimeSpan.FromSeconds.reverseGet(ts).asJson,
+        "minutes"      -> TimeSpan.FromMinutes.reverseGet(ts).asJson,
+        "hours"        -> TimeSpan.FromHours.reverseGet(ts).asJson,
+        "iso"          -> TimeSpan.FromString.reverseGet(ts).asJson
+      )
+    }
 
   given Encoder[Wavelength] = w =>
     Json.obj(
