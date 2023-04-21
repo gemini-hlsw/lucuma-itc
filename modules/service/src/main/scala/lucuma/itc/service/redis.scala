@@ -58,19 +58,11 @@ given Pickler[Wavelength] =
       .getOrElse(sys.error("cannot unpickle"))
   )(_.toPicometers.value.value)
 
-given Pickler[ItcChart]                                         = generatePickler
-given Pickler[ItcChartGroup]                                    = generatePickler
-given Pickler[ItcWarning]                                       = generatePickler
-given Pickler[ItcCcd]                                           = generatePickler
-given Pickler[GraphResult]                                      = generatePickler
-given Pickler[LegacyExposureCalculationResult.Success]          = generatePickler
-given Pickler[LegacyExposureCalculationResult.SourceTooBright]  = generatePickler
-given Pickler[LegacyExposureCalculationResult.CalculationError] = generatePickler
-given Pickler[LegacyExposureCalculationResult]                  =
-  compositePickler[LegacyExposureCalculationResult]
-    .addConcreteType[LegacyExposureCalculationResult.Success]
-    .addConcreteType[LegacyExposureCalculationResult.SourceTooBright]
-    .addConcreteType[LegacyExposureCalculationResult.CalculationError]
+given Pickler[ItcChart]      = generatePickler
+given Pickler[ItcChartGroup] = generatePickler
+given Pickler[ItcWarning]    = generatePickler
+given Pickler[ItcCcd]        = generatePickler
+given Pickler[GraphResult]   = generatePickler
 
 given Pickler[ExposureTimeResult.ExposureTimeSuccess]                   = generatePickler
 given newSourceTooBright: Pickler[ExposureTimeResult.SourceTooBright]   = generatePickler

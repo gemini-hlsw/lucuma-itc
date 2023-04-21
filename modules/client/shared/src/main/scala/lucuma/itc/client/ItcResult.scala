@@ -16,65 +16,58 @@ import lucuma.core.util.TimeSpan
 
 import java.math.MathContext
 
-sealed trait ItcResult {
-
-  def resultType: String =
-    this match {
-      case ItcResult.Error(_)         => ItcResult.Error.ResultType
-      case ItcResult.Success(_, _, _) => ItcResult.Success.ResultType
-    }
-
-  def toEither: Either[ItcResult.Error, ItcResult.Success] =
-    this match {
-      case e: ItcResult.Error   => e.asLeft[ItcResult.Success]
-      case s: ItcResult.Success => s.asRight[ItcResult.Error]
-    }
-
-  def error: Option[ItcResult.Error] =
-    toEither.swap.toOption
-
-  def success: Option[ItcResult.Success] =
-    toEither.toOption
-
-}
+sealed trait ItcResult
 
 object ItcResult {
 
   given Decoder[ItcResult] with
     def apply(c: HCursor): Decoder.Result[ItcResult] =
-      c.downField("resultType").as[String].flatMap {
-        case "Success" => c.as[Success].widen[ItcResult]
-        case "Error"   => c.as[Error].widen[ItcResult]
-        case rt        =>
+      c.downField("__typename").as[String].flatMap {
+        case "ExposureEstimate" => c.as[Success].widen[ItcResult]
+        case "SourceTooBright"  => c.as[SourceTooBright].widen[ItcResult]
+        case "CalculationError" => c.as[Error].widen[ItcResult]
+        case rt                 =>
           DecodingFailure(s"Couldn't parse ItcResult as success or error: $rt", c.history).asLeft
       }
 
   given Eq[ItcResult] with
     def eqv(x: ItcResult, y: ItcResult): Boolean =
       (x, y) match {
-        case (s0: Success, s1: Success) => s0 === s1
-        case (e0: Error, e1: Error)     => e0 === e1
-        case _                          => false
+        case (s0: Success, s1: Success)                 => s0 === s1
+        case (e0: SourceTooBright, e1: SourceTooBright) => e0 === e1
+        case (e0: Error, e1: Error)                     => e0 === e1
+        case _                                          => false
       }
 
   final case class Error(
-    msg: String
+    msg: List[String]
   ) extends ItcResult
 
   object Error {
 
-    val ResultType: String =
-      "Error"
-
     given Decoder[Error] with
       def apply(c: HCursor): Decoder.Result[Error] =
-        c.downField("msg").as[String].map(Error(_))
+        c.downField("msg").as[List[String]].map(Error(_))
 
     given Eq[Error] =
       Eq.by(_.msg)
 
   }
 
+  final case class SourceTooBright(
+    halfWellTime: BigDecimal
+  ) extends ItcResult
+
+  object SourceTooBright {
+
+    given Decoder[SourceTooBright] with
+      def apply(c: HCursor): Decoder.Result[SourceTooBright] =
+        c.downField("halfWellTime").as[BigDecimal].map(SourceTooBright(_))
+
+    given Eq[SourceTooBright] =
+      Eq.by(_.halfWellTime)
+
+  }
   final case class Success(
     exposureTime:  TimeSpan,
     exposures:     NonNegInt,
@@ -92,9 +85,6 @@ object ItcResult {
   }
 
   object Success {
-
-    val ResultType: String =
-      "Success"
 
     given Decoder[Success] with
       def apply(c: HCursor): Decoder.Result[Success] =
@@ -128,7 +118,7 @@ object ItcResult {
   }
 
   def error(msg: String): ItcResult =
-    Error(msg)
+    Error(List(msg))
 
   def success(
     exposureTime:  TimeSpan,

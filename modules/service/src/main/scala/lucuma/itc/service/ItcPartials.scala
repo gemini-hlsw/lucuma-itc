@@ -50,10 +50,8 @@ import lucuma.itc.GmosNITCParams
 import lucuma.itc.GmosSITCParams
 import lucuma.itc.Itc
 import lucuma.itc.ItcObservingConditions
-import lucuma.itc.LegacyItcResult.Spectroscopy
 import lucuma.itc.SignificantFigures
 import lucuma.itc.SpectroscopyParams
-import lucuma.itc.SpectroscopyResults
 import lucuma.itc.UpstreamException
 import lucuma.itc.given
 import lucuma.itc.search.GmosNorthFpuParam

@@ -12,29 +12,26 @@ import io.circe.Json
 
 object SpectroscopyQuery extends GraphQLOperation[Unit] {
 
-  type Data      = List[SpectroscopyResult]
+  type Data      = SpectroscopyResult
   type Variables = SpectroscopyModeInput
 
   override val document: String =
     """
       query Spectroscopy($spec: SpectroscopyModeInput!) {
-        spectroscopy(input: $spec) {
+        spectroscopyExposureTime(input: $spec) {
           serverVersion
           dataVersion
-          results {
-            itc {
-              ... on ItcSuccess {
-                exposures
-                exposureTime {
-                  microseconds
-                }
-                signalToNoise
-                resultType
+          result {
+            __typename
+            ... on ExposureEstimate {
+              exposures
+              exposureTime {
+                microseconds
               }
-              ... on ItcError {
-                msg
-                resultType
-              }
+              signalToNoise
+            }
+            ... on CalculationError {
+              msg
             }
           }
         }
@@ -48,7 +45,7 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
       )
     }
 
-  override val dataDecoder: Decoder[List[SpectroscopyResult]] =
-    (c: HCursor) => c.downField("spectroscopy").as[List[SpectroscopyResult]]
+  override val dataDecoder: Decoder[SpectroscopyResult] =
+    (c: HCursor) => c.downField("spectroscopyExposureTime").as[SpectroscopyResult]
 
 }

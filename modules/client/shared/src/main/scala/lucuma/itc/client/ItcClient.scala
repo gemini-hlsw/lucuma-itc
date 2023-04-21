@@ -54,13 +54,7 @@ object ItcClient {
       ): F[SpectroscopyResult] = {
 
         val callOut: F[SpectroscopyResult] =
-          for {
-            r  <- http.request(SpectroscopyQuery)(input)
-            rʹ <- ApplicativeError.liftFromOption[F](
-                    r.headOption,
-                    new RuntimeException("No results returned by ITC.")
-                  )
-          } yield rʹ
+          http.request(SpectroscopyQuery)(input)
 
         for {
           _ <- Logger[F].info(s"ITC Input: \n${input.asJson.spaces2}")

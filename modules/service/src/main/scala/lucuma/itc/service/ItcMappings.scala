@@ -26,9 +26,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
 import lucuma.itc.ItcVersions
-import lucuma.itc.LegacyItcResult.Spectroscopy
 import lucuma.itc.SpectroscopyGraphResults
-import lucuma.itc.SpectroscopyResults
 import lucuma.itc.*
 import lucuma.itc.encoders.given
 import lucuma.itc.search.ItcObservationDetails
@@ -76,7 +74,6 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           Schema(src.mkString).right.get
         }.liftTo[F]
       }
-    // .attemptTap(e => Logger[F].error(e.toString))
 
   def calculateSpectroscopyExposureTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
@@ -265,11 +262,6 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                 RootEffect.computeEncodable("versions")((_, p, env) =>
                   versions(environment, redis)
                 ),
-                RootEffect.computeEncodable("spectroscopy")((_, p, env) =>
-                  calculateSpectroscopyExposureTime(environment, redis, itc)(
-                    env
-                  ).map(_.map(x => x.toLegacy))
-                ),
                 RootEffect.computeEncodable("spectroscopyExposureTime") { (_, p, env) =>
                   calculateSpectroscopyExposureTime(environment, redis, itc)(env)
                 },
@@ -295,22 +287,6 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           new SelectElaborator(
             Map(
               QueryType -> {
-                case Select("spectroscopy", List(Binding("input", ObjectValue(wv))), child)      =>
-                  wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
-                    case (e, c) =>
-                      wavelengthPartial
-                        .orElse(radialVelocityPartial)
-                        .orElse(signalToNoisePartial)
-                        .orElse(sourceProfilePartial)
-                        .orElse(bandPartial)
-                        .orElse(instrumentModePartial)
-                        .orElse(constraintsPartial)
-                        .orElse(signalToNoiseAtPartial)
-                        .applyOrElse(
-                          (e, c),
-                          fallback
-                        )
-                  }.map(e => e.copy(child = Select("spectroscopy", Nil, child)))
                 case Select("spectroscopyExposureTime",
                             List(Binding("input", ObjectValue(wv))),
                             child

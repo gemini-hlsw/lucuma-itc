@@ -4580,35 +4580,6 @@ scalar PosLong
 # ITC schema
 ##############
 
-# ITC error result
-type ItcError implements ItcResult {
-  # Message
-  msg: String!
-
-  # Result type
-  resultType: String!
-}
-
-# Possible itc result
-interface ItcResult {
-  # Result type
-  resultType: String!
-}
-
-type ItcSuccess implements ItcResult {
-  # Exposure time duration
-  exposureTime: Duration!
-
-  # Exposures
-  exposures: Int!
-
-  # Signal/Noise ratio
-  signalToNoise: SignalToNoise!
-
-  # Result type
-  resultType: String!
-}
-#
 type ImagingMode {
   # instrument
   instrument: InstrumentType
@@ -4637,11 +4608,6 @@ type ItcVersions {
 }
 
 type Query {
-  spectroscopy(
-    # Query multiple modes in spectroscopy mode
-    input: SpectroscopyModeInput!
-  ): [SpectroscopyResult!]!
-
   # Given an instrument and a mode, return an estimate of the exposure time
   spectroscopyExposureTime(
     input: SpectroscopyModeInput!
@@ -4818,28 +4784,6 @@ input SpectroscopySNInput {
 
   # Significant figures, truncates the amount of significant value
   significantFigures: SignificantFiguresInput
-}
-
-# TODO Remove
-type Result {
-  # Spectroscopy mode
-  mode: ObservingModeSpectroscopy!
-
-  # ITC results
-  itc: ItcResult!
-}
-
-# TODO Remove
-type SpectroscopyResult {
-
-  # id of the backend server
-  serverVersion: String!
-
-  # token for the itc data version, can be null
-  dataVersion: String
-
-  # Search results
-  results: [Result!]!
 }
 
 # Possible exposure time itc result

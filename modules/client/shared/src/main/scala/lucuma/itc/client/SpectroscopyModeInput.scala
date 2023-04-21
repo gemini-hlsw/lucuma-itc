@@ -45,7 +45,7 @@ object SpectroscopyModeInput {
               .asJson
           ),
           "constraints"     -> a.constraints.asJson,
-          "modes"           -> List(a.mode).asJson
+          "mode"            -> a.mode.asJson
         )
         .dropNullValues
 

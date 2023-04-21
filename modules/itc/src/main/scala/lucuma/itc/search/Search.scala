@@ -6,12 +6,6 @@ package lucuma.itc
 import cats.data.NonEmptyList
 import io.circe.*
 
-case class SpectroscopyResults(
-  serverVersion: String,
-  dataVersion:   Option[String],
-  results:       List[LegacyItcResult.Spectroscopy]
-) derives Encoder.AsObject
-
 case class SpectroscopyGraphResults(
   serverVersion: String,
   dataVersion:   Option[String],
@@ -22,10 +16,4 @@ case class SpectroscopyGraphResults(
 case class ItcVersions(
   serverVersion: String,
   dataVersion:   Option[String]
-) derives Encoder.AsObject
-
-case class ExposureTimeResults(
-  serverVersion: String,
-  dataVersion:   Option[String],
-  results:       List[LegacyItcResult.SpectroscopyExposureTime]
 ) derives Encoder.AsObject

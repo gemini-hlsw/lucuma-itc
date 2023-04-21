@@ -15,9 +15,7 @@ import lucuma.itc.search.ObservingMode
 
 import scala.concurrent.duration.FiniteDuration
 
-sealed trait ExposureTimeResult extends Product with Serializable {
-  def toLegacy: LegacyExposureCalculationResult
-}
+sealed trait ExposureTimeResult extends Product with Serializable
 
 object ExposureTimeResult:
   given Encoder[ExposureTimeResult] = Encoder.instance { a =>
@@ -33,24 +31,13 @@ object ExposureTimeResult:
     exposures:     PosInt,
     signalToNoise: SignalToNoise
   ) extends ExposureTimeResult
-      derives Encoder.AsObject {
-    def toLegacy: LegacyExposureCalculationResult =
-      LegacyExposureCalculationResult.Success(exposureTime, exposures, signalToNoise)
-  }
+      derives Encoder.AsObject
 
   case class SourceTooBright(halfWellTime: BigDecimal) extends ExposureTimeResult
-      derives Encoder.AsObject {
-    def toLegacy: LegacyExposureCalculationResult = LegacyExposureCalculationResult.SourceTooBright(
-      s"Target is too bright. Well half filled in $halfWellTime"
-    )
-  }
+      derives Encoder.AsObject
 
   /** Generic calculation error */
-  case class CalculationError(msg: List[String]) extends ExposureTimeResult
-      derives Encoder.AsObject {
-    def toLegacy: LegacyExposureCalculationResult =
-      LegacyExposureCalculationResult.CalculationError(msg.mkString(", "))
-  }
+  case class CalculationError(msg: List[String]) extends ExposureTimeResult derives Encoder.AsObject
 
   object CalculationError {
     def apply(msg: String): CalculationError = CalculationError(List(msg))
@@ -61,13 +48,4 @@ case class ExposureTimeCalculationResult(
   dataVersion:   String,
   mode:          ObservingMode.Spectroscopy,
   result:        ExposureTimeResult
-) derives Encoder.AsObject {
-  def toLegacy: List[LegacySpectroscopyResult] =
-    List(
-      LegacySpectroscopyResult(
-        serverVersion = serverVersion,
-        dataVersion = dataVersion.some,
-        Nil
-      )
-    )
-}
+) derives Encoder.AsObject

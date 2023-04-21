@@ -21,7 +21,7 @@ object SpectroscopyResult {
     def apply(c: HCursor): Decoder.Result[SpectroscopyResult] =
       for {
         v <- c.as[ItcVersions]
-        r <- c.downField("results").downArray.downField("itc").success.traverse(_.as[ItcResult])
+        r <- c.downField("result").success.traverse(_.as[ItcResult])
       } yield SpectroscopyResult(v, r)
 
   given Eq[SpectroscopyResult] with
