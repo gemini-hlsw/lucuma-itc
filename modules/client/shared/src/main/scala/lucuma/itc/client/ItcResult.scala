@@ -23,9 +23,9 @@ object ItcResult {
   given Decoder[ItcResult] with
     def apply(c: HCursor): Decoder.Result[ItcResult] =
       c.downField("__typename").as[String].flatMap {
-        case "ExposureEstimate" => c.as[Success].widen[ItcResult]
+        case "ExposureEstimate" => c.as[ExposureEstimate].widen[ItcResult]
         case "SourceTooBright"  => c.as[SourceTooBright].widen[ItcResult]
-        case "CalculationError" => c.as[Error].widen[ItcResult]
+        case "CalculationError" => c.as[CalculationError].widen[ItcResult]
         case rt                 =>
           DecodingFailure(s"Couldn't parse ItcResult as success or error: $rt", c.history).asLeft
       }
@@ -33,42 +33,48 @@ object ItcResult {
   given Eq[ItcResult] with
     def eqv(x: ItcResult, y: ItcResult): Boolean =
       (x, y) match {
-        case (s0: Success, s1: Success)                 => s0 === s1
-        case (e0: SourceTooBright, e1: SourceTooBright) => e0 === e1
-        case (e0: Error, e1: Error)                     => e0 === e1
-        case _                                          => false
+        case (s0: ExposureEstimate, s1: ExposureEstimate) => s0 === s1
+        case (e0: SourceTooBright, e1: SourceTooBright)   => e0 === e1
+        case (e0: CalculationError, e1: CalculationError) => e0 === e1
+        case _                                            => false
       }
 
-  final case class Error(
-    msg: List[String]
-  ) extends ItcResult
+  final case class CalculationError(
+    originalMessages: List[String]
+  ) extends ItcResult {
+    val message: String = originalMessages.mkString(", ")
+  }
 
-  object Error {
+  object CalculationError {
 
-    given Decoder[Error] with
-      def apply(c: HCursor): Decoder.Result[Error] =
-        c.downField("msg").as[List[String]].map(Error(_))
+    given Decoder[CalculationError] with
+      def apply(c: HCursor): Decoder.Result[CalculationError] =
+        c.downField("originalMessages").as[List[String]].map(CalculationError(_))
 
-    given Eq[Error] =
-      Eq.by(_.msg)
+    given Eq[CalculationError] =
+      Eq.by(_.originalMessages)
 
   }
 
   final case class SourceTooBright(
     halfWellTime: BigDecimal
-  ) extends ItcResult
+  ) extends ItcResult {
+    val message: String = s"Source too bright, it saturates at $halfWellTime"
+  }
 
   object SourceTooBright {
 
     given Decoder[SourceTooBright] with
       def apply(c: HCursor): Decoder.Result[SourceTooBright] =
-        c.downField("halfWellTime").as[BigDecimal].map(SourceTooBright(_))
+        c.downField("halfWellTime")
+          .as[BigDecimal]
+          .map(SourceTooBright(_))
 
     given Eq[SourceTooBright] =
       Eq.by(_.halfWellTime)
 
   }
-  final case class Success(
+  final case class ExposureEstimate(
     exposureTime:  TimeSpan,
     exposures:     NonNegInt,
     signalToNoise: SignalToNoise
@@ -84,10 +90,10 @@ object ItcResult {
       )
   }
 
-  object Success {
+  object ExposureEstimate {
 
-    given Decoder[Success] with
-      def apply(c: HCursor): Decoder.Result[Success] =
+    given Decoder[ExposureEstimate] with
+      def apply(c: HCursor): Decoder.Result[ExposureEstimate] =
         for {
           t <- c.downField("exposureTime")
                  .downField("microseconds")
@@ -104,9 +110,9 @@ object ItcResult {
                  .flatMap(n => NonNegInt.from(n).leftMap(m => DecodingFailure(m, c.history)))
           s <- c.downField("signalToNoise")
                  .as[SignalToNoise]
-        } yield Success(t, n, s)
+        } yield ExposureEstimate(t, n, s)
 
-    given Eq[Success] =
+    given Eq[ExposureEstimate] =
       Eq.by { a =>
         (
           a.exposureTime.toMicroseconds,
@@ -118,13 +124,13 @@ object ItcResult {
   }
 
   def error(msg: String): ItcResult =
-    Error(List(msg))
+    CalculationError(List(msg))
 
   def success(
     exposureTime:  TimeSpan,
     exposures:     NonNegInt,
     signalToNoise: SignalToNoise
   ): ItcResult =
-    Success(exposureTime, exposures, signalToNoise)
+    ExposureEstimate(exposureTime, exposures, signalToNoise)
 
 }

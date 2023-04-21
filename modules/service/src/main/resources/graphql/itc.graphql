@@ -4800,16 +4800,26 @@ type ExposureEstimate {
   signalToNoise: SignalToNoise!
 }
 
+# Parent of all ITC errors, structured or not
+interface ExposureTimeError {
+  # Summary message of possible errors
+  message: String!
+}
+
 # ITC error when the source is too bright
-type SourceTooBright {
+type SourceTooBright implements ExposureTimeError {
+  message: String!
+
   # Half-well timme
   halfWellTime: BigDecimal!
 }
 
 # ITC generic error result
-type CalculationError {
-  # Messages, the itc engine sometimes returns multiple error lines
-  msg: [String!]!
+type CalculationError implements ExposureTimeError {
+  message: String!
+
+  # Original messages sent by the itc engine which sometimes returns multiple error lines
+  originalMessages: [String!]!
 }
 
 type SpectroscopyMode {

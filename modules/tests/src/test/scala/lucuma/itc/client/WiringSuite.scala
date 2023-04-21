@@ -47,7 +47,7 @@ class WiringSuite extends ClientSuite {
           BuildInfo.ocslibHash.some
         ),
         ItcResult
-          .Success(
+          .ExposureEstimate(
             TimeSpan.FromString.getOption("PT1S").get,
             NonNegInt.unsafeFrom(10),
             SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))

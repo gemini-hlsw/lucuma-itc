@@ -31,8 +31,11 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
               }
               signalToNoise
             }
+            ... on SourceTooBright {
+              halfWellTime
+            }
             ... on CalculationError {
-              msg
+              originalMessages
             }
           }
         }
