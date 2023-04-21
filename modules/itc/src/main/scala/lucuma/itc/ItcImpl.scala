@@ -109,7 +109,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
-      ): F[ExposureTimeResult] =
+      ): F[IntegrationTimeResult] =
         Trace[F].span("calculate-exposure-time") {
           observingMode match
             case _: ObservingMode.Spectroscopy =>
@@ -252,7 +252,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
-      ): F[ExposureTimeResult] = {
+      ): F[IntegrationTimeResult] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise
@@ -267,7 +267,7 @@ object ItcImpl {
           maxTime:    Quantity[BigDecimal, Second],
           s:          legacy.GraphsRemoteResult,
           counter:    NonNegInt
-        ): F[ExposureTimeResult] =
+        ): F[IntegrationTimeResult] =
           val totalTime: Quantity[BigDecimal, Second] =
             expTime * nExp
               .withUnit[1] * pow(requestedSN.toBigDecimal.toDouble / snr.toBigDecimal.toDouble, 2)
@@ -309,7 +309,7 @@ object ItcImpl {
                                   next
                           )
                         case r                               =>
-                          ExposureTimeResult.CalculationError(r.toString).pure[F]
+                          IntegrationTimeResult.CalculationError(r.toString).pure[F]
                       }
                   }
               } else {
@@ -317,15 +317,15 @@ object ItcImpl {
                   refineV[Positive](newNExp.toInt).toOption
                 ) match {
                   case (Some(sn), Some(count)) =>
-                    ExposureTimeResult
+                    IntegrationTimeResult
                       .ExposureTimeSuccess(newExpTime.toDouble.seconds, count, sn)
                   case _                       =>
-                    ExposureTimeResult.CalculationError(
+                    IntegrationTimeResult.CalculationError(
                       "Negative signal to noise or exposure count"
                     )
                 })
                   .pure[F]
-                  .widen[ExposureTimeResult]
+                  .widen[IntegrationTimeResult]
               }
             }
 
@@ -351,7 +351,7 @@ object ItcImpl {
                     if (halfWellTime < 1.0) {
                       val msg = s"Target is too bright. Well half filled in $halfWellTime"
                       L.error(msg) *>
-                        ExposureTimeResult
+                        IntegrationTimeResult
                           .SourceTooBright(halfWellTime)
                           .pure[F]
                           .widen
@@ -370,19 +370,19 @@ object ItcImpl {
                                     0.refined
                             )
                           case SNCalcResult.WavelengthAtAboveRange(w) =>
-                            ExposureTimeResult
+                            IntegrationTimeResult
                               .CalculationError(
                                 f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm above range"
                               )
                               .pure[F]
                           case SNCalcResult.WavelengthAtBelowRange(w) =>
-                            ExposureTimeResult
+                            IntegrationTimeResult
                               .CalculationError(
                                 f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm below range"
                               )
                               .pure[F]
                           case r                                      =>
-                            ExposureTimeResult.CalculationError(r.toString).pure[F]
+                            IntegrationTimeResult.CalculationError(r.toString).pure[F]
                         }
                     }
                   }
@@ -402,7 +402,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Wavelength
-      ): F[ExposureTimeResult] = {
+      ): F[IntegrationTimeResult] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise
@@ -415,7 +415,7 @@ object ItcImpl {
             .span("itc.calctime.spectroscopy-exp-time-at") {
               itcWithSNAt(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
                 .flatMap { r =>
-                  ExposureTimeResult
+                  IntegrationTimeResult
                     .ExposureTimeSuccess(
                       r.exposureCalculation.exposureTime.seconds,
                       r.exposureCalculation.exposures,

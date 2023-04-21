@@ -4580,6 +4580,23 @@ scalar PosLong
 # ITC schema
 ##############
 
+type Query {
+  # Given an instrument and a mode, return an the integration time and the estimated S/N
+  spectroscopyIntegrationTime(
+    input: SpectroscopyModeInput!
+  ): ExposureTimeCalculationResult!
+
+  spectroscopySignalToNoiseBeta(
+    input: SpectroscopySNInput!
+  ): SignalToNoiseResult!
+
+  spectroscopyGraph(
+    input: SpectroscopyGraphModeInput!
+  ): SpectroscopyGraphResult!
+
+  versions: ItcVersions
+}
+
 type ImagingMode {
   # instrument
   instrument: InstrumentType
@@ -4607,22 +4624,6 @@ type ItcVersions {
   dataVersion: String
 }
 
-type Query {
-  # Given an instrument and a mode, return an estimate of the exposure time
-  spectroscopyExposureTime(
-    input: SpectroscopyModeInput!
-  ): ExposureTimeCalculationResult!
-
-  spectroscopySignalToNoiseBeta(
-    input: SpectroscopySNInput!
-  ): SignalToNoiseResult!
-
-  spectroscopyGraph(
-    input: SpectroscopyGraphModeInput!
-  ): SpectroscopyGraphResult!
-
-  versions: ItcVersions
-}
 
 type GmosSITCParams {
   # Gmos South disperser
@@ -4787,11 +4788,11 @@ input SpectroscopySNInput {
 }
 
 # Possible exposure time itc result
-union ExposureCalculationResult = ExposureEstimate | SourceTooBright | CalculationError
+union ExposureCalculationResult = IntegrationTime | SourceTooBright | CalculationError
 
-type ExposureEstimate {
+type IntegrationTime {
   # Exposure time duration
-  exposureTime: Duration!
+  exposureTime: TimeSpan!
 
   # Exposures
   exposures: PosInt!

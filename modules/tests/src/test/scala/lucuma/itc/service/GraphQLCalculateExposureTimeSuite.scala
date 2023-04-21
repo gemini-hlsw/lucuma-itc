@@ -17,7 +17,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyExposureTime(input: {
+          spectroscopyIntegrationTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -82,7 +82,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
             }
             result {
               __typename
-              ... on ExposureEstimate {
+              ... on IntegrationTime {
                 exposures
                 exposureTime {
                   seconds
@@ -95,7 +95,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopyExposureTime" : {
+            "spectroscopyIntegrationTime" : {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "resolution" : 970,
@@ -107,7 +107,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               },
               "result" : {
-                "__typename" : "ExposureEstimate",
+                "__typename" : "IntegrationTime",
                 "exposures" : 10,
                 "exposureTime" : {
                   "seconds" : 1.000000000
@@ -124,7 +124,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyExposureTime(input: {
+          spectroscopyIntegrationTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -189,7 +189,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
               result {
-                ... on ExposureEstimate {
+                ... on IntegrationTime {
                   exposures
                   exposureTime {
                     seconds
@@ -202,7 +202,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopyExposureTime" : {
+            "spectroscopyIntegrationTime" : {
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
                   "resolution" : 970,
@@ -229,7 +229,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
   test("gmos north case with variables") {
     query(
       """
-        query($spectroscopy: SpectroscopyModeInput) {\n          spectroscopyExposureTime(input: $spectroscopy) {\n            mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n        }\n
+        query($spectroscopy: SpectroscopyModeInput) {\n          spectroscopyIntegrationTime(input: $spectroscopy) {\n            mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n        }\n
       """,
       """
         {
@@ -287,7 +287,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopyExposureTime" :
+            "spectroscopyIntegrationTime" :
               {
                     "mode" : {
                       "instrument" : "GMOS_NORTH"
@@ -319,7 +319,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopyExposureTime(input: {
+          spectroscopyIntegrationTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -383,7 +383,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureEstimate {
+                  ... on IntegrationTime {
                     exposures
                     exposureTime {
                       seconds
@@ -396,7 +396,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyExposureTime" :
+            "spectroscopyIntegrationTime" :
               {
                     "mode" : {
                       "instrument" : "GMOS_NORTH",
@@ -426,7 +426,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyExposureTime(input: {
+          spectroscopyIntegrationTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -490,7 +490,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureEstimate {
+                  ... on IntegrationTime {
                     exposures
                     exposureTime {
                       seconds
@@ -517,7 +517,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopyExposureTime(input: {
+          spectroscopyIntegrationTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -580,7 +580,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureEstimate {
+                  ... on IntegrationTime {
                     exposures
                     exposureTime {
                       seconds
@@ -593,7 +593,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyExposureTime" :
+            "spectroscopyIntegrationTime" :
               {
                     "mode" : {
                       "instrument" : "GMOS_NORTH",
@@ -623,7 +623,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopyExposureTime(input: {
+          spectroscopyIntegrationTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -691,7 +691,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureEstimate {
+                  ... on IntegrationTime {
                     exposures
                     exposureTime {
                       seconds
@@ -704,7 +704,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyExposureTime" :
+            "spectroscopyIntegrationTime" :
               {
                     "mode" : {
                       "instrument" : "GMOS_SOUTH",
@@ -734,7 +734,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
       query(
         s"""
           query {
-            spectroscopyExposureTime(input: {
+            spectroscopyIntegrationTime(input: {
               wavelength: {
                 nanometers: 60,
               },
@@ -804,7 +804,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                     }
                   }
                   result {
-                    ... on ExposureEstimate {
+                    ... on IntegrationTime {
                       exposures
                       exposureTime {
                         seconds
@@ -817,7 +817,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
         json"""
       {
         "data": {
-          "spectroscopyExposureTime" :
+          "spectroscopyIntegrationTime" :
             {
                   "mode" : {
                     "instrument" : "GMOS_NORTH",
@@ -849,7 +849,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopyExposureTime(input: {
+          spectroscopyIntegrationTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -914,7 +914,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureEstimate {
+                  ... on IntegrationTime {
                     exposures
                     exposureTime {
                       seconds
@@ -927,7 +927,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyExposureTime" :
+            "spectroscopyIntegrationTime" :
               {
                     "mode" : {
                       "instrument" : "GMOS_SOUTH",
@@ -959,7 +959,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopyExposureTime(input: {
+          spectroscopyIntegrationTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -1022,7 +1022,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureEstimate {
+                  ... on IntegrationTime {
                     exposures
                     exposureTime {
                       seconds
@@ -1035,7 +1035,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyExposureTime" :
+            "spectroscopyIntegrationTime" :
               {
                     "mode" : {
                       "instrument" : "GMOS_NORTH",
@@ -1065,7 +1065,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopyExposureTime(input: {
+          spectroscopyIntegrationTime(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -1128,7 +1128,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureEstimate {
+                  ... on IntegrationTime {
                     exposures
                     exposureTime {
                       seconds
@@ -1141,7 +1141,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyExposureTime" :
+            "spectroscopyIntegrationTime" :
               {
                     "mode" : {
                       "instrument" : "GMOS_SOUTH",

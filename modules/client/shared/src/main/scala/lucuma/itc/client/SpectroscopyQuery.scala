@@ -19,12 +19,12 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
   override val document: String =
     """
       query Spectroscopy($spec: SpectroscopyModeInput!) {
-        spectroscopyExposureTime(input: $spec) {
+        spectroscopyIntegrationTime(input: $spec) {
           serverVersion
           dataVersion
           result {
             __typename
-            ... on ExposureEstimate {
+            ... on IntegrationTime {
               exposures
               exposureTime {
                 microseconds
@@ -50,6 +50,6 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
     }
 
   override val dataDecoder: Decoder[SpectroscopyResult] =
-    (c: HCursor) => c.downField("spectroscopyExposureTime").as[SpectroscopyResult]
+    (c: HCursor) => c.downField("spectroscopyIntegrationTime").as[SpectroscopyResult]
 
 }

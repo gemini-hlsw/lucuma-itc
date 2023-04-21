@@ -110,12 +110,12 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           )(itc, redis)
             .handleErrorWith {
               case UpstreamException(msg) =>
-                ExposureTimeResult
+                IntegrationTimeResult
                   .CalculationError(msg)
                   .pure[F]
                   .widen
               case x                      =>
-                ExposureTimeResult
+                IntegrationTimeResult
                   .CalculationError(s"Error calculating itc $x")
                   .pure[F]
                   .widen
@@ -262,7 +262,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                 RootEffect.computeEncodable("versions")((_, p, env) =>
                   versions(environment, redis)
                 ),
-                RootEffect.computeEncodable("spectroscopyExposureTime") { (_, p, env) =>
+                RootEffect.computeEncodable("spectroscopyIntegrationTime") { (_, p, env) =>
                   calculateSpectroscopyExposureTime(environment, redis, itc)(env)
                 },
                 RootEffect.computeEncodable("spectroscopySignalToNoiseBeta")((_, p, env) =>
@@ -287,7 +287,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           new SelectElaborator(
             Map(
               QueryType -> {
-                case Select("spectroscopyExposureTime",
+                case Select("spectroscopyIntegrationTime",
                             List(Binding("input", ObjectValue(wv))),
                             child
                     ) =>
@@ -305,7 +305,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                           (e, c),
                           fallback
                         )
-                  }.map(e => e.copy(child = Select("spectroscopyExposureTime", Nil, child)))
+                  }.map(e => e.copy(child = Select("spectroscopyIntegrationTime", Nil, child)))
                 case Select("spectroscopyGraph", List(Binding("input", ObjectValue(wv))), child) =>
                   wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
                     case (e, c) =>

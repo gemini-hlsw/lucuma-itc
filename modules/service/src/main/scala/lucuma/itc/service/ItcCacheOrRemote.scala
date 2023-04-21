@@ -112,7 +112,7 @@ trait ItcCacheOrRemote extends Version:
   )(
     itc:         Itc[F],
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
-  ): F[ExposureTimeResult] =
+  ): F[IntegrationTimeResult] =
     cacheOrRemote(calcRequest, requestCalc(itc))(
       "itc:calc:spec",
       redis

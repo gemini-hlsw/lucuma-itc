@@ -30,7 +30,7 @@ trait Itc[F[_]]:
     constraints:     ItcObservingConditions,
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
-  ): F[ExposureTimeResult]
+  ): F[IntegrationTimeResult]
 
   /**
    * Retrieve the graph data for the given mode and exposureTime and exposures

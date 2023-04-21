@@ -23,7 +23,7 @@ object ItcResult {
   given Decoder[ItcResult] with
     def apply(c: HCursor): Decoder.Result[ItcResult] =
       c.downField("__typename").as[String].flatMap {
-        case "ExposureEstimate" => c.as[ExposureEstimate].widen[ItcResult]
+        case "IntegrationTime" => c.as[IntegrationTime].widen[ItcResult]
         case "SourceTooBright"  => c.as[SourceTooBright].widen[ItcResult]
         case "CalculationError" => c.as[CalculationError].widen[ItcResult]
         case rt                 =>
@@ -33,7 +33,7 @@ object ItcResult {
   given Eq[ItcResult] with
     def eqv(x: ItcResult, y: ItcResult): Boolean =
       (x, y) match {
-        case (s0: ExposureEstimate, s1: ExposureEstimate) => s0 === s1
+        case (s0: IntegrationTime, s1: IntegrationTime) => s0 === s1
         case (e0: SourceTooBright, e1: SourceTooBright)   => e0 === e1
         case (e0: CalculationError, e1: CalculationError) => e0 === e1
         case _                                            => false
@@ -74,7 +74,7 @@ object ItcResult {
       Eq.by(_.halfWellTime)
 
   }
-  final case class ExposureEstimate(
+  final case class IntegrationTime(
     exposureTime:  TimeSpan,
     exposures:     NonNegInt,
     signalToNoise: SignalToNoise
@@ -90,10 +90,10 @@ object ItcResult {
       )
   }
 
-  object ExposureEstimate {
+  object IntegrationTime {
 
-    given Decoder[ExposureEstimate] with
-      def apply(c: HCursor): Decoder.Result[ExposureEstimate] =
+    given Decoder[IntegrationTime] with
+      def apply(c: HCursor): Decoder.Result[IntegrationTime] =
         for {
           t <- c.downField("exposureTime")
                  .downField("microseconds")
@@ -110,9 +110,9 @@ object ItcResult {
                  .flatMap(n => NonNegInt.from(n).leftMap(m => DecodingFailure(m, c.history)))
           s <- c.downField("signalToNoise")
                  .as[SignalToNoise]
-        } yield ExposureEstimate(t, n, s)
+        } yield IntegrationTime(t, n, s)
 
-    given Eq[ExposureEstimate] =
+    given Eq[IntegrationTime] =
       Eq.by { a =>
         (
           a.exposureTime.toMicroseconds,
@@ -131,6 +131,6 @@ object ItcResult {
     exposures:     NonNegInt,
     signalToNoise: SignalToNoise
   ): ItcResult =
-    ExposureEstimate(exposureTime, exposures, signalToNoise)
+    IntegrationTime(exposureTime, exposures, signalToNoise)
 
 }

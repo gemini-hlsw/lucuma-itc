@@ -11,7 +11,7 @@ import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.itc.ChartType
-import lucuma.itc.ExposureTimeResult
+import lucuma.itc.IntegrationTimeResult
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcChartGroup
@@ -34,8 +34,8 @@ object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
     constraints:     ItcObservingConditions,
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[ExposureTimeResult] =
-    ExposureTimeResult
+  ): IO[IntegrationTimeResult] =
+    IntegrationTimeResult
       .ExposureTimeSuccess(1.seconds, 10.refined, SignalToNoise.fromInt(10).get)
       .pure[IO]
 

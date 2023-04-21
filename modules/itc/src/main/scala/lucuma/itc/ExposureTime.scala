@@ -15,10 +15,10 @@ import lucuma.itc.search.ObservingMode
 
 import scala.concurrent.duration.FiniteDuration
 
-sealed trait ExposureTimeResult extends Product with Serializable
+sealed trait IntegrationTimeResult extends Product with Serializable
 
-object ExposureTimeResult:
-  given Encoder[ExposureTimeResult] = Encoder.instance { a =>
+object IntegrationTimeResult:
+  given Encoder[IntegrationTimeResult] = Encoder.instance { a =>
     a match {
       case s @ ExposureTimeSuccess(_, _, _) => s.asJson
       case w @ SourceTooBright(_)           => w.asJson
@@ -30,14 +30,15 @@ object ExposureTimeResult:
     exposureTime:  FiniteDuration,
     exposures:     PosInt,
     signalToNoise: SignalToNoise
-  ) extends ExposureTimeResult
+  ) extends IntegrationTimeResult
       derives Encoder.AsObject
 
-  case class SourceTooBright(halfWellTime: BigDecimal) extends ExposureTimeResult
+  case class SourceTooBright(halfWellTime: BigDecimal) extends IntegrationTimeResult
       derives Encoder.AsObject
 
   /** Generic calculation error */
-  case class CalculationError(msg: List[String]) extends ExposureTimeResult derives Encoder.AsObject
+  case class CalculationError(msg: List[String]) extends IntegrationTimeResult
+      derives Encoder.AsObject
 
   object CalculationError {
     def apply(msg: String): CalculationError = CalculationError(List(msg))
@@ -47,5 +48,5 @@ case class ExposureTimeCalculationResult(
   serverVersion: String,
   dataVersion:   String,
   mode:          ObservingMode.Spectroscopy,
-  result:        ExposureTimeResult
+  result:        IntegrationTimeResult
 ) derives Encoder.AsObject
