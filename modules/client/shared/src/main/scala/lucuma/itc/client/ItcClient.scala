@@ -54,7 +54,7 @@ object ItcClient {
       ): F[SpectroscopyResult] = {
 
         val callOut: F[SpectroscopyResult] =
-          http.request(SpectroscopyQuery)(input).withInput(input)
+          http.request(SpectroscopyQuery).withInput(input)
 
         for {
           _ <- Logger[F].info(s"ITC Input: \n${input.asJson.spaces2}")
