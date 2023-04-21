@@ -9,6 +9,7 @@ import io.circe.Decoder
 import io.circe.Encoder
 import io.circe.HCursor
 import io.circe.Json
+import io.circe.JsonObject
 
 object SpectroscopyQuery extends GraphQLOperation[Unit] {
 
@@ -38,9 +39,9 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
       }
     """
 
-  override val varEncoder: Encoder[Variables] =
-    Encoder.instance[SpectroscopyModeInput] { input =>
-      Json.obj(
+  override val varEncoder: Encoder.AsObject[Variables] =
+    Encoder.AsObject.instance[SpectroscopyModeInput] { input =>
+      JsonObject(
         "spec" -> Encoder[SpectroscopyModeInput].apply(input)
       )
     }

@@ -14,8 +14,8 @@ import cats.syntax.either.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import cats.syntax.option.*
-import clue.TransactionalClient
-import clue.http4s.Http4sBackend
+import clue.http4s.Http4sHttpBackend
+import clue.http4s.Http4sHttpClient
 import io.circe.syntax.*
 import lucuma.core.model.Observation
 import org.http4s.Uri
@@ -46,7 +46,7 @@ object ItcClient {
   ): F[ItcClient[F]] =
     for {
       cache <- ItcCache.simple[F, SpectroscopyModeInput, SpectroscopyResult]
-      http  <- TransactionalClient.of[F, Unit](uri)(Async[F], Http4sBackend(client), Logger[F])
+      http  <- Http4sHttpClient.of[F, Unit](uri)(Async[F], Http4sHttpBackend(client), Logger[F])
     } yield new ItcClient[F] {
       override def spectroscopy(
         input:    SpectroscopyModeInput,
@@ -54,7 +54,7 @@ object ItcClient {
       ): F[SpectroscopyResult] = {
 
         val callOut: F[SpectroscopyResult] =
-          http.request(SpectroscopyQuery)(input)
+          http.request(SpectroscopyQuery)(input).withInput(input)
 
         for {
           _ <- Logger[F].info(s"ITC Input: \n${input.asJson.spaces2}")

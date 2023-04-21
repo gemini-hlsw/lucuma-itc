@@ -25,8 +25,8 @@ object VersionsQuery extends GraphQLOperation[Unit] {
       }
     """
 
-  override val varEncoder: Encoder[Unit] =
-    Encoder[Unit]
+  override val varEncoder: Encoder.AsObject[Unit] =
+    Encoder.AsObject[Unit]
 
   override val dataDecoder: Decoder[ItcVersions] =
     (c: HCursor) => c.downField("versions").as[ItcVersions]
