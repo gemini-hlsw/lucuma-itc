@@ -4642,8 +4642,8 @@ type Query {
     input: SpectroscopyModeInput!
   ): [SpectroscopyResult!]!
 
+  # Given an instrument and a mode, return an estimate of the exposure time
   spectroscopyExposureTime(
-    # Query multiple modes in spectroscopy mode
     input: SpectroscopyModeInput!
   ): ExposureTimeCalculationResult!
 
@@ -4739,7 +4739,7 @@ input SpectroscopyModeInput {
   constraints: ConstraintSetInput!
 
   # Instrument modes
-  modes: [InstrumentModesInput]!
+  mode: InstrumentModesInput
 }
 
 # Params for significant figures on each axis
@@ -4820,6 +4820,7 @@ input SpectroscopySNInput {
   significantFigures: SignificantFiguresInput
 }
 
+# TODO Remove
 type Result {
   # Spectroscopy mode
   mode: ObservingModeSpectroscopy!
@@ -4828,6 +4829,7 @@ type Result {
   itc: ItcResult!
 }
 
+# TODO Remove
 type SpectroscopyResult {
 
   # id of the backend server
@@ -4840,22 +4842,10 @@ type SpectroscopyResult {
   results: [Result!]!
 }
 
-"""Exposure calculation result types"""
-enum ExposureTimeResultType {
-  SUCCESS
-
-  SOURCE_TOO_BRIGHT
-
-  CALCULATION_ERROR
-}
-
 # Possible exposure time itc result
-interface ExposureTimeResult {
-  # Result type
-  resultType: ExposureTimeResultType!
-}
+union ExposureCalculationResult = ExposureEstimate | SourceTooBright | CalculationError
 
-type ExposureTimeSuccess implements ExposureTimeResult {
+type ExposureEstimate {
   # Exposure time duration
   exposureTime: Duration!
 
@@ -4863,28 +4853,19 @@ type ExposureTimeSuccess implements ExposureTimeResult {
   exposures: PosInt!
 
   # Signal/Noise ratio
-  signalToNoise: PosBigDecimal!
-
-  # Result type
-  resultType: ExposureTimeResultType!
+  signalToNoise: SignalToNoise!
 }
 
-# ITC error result
-type ExposureTimeSourceTooBright {
+# ITC error when the source is too bright
+type SourceTooBright {
   # Half-well timme
   halfWellTime: BigDecimal!
-
-  # Result type
-  resultType: ExposureTimeResultType!
 }
 
-# ITC error result
-type ExposureTimeError {
-  # Message
-  msg: String!
-
-  # Result type
-  resultType: ExposureTimeResultType!
+# ITC generic error result
+type CalculationError {
+  # Messages, the itc engine sometimes returns multiple error lines
+  msg: [String!]!
 }
 
 type SpectroscopyMode {
@@ -4901,16 +4882,6 @@ type SpectroscopyMode {
   instrument: InstrumentType
 }
 
-union ObservingMode = SpectroscopyMode | ImagingMode
-
-type ExposureTimeModeResult {
-  # Spectroscopy mode
-  mode: ObservingMode!
-
-  # ITC results
-  result: ExposureTimeResult!
-}
-
 type ExposureTimeCalculationResult {
 
   # id of the backend server
@@ -4919,9 +4890,14 @@ type ExposureTimeCalculationResult {
   # token for the itc data version, can be null
   dataVersion: String
 
-  # Search results
-  results: [ExposureTimeModeResult!]!
+  # queried mode
+  mode: ObservingMode!
+
+  # ITC results
+  result: ExposureCalculationResult!
 }
+
+union ObservingMode = SpectroscopyMode | ImagingMode
 
 """Chart data types"""
 enum ItcSeriesType {

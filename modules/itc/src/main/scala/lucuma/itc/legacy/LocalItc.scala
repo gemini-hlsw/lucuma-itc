@@ -31,8 +31,8 @@ case class LocalItc(classLoader: ClassLoader):
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculateExposureTime", classOf[String])
 
-  private val LegacyRight = """Right\((.*)\)""".r
-  private val LegacyLeft  = """Left\((.*)\)""".r
+  private val LegacyRight = """Right\((.*)\)?""".r
+  private val LegacyLeft  = """Left\((.*?):(?s)(.*)?\)""".r
 
   /**
    * This method does a call to the method ItcCalculation.calculation via reflection. This is done
@@ -45,35 +45,37 @@ case class LocalItc(classLoader: ClassLoader):
    * that may not be compatible. Instead we pass back and forth json encoded version of the params
    * essentially the same as if ITC were a server accepting json and responding json
    */
-  def calculateCharts(jsonParams: String): Either[String, GraphsRemoteResult] =
+  def calculateCharts(jsonParams: String): Either[List[String], GraphsRemoteResult] =
     val res = calculateChartsMethod
       .invoke(null, jsonParams) // null as it is a static method
       .asInstanceOf[String]
 
     res match
-      case LegacyRight(result) =>
+      case LegacyRight(result)          =>
         decode[legacy.GraphsRemoteResult](result).leftMap { e =>
-          e.getMessage()
+          List(e.getMessage())
         }
-      case LegacyLeft(result)  =>
-        Left(result)
-      case m                   =>
-        Left(s"Unknown result: $m")
+      case LegacyLeft(result)           =>
+        Left(List(result))
+      case LegacyLeft(result1, result2) =>
+        Left(List(result1, result2))
+      case m                            =>
+        Left(List(m))
 
   /**
    * This method does a call to the method ItcCalculation.calculate via reflection.
    */
-  def calculateExposureTime(jsonParams: String): Either[String, ExposureTimeRemoteResult] =
+  def calculateExposureTime(jsonParams: String): Either[List[String], ExposureTimeRemoteResult] =
     val res = calculateExposureTimeMethod
       .invoke(null, jsonParams) // null as it is a static method
       .asInstanceOf[String]
 
     res match
-      case LegacyRight(result) =>
+      case LegacyRight(result)          =>
         decode[legacy.ExposureTimeRemoteResult](result).leftMap { e =>
-          e.getMessage()
+          List(e.getMessage())
         }
-      case LegacyLeft(result)  =>
-        Left(result)
-      case m                   =>
-        Left(s"Unknown result: $m")
+      case LegacyLeft(result1, result2) =>
+        Left(List(result1, result2))
+      case m                            =>
+        Left(List(m))

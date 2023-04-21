@@ -56,15 +56,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
             },
-            modes: [{
-              gmosN: {
-                filter: G_PRIME,
-                fpu: {
-                  builtin: LONG_SLIT_0_25
-                },
-                grating: B1200_G5301
-              }
-            }, {
+            mode: {
               gmosN: {
                 filter: GG455,
                 fpu: {
@@ -73,32 +65,29 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 grating: B1200_G5301
               }
             }
-            ]
           }) {
-            results {
-                mode {
-                  ... on SpectroscopyMode {
-                    instrument
-                    resolution
-                    params {
-                      ... on GmosNITCParams {
-                        grating
-                      }
-                    }
-                    wavelength {
-                      nanometers
-                    }
+            mode {
+              ... on SpectroscopyMode {
+                instrument
+                resolution
+                params {
+                  ... on GmosNITCParams {
+                    grating
                   }
                 }
-                result {
-                  resultType
-                  ... on ExposureTimeSuccess {
-                    exposures
-                    exposureTime {
-                      seconds
-                    }
-                  }
+                wavelength {
+                  nanometers
                 }
+              }
+            }
+            result {
+              __typename
+              ... on ExposureEstimate {
+                exposures
+                exposureTime {
+                  seconds
+                }
+              }
             }
           }
         }
@@ -107,47 +96,24 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
         {
           "data": {
             "spectroscopyExposureTime" : {
-                "results" : [
-                  {
-                    "mode" : {
-                      "instrument" : "GMOS_NORTH",
-                      "resolution" : 970,
-                      "params": {
-                        "grating": "B1200_G5301"
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.000
-                      }
-                    },
-                    "result" : {
-                      "resultType": "SUCCESS",
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1.000000000
-                      }
-                    }
-                  },
-                  {
-                    "mode" : {
-                      "instrument" : "GMOS_NORTH",
-                      "resolution" : 970,
-                      "params": {
-                        "grating": "B1200_G5301"
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.000
-                      }
-                    },
-                    "result" : {
-                      "resultType": "SUCCESS",
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1.000000000
-                      }
-                    }
-                  }
-                ]
+              "mode" : {
+                "instrument" : "GMOS_NORTH",
+                "resolution" : 970,
+                "params": {
+                  "grating": "B1200_G5301"
+                },
+                "wavelength" : {
+                  "nanometers" : 60.000
+                }
+              },
+              "result" : {
+                "__typename" : "ExposureEstimate",
+                "exposures" : 10,
+                "exposureTime" : {
+                  "seconds" : 1.000000000
+                }
               }
+            }
           }
         }
         """
@@ -198,7 +164,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
             },
-            modes: [{
+            mode: {
               gmosS: {
                 filter: RG610,
                 fpu: {
@@ -206,41 +172,30 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 },
                 grating: B1200_G5321
               }
-            }, {
-              gmosS: {
-                filter: SII,
-                fpu: {
-                  builtin: LONG_SLIT_0_25
-                },
-                grating: B1200_G5321
-              }
             }
-            ]
           }) {
-            results {
-                mode {
-                  ... on SpectroscopyMode {
-                    instrument
-                    resolution
-                    params {
-                      ... on GmosSITCParams {
-                        grating
-                      }
-                    }
-                    wavelength {
-                      nanometers
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  resolution
+                  params {
+                    ... on GmosSITCParams {
+                      grating
                     }
                   }
-                }
-                result {
-                  ... on ExposureTimeSuccess {
-                    exposures
-                    exposureTime {
-                      seconds
-                    }
+                  wavelength {
+                    nanometers
                   }
                 }
-            }
+              }
+              result {
+                ... on ExposureEstimate {
+                  exposures
+                  exposureTime {
+                    seconds
+                  }
+                }
+              }
           }
         }
         """,
@@ -248,26 +203,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
         {
           "data": {
             "spectroscopyExposureTime" : {
-              "results" : [
-              {
-                "mode" : {
-                  "instrument" : "GMOS_SOUTH",
-                  "resolution" : 970,
-                  "params": {
-                    "grating": "B1200_G5321"
-                  },
-                  "wavelength" : {
-                    "nanometers" : 60.000
-                  }
-                },
-                "result" : {
-                  "exposures" : 10,
-                  "exposureTime" : {
-                    "seconds" : 1.000000000
-                  }
-                }
-              },
-              {
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
                   "resolution" : 970,
@@ -285,9 +220,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
               }
-              ]
-            }
-
           }
         }
         """
@@ -297,7 +229,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
   test("gmos north case with variables") {
     query(
       """
-        query($spectroscopy: SpectroscopyModeInput) {\n          spectroscopyExposureTime(input: $spectroscopy) {\n            results {\n              mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n          }\n        }\n
+        query($spectroscopy: SpectroscopyModeInput) {\n          spectroscopyExposureTime(input: $spectroscopy) {\n            mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n        }\n
       """,
       """
         {
@@ -340,7 +272,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
             },
-            "modes": [{
+            "mode": {
               "gmosN": {
                 "filter": "G_PRIME",
                 "fpu": {
@@ -348,16 +280,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 },
                 "grating": "B1200_G5301"
               }
-            }, {
-              "gmosN": {
-                "filter": "GG455",
-                "fpu": {
-                  "builtin": "LONG_SLIT_0_25"
-                },
-                "grating": "B1200_G5301"
-              }
             }
-            ]
           }
         }
         """,
@@ -366,18 +289,9 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyExposureTime" :
               {
-                "results" : [
-                  {
                     "mode" : {
                       "instrument" : "GMOS_NORTH"
                     }
-                  },
-                  {
-                    "mode" : {
-                      "instrument" : "GMOS_NORTH"
-                    }
-                  }
-                ]
               }
           }
         }
@@ -444,7 +358,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
             },
-            modes: [{
+            mode: {
               gmosN: {
                 filter: G_PRIME,
                 fpu: {
@@ -452,18 +366,8 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 },
                 grating: B1200_G5301
               }
-            }, {
-              gmosN: {
-                filter: GG455,
-                fpu: {
-                  builtin: LONG_SLIT_0_25
-                },
-                grating: B1200_G5301
-              }
             }
-            ]
           }) {
-            results {
                 mode {
                   ... on SpectroscopyMode {
                     instrument
@@ -479,14 +383,13 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureTimeSuccess {
+                  ... on ExposureEstimate {
                     exposures
                     exposureTime {
                       seconds
                     }
                   }
                 }
-            }
           }
         }
         """,
@@ -495,8 +398,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyExposureTime" :
               {
-                "results" : [
-                  {
                     "mode" : {
                       "instrument" : "GMOS_NORTH",
                       "resolution" : 970,
@@ -513,26 +414,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                         "seconds" : 1.000000000
                       }
                     }
-                  },
-                  {
-                    "mode" : {
-                      "instrument" : "GMOS_NORTH",
-                      "resolution" : 970,
-                      "params": {
-                        "grating": "B1200_G5301"
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.000
-                      }
-                    },
-                    "result" : {
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1.000000000
-                      }
-                    }
-                  }
-                ]
               }
           }
         }
@@ -584,7 +465,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
             },
-            modes: [{
+            mode: {
               gmosN: {
                 filter: G_PRIME,
                 fpu: {
@@ -592,18 +473,8 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 },
                 grating: B1200_G5301
               }
-            }, {
-              gmosN: {
-                filter: GG455,
-                fpu: {
-                  builtin: LONG_SLIT_0_25
-                },
-                grating: B1200_G5301
-              }
             }
-            ]
           }) {
-            results {
                 mode {
                   ... on SpectroscopyMode {
                     instrument
@@ -619,14 +490,13 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureTimeSuccess {
+                  ... on ExposureEstimate {
                     exposures
                     exposureTime {
                       seconds
                     }
                   }
                 }
-            }
           }
         }
         """,
@@ -686,7 +556,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
             },
-            modes: [{
+            mode: {
               gmosN: {
                 filter: G_PRIME,
                 fpu: {
@@ -695,9 +565,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 grating: ${d.tag.toScreamingSnakeCase}
               }
             }
-            ]
           }) {
-            results {
                 mode {
                   ... on SpectroscopyMode {
                     instrument
@@ -712,14 +580,13 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureTimeSuccess {
+                  ... on ExposureEstimate {
                     exposures
                     exposureTime {
                       seconds
                     }
                   }
                 }
-            }
           }
         }
         """,
@@ -728,8 +595,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyExposureTime" :
               {
-                "results" : [
-                  {
                     "mode" : {
                       "instrument" : "GMOS_NORTH",
                       "params": {
@@ -745,8 +610,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                         "seconds" : 1
                       }
                     }
-                  }
-                ]
               }
           }
         }
@@ -804,7 +667,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
             },
-            modes: [{
+            mode: {
               gmosS: {
                 filter: G_PRIME,
                 fpu: {
@@ -813,9 +676,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 grating: ${d.tag.toScreamingSnakeCase}
               }
             }
-            ]
           }) {
-            results {
                 mode {
                   ... on SpectroscopyMode {
                     instrument
@@ -830,14 +691,13 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureTimeSuccess {
+                  ... on ExposureEstimate {
                     exposures
                     exposureTime {
                       seconds
                     }
                   }
                 }
-            }
           }
         }
         """,
@@ -846,8 +706,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyExposureTime" :
               {
-                "results" : [
-                  {
                     "mode" : {
                       "instrument" : "GMOS_SOUTH",
                       "params": {
@@ -864,8 +722,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                       }
                     }
                   }
-                ]
-              }
           }
         }
         """
@@ -922,7 +778,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
               },
-              modes: [{
+              mode: {
                 gmosN: {
                   filter: G_PRIME,
                   fpu: {
@@ -931,9 +787,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   grating: B1200_G5301
                 }
               }
-              ]
             }) {
-              results {
                   mode {
                     ... on SpectroscopyMode {
                       instrument
@@ -950,14 +804,13 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                     }
                   }
                   result {
-                    ... on ExposureTimeSuccess {
+                    ... on ExposureEstimate {
                       exposures
                       exposureTime {
                         seconds
                       }
                     }
                   }
-              }
             }
           }
       """,
@@ -966,8 +819,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
         "data": {
           "spectroscopyExposureTime" :
             {
-              "results" : [
-                {
                   "mode" : {
                     "instrument" : "GMOS_NORTH",
                     "params": {
@@ -986,8 +837,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-              ]
-            }
         }
       }
       """
@@ -1039,7 +888,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
             },
-            modes: [{
+            mode: {
               gmosS: {
                 filter: G_PRIME,
                 fpu: {
@@ -1048,9 +897,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 grating: B1200_G5321
               }
             }
-            ]
           }) {
-            results {
                 mode {
                   ... on SpectroscopyMode {
                     instrument
@@ -1067,14 +914,13 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureTimeSuccess {
+                  ... on ExposureEstimate {
                     exposures
                     exposureTime {
                       seconds
                     }
                   }
                 }
-            }
           }
         }
         """,
@@ -1083,8 +929,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyExposureTime" :
               {
-                "results" : [
-                  {
                     "mode" : {
                       "instrument" : "GMOS_SOUTH",
                       "params": {
@@ -1103,8 +947,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                       }
                     }
                   }
-                ]
-              }
           }
         }
         """
@@ -1156,7 +998,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
             },
-            modes: [{
+            mode: {
               gmosN: {
                 filter: ${d.tag.toScreamingSnakeCase}
                 fpu: {
@@ -1165,9 +1007,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 grating: B1200_G5301
               }
             }
-            ]
           }) {
-            results {
                 mode {
                   ... on SpectroscopyMode {
                     instrument
@@ -1182,14 +1022,13 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureTimeSuccess {
+                  ... on ExposureEstimate {
                     exposures
                     exposureTime {
                       seconds
                     }
                   }
                 }
-            }
           }
         }
         """,
@@ -1198,8 +1037,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyExposureTime" :
               {
-                "results" : [
-                  {
                     "mode" : {
                       "instrument" : "GMOS_NORTH",
                       "params": {
@@ -1216,8 +1053,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                       }
                     }
                   }
-                ]
-              }
           }
         }
         """
@@ -1269,7 +1104,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
             },
-            modes: [{
+            mode: {
               gmosS: {
                 filter: ${d.tag.toScreamingSnakeCase}
                 fpu: {
@@ -1278,9 +1113,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 grating: B1200_G5321
               }
             }
-            ]
           }) {
-            results {
                 mode {
                   ... on SpectroscopyMode {
                     instrument
@@ -1295,14 +1128,13 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on ExposureTimeSuccess {
+                  ... on ExposureEstimate {
                     exposures
                     exposureTime {
                       seconds
                     }
                   }
                 }
-            }
           }
         }
         """,
@@ -1311,8 +1143,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyExposureTime" :
               {
-                "results" : [
-                  {
                     "mode" : {
                       "instrument" : "GMOS_SOUTH",
                       "params": {
@@ -1328,8 +1158,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                         "seconds" : 1.000000000
                       }
                     }
-                  }
-                ]
               }
           }
         }

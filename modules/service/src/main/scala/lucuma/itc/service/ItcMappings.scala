@@ -40,6 +40,7 @@ import lucuma.itc.service.syntax.all.*
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
+import io.circe.syntax.*
 import scala.concurrent.duration._
 import scala.io.Source
 import scala.util.Using
@@ -87,60 +88,58 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
      env.get[SignalToNoise]("signalToNoise"),
      env.get[SourceProfile]("sourceProfile"),
      env.get[Band]("band"),
-     env.get[List[SpectroscopyParams]]("modes"),
+     env.get[SpectroscopyParams]("mode"),
      env.get[ItcObservingConditions]("constraints")
-    ).traverseN { (wv, rs, sn, sp, sd, modes, c) =>
-      modes
-        .parTraverse { mode =>
-          val signalToNoiseAt = env.get[Wavelength]("signalToNoiseAt")
-          Logger[F].info(
-            s"ITC calculate for $mode, conditions $c and profile $sp, at $signalToNoiseAt"
-          ) *>
-            Trace[F].put(("itc.modes_count", modes.length)) *> {
-              val specMode = mode match {
-                case GmosNITCParams(grating, fpu, filter) =>
-                  ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
-                case GmosSITCParams(grating, fpu, filter) =>
-                  ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
-              }
-              calcFromCacheOrRemote(
-                CalcRequest(
-                  TargetProfile(sp, sd, rs),
-                  specMode,
-                  c,
-                  sn,
-                  signalToNoiseAt
-                )
-              )(itc, redis)
-                .handleErrorWith {
-                  case UpstreamException(msg) =>
-                    ExposureTimeResult
-                      .CalculationError(msg)
-                      .pure[F]
-                      .widen
-                  case x                      =>
-                    ExposureTimeResult
-                      .CalculationError(s"Error calculating itc $x")
-                      .pure[F]
-                      .widen
-                }
-                .map { r =>
-                  ExposureTimeModeResult(specMode, r)
-                }
+    ).traverseN { (wv, rs, sn, sp, sd, mode, c) =>
+      {
+        val signalToNoiseAt = env.get[Wavelength]("signalToNoiseAt")
+        Logger[F].info(
+          s"ITC calculate for $mode, conditions $c and profile $sp, at $signalToNoiseAt"
+        ) *> {
+          val specMode = mode match {
+            case GmosNITCParams(grating, fpu, filter) =>
+              ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
+            case GmosSITCParams(grating, fpu, filter) =>
+              ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
+          }
+          calcFromCacheOrRemote(
+            CalcRequest(
+              TargetProfile(sp, sd, rs),
+              specMode,
+              c,
+              sn,
+              signalToNoiseAt
+            )
+          )(itc, redis)
+            .handleErrorWith {
+              case UpstreamException(msg) =>
+                ExposureTimeResult
+                  .CalculationError(msg)
+                  .pure[F]
+                  .widen
+              case x                      =>
+                ExposureTimeResult
+                  .CalculationError(s"Error calculating itc $x")
+                  .pure[F]
+                  .widen
+            }
+            .map { r =>
+              ExposureTimeCalculationResult(version(environment).value,
+                                            BuildInfo.ocslibHash,
+                                            specMode,
+                                            r
+              )
             }
         }
-        .map(r =>
-          ExposureTimeCalculationResult(
-            version(environment).value,
-            BuildInfo.ocslibHash,
-            r
-          ).rightIor[NonEmptyChain[Problem]]
-        )
+      }
+        .map(_.rightIor[NonEmptyChain[Problem]])
         .handleErrorWith { case x =>
           Problem(s"Error calculating itc $x").leftIorNec.pure[F]
         }
     }.map(
-      _.getOrElse(Problem("Missing parameters for calculateSpectroscopyExposureTime").leftIorNec)
+      _.getOrElse(
+        Problem(s"Missing parameters for calculateSpectroscopyExposureTime $env").leftIorNec
+      )
     )
 
   def spectroscopyGraph[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
@@ -304,7 +303,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                         .orElse(signalToNoisePartial)
                         .orElse(sourceProfilePartial)
                         .orElse(bandPartial)
-                        .orElse(instrumentModesPartial)
+                        .orElse(instrumentModePartial)
                         .orElse(constraintsPartial)
                         .orElse(signalToNoiseAtPartial)
                         .applyOrElse(
@@ -323,7 +322,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                         .orElse(signalToNoisePartial)
                         .orElse(sourceProfilePartial)
                         .orElse(bandPartial)
-                        .orElse(instrumentModesPartial)
+                        .orElse(instrumentModePartial)
                         .orElse(constraintsPartial)
                         .orElse(signalToNoiseAtPartial)
                         .applyOrElse(
