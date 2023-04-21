@@ -19,6 +19,7 @@ import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.numeric.PosLong
 import eu.timepit.refined.types.string.NonEmptyString
+import io.circe.syntax.*
 import lucuma.core.enums.*
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.SignalToNoise
@@ -38,7 +39,6 @@ import lucuma.itc.service.syntax.all.*
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
-import io.circe.syntax.*
 import scala.concurrent.duration._
 import scala.io.Source
 import scala.util.Using
