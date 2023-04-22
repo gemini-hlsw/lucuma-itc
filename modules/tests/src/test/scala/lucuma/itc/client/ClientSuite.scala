@@ -55,7 +55,7 @@ trait ClientSuite extends CatsEffectSuite {
     } yield c
 
   def spectroscopy(
-    in:       SpectroscopyModeInput,
+    in:       SpectroscopyIntegrationTimeInput,
     expected: Either[String, SpectroscopyResult]
   ): IO[Unit] =
     itcClient.flatMap {

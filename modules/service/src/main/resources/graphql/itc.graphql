@@ -2106,7 +2106,7 @@ input SpectroscopyScienceRequirementsInput {
   """
   The signalToNoise field may be unset by assigning a null value, or ignored by skipping it altogether
   """
-  signalToNoise: BigDecimal
+  signalToNoise: SignalToNoise
 
   """
   The signalToNoiseAt field may be unset by assigning a null value, or ignored by skipping it altogether
@@ -4604,15 +4604,15 @@ type TimeSpan {
 type Query {
   # Given an instrument and a mode, return an the integration time and the estimated S/N
   spectroscopyIntegrationTime(
-    input: SpectroscopyModeInput!
+    input: SpectroscopyIntegrationTimeInput!
   ): ExposureTimeCalculationResult!
 
-  spectroscopySignalToNoiseBeta(
-    input: SpectroscopySNInput!
+  spectroscopySignalToNoise(
+    input: SpectroscopySignalToNoiseInput!
   ): SignalToNoiseResult!
 
   spectroscopyGraph(
-    input: SpectroscopyGraphModeInput!
+    input: SpectroscopyGraphInput!
   ): SpectroscopyGraphResult!
 
   versions: ItcVersions
@@ -4704,7 +4704,7 @@ input InstrumentModesInput {
 }
 
 # Configuration alternatives query
-input SpectroscopyModeInput {
+input SpectroscopyIntegrationTimeInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
 
@@ -4743,7 +4743,7 @@ input SignificantFiguresInput {
 }
 
 # Parameters to retrieve graph data
-input SpectroscopyGraphModeInput {
+input SpectroscopyGraphInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
 
@@ -4776,7 +4776,7 @@ input SpectroscopyGraphModeInput {
 }
 
 # Parameters to calculate signal to noise
-input SpectroscopySNInput {
+input SpectroscopySignalToNoiseInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
 

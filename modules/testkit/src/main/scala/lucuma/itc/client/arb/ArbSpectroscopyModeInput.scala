@@ -21,7 +21,7 @@ import lucuma.core.util.arb.ArbEnumerated
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.*
 
-trait ArbSpectroscopyModeInput {
+trait ArbSpectroscopyIntegrationTimeInput {
 
   import ArbConstraintSet.*
   import ArbEnumerated.*
@@ -32,9 +32,9 @@ trait ArbSpectroscopyModeInput {
   import ArbSourceProfile.given
   import ArbWavelength.*
 
-  def genSpectroscopyModeInput(
+  def genSpectroscopyIntegrationTimeInput(
     im: InstrumentMode
-  ): Gen[SpectroscopyModeInput] =
+  ): Gen[SpectroscopyIntegrationTimeInput] =
     for {
       w   <- arbitrary[Wavelength]
       s2n <- arbitrary[SignalToNoise]
@@ -44,7 +44,7 @@ trait ArbSpectroscopyModeInput {
       rv  <- arbitrary[RadialVelocity]
       cs  <- arbitrary[ConstraintSet]
       im  <- arbitrary[InstrumentMode]
-    } yield SpectroscopyModeInput(
+    } yield SpectroscopyIntegrationTimeInput(
       w,
       s2n,
       sat,
@@ -55,15 +55,15 @@ trait ArbSpectroscopyModeInput {
       im
     )
 
-  given Arbitrary[SpectroscopyModeInput] =
+  given Arbitrary[SpectroscopyIntegrationTimeInput] =
     Arbitrary {
       for {
         im <- arbitrary[InstrumentMode]
-        sm <- genSpectroscopyModeInput(im)
+        sm <- genSpectroscopyIntegrationTimeInput(im)
       } yield sm
     }
 
-  given Cogen[SpectroscopyModeInput] =
+  given Cogen[SpectroscopyIntegrationTimeInput] =
     Cogen[
       (
         Wavelength,
@@ -89,4 +89,4 @@ trait ArbSpectroscopyModeInput {
     }
 }
 
-object ArbSpectroscopyModeInput extends ArbSpectroscopyModeInput
+object ArbSpectroscopyIntegrationTimeInput extends ArbSpectroscopyIntegrationTimeInput

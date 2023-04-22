@@ -14,11 +14,11 @@ import io.circe.JsonObject
 object SpectroscopyQuery extends GraphQLOperation[Unit] {
 
   type Data      = SpectroscopyResult
-  type Variables = SpectroscopyModeInput
+  type Variables = SpectroscopyIntegrationTimeInput
 
   override val document: String =
     """
-      query Spectroscopy($spec: SpectroscopyModeInput!) {
+      query Spectroscopy($spec: SpectroscopyIntegrationTimeInput!) {
         spectroscopyIntegrationTime(input: $spec) {
           serverVersion
           dataVersion
@@ -43,9 +43,9 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
     """
 
   override val varEncoder: Encoder.AsObject[Variables] =
-    Encoder.AsObject.instance[SpectroscopyModeInput] { input =>
+    Encoder.AsObject.instance[SpectroscopyIntegrationTimeInput] { input =>
       JsonObject(
-        "spec" -> Encoder[SpectroscopyModeInput].apply(input)
+        "spec" -> Encoder[SpectroscopyIntegrationTimeInput].apply(input)
       )
     }
 

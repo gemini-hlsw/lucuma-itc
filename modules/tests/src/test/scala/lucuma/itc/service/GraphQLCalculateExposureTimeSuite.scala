@@ -229,7 +229,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
   test("gmos north case with variables") {
     query(
       """
-        query($spectroscopy: SpectroscopyModeInput) {\n          spectroscopyIntegrationTime(input: $spectroscopy) {\n            mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n        }\n
+        query($spectroscopy: SpectroscopyIntegrationTimeInput) {\n          spectroscopyIntegrationTime(input: $spectroscopy) {\n            mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n        }\n
       """,
       """
         {

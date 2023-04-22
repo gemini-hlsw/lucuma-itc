@@ -30,7 +30,7 @@ import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED.Galaxy
 import lucuma.core.util.TimeSpan
-import lucuma.itc.client.SpectroscopyModeInput
+import lucuma.itc.client.SpectroscopyIntegrationTimeInput
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
 
 import java.time.Instant
@@ -77,8 +77,8 @@ class WiringSuite extends ClientSuite {
 
 object WiringSuite {
 
-  val Input: SpectroscopyModeInput =
-    SpectroscopyModeInput(
+  val Input: SpectroscopyIntegrationTimeInput =
+    SpectroscopyIntegrationTimeInput(
       Wavelength.Min,
       SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
       Option.empty[Wavelength],

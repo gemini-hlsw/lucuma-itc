@@ -30,7 +30,7 @@ trait ItcClient[F[_]] {
   // TODO: chart
 
   def spectroscopy(
-    input:    SpectroscopyModeInput,
+    input:    SpectroscopyIntegrationTimeInput,
     useCache: Boolean = true
   ): F[SpectroscopyResult]
 
@@ -45,11 +45,11 @@ object ItcClient {
     client: Client[F]
   ): F[ItcClient[F]] =
     for {
-      cache <- ItcCache.simple[F, SpectroscopyModeInput, SpectroscopyResult]
+      cache <- ItcCache.simple[F, SpectroscopyIntegrationTimeInput, SpectroscopyResult]
       http  <- Http4sHttpClient.of[F, Unit](uri)(Async[F], Http4sHttpBackend(client), Logger[F])
     } yield new ItcClient[F] {
       override def spectroscopy(
-        input:    SpectroscopyModeInput,
+        input:    SpectroscopyIntegrationTimeInput,
         useCache: Boolean = true
       ): F[SpectroscopyResult] = {
 
