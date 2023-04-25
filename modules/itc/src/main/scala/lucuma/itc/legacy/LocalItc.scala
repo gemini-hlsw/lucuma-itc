@@ -31,8 +31,8 @@ case class LocalItc(classLoader: ClassLoader):
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculateExposureTime", classOf[String])
 
-  private val LegacyRight = """Right\((.*)\)?""".r
-  private val LegacyLeft  = """Left\((.*?):(?s)(.*)?\)""".r
+  private val LegacyRight = """Right\((.*)\)""".r
+  private val LegacyLeft  = """Left\((.*?):(?s)(.*)?\)?""".r
 
   /**
    * This method does a call to the method ItcCalculation.calculation via reflection. This is done

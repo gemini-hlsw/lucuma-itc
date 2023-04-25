@@ -543,7 +543,6 @@ trait GracklePartials extends GrackleParsers:
 
   def instrumentModePartial: PartialFunction[(Partial, (String, Value)), Partial] =
     case (i, ("mode", m)) =>
-      println(s"MODE $m")
       val modes = m match {
         case ObjectValue(List(("gmosN", AbsentValue), ("gmosS", gmosS))) =>
           gmosS match

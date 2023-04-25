@@ -72,11 +72,4 @@ given Pickler[ItcWarning]    = generatePickler
 given Pickler[ItcCcd]        = generatePickler
 given Pickler[GraphResult]   = generatePickler
 
-given Pickler[IntegrationTimeResult.ExposureTimeSuccess]                   = generatePickler
-given newSourceTooBright: Pickler[IntegrationTimeResult.SourceTooBright]   = generatePickler
-given newCalculationError: Pickler[IntegrationTimeResult.CalculationError] = generatePickler
-given Pickler[IntegrationTimeResult]                                       =
-  compositePickler[IntegrationTimeResult]
-    .addConcreteType[IntegrationTimeResult.ExposureTimeSuccess]
-    .addConcreteType[IntegrationTimeResult.SourceTooBright]
-    .addConcreteType[IntegrationTimeResult.CalculationError]
+given Pickler[IntegrationTimeResult] = generatePickler

@@ -12,7 +12,7 @@ import io.circe.HCursor
 
 final case class SpectroscopyResult(
   versions: ItcVersions,
-  result:   Option[ItcResult]
+  result:   Option[IntegrationTime]
 )
 
 object SpectroscopyResult {
@@ -21,12 +21,11 @@ object SpectroscopyResult {
     def apply(c: HCursor): Decoder.Result[SpectroscopyResult] =
       for {
         v <- c.as[ItcVersions]
-        r <- c.downField("result").success.traverse(_.as[ItcResult])
+        r <- c.downField("result").success.traverse(_.as[IntegrationTime])
       } yield SpectroscopyResult(v, r)
 
   given Eq[SpectroscopyResult] with
     def eqv(x: SpectroscopyResult, y: SpectroscopyResult): Boolean =
-      x.versions === y.versions &&
-        x.result === y.result
+      x.versions === y.versions && x.result === y.result
 
 }

@@ -12,7 +12,7 @@ val http4sVersion               = "0.23.18"
 val http4sJdkHttpClientVersion  = "0.9.0"
 val fs2Version                  = "3.6.1"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.74.0"
+val lucumaCoreVersion           = "0.75-1bf784a-20230425T151146Z-SNAPSHOT"
 val lucumaRefinedVersion        = "0.1.1"
 val slf4jVersion                = "2.0.7"
 val log4catsVersion             = "2.5.0"
@@ -104,7 +104,7 @@ lazy val core = project
       "org.typelevel" %%% "spire-extras"        % spireVersion,
       "org.typelevel" %%% "kittens"             % kittensVersion,
       "org.typelevel"  %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
-      "com.lihaoyi"   %%% "pprint"              % pprintVersion          % Test
+      "com.lihaoyi"   %%% "pprint"              % pprintVersion
     )
   )
 

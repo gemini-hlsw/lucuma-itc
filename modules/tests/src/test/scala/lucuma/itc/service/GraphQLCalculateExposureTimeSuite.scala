@@ -81,12 +81,9 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
               }
             }
             result {
-              __typename
-              ... on IntegrationTime {
-                exposures
-                exposureTime {
-                  seconds
-                }
+              exposures
+              exposureTime {
+                seconds
               }
             }
           }
@@ -107,7 +104,6 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               },
               "result" : {
-                "__typename" : "IntegrationTime",
                 "exposures" : 10,
                 "exposureTime" : {
                   "seconds" : 1.000000000
@@ -189,13 +185,11 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
               result {
-                ... on IntegrationTime {
                   exposures
                   exposureTime {
                     seconds
                   }
                 }
-              }
           }
         }
         """,
@@ -225,7 +219,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
         """
     )
   }
-
+//
   test("gmos north case with variables") {
     query(
       """
@@ -383,13 +377,11 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on IntegrationTime {
-                    exposures
-                    exposureTime {
-                      seconds
-                    }
+                  exposures
+                  exposureTime {
+                    seconds
                   }
-                }
+              }
           }
         }
         """,
@@ -490,11 +482,9 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on IntegrationTime {
-                    exposures
-                    exposureTime {
-                      seconds
-                    }
+                  exposures
+                  exposureTime {
+                    seconds
                   }
                 }
           }
@@ -580,11 +570,9 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on IntegrationTime {
-                    exposures
-                    exposureTime {
-                      seconds
-                    }
+                  exposures
+                  exposureTime {
+                    seconds
                   }
                 }
           }
@@ -691,11 +679,9 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on IntegrationTime {
-                    exposures
-                    exposureTime {
-                      seconds
-                    }
+                  exposures
+                  exposureTime {
+                    seconds
                   }
                 }
           }
@@ -804,11 +790,9 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                     }
                   }
                   result {
-                    ... on IntegrationTime {
-                      exposures
-                      exposureTime {
-                        seconds
-                      }
+                    exposures
+                    exposureTime {
+                      seconds
                     }
                   }
             }
@@ -914,11 +898,9 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on IntegrationTime {
-                    exposures
-                    exposureTime {
-                      seconds
-                    }
+                  exposures
+                  exposureTime {
+                    seconds
                   }
                 }
           }
@@ -1022,12 +1004,10 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on IntegrationTime {
                     exposures
                     exposureTime {
                       seconds
                     }
-                  }
                 }
           }
         }
@@ -1128,12 +1108,10 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
                 result {
-                  ... on IntegrationTime {
                     exposures
                     exposureTime {
                       seconds
                     }
-                  }
                 }
           }
         }

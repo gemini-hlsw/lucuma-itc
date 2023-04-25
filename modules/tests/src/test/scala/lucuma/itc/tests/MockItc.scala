@@ -27,7 +27,7 @@ import lucuma.refined.*
 
 import scala.concurrent.duration._
 
-object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
+object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
   override def calculateExposureTime(
     targetProfile:   TargetProfile,
@@ -36,8 +36,7 @@ object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
   ): IO[IntegrationTimeResult] =
-    IntegrationTimeResult
-      .ExposureTimeSuccess(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get)
+    IntegrationTimeResult(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get)
       .pure[IO]
 
   override def calculateGraph(
@@ -77,4 +76,50 @@ object FixedItc extends Itc[IO] with SignalToNoiseCalculation[IO] {
     )
       .pure[IO]
 
-}
+object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
+
+  override def calculateExposureTime(
+    targetProfile:   TargetProfile,
+    observingMode:   ObservingMode,
+    constraints:     ItcObservingConditions,
+    signalToNoise:   SignalToNoise,
+    signalToNoiseAt: Option[Wavelength]
+  ): IO[IntegrationTimeResult] =
+    IO.raiseError(CalculationError("A calculation error"))
+
+  override def calculateGraph(
+    targetProfile: TargetProfile,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  NonNegDuration,
+    exposures:     PosLong
+  ): IO[GraphResult] =
+    GraphResult(
+      "1",
+      NonEmptyList.of(
+        ItcCcd(1,
+               1,
+               2,
+               2,
+               Wavelength.fromIntNanometers(1001).get,
+               Wavelength.fromIntNanometers(1001).get,
+               3,
+               4,
+               5,
+               Nil
+        )
+      ),
+      NonEmptyList.of(
+        ItcChartGroup(
+          NonEmptyList.of(
+            ItcChart(
+              ChartType.S2NChart,
+              List(
+                ItcSeries("title", SeriesDataType.FinalS2NData, List((1.0, 1000.0), (2.0, 1001.0)))
+              )
+            )
+          )
+        )
+      )
+    )
+      .pure[IO]

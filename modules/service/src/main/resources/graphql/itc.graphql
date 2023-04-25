@@ -4605,7 +4605,7 @@ type Query {
   # Given an instrument and a mode, return an the integration time and the estimated S/N
   spectroscopyIntegrationTime(
     input: SpectroscopyIntegrationTimeInput!
-  ): ExposureTimeCalculationResult!
+  ): IntegrationTimeCalculationResult!
 
   spectroscopySignalToNoise(
     input: SpectroscopySignalToNoiseInput!
@@ -4808,9 +4808,6 @@ input SpectroscopySignalToNoiseInput {
   significantFigures: SignificantFiguresInput
 }
 
-# Possible exposure time itc result
-union ExposureCalculationResult = IntegrationTime | SourceTooBright | CalculationError
-
 type IntegrationTime {
   # Exposure time duration
   exposureTime: TimeSpan!
@@ -4820,28 +4817,6 @@ type IntegrationTime {
 
   # Signal/Noise ratio
   signalToNoise: SignalToNoise!
-}
-
-# Parent of all ITC errors, structured or not
-interface ExposureTimeError {
-  # Summary message of possible errors
-  message: String!
-}
-
-# ITC error when the source is too bright
-type SourceTooBright implements ExposureTimeError {
-  message: String!
-
-  # Half-well timme
-  halfWellTime: BigDecimal!
-}
-
-# ITC generic error result
-type CalculationError implements ExposureTimeError {
-  message: String!
-
-  # Original messages sent by the itc engine which sometimes returns multiple error lines
-  originalMessages: [String!]!
 }
 
 type SpectroscopyMode {
@@ -4858,7 +4833,7 @@ type SpectroscopyMode {
   instrument: InstrumentType
 }
 
-type ExposureTimeCalculationResult {
+type IntegrationTimeCalculationResult {
 
   # id of the backend server
   serverVersion: String
@@ -4870,7 +4845,7 @@ type ExposureTimeCalculationResult {
   mode: ObservingMode!
 
   # ITC results
-  result: ExposureCalculationResult!
+  result: IntegrationTime!
 }
 
 union ObservingMode = SpectroscopyMode | ImagingMode

@@ -98,8 +98,6 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
 object ItcImpl {
   opaque type NumberOfExposures = Int
 
-  val Error400Regex = "<title>Error 400 (.*)</title>".r
-
   def build[F[_]: MonadThrow: Logger: Trace](itcLocal: LocalItc, dataVersion: String): Itc[F] =
     new Itc[F] with SignalToNoiseCalculation[F] {
       val L = Logger[F]
@@ -165,7 +163,8 @@ object ItcImpl {
             Trace[F].put("itc.exposures" -> exposures) *>
             Trace[F].put("itc.level" -> level.value) *>
             (itcLocal.calculateCharts(request.noSpaces) match {
-              case Right(r)  => r.pure[F]
+              case Right(r)  =>
+                r.pure[F]
               case Left(msg) =>
                 L.warn(s"Upstream error $msg") *>
                   ApplicativeThrow[F].raiseError(new UpstreamException(msg.mkString("\n")))
@@ -194,9 +193,10 @@ object ItcImpl {
             Trace[F].put("itc.sigma" -> sigma.toBigDecimal.toDouble) *>
             Logger[F].info(request.noSpaces) *>
             (itcLocal.calculateExposureTime(request.noSpaces) match {
-              case Right(r)  => r.pure[F]
+              case Right(r)  =>
+                r.pure[F]
               case Left(msg) =>
-                L.warn(s"Upstream 1 error $msg") *>
+                L.warn(s"Upstream error $msg") *>
                   ApplicativeThrow[F].raiseError(new UpstreamException(msg.mkString("\n")))
             })
         }
@@ -270,9 +270,11 @@ object ItcImpl {
           counter:    NonNegInt
         ): F[IntegrationTimeResult] =
           val totalTime: Quantity[BigDecimal, Second] =
-            expTime * nExp
-              .withUnit[1] * pow(requestedSN.toBigDecimal.toDouble / snr.toBigDecimal.toDouble, 2)
-              .withUnit[1]
+            if (snr === SignalToNoise.Min) TimeSpan.Max.toSeconds.withUnit[Second]
+            else
+              expTime * nExp
+                .withUnit[1] * pow(requestedSN.toBigDecimal.toDouble / snr.toBigDecimal.toDouble, 2)
+                .withUnit[1]
 
           val newNExp: BigDecimal = spire.math.ceil((totalTime / maxTime).value)
 
@@ -310,31 +312,29 @@ object ItcImpl {
                                   next
                           )
                         case r                               =>
-                          IntegrationTimeResult.CalculationError(r.toString).pure[F]
+                          MonadThrow[F].raiseError(CalculationError(r.toString))
                       }
                   }
               } else {
-                ((SignalToNoise.FromBigDecimalRounding.getOption(s.maxTotalSNRatio),
-                  TimeSpan.fromSeconds(newExpTime),
-                  refineV[Positive](newNExp.toInt).toOption
+                (SignalToNoise.FromBigDecimalRounding.getOption(s.maxTotalSNRatio),
+                 TimeSpan.fromSeconds(newExpTime),
+                 refineV[Positive](newNExp.toInt).toOption
                 ) match {
                   case (Some(sn), Some(expTime), Some(count)) =>
-                    IntegrationTimeResult
-                      .ExposureTimeSuccess(expTime, count, sn)
+                    IntegrationTimeResult(expTime, count, sn).pure[F]
                   case _                                      =>
-                    IntegrationTimeResult.CalculationError(
-                      "Negative signal to noise or exposure count"
+                    MonadThrow[F].raiseError(
+                      CalculationError(
+                        "Negative signal to noise or exposure count"
+                      )
                     )
-                })
-                  .pure[F]
-                  .widen[IntegrationTimeResult]
+                }
               }
             }
+        end itcStep
 
         L.info(s"Desired S/N $signalToNoise") *>
-          L.info(
-            s"Target brightness ${targetProfile} at band ${targetProfile.band}"
-          ) *>
+          L.info(s"Target brightness ${targetProfile} at band ${targetProfile.band}") *>
           Trace[F]
             .span("itc.calctime.spectroscopy") {
 
@@ -348,20 +348,21 @@ object ItcImpl {
                 .flatMap { r =>
                   val halfWellTime = r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime.value
                   L.info(
-                    s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} $halfWellTime"
+                    s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} halfWellTime: $halfWellTime"
                   ) *> {
                     if (halfWellTime < 1.0) {
                       val msg = s"Target is too bright. Well half filled in $halfWellTime"
-                      L.error(msg) *>
-                        IntegrationTimeResult
-                          .SourceTooBright(halfWellTime)
-                          .pure[F]
-                          .widen
+                      MonadThrow[F].raiseError(SourceTooBright(halfWellTime))
                     } else {
                       val maxTime = startExpTime.value.min(halfWellTime)
                       calculateSignalToNoise(r.groups, signalToNoiseAt)
                         .flatMap {
-                          case SNCalcResult.SNCalcSuccess(snr)        =>
+                          // degenerate case where the ITC cannot compute a S/N
+                          case SNCalcResult.SNCalcSuccess(snr) if snr.toBigDecimal <= 0.0 =>
+                            MonadThrow[F].raiseError(
+                              CalculationError("No signal can be achieved")
+                            )
+                          case SNCalcResult.SNCalcSuccess(snr)                            =>
                             itcStep(numberOfExposures,
                                     0,
                                     startExpTime,
@@ -371,21 +372,22 @@ object ItcImpl {
                                     r,
                                     0.refined
                             )
-                          case SNCalcResult.WavelengthAtAboveRange(w) =>
-                            IntegrationTimeResult
-                              .CalculationError(
+                          case SNCalcResult.WavelengthAtAboveRange(w)                     =>
+                            MonadThrow[F].raiseError(
+                              CalculationError(
                                 f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm above range"
                               )
-                              .pure[F]
-                          case SNCalcResult.WavelengthAtBelowRange(w) =>
-                            IntegrationTimeResult
-                              .CalculationError(
+                            )
+                          case SNCalcResult.WavelengthAtBelowRange(w)                     =>
+                            MonadThrow[F].raiseError(
+                              CalculationError(
                                 f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm below range"
                               )
-                              .pure[F]
-                          case r                                      =>
-                            IntegrationTimeResult.CalculationError(r.toString).pure[F]
+                            )
+                          case r                                                          =>
+                            MonadThrow[F].raiseError(CalculationError(r.toString))
                         }
+
                     }
                   }
 
@@ -420,20 +422,19 @@ object ItcImpl {
                   TimeSpan
                     .fromSeconds(r.exposureCalculation.exposureTime)
                     .map(expTime =>
-                      IntegrationTimeResult
-                        .ExposureTimeSuccess(
-                          expTime,
-                          r.exposureCalculation.exposures,
-                          r.exposureCalculation.signalToNoise
-                        )
+                      IntegrationTimeResult(
+                        expTime,
+                        r.exposureCalculation.exposures,
+                        r.exposureCalculation.signalToNoise
+                      )
                         .pure[F]
                     )
                     .getOrElse {
-                      IntegrationTimeResult
-                        .CalculationError(
+                      MonadThrow[F].raiseError(
+                        CalculationError(
                           s"Negative exposure time ${r.exposureCalculation.exposureTime}"
                         )
-                        .pure[F]
+                      )
                     }
                 }
             }

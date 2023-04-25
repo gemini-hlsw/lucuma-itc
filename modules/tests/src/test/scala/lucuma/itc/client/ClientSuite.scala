@@ -7,7 +7,7 @@ import cats.effect._
 import cats.implicits._
 import com.comcast.ip4s._
 import lucuma.itc.client.ItcClient
-import lucuma.itc.tests.FixedItc
+import lucuma.itc.tests.MockItc
 import munit.CatsEffectSuite
 import natchez.Trace.Implicits.noop
 import org.http4s._
@@ -27,7 +27,7 @@ trait ClientSuite extends CatsEffectSuite {
     Slf4jLogger.getLoggerFromClass(getClass)
 
   private val httpApp: Resource[IO, WebSocketBuilder2[IO] => HttpApp[IO]] =
-    Resource.eval(lucuma.itc.tests.app(FixedItc))
+    Resource.eval(lucuma.itc.tests.app(MockItc))
 
   private val server: Resource[IO, Server] =
     httpApp.flatMap { app =>

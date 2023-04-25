@@ -23,20 +23,11 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
           serverVersion
           dataVersion
           result {
-            __typename
-            ... on IntegrationTime {
-              exposures
-              exposureTime {
-                microseconds
-              }
-              signalToNoise
+            exposures
+            exposureTime {
+              microseconds
             }
-            ... on SourceTooBright {
-              halfWellTime
-            }
-            ... on CalculationError {
-              originalMessages
-            }
+            signalToNoise
           }
         }
       }

@@ -79,7 +79,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(env: Cursor.Env): F[Result[ExposureTimeCalculationResult]] =
+  )(env: Cursor.Env): F[Result[IntegrationTimeCalculationResult]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[SignalToNoise]("signalToNoise"),
@@ -108,30 +108,21 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
               signalToNoiseAt
             )
           )(itc, redis)
-            .handleErrorWith {
-              case UpstreamException(msg) =>
-                IntegrationTimeResult
-                  .CalculationError(msg)
-                  .pure[F]
-                  .widen
-              case x                      =>
-                IntegrationTimeResult
-                  .CalculationError(s"Error calculating itc $x")
-                  .pure[F]
-                  .widen
-            }
             .map { r =>
-              ExposureTimeCalculationResult(version(environment).value,
-                                            BuildInfo.ocslibHash,
-                                            specMode,
-                                            r
+              IntegrationTimeCalculationResult(version(environment).value,
+                                               BuildInfo.ocslibHash,
+                                               specMode,
+                                               r
               )
             }
         }
       }
         .map(_.rightIor[NonEmptyChain[Problem]])
-        .handleErrorWith { case x =>
-          Problem(s"Error calculating itc $x").leftIorNec.pure[F]
+        .handleError {
+          case x: IntegrationTimeError =>
+            Problem(x.message).leftIorNec
+          case x                       =>
+            Problem(s"Error calculating itc $x").leftIorNec
         }
     }.map(
       _.getOrElse(
@@ -179,8 +170,11 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           }
       }
         .map(_.rightIor[NonEmptyChain[Problem]])
-        .handleError { case x =>
-          Problem(s"Error calculating itc $x").leftIorNec
+        .handleError {
+          case x: IntegrationTimeError =>
+            Problem(x.message).leftIorNec
+          case x                       =>
+            Problem(s"Error calculating itc $x").leftIorNec
         }
     }.map(
       _.getOrElse(
@@ -223,8 +217,11 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           }
       }
         .map(_.rightIor[NonEmptyChain[Problem]])
-        .handleError { case x =>
-          Problem(s"Error calculating itc $x").leftIorNec
+        .handleError {
+          case x: IntegrationTimeError =>
+            Problem(x.message).leftIorNec
+          case x                       =>
+            Problem(s"Error calculating itc $x").leftIorNec
         }
     }.map(
       _.getOrElse(Problem(s"Missing parameters for signal to noise calculation$env").leftIorNec)
