@@ -77,7 +77,11 @@ lazy val model = crossProject(JVMPlatform, JSPlatform)
   .settings(
     name := "lucuma-itc",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % catsVersion
+      "org.typelevel"  %% "cats-core"    % catsVersion,
+      "edu.gemini"     %% "lucuma-core"  % lucumaCoreVersion,
+      "eu.timepit"     %% "refined"      % refinedVersion,
+      "eu.timepit"     %% "refined-cats" % refinedVersion,
+      "org.typelevel" %%% "kittens"      % kittensVersion
     )
   )
 

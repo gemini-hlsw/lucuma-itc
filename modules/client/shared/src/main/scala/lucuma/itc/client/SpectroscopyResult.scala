@@ -9,6 +9,7 @@ import cats.syntax.traverse.*
 import io.circe.Decoder
 import io.circe.DecodingFailure
 import io.circe.HCursor
+import lucuma.itc.IntegrationTime
 
 final case class SpectroscopyResult(
   versions: ItcVersions,

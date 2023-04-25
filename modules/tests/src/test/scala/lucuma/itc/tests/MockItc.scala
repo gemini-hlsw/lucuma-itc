@@ -12,7 +12,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.core.util.TimeSpan
 import lucuma.itc.ChartType
-import lucuma.itc.IntegrationTimeResult
+import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcChartGroup
@@ -29,14 +29,14 @@ import scala.concurrent.duration._
 
 object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
-  override def calculateExposureTime(
+  override def calculateIntegrationTime(
     targetProfile:   TargetProfile,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[IntegrationTimeResult] =
-    IntegrationTimeResult(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get)
+  ): IO[IntegrationTime] =
+    IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get)
       .pure[IO]
 
   override def calculateGraph(
@@ -78,13 +78,13 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
 object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
-  override def calculateExposureTime(
+  override def calculateIntegrationTime(
     targetProfile:   TargetProfile,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[IntegrationTimeResult] =
+  ): IO[IntegrationTime] =
     IO.raiseError(CalculationError("A calculation error"))
 
   override def calculateGraph(

@@ -72,4 +72,4 @@ given Pickler[ItcWarning]    = generatePickler
 given Pickler[ItcCcd]        = generatePickler
 given Pickler[GraphResult]   = generatePickler
 
-given Pickler[IntegrationTimeResult] = generatePickler
+given Pickler[IntegrationTime] = generatePickler

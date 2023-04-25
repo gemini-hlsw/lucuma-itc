@@ -35,15 +35,9 @@ object CalculationError {
   def apply(msg: String): CalculationError = CalculationError(List(msg))
 }
 
-case class IntegrationTimeResult(
-  exposureTime:  TimeSpan,
-  exposures:     PosInt,
-  signalToNoise: SignalToNoise
-) derives Encoder.AsObject
-
 case class IntegrationTimeCalculationResult(
   serverVersion: String,
   dataVersion:   String,
   mode:          ObservingMode.Spectroscopy,
-  result:        IntegrationTimeResult
+  result:        IntegrationTime
 ) derives Encoder.AsObject

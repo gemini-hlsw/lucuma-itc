@@ -24,13 +24,13 @@ trait Itc[F[_]]:
    * Compute the exposure time and number of exposures required to achieve the desired
    * signal-to-noise under the requested conditions.
    */
-  def calculateExposureTime(
+  def calculateIntegrationTime(
     targetProfile:   TargetProfile,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
-  ): F[IntegrationTimeResult]
+  ): F[IntegrationTime]
 
   /**
    * Retrieve the graph data for the given mode and exposureTime and exposures

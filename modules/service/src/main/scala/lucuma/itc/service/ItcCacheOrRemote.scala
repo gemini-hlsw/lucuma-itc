@@ -96,7 +96,7 @@ trait ItcCacheOrRemote extends Version:
     (itc: Itc[F]) =>
       (calcRequest: CalcRequest) =>
         itc
-          .calculateExposureTime(
+          .calculateIntegrationTime(
             calcRequest.targetProfile,
             calcRequest.specMode,
             calcRequest.constraints,
@@ -112,7 +112,7 @@ trait ItcCacheOrRemote extends Version:
   )(
     itc:         Itc[F],
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
-  ): F[IntegrationTimeResult] =
+  ): F[IntegrationTime] =
     cacheOrRemote(calcRequest, requestCalc(itc))(
       "itc:calc:spec",
       redis

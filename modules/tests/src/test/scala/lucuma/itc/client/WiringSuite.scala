@@ -7,8 +7,8 @@ import buildinfo.BuildInfo
 import cats.syntax.either.*
 import cats.syntax.option.*
 import eu.timepit.refined.auto.*
-import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
+import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.enums.Band
 import lucuma.core.enums.CloudExtinction
@@ -30,6 +30,7 @@ import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED.Galaxy
 import lucuma.core.util.TimeSpan
+import lucuma.itc.IntegrationTime
 import lucuma.itc.client.SpectroscopyIntegrationTimeInput
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
 
@@ -48,7 +49,7 @@ class WiringSuite extends ClientSuite {
         ),
         IntegrationTime(
           TimeSpan.FromString.getOption("PT1S").get,
-          NonNegInt.unsafeFrom(10),
+          PosInt.unsafeFrom(10),
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
         ).some
       ).asRight

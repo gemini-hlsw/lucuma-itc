@@ -102,13 +102,13 @@ object ItcImpl {
     new Itc[F] with SignalToNoiseCalculation[F] {
       val L = Logger[F]
 
-      def calculateExposureTime(
+      def calculateIntegrationTime(
         targetProfile:   TargetProfile,
         observingMode:   ObservingMode,
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
-      ): F[IntegrationTimeResult] =
+      ): F[IntegrationTime] =
         Trace[F].span("calculate-exposure-time") {
           observingMode match
             case _: ObservingMode.Spectroscopy =>
@@ -253,7 +253,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
-      ): F[IntegrationTimeResult] = {
+      ): F[IntegrationTime] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise
@@ -268,7 +268,7 @@ object ItcImpl {
           maxTime:    Quantity[BigDecimal, Second],
           s:          legacy.GraphsRemoteResult,
           counter:    NonNegInt
-        ): F[IntegrationTimeResult] =
+        ): F[IntegrationTime] =
           val totalTime: Quantity[BigDecimal, Second] =
             if (snr === SignalToNoise.Min) TimeSpan.Max.toSeconds.withUnit[Second]
             else
@@ -321,7 +321,7 @@ object ItcImpl {
                  refineV[Positive](newNExp.toInt).toOption
                 ) match {
                   case (Some(sn), Some(expTime), Some(count)) =>
-                    IntegrationTimeResult(expTime, count, sn).pure[F]
+                    IntegrationTime(expTime, count, sn).pure[F]
                   case _                                      =>
                     MonadThrow[F].raiseError(
                       CalculationError(
@@ -406,7 +406,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Wavelength
-      ): F[IntegrationTimeResult] = {
+      ): F[IntegrationTime] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise
@@ -422,7 +422,7 @@ object ItcImpl {
                   TimeSpan
                     .fromSeconds(r.exposureCalculation.exposureTime)
                     .map(expTime =>
-                      IntegrationTimeResult(
+                      IntegrationTime(
                         expTime,
                         r.exposureCalculation.exposures,
                         r.exposureCalculation.signalToNoise
