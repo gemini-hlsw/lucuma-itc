@@ -15,6 +15,7 @@ import lucuma.core.util.Enumerated
 import lucuma.itc.encoders.given
 import lucuma.itc.legacy.ItcRemoteCcd
 import lucuma.itc.search.*
+import lucuma.itc.service.*
 
 import scala.concurrent.duration.FiniteDuration
 

@@ -27,7 +27,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
 import lucuma.itc.ItcVersions
-import lucuma.itc.SpectroscopyGraphResults
+import lucuma.itc.SpectroscopyGraphResult
 import lucuma.itc.*
 import lucuma.itc.encoders.given
 import lucuma.itc.search.ItcObservationDetails
@@ -134,7 +134,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(env: Cursor.Env): F[Result[SpectroscopyGraphResults]] =
+  )(env: Cursor.Env): F[Result[SpectroscopyGraphResult]] =
     (env.get[Wavelength]("wavelength"),
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[NonNegDuration]("exposureTime"),
@@ -147,6 +147,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
       Logger[F].info(
         s"ITC graph calculate for $mode, conditions $c, exposureTime $expTime x $exp and profile $sp"
       ) *> {
+        val signalToNoiseAt    = env.get[Wavelength]("signalToNoiseAt")
         val significantFigures = env.get[SignificantFigures]("significantFigures")
         val specMode           = mode match {
           case GmosNITCParams(grating, fpu, filter) =>
@@ -162,10 +163,10 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
               significantFigures.fold(r.charts)(v => r.charts.map(_.adjustSignificantFigures(v)))
             val ccds   =
               significantFigures.fold(r.ccds)(v => r.ccds.map(_.adjustSignificantFigures(v)))
-            SpectroscopyGraphResults(version(environment).value,
-                                     r.dataVersion.some,
-                                     ccds,
-                                     charts.flatMap(_.charts)
+            SpectroscopyGraphResult(version(environment).value,
+                                    BuildInfo.ocslibHash,
+                                    ccds,
+                                    charts.flatMap(_.charts)
             )
           }
       }
@@ -178,7 +179,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         }
     }.map(
       _.getOrElse(
-        Problem(s"Missing parameters for calculateSpectroscopyExposureTime graph $env").leftIorNec
+        Problem(s"Missing parameters for calculateSpectroscopyGraph $env").leftIorNec
       )
     )
 

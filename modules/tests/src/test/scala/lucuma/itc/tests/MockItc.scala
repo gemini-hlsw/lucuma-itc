@@ -47,7 +47,6 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     exposures:     PosLong
   ): IO[GraphResult] =
     GraphResult(
-      "1",
       NonEmptyList.of(
         ItcCcd(1,
                1,
@@ -95,7 +94,6 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     exposures:     PosLong
   ): IO[GraphResult] =
     GraphResult(
-      "1",
       NonEmptyList.of(
         ItcCcd(1,
                1,

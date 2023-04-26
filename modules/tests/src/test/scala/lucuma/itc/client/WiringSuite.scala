@@ -4,6 +4,7 @@
 package lucuma.itc.client
 
 import buildinfo.BuildInfo
+import cats.data.NonEmptyList
 import cats.syntax.either.*
 import cats.syntax.option.*
 import eu.timepit.refined.auto.*
@@ -30,9 +31,17 @@ import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED.Galaxy
 import lucuma.core.util.TimeSpan
+import lucuma.itc.ChartType
 import lucuma.itc.IntegrationTime
-import lucuma.itc.client.SpectroscopyIntegrationTimeInput
+import lucuma.itc.ItcAxis
+import lucuma.itc.ItcCcd
+import lucuma.itc.ItcChart
+import lucuma.itc.ItcChartGroup
+import lucuma.itc.ItcSeries
+import lucuma.itc.SeriesDataType
+import lucuma.itc.client.json.encoders.given
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
+import lucuma.refined.*
 
 import java.time.Instant
 import scala.collection.immutable.SortedMap
@@ -72,6 +81,41 @@ class WiringSuite extends ClientSuite {
       .contains(Wavelength.Min.asJson)
   }
 
+  test("ItcClient spectroscopy graph wiring and sanity check") {
+    optimizedSpectroscopyGraph(
+      WiringSuite.GraphInput,
+      OptimizedSpectroscopyGraphResult(
+        versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+        BuildInfo.ocslibHash,
+        NonEmptyList.of(
+          ItcCcd(1,
+                 1,
+                 2,
+                 2,
+                 Wavelength.fromIntNanometers(1001).get,
+                 Wavelength.fromIntNanometers(1001).get,
+                 3,
+                 4,
+                 5,
+                 Nil
+          )
+        ),
+        NonEmptyList.of(
+          OptimizedChartResult(
+            ChartType.S2NChart,
+            List(
+              OptimizedSeriesResult("title",
+                                    SeriesDataType.FinalS2NData,
+                                    List(1000.0, 1000.0),
+                                    ItcAxis(1, 2, 1, 2, 2).some,
+                                    ItcAxis(1000.0, 1000.0, 1000, 1000, 2).some
+              )
+            )
+          )
+        )
+      ).asRight
+    )
+  }
 }
 
 object WiringSuite {
@@ -98,4 +142,27 @@ object WiringSuite {
       )
     )
 
+  val GraphInput: SpectroscopyGraphInput =
+    SpectroscopyGraphInput(
+      Wavelength.Min,
+      None,
+      TimeSpan.fromSeconds(1).get,
+      PosInt.unsafeFrom(5),
+      SourceProfile.Point(BandNormalized[Integrated](Galaxy(Spiral).some, SortedMap.empty)),
+      Band.SloanU,
+      RadialVelocity.fromMetersPerSecond.getOption(1.0).get,
+      ConstraintSet(
+        ImageQuality.PointOne,
+        CloudExtinction.PointOne,
+        SkyBackground.Darkest,
+        WaterVapor.VeryDry,
+        AirMass.Default
+      ),
+      InstrumentMode.GmosNorth(
+        GmosNorthGrating.B1200_G5301,
+        GmosNorthFilter.GPrime.some,
+        GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25)
+      ),
+      Some(SignificantFiguresInput(2.refined, 2.refined, 2.refined))
+    )
 }

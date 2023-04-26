@@ -4597,6 +4597,26 @@ type TimeSpan {
   iso: String!
 }
 
+input TimeSpanInput {
+  # TimeSpan in µs
+  microseconds: Long
+
+  # TimeSpan in ms
+  milliseconds: BigDecimal
+
+  # TimeSpan in seconds
+  seconds: BigDecimal
+
+  # TimeSpan in minutes
+  minutes: BigDecimal
+
+  # TimeSpan in hours
+  hours: BigDecimal
+
+  # TimeSpan as an ISO-8601 string
+  iso: String
+}
+
 ##############
 # ITC schema
 ##############
@@ -4918,6 +4938,10 @@ type ItcChart {
   series: [ItcSeries!]!
 }
 
+type ItcWarning {
+  msg: String!
+}
+
 type ItcCcd {
   # the final SN ratio for a single image
   singleSNRatio: BigDecimal!
@@ -4946,6 +4970,9 @@ type ItcCcd {
   # the amplifier gain for this CCD (used to calculate ADU)
   ampGain:       BigDecimal!
 
+  # Possible warnings
+  warnings: [ItcWarning!]
+
 }
 
 type SpectroscopyGraphResult {
@@ -4954,7 +4981,7 @@ type SpectroscopyGraphResult {
   serverVersion: String!
 
   # token for the itc data version, can be null
-  dataVersion: String
+  dataVersion: String!
 
   # Results for each CCD
   ccds: [ItcCcd!]!

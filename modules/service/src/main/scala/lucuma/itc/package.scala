@@ -15,22 +15,21 @@ import lucuma.core.util.Enumerated
 import lucuma.itc.encoders.given
 import lucuma.itc.legacy.ItcRemoteCcd
 import lucuma.itc.search.*
+import lucuma.itc.service.*
 
 import scala.concurrent.duration.FiniteDuration
 
 case class UpstreamException(msg: String) extends RuntimeException(msg)
 
 case class GraphResult(
-  dataVersion: String,
-  ccds:        NonEmptyList[ItcCcd],
-  charts:      NonEmptyList[ItcChartGroup]
+  ccds:   NonEmptyList[ItcCcd],
+  charts: NonEmptyList[ItcChartGroup]
 )
 
 object GraphResult:
   def fromLegacy(
-    dataVersion: String,
-    ccds:        NonEmptyList[ItcRemoteCcd],
-    charts:      NonEmptyList[ItcChartGroup]
+    ccds:   NonEmptyList[ItcRemoteCcd],
+    charts: NonEmptyList[ItcChartGroup]
   ): GraphResult = {
     def maxWavelength(chart: ItcChart, seriesDataType: SeriesDataType): List[Wavelength] =
       chart.series
@@ -92,7 +91,7 @@ object GraphResult:
             .flattenOption
         }
     assert(calculatedCCDs.length === ccds.length)
-    GraphResult(dataVersion, NonEmptyList.fromListUnsafe(calculatedCCDs), charts)
+    GraphResult(NonEmptyList.fromListUnsafe(calculatedCCDs), charts)
   }
 
 enum SNResultType(val tag: String) derives Enumerated:

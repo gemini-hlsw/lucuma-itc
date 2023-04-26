@@ -30,6 +30,7 @@ import lucuma.itc.Itc
 import lucuma.itc.legacy.LocalItc
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
+import lucuma.itc.service.*
 import lucuma.refined.*
 import natchez.Trace
 import natchez.http4s.NatchezMiddleware
@@ -98,7 +99,7 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
 object ItcImpl {
   opaque type NumberOfExposures = Int
 
-  def build[F[_]: MonadThrow: Logger: Trace](itcLocal: LocalItc, dataVersion: String): Itc[F] =
+  def build[F[_]: MonadThrow: Logger: Trace](itcLocal: LocalItc): Itc[F] =
     new Itc[F] with SignalToNoiseCalculation[F] {
       val L = Logger[F]
 
@@ -240,7 +241,7 @@ object ItcImpl {
         exposures:        Long
       ): F[GraphResult] =
         itcGraph(targetProfile, observingMode, constraints, exposureDuration, exposures).map { r =>
-          GraphResult.fromLegacy(dataVersion, r.ccds, r.groups)
+          GraphResult.fromLegacy(r.ccds, r.groups)
         }
 
       /**

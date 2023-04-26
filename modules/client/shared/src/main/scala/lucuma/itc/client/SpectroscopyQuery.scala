@@ -10,6 +10,8 @@ import io.circe.Encoder
 import io.circe.HCursor
 import io.circe.Json
 import io.circe.JsonObject
+import lucuma.itc.client.OptimizedSpectroscopyGraphResult
+import lucuma.itc.client.json.decoders.given
 
 object SpectroscopyQuery extends GraphQLOperation[Unit] {
 
@@ -43,4 +45,68 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
   override val dataDecoder: Decoder[SpectroscopyResult] =
     (c: HCursor) => c.downField("spectroscopyIntegrationTime").as[SpectroscopyResult]
 
+}
+
+object SpectroscopyGraphQuery
+    extends GraphQLOperation.Typed[Unit, SpectroscopyGraphInput, OptimizedSpectroscopyGraphResult] {
+
+  val document =
+    """
+    query($input: SpectroscopyGraphInput!) {
+      spectroscopyGraph(input: $input) {
+        serverVersion
+        dataVersion
+        ccds {
+          singleSNRatio
+          totalSNRatio
+          peakPixelFlux
+          ampGain
+          maxTotalSNRatio
+          maxSingleSNRatio
+          wavelengthForMaxTotalSNRatio {
+            picometers
+          }
+          wavelengthForMaxSingleSNRatio {
+            picometers
+          }
+          wellDepth
+          warnings {
+            msg
+          }
+        }
+        charts {
+          chartType
+          series {
+            title
+            seriesType
+            dataY
+            xAxis {
+              start
+              end
+              count
+              min
+              max
+            }
+            yAxis {
+              start
+              end
+              count
+              min
+              max
+            }
+          }
+        }
+      }
+    }
+  """
+
+  override val varEncoder: Encoder.AsObject[Variables] =
+    Encoder.AsObject.instance[SpectroscopyGraphInput] { input =>
+      JsonObject(
+        "input" -> Encoder[SpectroscopyGraphInput].apply(input)
+      )
+    }
+
+  override val dataDecoder: Decoder[OptimizedSpectroscopyGraphResult] =
+    (c: HCursor) => c.downField("spectroscopyGraph").as[OptimizedSpectroscopyGraphResult]
 }

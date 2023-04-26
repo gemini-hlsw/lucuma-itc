@@ -16,6 +16,7 @@ import lucuma.core.model.ConstraintSet
 import lucuma.core.model.SourceProfile
 import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
+import lucuma.itc.encoders.given
 
 final case class SpectroscopyIntegrationTimeInput(
   wavelength:      Wavelength,
@@ -34,7 +35,7 @@ object SpectroscopyIntegrationTimeInput {
     def apply(a: SpectroscopyIntegrationTimeInput): Json =
       Json
         .obj(
-          "wavelength"      -> a.wavelength.asJson,
+          "wavelength"      -> Json.obj("picometers" -> a.wavelength.toPicometers.value.asJson),
           "signalToNoise"   -> a.signalToNoise.asJson,
           "signalToNoiseAt" -> a.signalToNoiseAt.asJson,
           "sourceProfile"   -> a.sourceProfile.asJson,

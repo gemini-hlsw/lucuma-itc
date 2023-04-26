@@ -5,13 +5,7 @@ package lucuma.itc
 
 import cats.data.NonEmptyList
 import io.circe.*
-
-case class SpectroscopyGraphResults(
-  serverVersion: String,
-  dataVersion:   Option[String],
-  ccds:          NonEmptyList[ItcCcd],
-  charts:        NonEmptyList[ItcChart]
-) derives Encoder.AsObject
+import lucuma.itc.encoders.given
 
 case class ItcVersions(
   serverVersion: String,
