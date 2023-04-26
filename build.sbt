@@ -12,7 +12,7 @@ val http4sVersion               = "0.23.18"
 val http4sJdkHttpClientVersion  = "0.9.0"
 val fs2Version                  = "3.6.1"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.74.0"
+val lucumaCoreVersion           = "0.75.0"
 val lucumaRefinedVersion        = "0.1.1"
 val slf4jVersion                = "2.0.7"
 val log4catsVersion             = "2.6.0"
@@ -36,7 +36,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.2.2"
 ThisBuild / crossScalaVersions  := Seq("3.2.2")
-ThisBuild / tlBaseVersion       := "0.9"
+ThisBuild / tlBaseVersion       := "0.10"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -77,7 +77,11 @@ lazy val model = crossProject(JVMPlatform, JSPlatform)
   .settings(
     name := "lucuma-itc",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % catsVersion
+      "org.typelevel"  %% "cats-core"    % catsVersion,
+      "edu.gemini"     %% "lucuma-core"  % lucumaCoreVersion,
+      "eu.timepit"     %% "refined"      % refinedVersion,
+      "eu.timepit"     %% "refined-cats" % refinedVersion,
+      "org.typelevel" %%% "kittens"      % kittensVersion
     )
   )
 
@@ -104,7 +108,7 @@ lazy val core = project
       "org.typelevel" %%% "spire-extras"        % spireVersion,
       "org.typelevel" %%% "kittens"             % kittensVersion,
       "org.typelevel"  %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
-      "com.lihaoyi"   %%% "pprint"              % pprintVersion          % Test
+      "com.lihaoyi"   %%% "pprint"              % pprintVersion
     )
   )
 
@@ -148,6 +152,7 @@ lazy val service = project
       "eu.timepit"     %% "refined-cats"                  % refinedVersion,
       "dev.profunktor" %% "redis4cats-effects"            % redis4CatsVersion,
       "dev.profunktor" %% "redis4cats-log4cats"           % redis4CatsVersion,
+      "com.lihaoyi"    %% "pprint"                        % pprintVersion,
       "io.suzaku"      %% "boopickle"                     % boopickleVersion,
       "org.typelevel"  %% "munit-cats-effect-3"           % munitCatsEffectVersion % Test
     ),

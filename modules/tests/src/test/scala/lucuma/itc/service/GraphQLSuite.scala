@@ -11,8 +11,9 @@ import cats.syntax.all._
 import io.circe.Json
 import io.circe.parser._
 import lucuma.core.math.Wavelength
-import lucuma.itc.ItcChart.apply
-import lucuma.itc.tests.FixedItc
+import lucuma.itc.Itc
+import lucuma.itc.tests.FailingMockItc
+import lucuma.itc.tests.MockItc
 import lucuma.itc.tests.NoOpRedis
 import natchez.Trace.Implicits.noop
 import org.http4s._
@@ -24,10 +25,12 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import java.time.Duration
 import scala.concurrent.duration._
 
-trait GraphQLSuite extends munit.CatsEffectSuite:
+trait GraphQLSuiteBase extends munit.CatsEffectSuite:
   given Logger[IO] = Slf4jLogger.getLogger[IO]
 
-  val service = lucuma.itc.tests.routes(FixedItc)
+  def itcService: Itc[IO]
+
+  val service = lucuma.itc.tests.routes(itcService)
 
   val itcFixture = ResourceSuiteLocalFixture(
     "itc",
@@ -61,3 +64,9 @@ trait GraphQLSuite extends munit.CatsEffectSuite:
       }
       .flatMap(_.as[Json])
       .assertEquals(expected)
+
+trait GraphQLSuite extends GraphQLSuiteBase:
+  override def itcService = MockItc
+
+trait FailingCalculationSuite extends GraphQLSuiteBase:
+  override def itcService = FailingMockItc

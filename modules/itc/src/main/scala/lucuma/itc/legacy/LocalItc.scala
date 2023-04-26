@@ -10,11 +10,29 @@ import lucuma.itc.legacy.given
 
 import java.lang.reflect.Method
 
-case class LocalItc(classLoader: ClassLoader) {
+/**
+ * This class contains methods to call to methods in ItcCalculation via reflection. This is done
+ * because the itc-server runs on scala 3 while the ItcCalculation method is based on scala 2
+ *
+ * Doing the call via reflection with a custom class loader lets us have both scala versions in the
+ * jvm at the same time.
+ *
+ * Note that params are passed as a String for the same reason avoiding conflicts across classes
+ * that may not be compatible. Instead we pass back and forth json encoded version of the params
+ * essentially the same as if ITC were a server accepting json and responding json
+ */
+case class LocalItc(classLoader: ClassLoader):
   // We need to keep a single reference to the reflected method
-  val method: Method = classLoader
+  val calculateChartsMethod: Method = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
-    .getMethod("calculation", classOf[String], classOf[String])
+    .getMethod("calculateCharts", classOf[String])
+
+  val calculateExposureTimeMethod = classLoader
+    .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
+    .getMethod("calculateExposureTime", classOf[String])
+
+  private val LegacyRight = """Right\((.*)\)""".r
+  private val LegacyLeft  = """Left\((.*?):(?s)(.*)?\)?""".r
 
   /**
    * This method does a call to the method ItcCalculation.calculation via reflection. This is done
@@ -27,23 +45,37 @@ case class LocalItc(classLoader: ClassLoader) {
    * that may not be compatible. Instead we pass back and forth json encoded version of the params
    * essentially the same as if ITC were a server accepting json and responding json
    */
-  def callLocal(call: String): Either[String, ItcRemoteResult] = {
-    val res = method
-      .invoke(null, call, "token") // null as it is a static method
+  def calculateCharts(jsonParams: String): Either[List[String], GraphsRemoteResult] =
+    val res = calculateChartsMethod
+      .invoke(null, jsonParams) // null as it is a static method
       .asInstanceOf[String]
 
-    val LegacyRight = """Right\((.*)\)""".r
-    val LegacyLeft  = """Left\((.*)\)""".r
-
-    res match {
-      case LegacyRight(result) =>
-        decode[legacy.ItcRemoteResult](result).leftMap { e =>
-          e.getMessage()
+    res match
+      case LegacyRight(result)          =>
+        decode[legacy.GraphsRemoteResult](result).leftMap { e =>
+          List(e.getMessage())
         }
-      case LegacyLeft(result)  =>
-        Left(result)
-      case m                   =>
-        Left(s"Unknown result: $m")
-    }
-  }
-}
+      case LegacyLeft(result)           =>
+        Left(List(result))
+      case LegacyLeft(result1, result2) =>
+        Left(List(result1, result2))
+      case m                            =>
+        Left(List(m))
+
+  /**
+   * This method does a call to the method ItcCalculation.calculate via reflection.
+   */
+  def calculateExposureTime(jsonParams: String): Either[List[String], ExposureTimeRemoteResult] =
+    val res = calculateExposureTimeMethod
+      .invoke(null, jsonParams) // null as it is a static method
+      .asInstanceOf[String]
+
+    res match
+      case LegacyRight(result)          =>
+        decode[legacy.ExposureTimeRemoteResult](result).leftMap { e =>
+          List(e.getMessage())
+        }
+      case LegacyLeft(result1, result2) =>
+        Left(List(result1, result2))
+      case m                            =>
+        Left(List(m))

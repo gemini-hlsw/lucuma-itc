@@ -5,6 +5,8 @@ package lucuma.itc.legacy
 
 import cats.data.NonEmptyList
 import cats.syntax.all._
+import eu.timepit.refined.numeric.Positive
+import eu.timepit.refined.refineV
 import io.circe.*
 import io.circe.generic.semiauto._
 import io.circe.refined.*
@@ -12,6 +14,7 @@ import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.Redshift
+import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
@@ -346,13 +349,28 @@ given Decoder[ItcChart] = (c: HCursor) =>
 given Decoder[ItcChartGroup] = (c: HCursor) =>
   c.downField("charts").as[NonEmptyList[ItcChart]].map(ItcChartGroup.apply)
 
-given Decoder[ItcRemoteResult] = (c: HCursor) =>
+given Decoder[GraphsRemoteResult] = (c: HCursor) =>
   for
-    v      <- c.downField("versionToken").as[String]
     charts <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
                 .downField("chartGroups")
                 .as[NonEmptyList[ItcChartGroup]]
     ccd    <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
                 .downField("ccds")
                 .as[NonEmptyList[ItcRemoteCcd]]
-  yield ItcRemoteResult(v, ccd, charts)
+  yield GraphsRemoteResult(ccd, charts)
+
+given Decoder[ExposureCalculation] = (c: HCursor) =>
+  for
+    time  <- c.downField("exposureCalculation").downField("exposureTime").as[Double]
+    count <-
+      c.downField("exposureCalculation")
+        .downField("exposures")
+        .as[Int]
+        .flatMap(refineV[Positive](_).leftMap(e => DecodingFailure(e, List.empty)))
+    sn    <- c.downField("exposureCalculation").downField("signalToNoise").as[SignalToNoise]
+  yield ExposureCalculation(time, count, sn)
+
+given Decoder[ExposureTimeRemoteResult] = (c: HCursor) =>
+  for calc <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
+                .as[ExposureCalculation]
+  yield ExposureTimeRemoteResult(calc)

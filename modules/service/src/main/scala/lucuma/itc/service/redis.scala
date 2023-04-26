@@ -10,6 +10,7 @@ import eu.timepit.refined.api.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.Enumerated
+import lucuma.core.util.TimeSpan
 import lucuma.itc.*
 
 import scala.concurrent.duration.*
@@ -51,6 +52,13 @@ given Pickler[SignalToNoise] =
       .getOrElse(sys.error("cannot unpickle"))
   )(_.toBigDecimal)
 
+given Pickler[TimeSpan] =
+  transformPickler((d: Long) =>
+    TimeSpan
+      .fromMicroseconds(d)
+      .getOrElse(sys.error("cannot unpickle"))
+  )(_.toMicroseconds)
+
 given Pickler[Wavelength] =
   transformPickler((i: Int) =>
     Wavelength.intPicometers
@@ -58,16 +66,10 @@ given Pickler[Wavelength] =
       .getOrElse(sys.error("cannot unpickle"))
   )(_.toPicometers.value.value)
 
-given Pickler[ItcChart]                        = generatePickler
-given Pickler[ItcChartGroup]                   = generatePickler
-given Pickler[ItcWarning]                      = generatePickler
-given Pickler[ItcCcd]                          = generatePickler
-given Pickler[Itc.GraphResult]                 = generatePickler
-given Pickler[Itc.CalcResult.Success]          = generatePickler
-given Pickler[Itc.CalcResult.SourceTooBright]  = generatePickler
-given Pickler[Itc.CalcResult.CalculationError] = generatePickler
-given Pickler[Itc.CalcResult]                  = compositePickler[Itc.CalcResult]
-  .addConcreteType[Itc.CalcResult.Success]
-  .addConcreteType[Itc.CalcResult.SourceTooBright]
-  .addConcreteType[Itc.CalcResult.CalculationError]
-given Pickler[Itc.CalcResultWithVersion]       = generatePickler
+given Pickler[ItcChart]      = generatePickler
+given Pickler[ItcChartGroup] = generatePickler
+given Pickler[ItcWarning]    = generatePickler
+given Pickler[ItcCcd]        = generatePickler
+given Pickler[GraphResult]   = generatePickler
+
+given Pickler[IntegrationTime] = generatePickler

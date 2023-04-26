@@ -30,7 +30,7 @@ trait ItcClient[F[_]] {
   // TODO: chart
 
   def spectroscopy(
-    input:    SpectroscopyModeInput,
+    input:    SpectroscopyIntegrationTimeInput,
     useCache: Boolean = true
   ): F[SpectroscopyResult]
 
@@ -45,22 +45,16 @@ object ItcClient {
     client: Client[F]
   ): F[ItcClient[F]] =
     for {
-      cache <- ItcCache.simple[F, SpectroscopyModeInput, SpectroscopyResult]
+      cache <- ItcCache.simple[F, SpectroscopyIntegrationTimeInput, SpectroscopyResult]
       http  <- Http4sHttpClient.of[F, Unit](uri)(Async[F], Http4sHttpBackend(client), Logger[F])
     } yield new ItcClient[F] {
       override def spectroscopy(
-        input:    SpectroscopyModeInput,
+        input:    SpectroscopyIntegrationTimeInput,
         useCache: Boolean = true
       ): F[SpectroscopyResult] = {
 
         val callOut: F[SpectroscopyResult] =
-          for {
-            r  <- http.request(SpectroscopyQuery).withInput(input)
-            rʹ <- ApplicativeError.liftFromOption[F](
-                    r.headOption,
-                    new RuntimeException("No results returned by ITC.")
-                  )
-          } yield rʹ
+          http.request(SpectroscopyQuery).withInput(input)
 
         for {
           _ <- Logger[F].info(s"ITC Input: \n${input.asJson.spaces2}")

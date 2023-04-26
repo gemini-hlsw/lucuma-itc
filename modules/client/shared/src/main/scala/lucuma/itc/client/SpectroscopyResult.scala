@@ -9,10 +9,11 @@ import cats.syntax.traverse.*
 import io.circe.Decoder
 import io.circe.DecodingFailure
 import io.circe.HCursor
+import lucuma.itc.IntegrationTime
 
 final case class SpectroscopyResult(
   versions: ItcVersions,
-  result:   Option[ItcResult]
+  result:   Option[IntegrationTime]
 )
 
 object SpectroscopyResult {
@@ -21,12 +22,11 @@ object SpectroscopyResult {
     def apply(c: HCursor): Decoder.Result[SpectroscopyResult] =
       for {
         v <- c.as[ItcVersions]
-        r <- c.downField("results").downArray.downField("itc").success.traverse(_.as[ItcResult])
+        r <- c.downField("result").success.traverse(_.as[IntegrationTime])
       } yield SpectroscopyResult(v, r)
 
   given Eq[SpectroscopyResult] with
     def eqv(x: SpectroscopyResult, y: SpectroscopyResult): Boolean =
-      x.versions === y.versions &&
-        x.result === y.result
+      x.versions === y.versions && x.result === y.result
 
 }

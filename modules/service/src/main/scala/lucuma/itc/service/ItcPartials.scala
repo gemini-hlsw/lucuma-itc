@@ -59,8 +59,6 @@ import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosNorth
 import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
-import lucuma.itc.search.Result.Spectroscopy
-import lucuma.itc.search.SpectroscopyResults
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.service.config.*
 import lucuma.itc.service.syntax.all.*
@@ -542,62 +540,6 @@ trait GracklePartials extends GrackleParsers:
 
         case _ =>
           i.addProblem(s"Not valid significantFigures value $r")
-
-  def instrumentModesPartial: PartialFunction[(Partial, (String, Value)), Partial] =
-    case (i, ("modes", ListValue(m))) =>
-      val modes = m.collect {
-        case ObjectValue(List(("gmosN", AbsentValue), ("gmosS", gmosS))) =>
-          gmosS match
-            case ObjectValue(
-                  List(("grating", TypedEnumValue(EnumValue(d, _, _, _))),
-                       ("fpu",
-                        ObjectValue(
-                          List(("customMask", AbsentValue),
-                               ("builtin", TypedEnumValue(EnumValue(fpu, _, _, _)))
-                          )
-                        )
-                       ),
-                       ("filter", f)
-                  )
-                ) =>
-              val filterOpt = f match
-                case TypedEnumValue(EnumValue(f, _, _, _)) =>
-                  gsFilter.get(f)
-                case _                                     => none
-
-              (gsGrating.get(d), gsFpu.get(fpu)).mapN((a, b) =>
-                GmosSITCParams(a, GmosSouthFpuParam(b), filterOpt)
-              )
-            case _ =>
-              none
-
-        case ObjectValue(List(("gmosN", gmosN), ("gmosS", AbsentValue))) =>
-          gmosN match
-            case ObjectValue(
-                  List(("grating", TypedEnumValue(EnumValue(d, _, _, _))),
-                       ("fpu",
-                        ObjectValue(
-                          List(("customMask", AbsentValue),
-                               ("builtin", TypedEnumValue(EnumValue(fpu, _, _, _)))
-                          )
-                        )
-                       ),
-                       ("filter", f)
-                  )
-                ) =>
-              val filterOpt = f match
-                case TypedEnumValue(EnumValue(f, _, _, _)) =>
-                  gnFilter.get(f)
-                case _                                     => none
-
-              (gnGrating.get(d), gnFpu.get(fpu)).mapN((a, b) =>
-                GmosNITCParams(a, GmosNorthFpuParam(b), filterOpt)
-              )
-            case _ =>
-              none
-
-      }.flatten
-      cursorEnvAdd("modes", modes)(i)
 
   def instrumentModePartial: PartialFunction[(Partial, (String, Value)), Partial] =
     case (i, ("mode", m)) =>

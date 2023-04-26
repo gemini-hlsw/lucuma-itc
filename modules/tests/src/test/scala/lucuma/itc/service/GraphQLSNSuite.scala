@@ -17,7 +17,7 @@ class GraphQLSNSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopySignalToNoiseBeta(input: {
+          spectroscopySignalToNoise(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -81,7 +81,7 @@ class GraphQLSNSuite extends GraphQLSuite {
         """,
       json"""{
           "data": {
-            "spectroscopySignalToNoiseBeta": {
+            "spectroscopySignalToNoise": {
               "resultType": "SUCCESS",
               "signalToNoise": 1001.0
             }
@@ -95,7 +95,7 @@ class GraphQLSNSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopySignalToNoiseBeta(input: {
+          spectroscopySignalToNoise(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -162,7 +162,7 @@ class GraphQLSNSuite extends GraphQLSuite {
         """,
       json"""{
           "data": {
-            "spectroscopySignalToNoiseBeta": {
+            "spectroscopySignalToNoise": {
               "resultType": "SUCCESS",
               "signalToNoise": 1000.0
             }
@@ -176,7 +176,7 @@ class GraphQLSNSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopySignalToNoiseBeta(input: {
+          spectroscopySignalToNoise(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -243,7 +243,7 @@ class GraphQLSNSuite extends GraphQLSuite {
         """,
       json"""{
           "data": {
-            "spectroscopySignalToNoiseBeta": {
+            "spectroscopySignalToNoise": {
               "resultType": "SUCCESS",
               "signalToNoise": 1000.5
             }
@@ -256,7 +256,7 @@ class GraphQLSNSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopySignalToNoiseBeta(input: {
+          spectroscopySignalToNoise(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -325,7 +325,7 @@ class GraphQLSNSuite extends GraphQLSuite {
         """,
       json"""{
           "data": {
-            "spectroscopySignalToNoiseBeta": {
+            "spectroscopySignalToNoise": {
               "resultType": "BELOW_RANGE",
               "signalToNoiseAt": {
                 "nanometers": 0.10
@@ -341,7 +341,7 @@ class GraphQLSNSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopySignalToNoiseBeta(input: {
+          spectroscopySignalToNoise(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -405,7 +405,7 @@ class GraphQLSNSuite extends GraphQLSuite {
         """,
       json"""{
           "data": {
-            "spectroscopySignalToNoiseBeta": {
+            "spectroscopySignalToNoise": {
               "resultType": "ABOVE_RANGE"
             }
           }

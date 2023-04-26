@@ -3,11 +3,12 @@
 
 package lucuma.itc.client
 
+import buildinfo.BuildInfo
 import cats.syntax.either.*
 import cats.syntax.option.*
 import eu.timepit.refined.auto.*
-import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
+import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.enums.Band
 import lucuma.core.enums.CloudExtinction
@@ -29,7 +30,8 @@ import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED.Galaxy
 import lucuma.core.util.TimeSpan
-import lucuma.itc.client.SpectroscopyModeInput
+import lucuma.itc.IntegrationTime
+import lucuma.itc.client.SpectroscopyIntegrationTimeInput
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
 
 import java.time.Instant
@@ -43,15 +45,13 @@ class WiringSuite extends ClientSuite {
       SpectroscopyResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          None
+          BuildInfo.ocslibHash.some
         ),
-        ItcResult
-          .Success(
-            TimeSpan.FromString.getOption("PT1S").get,
-            NonNegInt.unsafeFrom(10),
-            SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
-          )
-          .some
+        IntegrationTime(
+          TimeSpan.FromString.getOption("PT1S").get,
+          PosInt.unsafeFrom(10),
+          SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
+        ).some
       ).asRight
     )
   }
@@ -76,8 +76,8 @@ class WiringSuite extends ClientSuite {
 
 object WiringSuite {
 
-  val Input: SpectroscopyModeInput =
-    SpectroscopyModeInput(
+  val Input: SpectroscopyIntegrationTimeInput =
+    SpectroscopyIntegrationTimeInput(
       Wavelength.Min,
       SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
       Option.empty[Wavelength],

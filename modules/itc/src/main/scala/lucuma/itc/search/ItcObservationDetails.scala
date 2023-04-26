@@ -7,11 +7,12 @@ import io.circe._
 import io.circe.generic.semiauto._
 import io.circe.syntax._
 import lucuma.core.math.Angle
+import lucuma.core.math.Wavelength
 import lucuma.itc.syntax.finiteduration._
 
 import scala.concurrent.duration.FiniteDuration
 
-final case class ItcObservationDetails(
+case class ItcObservationDetails(
   calculationMethod: ItcObservationDetails.CalculationMethod,
   analysisMethod:    ItcObservationDetails.AnalysisMethod
 )
@@ -25,7 +26,7 @@ object ItcObservationDetails {
     sealed trait SignalToNoise extends CalculationMethod
     object SignalToNoise {
 
-      final case class Imaging(
+      case class Imaging(
         exposures:        Int,
         coadds:           Option[Int],
         exposureDuration: FiniteDuration,
@@ -46,7 +47,7 @@ object ItcObservationDetails {
           }
       }
 
-      final case class Spectroscopy(
+      case class Spectroscopy(
         exposures:        Int,
         coadds:           Option[Int],
         exposureDuration: FiniteDuration,
@@ -67,12 +68,35 @@ object ItcObservationDetails {
           }
       }
 
+      case class SpectroscopyWithSNAt(
+        sigma:          Double,
+        wavelength:     Wavelength,
+        coadds:         Option[Int],
+        sourceFraction: Double,
+        ditherOffset:   Angle
+      ) extends SignalToNoise
+
+      object SpectroscopyWithSNAt {
+        val encoder: Encoder[SpectroscopyWithSNAt] =
+          Encoder.instance { a =>
+            Json.obj(
+              "sigma"          -> a.sigma.asJson,
+              "wavelength"     -> a.wavelength.toNanometers.value.value.asJson,
+              "coadds"         -> a.coadds.asJson,
+              "sourceFraction" -> a.sourceFraction.asJson,
+              "offset"         -> Angle.signedDecimalArcseconds.get(a.ditherOffset).asJson
+            )
+          }
+      }
+
       given encoder: Encoder[SignalToNoise] =
         new Encoder[SignalToNoise] {
           def apply(a: SignalToNoise): Json =
             a match {
-              case a: Spectroscopy => Json.obj("SpectroscopyS2N" -> Spectroscopy.encoder(a))
-              case a: Imaging      => Json.obj("ImagingS2N" -> Imaging.encoder(a))
+              case a: Spectroscopy         => Json.obj("SpectroscopyS2N" -> Spectroscopy.encoder(a))
+              case a: SpectroscopyWithSNAt =>
+                Json.obj("SpectroscopyInt" -> SpectroscopyWithSNAt.encoder(a))
+              case a: Imaging              => Json.obj("ImagingS2N" -> Imaging.encoder(a))
             }
         }
 

@@ -17,7 +17,7 @@ import lucuma.core.model.SourceProfile
 import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
 
-final case class SpectroscopyModeInput(
+final case class SpectroscopyIntegrationTimeInput(
   wavelength:      Wavelength,
   signalToNoise:   SignalToNoise,
   signalToNoiseAt: Option[Wavelength],
@@ -28,10 +28,10 @@ final case class SpectroscopyModeInput(
   mode:            InstrumentMode
 )
 
-object SpectroscopyModeInput {
+object SpectroscopyIntegrationTimeInput {
 
-  given Encoder[SpectroscopyModeInput] with
-    def apply(a: SpectroscopyModeInput): Json =
+  given Encoder[SpectroscopyIntegrationTimeInput] with
+    def apply(a: SpectroscopyIntegrationTimeInput): Json =
       Json
         .obj(
           "wavelength"      -> a.wavelength.asJson,
@@ -45,11 +45,11 @@ object SpectroscopyModeInput {
               .asJson
           ),
           "constraints"     -> a.constraints.asJson,
-          "modes"           -> List(a.mode).asJson
+          "mode"            -> a.mode.asJson
         )
         .dropNullValues
 
-  given Eq[SpectroscopyModeInput] =
+  given Eq[SpectroscopyIntegrationTimeInput] =
     Eq.by { a =>
       (
         a.wavelength,
