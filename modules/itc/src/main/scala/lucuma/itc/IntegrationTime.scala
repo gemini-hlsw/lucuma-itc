@@ -22,7 +22,7 @@ sealed trait IntegrationTimeError extends RuntimeException {
 
 case class SourceTooBright(halfWellTime: BigDecimal) extends IntegrationTimeError
     derives Encoder.AsObject {
-  val message: String = s"Source too bright, it saturates at $halfWellTime"
+  val message: String = f"Source saturates in $halfWellTime%.2f seconds"
 }
 
 /** Generic calculation error */
