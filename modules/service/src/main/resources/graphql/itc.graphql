@@ -4631,9 +4631,10 @@ type Query {
     input: SpectroscopySignalToNoiseInput!
   ): SignalToNoiseResult!
 
-  spectroscopyGraph(
-    input: SpectroscopyGraphInput!
-  ): SpectroscopyGraphResult!
+  # Given an instrument and a mode, return the graph data in an optimized format
+  optimizedSpectroscopyGraph(
+    input: OptimizedSpectroscopyGraphInput!
+  ): OptimizedSpectroscopyGraphResult!
 
   versions: ItcVersions
 }
@@ -4763,12 +4764,9 @@ input SignificantFiguresInput {
 }
 
 # Parameters to retrieve graph data
-input SpectroscopyGraphInput {
+input OptimizedSpectroscopyGraphInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
-
-  # Wavelength at which to measure Signal to Noise
-  signalToNoiseAt: WavelengthInput
 
   # Exposure time duration
   exposureTime: NonNegDurationInput!
@@ -4975,7 +4973,7 @@ type ItcCcd {
 
 }
 
-type SpectroscopyGraphResult {
+type OptimizedSpectroscopyGraphResult {
 
   # id of the backend server
   serverVersion: String!

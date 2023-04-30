@@ -48,12 +48,15 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
 }
 
 object SpectroscopyGraphQuery
-    extends GraphQLOperation.Typed[Unit, SpectroscopyGraphInput, OptimizedSpectroscopyGraphResult] {
+    extends GraphQLOperation.Typed[Unit,
+                                   OptimizedSpectroscopyGraphInput,
+                                   OptimizedSpectroscopyGraphResult
+    ] {
 
   val document =
     """
-    query($input: SpectroscopyGraphInput!) {
-      spectroscopyGraph(input: $input) {
+    query($input: OptimizedSpectroscopyGraphInput!) {
+      optimizedSpectroscopyGraph(input: $input) {
         serverVersion
         dataVersion
         ccds {
@@ -101,12 +104,12 @@ object SpectroscopyGraphQuery
   """
 
   override val varEncoder: Encoder.AsObject[Variables] =
-    Encoder.AsObject.instance[SpectroscopyGraphInput] { input =>
+    Encoder.AsObject.instance[OptimizedSpectroscopyGraphInput] { input =>
       JsonObject(
-        "input" -> Encoder[SpectroscopyGraphInput].apply(input)
+        "input" -> Encoder[OptimizedSpectroscopyGraphInput].apply(input)
       )
     }
 
   override val dataDecoder: Decoder[OptimizedSpectroscopyGraphResult] =
-    (c: HCursor) => c.downField("spectroscopyGraph").as[OptimizedSpectroscopyGraphResult]
+    (c: HCursor) => c.downField("optimizedSpectroscopyGraph").as[OptimizedSpectroscopyGraphResult]
 }

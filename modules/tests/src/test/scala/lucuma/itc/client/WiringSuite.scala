@@ -142,10 +142,9 @@ object WiringSuite {
       )
     )
 
-  val GraphInput: SpectroscopyGraphInput =
-    SpectroscopyGraphInput(
+  val GraphInput: OptimizedSpectroscopyGraphInput =
+    OptimizedSpectroscopyGraphInput(
       Wavelength.Min,
-      None,
       TimeSpan.fromSeconds(1).get,
       PosInt.unsafeFrom(5),
       SourceProfile.Point(BandNormalized[Integrated](Galaxy(Spiral).some, SortedMap.empty)),

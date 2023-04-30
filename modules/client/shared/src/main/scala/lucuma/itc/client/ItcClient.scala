@@ -34,7 +34,7 @@ trait ItcClient[F[_]] {
   ): F[SpectroscopyResult]
 
   def optimizedSpectroscopyGraph(
-    input:    SpectroscopyGraphInput,
+    input:    OptimizedSpectroscopyGraphInput,
     useCache: Boolean = true
   ): F[OptimizedSpectroscopyGraphResult]
 
@@ -51,7 +51,8 @@ object ItcClient {
   ): F[ItcClient[F]] =
     for {
       cache      <- ItcCache.simple[F, SpectroscopyIntegrationTimeInput, SpectroscopyResult]
-      graphCache <- ItcCache.simple[F, SpectroscopyGraphInput, OptimizedSpectroscopyGraphResult]
+      graphCache <-
+        ItcCache.simple[F, OptimizedSpectroscopyGraphInput, OptimizedSpectroscopyGraphResult]
       http       <- Http4sHttpClient.of[F, Unit](uri)(Async[F], Http4sHttpBackend(client), Logger[F])
     } yield new ItcClient[F] {
       override def spectroscopy(
@@ -74,7 +75,7 @@ object ItcClient {
         http.request(VersionsQuery)
 
       def optimizedSpectroscopyGraph(
-        input:    SpectroscopyGraphInput,
+        input:    OptimizedSpectroscopyGraphInput,
         useCache: Boolean = true
       ): F[OptimizedSpectroscopyGraphResult] = {
         val callOut: F[OptimizedSpectroscopyGraphResult] =

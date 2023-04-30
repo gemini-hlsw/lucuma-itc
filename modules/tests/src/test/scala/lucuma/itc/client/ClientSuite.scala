@@ -65,7 +65,7 @@ trait ClientSuite extends CatsEffectSuite {
     }
 
   def optimizedSpectroscopyGraph(
-    in:       SpectroscopyGraphInput,
+    in:       OptimizedSpectroscopyGraphInput,
     expected: Either[String, OptimizedSpectroscopyGraphResult]
   ): IO[Unit] =
     itcClient.flatMap {

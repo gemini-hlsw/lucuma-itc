@@ -265,7 +265,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                 RootEffect.computeEncodable("spectroscopySignalToNoise")((_, p, env) =>
                   calculateSignalToNoise(environment, redis, itc)(env)
                 ),
-                RootEffect.computeEncodable("spectroscopyGraph")((_, p, env) =>
+                RootEffect.computeEncodable("optimizedSpectroscopyGraph")((_, p, env) =>
                   spectroscopyGraph(environment, redis, itc)(env)
                 )
               )
@@ -302,7 +302,10 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                           fallback
                         )
                   }.map(e => e.copy(child = Select("spectroscopyIntegrationTime", Nil, child)))
-                case Select("spectroscopyGraph", List(Binding("input", ObjectValue(wv))), child) =>
+                case Select("optimizedSpectroscopyGraph",
+                            List(Binding("input", ObjectValue(wv))),
+                            child
+                    ) =>
                   wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
                     case (e, c) =>
                       wavelengthPartial
@@ -318,7 +321,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                           (e, c),
                           fallback
                         )
-                  }.map(e => e.copy(child = Select("spectroscopyGraph", Nil, child)))
+                  }.map(e => e.copy(child = Select("optimizedSpectroscopyGraph", Nil, child)))
                 case Select("spectroscopySignalToNoise",
                             List(Binding("input", ObjectValue(wv))),
                             child
