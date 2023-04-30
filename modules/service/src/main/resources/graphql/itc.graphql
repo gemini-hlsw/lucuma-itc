@@ -4597,6 +4597,26 @@ type TimeSpan {
   iso: String!
 }
 
+input TimeSpanInput {
+  # TimeSpan in µs
+  microseconds: Long
+
+  # TimeSpan in ms
+  milliseconds: BigDecimal
+
+  # TimeSpan in seconds
+  seconds: BigDecimal
+
+  # TimeSpan in minutes
+  minutes: BigDecimal
+
+  # TimeSpan in hours
+  hours: BigDecimal
+
+  # TimeSpan as an ISO-8601 string
+  iso: String
+}
+
 ##############
 # ITC schema
 ##############
@@ -4611,9 +4631,10 @@ type Query {
     input: SpectroscopySignalToNoiseInput!
   ): SignalToNoiseResult!
 
-  spectroscopyGraph(
-    input: SpectroscopyGraphInput!
-  ): SpectroscopyGraphResult!
+  # Given an instrument and a mode, return the graph data in an optimized format
+  optimizedSpectroscopyGraph(
+    input: OptimizedSpectroscopyGraphInput!
+  ): OptimizedSpectroscopyGraphResult!
 
   versions: ItcVersions
 }
@@ -4743,12 +4764,9 @@ input SignificantFiguresInput {
 }
 
 # Parameters to retrieve graph data
-input SpectroscopyGraphInput {
+input OptimizedSpectroscopyGraphInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
-
-  # Wavelength at which to measure Signal to Noise
-  signalToNoiseAt: WavelengthInput
 
   # Exposure time duration
   exposureTime: NonNegDurationInput!
@@ -4918,6 +4936,10 @@ type ItcChart {
   series: [ItcSeries!]!
 }
 
+type ItcWarning {
+  msg: String!
+}
+
 type ItcCcd {
   # the final SN ratio for a single image
   singleSNRatio: BigDecimal!
@@ -4946,15 +4968,18 @@ type ItcCcd {
   # the amplifier gain for this CCD (used to calculate ADU)
   ampGain:       BigDecimal!
 
+  # Possible warnings
+  warnings: [ItcWarning!]
+
 }
 
-type SpectroscopyGraphResult {
+type OptimizedSpectroscopyGraphResult {
 
   # id of the backend server
   serverVersion: String!
 
   # token for the itc data version, can be null
-  dataVersion: String
+  dataVersion: String!
 
   # Results for each CCD
   ccds: [ItcCcd!]!

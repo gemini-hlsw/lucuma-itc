@@ -52,7 +52,7 @@ end ItcSyntax
 trait ItcChartSyntax:
   extension (series: ItcSeries)
     def adjustSignificantFigures(figures: SignificantFigures): ItcSeries =
-      val data =
+      val data: List[(Double, Double)] =
         series.data.map((x, y) =>
           (figures.xAxis.fold(x)(xDigits => roundToSignificantFigures(x, xDigits.value)),
            figures.yAxis.fold(y)(yDigits => roundToSignificantFigures(y, yDigits.value))

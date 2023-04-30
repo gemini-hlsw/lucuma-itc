@@ -32,14 +32,6 @@ pull_request_rules:
       add:
       - client
       remove: []
-- name: Label itc PRs
-  conditions:
-  - files~=^modules/itc/
-  actions:
-    label:
-      add:
-      - itc
-      remove: []
 - name: Label model PRs
   conditions:
   - files~=^modules/model/

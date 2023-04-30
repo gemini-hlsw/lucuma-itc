@@ -23,7 +23,7 @@ import scala.concurrent.duration._
 
 trait ClientSuite extends CatsEffectSuite {
 
-  private implicit val log: Logger[IO] =
+  given Logger[IO] =
     Slf4jLogger.getLoggerFromClass(getClass)
 
   private val httpApp: Resource[IO, WebSocketBuilder2[IO] => HttpApp[IO]] =
@@ -60,6 +60,16 @@ trait ClientSuite extends CatsEffectSuite {
   ): IO[Unit] =
     itcClient.flatMap {
       _.spectroscopy(in).attempt
+        .map(_.leftMap(_.getMessage))
+        .assertEquals(expected)
+    }
+
+  def optimizedSpectroscopyGraph(
+    in:       OptimizedSpectroscopyGraphInput,
+    expected: Either[String, OptimizedSpectroscopyGraphResult]
+  ): IO[Unit] =
+    itcClient.flatMap {
+      _.optimizedSpectroscopyGraph(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
     }

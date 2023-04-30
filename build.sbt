@@ -36,7 +36,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.2.2"
 ThisBuild / crossScalaVersions  := Seq("3.2.2")
-ThisBuild / tlBaseVersion       := "0.10"
+ThisBuild / tlBaseVersion       := "0.11"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -77,38 +77,11 @@ lazy val model = crossProject(JVMPlatform, JSPlatform)
   .settings(
     name := "lucuma-itc",
     libraryDependencies ++= Seq(
-      "org.typelevel"  %% "cats-core"    % catsVersion,
-      "edu.gemini"     %% "lucuma-core"  % lucumaCoreVersion,
-      "eu.timepit"     %% "refined"      % refinedVersion,
-      "eu.timepit"     %% "refined-cats" % refinedVersion,
+      "org.typelevel" %%% "cats-core"    % catsVersion,
+      "edu.gemini"    %%% "lucuma-core"  % lucumaCoreVersion,
+      "eu.timepit"    %%% "refined"      % refinedVersion,
+      "eu.timepit"    %%% "refined-cats" % refinedVersion,
       "org.typelevel" %%% "kittens"      % kittensVersion
-    )
-  )
-
-// Contains ITC logic and conectivity to the old itc server
-lazy val core = project
-  .in(file("modules/itc"))
-  .dependsOn(model.jvm)
-  .settings(commonSettings)
-  .settings(
-    name := "lucuma-itc-core",
-    libraryDependencies ++= Seq(
-      "edu.gemini"     %% "lucuma-core"         % lucumaCoreVersion,
-      "edu.gemini"    %%% "lucuma-refined"      % lucumaRefinedVersion,
-      "org.typelevel"  %% "cats-core"           % catsVersion,
-      "org.typelevel"  %% "cats-effect"         % catsEffectVersion,
-      "org.http4s"     %% "http4s-circe"        % http4sVersion,
-      "org.http4s"     %% "http4s-dsl"          % http4sVersion,
-      "io.circe"       %% "circe-literal"       % circeVersion,
-      "edu.gemini"     %% "clue-model"          % clueVersion,
-      "io.circe"       %% "circe-generic"       % circeVersion,
-      "org.tpolecat"   %% "natchez-http4s"      % natcchezHttp4sVersion,
-      "org.typelevel"  %% "log4cats-slf4j"      % log4catsVersion,
-      "org.typelevel" %%% "spire"               % spireVersion,
-      "org.typelevel" %%% "spire-extras"        % spireVersion,
-      "org.typelevel" %%% "kittens"             % kittensVersion,
-      "org.typelevel"  %% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
-      "com.lihaoyi"   %%% "pprint"              % pprintVersion
     )
   )
 
@@ -122,7 +95,7 @@ ThisBuild / ocslibHash := {
 // Contains the grackle server
 lazy val service = project
   .in(file("modules/service"))
-  .dependsOn(core, model.jvm)
+  .dependsOn(model.jvm)
   .settings(commonSettings)
   .settings(
     name              := "lucuma-itc-service",

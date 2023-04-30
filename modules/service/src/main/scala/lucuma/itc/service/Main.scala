@@ -125,7 +125,7 @@ object Main extends IOApp with ItcCacheOrRemote {
     itc: LocalItc
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
-      itc     <- Resource.eval(ItcImpl.build(itc, BuildInfo.ocslibHash).pure[F])
+      itc     <- Resource.eval(ItcImpl.build(itc).pure[F])
       redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
       _       <- Resource.eval(checkVersionToPurge[F](redis, itc))
       mapping <- Resource.eval(ItcMapping(cfg.environment, redis, itc))

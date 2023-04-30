@@ -1,0 +1,34 @@
+// Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
+// For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
+
+package lucuma.itc.client
+
+import cats.Eq
+import cats.data.NonEmptyList
+import cats.syntax.eq.*
+import cats.syntax.traverse.*
+import io.circe.Decoder
+import io.circe.DecodingFailure
+import io.circe.Encoder
+import io.circe.HCursor
+import lucuma.itc.IntegrationTime
+import lucuma.itc.*
+
+// These are limited versions of the chart for the client as we don't want to transfer all the data
+case class OptimizedSeriesResult(
+  title:      String,
+  seriesType: SeriesDataType,
+  dataY:      List[Double],
+  xAxis:      Option[ItcAxis],
+  yAxis:      Option[ItcAxis]
+) derives Encoder.AsObject
+
+case class OptimizedChartResult(chartType: ChartType, series: List[OptimizedSeriesResult])
+    derives Encoder.AsObject
+
+case class OptimizedSpectroscopyGraphResult(
+  serverVersion: String,
+  dataVersion:   String,
+  ccds:          NonEmptyList[ItcCcd],
+  charts:        NonEmptyList[OptimizedChartResult]
+) derives Encoder.AsObject
