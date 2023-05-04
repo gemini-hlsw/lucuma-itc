@@ -39,6 +39,6 @@ object CalculationError {
 case class IntegrationTimeCalculationResult(
   serverVersion: String,
   dataVersion:   String,
-  mode:          ObservingMode.Spectroscopy,
+  mode:          ObservingMode,
   result:        IntegrationTime
 ) derives Encoder.AsObject

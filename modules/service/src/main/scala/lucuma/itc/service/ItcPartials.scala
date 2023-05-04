@@ -46,13 +46,7 @@ import lucuma.core.syntax.enumerated.*
 import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
 import lucuma.core.util.Of
-import lucuma.itc.GmosNITCParams
-import lucuma.itc.GmosSITCParams
-import lucuma.itc.Itc
-import lucuma.itc.ItcObservingConditions
-import lucuma.itc.SignificantFigures
-import lucuma.itc.SpectroscopyParams
-import lucuma.itc.UpstreamException
+import lucuma.itc.*
 import lucuma.itc.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
@@ -564,7 +558,7 @@ trait GracklePartials extends GrackleParsers:
                 case _                                     => none
 
               (gsGrating.get(d), gsFpu.get(fpu)).mapN((a, b) =>
-                GmosSITCParams(a, GmosSouthFpuParam(b), filterOpt)
+                GmosSSpectroscopyParams(a, GmosSouthFpuParam(b), filterOpt)
               )
             case _ =>
               none
@@ -589,11 +583,72 @@ trait GracklePartials extends GrackleParsers:
                 case _                                     => none
 
               (gnGrating.get(d), gnFpu.get(fpu)).mapN((a, b) =>
-                GmosNITCParams(a, GmosNorthFpuParam(b), filterOpt)
+                GmosNSpectrosocpyParams(a, GmosNorthFpuParam(b), filterOpt)
               )
             case _ =>
               none
 
+        // case ObjectValue(List(("gmosNImaging", gmosN), ("gmosSImaging", AbsentValue))) =>
+        //   gmosN match
+        //     case ObjectValue(
+        //           List(("grating", TypedEnumValue(EnumValue(d, _, _, _))),
+        //                ("fpu",
+        //                 ObjectValue(
+        //                   List(("customMask", AbsentValue),
+        //                        ("builtin", TypedEnumValue(EnumValue(fpu, _, _, _)))
+        //                   )
+        //                 )
+        //                ),
+        //                ("filter", f)
+        //           )
+        //         ) =>
+        //       val filterOpt = f match
+        //         case TypedEnumValue(EnumValue(f, _, _, _)) =>
+        //           gnFilter.get(f)
+        //         case _                                     => none
+        //
+        //       (gnGrating.get(d), gnFpu.get(fpu)).mapN((a, b) =>
+        //         GmosNITCParams(a, GmosNorthFpuParam(b), filterOpt)
+        //       )
+        //     case _ =>
+        //       none
+
+        case ObjectValue(
+              List(("gmosN", AbsentValue),
+                   ("gmosS", AbsentValue),
+                   ("gmosNImaging", AbsentValue),
+                   ("gmosSImaging", gmosS)
+              )
+            ) =>
+          gmosS match
+            case ObjectValue(List(("filter", f))) =>
+              val filterOpt = f match
+                case TypedEnumValue(EnumValue(f, _, _, _)) =>
+                  gsFilter.get(f)
+                case _                                     => none
+              println(s"SOUTH $filterOpt")
+
+              filterOpt.map(GmosSImagingParams(_))
+            case _                                =>
+              none
+        case ObjectValue(
+              List(("gmosN", AbsentValue),
+                   ("gmosS", AbsentValue),
+                   ("gmosNImaging", gmosN),
+                   ("gmosSImaging", AbsentValue)
+              )
+            ) =>
+          gmosN match
+            case ObjectValue(List(("filter", f))) =>
+              val filterOpt = f match
+                case TypedEnumValue(EnumValue(f, _, _, _)) =>
+                  gnFilter.get(f)
+                case _                                     => none
+              println(s"NORTH $filterOpt")
+
+              filterOpt.map(GmosNImagingParams(_))
+            case _                                =>
+              none
         case _ => none
       }
       modes

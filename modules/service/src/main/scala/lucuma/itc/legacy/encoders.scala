@@ -33,6 +33,7 @@ import lucuma.itc.syntax.all.given
 
 import java.math.MathContext
 import scala.util.Try
+import scala.math.BigDecimal.RoundingMode
 
 ////////////////////////////////////////////////////////////
 //
@@ -69,12 +70,38 @@ private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.Spectroscopy.Gmos
           s"${Wavelength.decimalNanometers.reverseGet(a.λ)} nm"
         ),
         "filter"            -> Json.obj(
-          "FilterNorth" -> a.filter.fold[Json](Json.fromString("NONE"))(r =>
+          "FilterNorth" -> a.filter.fold[Json](Json.fromString("None"))(r =>
             Json.fromString(r.ocs2Tag)
           )
         ),
         "grating"           -> Json.obj("DisperserNorth" -> Json.fromString(a.disperser.ocs2Tag)),
         "fpMask"            -> Json.obj("FPUnitNorth" -> Json.fromString(a.fpu.builtin.ocs2Tag)),
+        // Remaining fields are defaulted for now.
+        "spectralBinning"   -> Json.fromInt(1),
+        "site"              -> Json.fromString("GN"),
+        "ccdType"           -> Json.fromString("HAMAMATSU"),
+        "ampReadMode"       -> Json.fromString("SLOW"),
+        "builtinROI"        -> Json.fromString("FULL_FRAME"),
+        "spatialBinning"    -> Json.fromInt(1),
+        "customSlitWidth"   -> Json.Null,
+        "ampGain"           -> Json.fromString("LOW")
+      )
+  }
+
+private val encodeGmosNorthImaging: Encoder[ObservingMode.Imaging.GmosNorth] =
+  new Encoder[ObservingMode.Imaging.GmosNorth] {
+    def apply(a: ObservingMode.Imaging.GmosNorth): Json =
+      Json.obj(
+        // Translate observing mode to OCS2 style
+        "centralWavelength" -> Json.fromString(
+          s"${Wavelength.decimalNanometers.reverseGet(a.λ)} nm"
+        ),
+        "filter"            -> Json.obj(
+          "FilterNorth" ->
+            Json.fromString(a.filter.ocs2Tag)
+        ),
+        "grating"           -> Json.obj("DisperserNorth" -> "MIRROR".asJson),
+        "fpMask"            -> Json.obj("FPUnitNorth" -> "FPU_NONE".asJson),
         // Remaining fields are defaulted for now.
         "spectralBinning"   -> Json.fromInt(1),
         "site"              -> Json.fromString("GN"),
@@ -114,12 +141,42 @@ private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.Spectroscopy.Gmos
       )
   }
 
+private val encodeGmosSouthImaging: Encoder[ObservingMode.Imaging.GmosSouth] =
+  new Encoder[ObservingMode.Imaging.GmosSouth] {
+    def apply(a: ObservingMode.Imaging.GmosSouth): Json =
+      Json.obj(
+        // Translate observing mode to OCS2 style
+        "centralWavelength" -> Json.fromString(
+          s"${Wavelength.decimalNanometers.reverseGet(a.λ)} nm"
+        ),
+        "filter"            -> Json.obj(
+          "FilterSouth" ->
+            Json.fromString(a.filter.ocs2Tag)
+        ),
+        "grating"           -> Json.obj("DisperserSouth" -> "MIRROR".asJson),
+        "fpMask"            -> Json.obj("FPUnitSouth" -> "FPU_NONE".asJson),
+        // Remaining fields are defaulted for now.
+        "spectralBinning"   -> Json.fromInt(1),
+        "site"              -> Json.fromString("GS"),
+        "ccdType"           -> Json.fromString("HAMAMATSU"),
+        "ampReadMode"       -> Json.fromString("SLOW"),
+        "builtinROI"        -> Json.fromString("FULL_FRAME"),
+        "spatialBinning"    -> Json.fromInt(1),
+        "customSlitWidth"   -> Json.Null,
+        "ampGain"           -> Json.fromString("LOW")
+      )
+  }
+
 private given Encoder[ItcInstrumentDetails] = (a: ItcInstrumentDetails) =>
   a.mode match
     case a: ObservingMode.Spectroscopy.GmosNorth =>
       Json.obj("GmosParameters" -> encodeGmosNorthSpectroscopy(a))
     case a: ObservingMode.Spectroscopy.GmosSouth =>
       Json.obj("GmosParameters" -> encodeGmosSouthSpectroscopy(a))
+    case a: ObservingMode.Imaging.GmosNorth      =>
+      Json.obj("GmosParameters" -> encodeGmosNorthImaging(a))
+    case a: ObservingMode.Imaging.GmosSouth      =>
+      Json.obj("GmosParameters" -> encodeGmosSouthImaging(a))
 
 private given Encoder[ItcWavefrontSensor] = Encoder[String].contramap(_.ocs2Tag)
 
@@ -360,14 +417,22 @@ given Decoder[GraphsRemoteResult] = (c: HCursor) =>
   yield GraphsRemoteResult(ccd, charts)
 
 given Decoder[ExposureCalculation] = (c: HCursor) =>
+  val head = c.downField("exposureCalculation").downArray.right
   for
-    time  <- c.downField("exposureCalculation").downField("exposureTime").as[Double]
-    count <-
-      c.downField("exposureCalculation")
-        .downField("exposures")
-        .as[Int]
-        .flatMap(refineV[Positive](_).leftMap(e => DecodingFailure(e, List.empty)))
-    sn    <- c.downField("exposureCalculation").downField("signalToNoise").as[SignalToNoise]
+    time  <- head.downField("exposureTime").as[Double]
+    count <- head
+               .downField("exposures")
+               .as[Int]
+               .flatMap(refineV[Positive](_).leftMap(e => DecodingFailure(e, List.empty)))
+    sn    <-
+      head
+        .downField("signalToNoise")
+        .as[BigDecimal]
+        .flatMap(s =>
+          SignalToNoise.FromBigDecimalRounding
+            .getOption(s) // .setScale(3, RoundingMode.HALF_UP))
+            .toRight(DecodingFailure(s"Invalid s/n value $s", Nil))
+        )
   yield ExposureCalculation(time, count, sn)
 
 given Decoder[ExposureTimeRemoteResult] = (c: HCursor) =>

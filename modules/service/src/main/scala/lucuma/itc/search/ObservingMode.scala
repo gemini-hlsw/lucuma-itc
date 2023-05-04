@@ -10,13 +10,16 @@ import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
-import lucuma.itc.GmosNITCParams
-import lucuma.itc.GmosSITCParams
+import lucuma.itc.GmosNSpectrosocpyParams
+import lucuma.itc.GmosSSpectroscopyParams
 import lucuma.itc.encoders.given
 import lucuma.itc.search.hashes.given
 import lucuma.itc.search.syntax.*
 import spire.math.Interval
 import spire.math.Rational
+import lucuma.itc.search.ItcObservationDetails.AnalysisMethod
+import lucuma.itc.GmosNImagingParams
+import lucuma.itc.GmosSImagingParams
 
 case class GmosNorthFpuParam(
   builtin: GmosNorthFpu
@@ -92,7 +95,7 @@ object ObservingMode {
         Json.obj(
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
           ("resolution", Json.fromInt(a.resolution.toInt)),
-          ("params", GmosNITCParams(a.disperser, a.fpu, a.filter).asJson),
+          ("params", GmosNSpectrosocpyParams(a.disperser, a.fpu, a.filter).asJson),
           ("wavelength", a.λ.asJson)
         )
 
@@ -122,10 +125,67 @@ object ObservingMode {
         Json.obj(
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
           ("resolution", Json.fromInt(a.resolution.toInt)),
-          ("params", GmosSITCParams(a.disperser, a.fpu, a.filter).asJson),
+          ("params", GmosSSpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
           ("wavelength", a.λ.asJson)
         )
 
+  }
+
+  sealed trait Imaging extends ObservingMode derives Hash {
+    // def λ: Wavelength
+    // def resolution: Rational
+    // def coverage: Interval[Wavelength]
+  }
+
+  object Imaging {
+    given Encoder[ObservingMode.Imaging] = Encoder.instance {
+      case gn: GmosNorth => gn.asJson
+      case gs: GmosSouth => gs.asJson
+    }
+
+    sealed trait GmosImaging extends Imaging derives Hash {
+
+      def analysisMethod: ItcObservationDetails.AnalysisMethod =
+        ItcObservationDetails.AnalysisMethod.Aperture.Auto(
+          skyAperture = 5.0
+        )
+    }
+
+    case class GmosNorth(
+      λ:      Wavelength,
+      filter: GmosNorthFilter
+    ) extends GmosImaging {
+
+      val instrument: Instrument =
+        Instrument.GmosNorth
+
+    }
+
+    object GmosNorth:
+      given Encoder[GmosNorth] = a =>
+        Json.obj(
+          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+          // ("resolution", Json.fromInt(a.resolution.toInt)),
+          ("params", GmosNImagingParams(a.filter).asJson),
+          ("wavelength", a.λ.asJson)
+        )
+
+    case class GmosSouth(
+      λ:      Wavelength,
+      filter: GmosSouthFilter
+    ) extends GmosImaging {
+      val instrument: Instrument =
+        Instrument.GmosSouth
+    }
+
+    object GmosSouth:
+      given Encoder[GmosSouth] = a =>
+        Json.obj(
+          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+          // ("resolution", Json.fromInt(a.resolution.toInt)),
+          ("params", GmosSImagingParams(a.filter).asJson),
+          ("wavelength", a.λ.asJson)
+        )
   }
 
 }

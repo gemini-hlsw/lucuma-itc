@@ -14,6 +14,7 @@ import lucuma.itc.ItcVersions
 import lucuma.itc.*
 import lucuma.itc.service.config.ExecutionEnvironment
 import lucuma.itc.service.redis.given
+import lucuma.core.math.SignalToNoise
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
@@ -92,9 +93,9 @@ trait ItcCacheOrRemote extends Version:
   )(itc: Itc[F], redis: StringCommands[F, Array[Byte], Array[Byte]]): F[GraphResult] =
     cacheOrRemote(request, requestGraph(itc))("itc:graph:spec", redis)
 
-  private val requestCalc = [F[_]] =>
+  private val requestSpecTimeCalc = [F[_]] =>
     (itc: Itc[F]) =>
-      (calcRequest: CalcRequest) =>
+      (calcRequest: SpectroscopyIntegrationTimeRequest) =>
         itc
           .calculateIntegrationTime(
             calcRequest.targetProfile,
@@ -105,16 +106,42 @@ trait ItcCacheOrRemote extends Version:
         )
 
   /**
-   * Request exposure time calculation
+   * Request exposure time calculation for spectroscopy
    */
-  def calcFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
-    calcRequest: CalcRequest
+  def specTimeFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
+    calcRequest: SpectroscopyIntegrationTimeRequest
   )(
     itc:         Itc[F],
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
   ): F[IntegrationTime] =
-    cacheOrRemote(calcRequest, requestCalc(itc))(
+    cacheOrRemote(calcRequest, requestSpecTimeCalc(itc))(
       "itc:calc:spec",
+      redis
+    )
+
+  private val requestImgTimeCalc = [F[_]] =>
+    (itc: Itc[F]) =>
+      (calcRequest: ImagingIntegrationTimeRequest) =>
+        itc
+          .calculateIntegrationTime(
+            calcRequest.targetProfile,
+            calcRequest.specMode,
+            calcRequest.constraints,
+            calcRequest.signalToNoise,
+            none
+        )
+
+  /**
+   * Request exposure time calculation for imaging
+   */
+  def imgTimeFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
+    calcRequest: ImagingIntegrationTimeRequest
+  )(
+    itc:         Itc[F],
+    redis:       StringCommands[F, Array[Byte], Array[Byte]]
+  ): F[IntegrationTime] =
+    cacheOrRemote(calcRequest, requestImgTimeCalc(itc))(
+      "itc:calc:img",
       redis
     )
 

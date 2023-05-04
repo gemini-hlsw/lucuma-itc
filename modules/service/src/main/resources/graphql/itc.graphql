@@ -4627,6 +4627,10 @@ type Query {
     input: SpectroscopyIntegrationTimeInput!
   ): IntegrationTimeCalculationResult!
 
+  imagingIntegrationTime(
+    input: ImagingIntegrationTimeInput!
+  ): IntegrationTimeCalculationResult!
+
   spectroscopySignalToNoise(
     input: SpectroscopySignalToNoiseInput!
   ): SignalToNoiseResult!
@@ -4678,7 +4682,7 @@ type GmosSITCParams {
   filter: GmosSouthFilter
 }
 
-input GmosSITCInput {
+input GmosSSpectroscopyInput {
   # Gmos South disperser
   grating: GmosSouthGrating!
 
@@ -4687,6 +4691,11 @@ input GmosSITCInput {
 
   # Gmos South filter
   filter: GmosSouthFilter
+}
+
+input GmosSImagingInput {
+  # Gmos South filter
+  filter: GmosSouthFilter!
 }
 
 type GmosNITCParams {
@@ -4702,7 +4711,7 @@ type GmosNITCParams {
   filter: GmosNorthFilter
 }
 
-input GmosNITCInput {
+input GmosNSpectroscopyInput {
   # Gmos North disperser
   grating: GmosNorthGrating!
 
@@ -4713,15 +4722,24 @@ input GmosNITCInput {
   filter: GmosNorthFilter
 }
 
+input GmosNImagingInput {
+  # Gmos North filter
+  filter: GmosNorthFilter!
+}
+
 union InstrumentITCParams = GmosNITCParams | GmosSITCParams
 
 # Params for instrument modes
 input InstrumentModesInput {
   # Gmos North
-  gmosN: GmosNITCInput
+  gmosN: GmosNSpectroscopyInput
 
   # Gmos South
-  gmosS: GmosSITCInput
+  gmosS: GmosSSpectroscopyInput
+
+  gmosNImaging: GmosNImagingInput
+
+  gmosSImaging: GmosSImagingInput
 }
 
 # Configuration alternatives query
@@ -4731,6 +4749,30 @@ input SpectroscopyIntegrationTimeInput {
 
   # Wavelength at which to measure Signal to Noise
   signalToNoiseAt: WavelengthInput
+
+  # Minimum desired signal-to-noise ratio.
+  signalToNoise: SignalToNoise!
+
+  # Spatial profile PointSource/UniformSource/GaussianSource.
+  sourceProfile: SourceProfileInput!
+
+  # Observing Band
+  band: Band!
+
+  # Target radial velocity
+  radialVelocity: RadialVelocityInput!
+
+  # Conditions
+  constraints: ConstraintSetInput!
+
+  # Instrument modes
+  mode: InstrumentModesInput
+}
+
+# Configuration alternatives query
+input ImagingIntegrationTimeInput {
+  # Observing wavelength.
+  wavelength: WavelengthInput!
 
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!
@@ -4827,6 +4869,9 @@ input SpectroscopySignalToNoiseInput {
 }
 
 type IntegrationTime {
+  # unit id, e.g. CCD ID
+  #id: NonEmptyString!
+
   # Exposure time duration
   exposureTime: TimeSpan!
 
@@ -4862,7 +4907,7 @@ type IntegrationTimeCalculationResult {
   # queried mode
   mode: ObservingMode!
 
-  # ITC results
+  # ITC results, one per CCD with at least one
   result: IntegrationTime!
 }
 

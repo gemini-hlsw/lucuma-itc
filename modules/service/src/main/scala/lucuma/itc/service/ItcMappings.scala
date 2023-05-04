@@ -55,12 +55,19 @@ case class GraphRequest(
   exp:           PosLong
 ) derives Hash
 
-case class CalcRequest(
+case class SpectroscopyIntegrationTimeRequest(
   targetProfile:   TargetProfile,
   specMode:        ObservingMode.Spectroscopy,
   constraints:     ItcObservingConditions,
   signalToNoise:   SignalToNoise,
   signalToNoiseAt: Option[Wavelength]
+) derives Hash
+
+case class ImagingIntegrationTimeRequest(
+  targetProfile: TargetProfile,
+  specMode:      ObservingMode.Imaging,
+  constraints:   ItcObservingConditions,
+  signalToNoise: SignalToNoise
 ) derives Hash
 
 object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
@@ -74,6 +81,49 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           Schema(src.mkString).right.get
         }.liftTo[F]
       }
+
+  def calculateImagingExposureTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+    environment: ExecutionEnvironment,
+    redis:       StringCommands[F, Array[Byte], Array[Byte]],
+    itc:         Itc[F]
+  )(env: Cursor.Env): F[Result[IntegrationTimeCalculationResult]] =
+    (env.get[Wavelength]("wavelength"),
+     env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
+     env.get[SignalToNoise]("signalToNoise"),
+     env.get[SourceProfile]("sourceProfile"),
+     env.get[SpectroscopyParams | ImagingParams]("mode"),
+     env.get[Band]("band"),
+     env.get[ItcObservingConditions]("constraints")
+    ).traverseN { (wv, rs, sn, sp, mode, band, c) =>
+      println(mode)
+      val imgMode = mode match {
+        case GmosNImagingParams(filter) =>
+          ObservingMode.Imaging.GmosNorth(wv, filter)
+        case GmosSImagingParams(filter) =>
+          ObservingMode.Imaging.GmosSouth(wv, filter)
+      }
+      println(imgMode)
+      imgTimeFromCacheOrRemote(
+        ImagingIntegrationTimeRequest(
+          TargetProfile(sp, band, rs),
+          imgMode,
+          c,
+          sn
+        )
+      )(itc, redis).map { r =>
+        println(r)
+        IntegrationTimeCalculationResult(
+          version(environment).value,
+          BuildInfo.ocslibHash,
+          imgMode,
+          r
+        ).rightIorNec
+      }
+    }.map(
+      _.getOrElse(
+        Problem(s"Missing parameters for imagingIntegrationTime $env").leftIorNec
+      )
+    )
 
   def calculateSpectroscopyExposureTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
@@ -94,13 +144,13 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           s"ITC calculate for $mode, conditions $c and profile $sp, at $signalToNoiseAt"
         ) *> {
           val specMode = mode match {
-            case GmosNITCParams(grating, fpu, filter) =>
+            case GmosNSpectrosocpyParams(grating, fpu, filter) =>
               ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
-            case GmosSITCParams(grating, fpu, filter) =>
+            case GmosSSpectroscopyParams(grating, fpu, filter) =>
               ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
           }
-          calcFromCacheOrRemote(
-            CalcRequest(
+          specTimeFromCacheOrRemote(
+            SpectroscopyIntegrationTimeRequest(
               TargetProfile(sp, sd, rs),
               specMode,
               c,
@@ -126,7 +176,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         }
     }.map(
       _.getOrElse(
-        Problem(s"Missing parameters for calculateSpectroscopyExposureTime $env").leftIorNec
+        Problem(s"Missing parameters for spectroscopyIntegrationTime $env").leftIorNec
       )
     )
 
@@ -150,9 +200,9 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         val signalToNoiseAt    = env.get[Wavelength]("signalToNoiseAt")
         val significantFigures = env.get[SignificantFigures]("significantFigures")
         val specMode           = mode match {
-          case GmosNITCParams(grating, fpu, filter) =>
+          case GmosNSpectrosocpyParams(grating, fpu, filter) =>
             ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
-          case GmosSITCParams(grating, fpu, filter) =>
+          case GmosSSpectroscopyParams(grating, fpu, filter) =>
             ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
         }
         graphFromCacheOrRemote(
@@ -203,9 +253,9 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         val significantFigures = env.get[SignificantFigures]("significantFigures")
         val signalToNoiseAt    = env.get[Wavelength]("signalToNoiseAt")
         val specMode           = mode match {
-          case GmosNITCParams(grating, fpu, filter) =>
+          case GmosNSpectrosocpyParams(grating, fpu, filter) =>
             ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
-          case GmosSITCParams(grating, fpu, filter) =>
+          case GmosSSpectroscopyParams(grating, fpu, filter) =>
             ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
         }
         import io.circe.syntax.*
@@ -267,6 +317,9 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                 ),
                 RootEffect.computeEncodable("optimizedSpectroscopyGraph")((_, p, env) =>
                   spectroscopyGraph(environment, redis, itc)(env)
+                ),
+                RootEffect.computeEncodable("imagingIntegrationTime")((_, p, env) =>
+                  calculateImagingExposureTime(environment, redis, itc)(env)
                 )
               )
             ),
@@ -302,6 +355,25 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                           fallback
                         )
                   }.map(e => e.copy(child = Select("spectroscopyIntegrationTime", Nil, child)))
+                case Select("imagingIntegrationTime",
+                            List(Binding("input", ObjectValue(wv))),
+                            child
+                    ) =>
+                  wv.foldLeft(Environment(Cursor.Env(), child).rightIor[NonEmptyChain[Problem]]) {
+                    case (e, c) =>
+                      wavelengthPartial
+                        .orElse(radialVelocityPartial)
+                        .orElse(signalToNoisePartial)
+                        .orElse(sourceProfilePartial)
+                        .orElse(bandPartial)
+                        .orElse(instrumentModePartial)
+                        .orElse(constraintsPartial)
+                        // .orElse(signalToNoiseAtPartial)
+                        .applyOrElse(
+                          (e, c),
+                          fallback
+                        )
+                  }.map(e => e.copy(child = Select("imagingIntegrationTime", Nil, child)))
                 case Select("optimizedSpectroscopyGraph",
                             List(Binding("input", ObjectValue(wv))),
                             child

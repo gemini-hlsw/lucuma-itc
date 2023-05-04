@@ -118,7 +118,9 @@ object ItcImpl {
                   spectroscopy(targetProfile, observingMode, constraints, signalToNoise, none)
                 case Some(at) =>
                   spectroscopySNAt(targetProfile, observingMode, constraints, signalToNoise, at)
-            // TODO: imaging
+            case _: ObservingMode.Imaging      =>
+              println("INT TIME " + targetProfile)
+              imaging(targetProfile, observingMode, constraints, signalToNoise)
         }
 
       def calculateGraph(
@@ -137,6 +139,9 @@ object ItcImpl {
               BigDecimal(exposureTime.value.toMillis).withUnit[Millisecond].toUnit[Second],
               exposures.value
             )
+          case _: ObservingMode.Imaging      =>
+            ???
+
           // TODO: imaging
 
       // Convenience method to compute an OCS2 ITC result for the specified profile/mode.
@@ -407,11 +412,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Wavelength
-      ): F[IntegrationTime] = {
-        val startExpTime      = BigDecimal(1200.0).withUnit[Second]
-        val numberOfExposures = 1
-        val requestedSN       = signalToNoise
-
+      ): F[IntegrationTime] =
         L.info(s"Desired S/N $signalToNoise") *>
           L.info(
             s"Target brightness ${targetProfile} at band ${targetProfile.band}"
@@ -440,7 +441,73 @@ object ItcImpl {
                 }
             }
 
-      }
-    }
+      def imagingLegacy(
+        targetProfile: TargetProfile,
+        observingMode: ObservingMode,
+        constraints:   ItcObservingConditions,
+        sigma:         SignalToNoise
+      ): F[legacy.ExposureTimeRemoteResult] =
+        import lucuma.itc.legacy.given
+        import lucuma.itc.legacy.*
 
+        Trace[F].span("legacy-itc-query") {
+          println(s"targetProfile: $targetProfile")
+          val request =
+            imagingParams(targetProfile, observingMode, constraints, sigma).asJson
+
+          Trace[F].put("itc.query" -> request.spaces2) *>
+            Trace[F].put("itc.sigma" -> sigma.toBigDecimal.toDouble) *>
+            Logger[F].info(request.noSpaces) *>
+            (itcLocal.calculateExposureTime(request.noSpaces) match {
+              case Right(r)  =>
+                r.pure[F]
+              case Left(msg) =>
+                L.warn(s"Upstream error $msg") *>
+                  ApplicativeThrow[F].raiseError(new UpstreamException(msg.mkString("\n")))
+            })
+        }
+
+      /**
+       * Compute the exposure time and number of exposures required to achieve the desired
+       * signal-to-noise under the requested conditions. Only for spectroscopy modes
+       */
+      def imaging(
+        targetProfile: TargetProfile,
+        observingMode: ObservingMode,
+        constraints:   ItcObservingConditions,
+        signalToNoise: SignalToNoise
+      ): F[IntegrationTime] =
+        L.info(s"Desired S/N $signalToNoise") *>
+          L.info(
+            s"Target brightness ${targetProfile} at band ${targetProfile.band}"
+          ) *> Trace[F]
+            .span("itc.calctime.spectroscopy-exp-time-at") {
+              imagingLegacy(
+                targetProfile,
+                observingMode,
+                constraints,
+                signalToNoise
+              )
+                .flatMap { r =>
+                  TimeSpan
+                    .fromSeconds(r.exposureCalculation.exposureTime)
+                    .map(expTime =>
+                      IntegrationTime(
+                        expTime,
+                        r.exposureCalculation.exposures,
+                        r.exposureCalculation.signalToNoise
+                      )
+                        .pure[F]
+                    )
+                    .getOrElse {
+                      MonadThrow[F].raiseError(
+                        CalculationError(
+                          s"Negative exposure time ${r.exposureCalculation.exposureTime}"
+                        )
+                      )
+                    }
+                }
+            }
+
+    }
 }

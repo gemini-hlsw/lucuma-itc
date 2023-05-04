@@ -104,3 +104,27 @@ def spectroscopyWithSNAtParams(
     ),
     instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
   )
+
+def imagingParams(
+  targetProfile: TargetProfile,
+  observingMode: ObservingMode,
+  conditions:    ItcObservingConditions,
+  sigma:         SignalToNoise
+): ItcParameters =
+  ItcParameters(
+    source = ItcSourceDefinition.fromTargetProfile(targetProfile),
+    observation = ItcObservationDetails(
+      calculationMethod = ItcObservationDetails.CalculationMethod.IntegrationTime.ImagingExp(
+        sigma = sigma.toBigDecimal.toDouble,
+        coadds = None,
+        sourceFraction = 1.0,
+        ditherOffset = Angle.Angle0
+      ),
+      analysisMethod = observingMode.analysisMethod
+    ),
+    conditions = conditions,
+    telescope = ItcTelescopeDetails(
+      wfs = ItcWavefrontSensor.OIWFS
+    ),
+    instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
+  )

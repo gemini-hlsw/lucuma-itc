@@ -11,7 +11,7 @@ import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcObservingConditions
 
-class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
+class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
 
   test("gmos north case") {
     query(

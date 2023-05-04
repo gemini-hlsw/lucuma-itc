@@ -21,18 +21,26 @@ import scala.concurrent.duration.FiniteDuration
 
 sealed trait SpectroscopyParams
 
-final case class GmosNITCParams(
+case class GmosNSpectrosocpyParams(
   grating: GmosNorthGrating,
   fpu:     GmosNorthFpuParam,
   filter:  Option[GmosNorthFilter]
 ) extends SpectroscopyParams
     derives Encoder.AsObject
 
-final case class GmosSITCParams(
+case class GmosSSpectroscopyParams(
   grating: GmosSouthGrating,
   fpu:     GmosSouthFpuParam,
   filter:  Option[GmosSouthFilter]
 ) extends SpectroscopyParams
+    derives Encoder.AsObject
+
+sealed trait ImagingParams
+
+case class GmosNImagingParams(filter: GmosNorthFilter) extends ImagingParams
+    derives Encoder.AsObject
+
+case class GmosSImagingParams(filter: GmosSouthFilter) extends ImagingParams
     derives Encoder.AsObject
 
 case class ItcObservingConditions(
