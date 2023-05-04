@@ -3,6 +3,7 @@
 
 package lucuma.itc
 
+import cats.data.NonEmptyList
 import coulomb.*
 import coulomb.policy.spire.standard.given
 import coulomb.syntax.*
@@ -24,8 +25,9 @@ type Millisecond = Milli * Second
 
 object encoders:
 
-  given Encoder[NonEmptyString] = (s: NonEmptyString) => s.value.asJson
-  given Encoder[PosInt]         = (s: PosInt) => s.value.asJson
+  given nelEncoder[A: Encoder]: Encoder[NonEmptyList[A]] = Encoder.encodeList[A].contramap(_.toList)
+  given Encoder[NonEmptyString]                          = (s: NonEmptyString) => s.value.asJson
+  given Encoder[PosInt]                                  = (s: PosInt) => s.value.asJson
 
   // TODO get this directly from odb schemas
   given Encoder[TimeSpan] =

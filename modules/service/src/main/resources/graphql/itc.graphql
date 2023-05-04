@@ -4890,8 +4890,8 @@ type IntegrationTimeCalculationResult {
   # queried mode
   mode: ObservingMode!
 
-  # ITC results, one per CCD with at least one
-  result: IntegrationTime!
+  # ITC results, there maybe one per CCD or a single result
+  results: [IntegrationTime!]!
 }
 
 interface ObservingMode {

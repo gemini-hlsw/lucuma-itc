@@ -56,11 +56,14 @@ class WiringSuite extends ClientSuite {
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
         ),
-        IntegrationTime(
-          TimeSpan.FromString.getOption("PT1S").get,
-          PosInt.unsafeFrom(10),
-          SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
-        ).some
+        NonEmptyList
+          .one(
+            IntegrationTime(
+              TimeSpan.FromString.getOption("PT1S").get,
+              PosInt.unsafeFrom(10),
+              SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
+            )
+          )
       ).asRight
     )
   }

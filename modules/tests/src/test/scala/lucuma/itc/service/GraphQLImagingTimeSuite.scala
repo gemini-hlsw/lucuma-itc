@@ -104,7 +104,7 @@ class GraphQLImagingTimeSuite extends GraphQLSuite {
                 }
               }
             }
-            result {
+            results {
               exposures
               exposureTime {
                 seconds
@@ -127,12 +127,12 @@ class GraphQLImagingTimeSuite extends GraphQLSuite {
                   "nanometers" : 530.000
                 }
               },
-              "result" : {
+              "results" : [{
                 "exposures" : 10,
                 "exposureTime" : {
                   "seconds" : 1.000000
                 }
-              }
+              }]
             }
           }
         }
@@ -140,41 +140,3 @@ class GraphQLImagingTimeSuite extends GraphQLSuite {
     )
   }
 }
-// wavelength: {
-//   nanometers: 60,
-// },
-// radialVelocity: {
-//   kilometersPerSecond: 1000
-// },
-// signalToNoise: 2,
-// sourceProfile: {
-//   point: {
-//     bandNormalized: {
-//       sed: {
-//         stellarLibrary: O5_V
-//       }
-//       brightnesses: [ {
-//         band: R
-//         value: 3
-//         units: ERG_PER_S_PER_CM_SQUARED_PER_A
-//       }, {
-//         band: J
-//         value: 2.1
-//         units: AB_MAGNITUDE
-//       }]
-//     }
-//   }
-// },
-// band: J,
-// constraints: {
-//   imageQuality: POINT_THREE,
-//   cloudExtinction: POINT_FIVE,
-//   skyBackground: DARK,
-//   waterVapor: DRY,
-//   elevationRange: {
-//     airMass: {
-//       min: 1,
-//       max: 2
-//     }
-//   }
-// },

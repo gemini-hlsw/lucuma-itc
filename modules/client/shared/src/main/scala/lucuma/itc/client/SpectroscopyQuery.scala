@@ -24,7 +24,7 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
         spectroscopyIntegrationTime(input: $spec) {
           serverVersion
           dataVersion
-          result {
+          results {
             exposures
             exposureTime {
               microseconds

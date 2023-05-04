@@ -109,7 +109,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
-      ): F[IntegrationTime] =
+      ): F[NonEmptyList[IntegrationTime]] =
         Trace[F].span("calculate-exposure-time") {
           observingMode match
             case _: ObservingMode.SpectroscopyMode =>
@@ -258,7 +258,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
-      ): F[IntegrationTime] = {
+      ): F[NonEmptyList[IntegrationTime]] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise
@@ -397,6 +397,7 @@ object ItcImpl {
                   }
 
                 }
+                .map(NonEmptyList.one)
             }
 
       }
@@ -411,7 +412,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Wavelength
-      ): F[IntegrationTime] =
+      ): F[NonEmptyList[IntegrationTime]] =
         L.info(s"Desired S/N $signalToNoise") *>
           L.info(
             s"Target brightness ${targetProfile} at band ${targetProfile.band}"
@@ -420,23 +421,20 @@ object ItcImpl {
             .span("itc.calctime.spectroscopy-exp-time-at") {
               itcWithSNAt(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
                 .flatMap { r =>
-                  TimeSpan
-                    .fromSeconds(r.exposureCalculation.exposureTime)
-                    .map(expTime =>
-                      IntegrationTime(
-                        expTime,
-                        r.exposureCalculation.exposures,
-                        r.exposureCalculation.signalToNoise
+                  r.exposureCalculation.traverse(r =>
+                    TimeSpan
+                      .fromSeconds(r.exposureTime)
+                      .map(expTime =>
+                        IntegrationTime(expTime, r.exposures, r.signalToNoise).pure[F]
                       )
-                        .pure[F]
-                    )
-                    .getOrElse {
-                      MonadThrow[F].raiseError(
-                        CalculationError(
-                          s"Negative exposure time ${r.exposureCalculation.exposureTime}"
+                      .getOrElse {
+                        MonadThrow[F].raiseError(
+                          CalculationError(
+                            s"Negative exposure time ${r.exposureTime}"
+                          )
                         )
-                      )
-                    }
+                      }
+                  )
                 }
             }
 
@@ -474,7 +472,7 @@ object ItcImpl {
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         signalToNoise: SignalToNoise
-      ): F[IntegrationTime] =
+      ): F[NonEmptyList[IntegrationTime]] =
         L.info(s"Desired S/N $signalToNoise") *>
           L.info(
             s"Target brightness ${targetProfile} at band ${targetProfile.band}"
@@ -487,23 +485,20 @@ object ItcImpl {
                 signalToNoise
               )
                 .flatMap { r =>
-                  TimeSpan
-                    .fromSeconds(r.exposureCalculation.exposureTime)
-                    .map(expTime =>
-                      IntegrationTime(
-                        expTime,
-                        r.exposureCalculation.exposures,
-                        r.exposureCalculation.signalToNoise
+                  r.exposureCalculation.traverse(r =>
+                    TimeSpan
+                      .fromSeconds(r.exposureTime)
+                      .map(expTime =>
+                        IntegrationTime(expTime, r.exposures, r.signalToNoise).pure[F]
                       )
-                        .pure[F]
-                    )
-                    .getOrElse {
-                      MonadThrow[F].raiseError(
-                        CalculationError(
-                          s"Negative exposure time ${r.exposureCalculation.exposureTime}"
+                      .getOrElse {
+                        MonadThrow[F].raiseError(
+                          CalculationError(
+                            s"Negative exposure time ${r.exposureTime}"
+                          )
                         )
-                      )
-                    }
+                      }
+                  )
                 }
             }
 

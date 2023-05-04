@@ -80,7 +80,7 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
                 }
               }
             }
-            result {
+            results {
               exposures
               exposureTime {
                 seconds

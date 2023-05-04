@@ -4,6 +4,7 @@
 package lucuma.itc.client
 
 import cats.Eq
+import cats.data.NonEmptyList
 import cats.syntax.eq.*
 import cats.syntax.traverse.*
 import io.circe.Decoder
@@ -13,7 +14,7 @@ import lucuma.itc.IntegrationTime
 
 final case class SpectroscopyResult(
   versions: ItcVersions,
-  result:   Option[IntegrationTime]
+  result:   NonEmptyList[IntegrationTime]
 )
 
 object SpectroscopyResult {
@@ -22,7 +23,7 @@ object SpectroscopyResult {
     def apply(c: HCursor): Decoder.Result[SpectroscopyResult] =
       for {
         v <- c.as[ItcVersions]
-        r <- c.downField("result").success.traverse(_.as[IntegrationTime])
+        r <- c.downField("results").as[NonEmptyList[IntegrationTime]]
       } yield SpectroscopyResult(v, r)
 
   given Eq[SpectroscopyResult] with

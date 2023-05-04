@@ -6,6 +6,7 @@ package lucuma.itc.service
 import boopickle.DefaultBasic.*
 import buildinfo.BuildInfo
 import cats.*
+import cats.data.NonEmptyList
 import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
@@ -113,7 +114,7 @@ trait ItcCacheOrRemote extends Version:
   )(
     itc:         Itc[F],
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
-  ): F[IntegrationTime] =
+  ): F[NonEmptyList[IntegrationTime]] =
     cacheOrRemote(calcRequest, requestSpecTimeCalc(itc))(
       "itc:calc:spec",
       redis
@@ -139,7 +140,7 @@ trait ItcCacheOrRemote extends Version:
   )(
     itc:         Itc[F],
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
-  ): F[IntegrationTime] =
+  ): F[NonEmptyList[IntegrationTime]] =
     cacheOrRemote(calcRequest, requestImgTimeCalc(itc))(
       "itc:calc:img",
       redis

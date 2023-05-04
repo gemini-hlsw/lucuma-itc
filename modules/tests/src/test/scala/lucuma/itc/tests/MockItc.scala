@@ -35,8 +35,9 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     constraints:     ItcObservingConditions,
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[IntegrationTime] =
-    IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get)
+  ): IO[NonEmptyList[IntegrationTime]] =
+    NonEmptyList
+      .one(IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get))
       .pure[IO]
 
   override def calculateGraph(
@@ -83,7 +84,7 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     constraints:     ItcObservingConditions,
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[IntegrationTime] =
+  ): IO[NonEmptyList[IntegrationTime]] =
     IO.raiseError(CalculationError("A calculation error"))
 
   override def calculateGraph(

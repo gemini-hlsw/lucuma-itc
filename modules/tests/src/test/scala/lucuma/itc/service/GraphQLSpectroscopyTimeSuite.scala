@@ -80,7 +80,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                 }
               }
             }
-            result {
+            results {
               exposures
               exposureTime {
                 seconds
@@ -103,12 +103,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   "nanometers" : 60.000
                 }
               },
-              "result" : {
+              "results" : [{
                 "exposures" : 10,
                 "exposureTime" : {
                   "seconds" : 1.000000000
                 }
-              }
+              }]
             }
           }
         }
@@ -184,7 +184,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   }
                 }
               }
-              result {
+              results {
                   exposures
                   exposureTime {
                     seconds
@@ -207,12 +207,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     "nanometers" : 60.000
                   }
                 },
-                "result" : {
+                "results" : [{
                   "exposures" : 10,
                   "exposureTime" : {
                     "seconds" : 1.000000000
                   }
-                }
+                }]
               }
           }
         }
@@ -376,7 +376,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                   exposures
                   exposureTime {
                     seconds
@@ -400,12 +400,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         "nanometers" : 60.000
                       }
                     },
-                    "result" : {
+                    "results" : [{
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1.000000000
                       }
-                    }
+                    }]
               }
           }
         }
@@ -481,7 +481,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                   exposures
                   exposureTime {
                     seconds
@@ -569,7 +569,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                   exposures
                   exposureTime {
                     seconds
@@ -592,12 +592,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         "nanometers" : 60.00
                       }
                     },
-                    "result" : {
+                    "results" : [{
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1
                       }
-                    }
+                    }]
               }
           }
         }
@@ -678,7 +678,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                   exposures
                   exposureTime {
                     seconds
@@ -701,12 +701,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         "nanometers" : 60.00
                       }
                     },
-                    "result" : {
+                    "results" : [{
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1
                       }
-                    }
+                    }]
                   }
           }
         }
@@ -789,7 +789,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                       }
                     }
                   }
-                  result {
+                  results {
                     exposures
                     exposureTime {
                       seconds
@@ -814,12 +814,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                       "nanometers" : 60.00
                     }
                   },
-                  "result" : {
+                  "results" : [{
                     "exposures" : 10,
                     "exposureTime" : {
                       "seconds" : 1.000000000
                     }
-                  }
+                  }]
                 }
         }
       }
@@ -897,7 +897,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                   exposures
                   exposureTime {
                     seconds
@@ -922,12 +922,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         "nanometers" : 60.00
                       }
                     },
-                    "result" : {
+                    "results" : [{
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1.000000000
                       }
-                    }
+                    }]
                   }
           }
         }
@@ -1003,7 +1003,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                     exposures
                     exposureTime {
                       seconds
@@ -1026,12 +1026,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         "nanometers" : 60.000
                       }
                     },
-                    "result" : {
+                    "results" : [{
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1.000000000
                       }
-                    }
+                    }]
                   }
           }
         }
@@ -1107,7 +1107,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                     exposures
                     exposureTime {
                       seconds
@@ -1130,12 +1130,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         "nanometers" : 60.000
                       }
                     },
-                    "result" : {
+                    "results" : [{
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1.000000000
                       }
-                    }
+                    }]
               }
           }
         }
