@@ -70,7 +70,7 @@ private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.
           s"${Wavelength.decimalNanometers.reverseGet(a.λ)} nm"
         ),
         "filter"            -> Json.obj(
-          "FilterNorth" -> a.filter.fold[Json](Json.fromString("None"))(r =>
+          "FilterNorth" -> a.filter.fold[Json](Json.fromString("NONE"))(r =>
             Json.fromString(r.ocs2Tag)
           )
         ),
@@ -102,13 +102,12 @@ private val encodeGmosNorthImaging: Encoder[ObservingMode.ImagingMode.GmosNorth]
         ),
         "grating"           -> Json.obj("DisperserNorth" -> "MIRROR".asJson),
         "fpMask"            -> Json.obj("FPUnitNorth" -> "FPU_NONE".asJson),
-        // Remaining fields are defaulted for now.
-        "spectralBinning"   -> Json.fromInt(1),
+        "spectralBinning"   -> Json.fromInt(2),
         "site"              -> Json.fromString("GN"),
         "ccdType"           -> Json.fromString("HAMAMATSU"),
         "ampReadMode"       -> Json.fromString("SLOW"),
         "builtinROI"        -> Json.fromString("FULL_FRAME"),
-        "spatialBinning"    -> Json.fromInt(1),
+        "spatialBinning"    -> Json.fromInt(2),
         "customSlitWidth"   -> Json.Null,
         "ampGain"           -> Json.fromString("LOW")
       )
@@ -133,7 +132,7 @@ private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.
         "spectralBinning"   -> Json.fromInt(1),
         "site"              -> Json.fromString("GS"),
         "ccdType"           -> Json.fromString("HAMAMATSU"),
-        "ampReadMode"       -> Json.fromString("SLOW"),
+        "ampReadMode"       -> Json.fromString("FAST"),
         "builtinROI"        -> Json.fromString("FULL_FRAME"),
         "spatialBinning"    -> Json.fromInt(1),
         "customSlitWidth"   -> Json.Null,
@@ -155,13 +154,12 @@ private val encodeGmosSouthImaging: Encoder[ObservingMode.ImagingMode.GmosSouth]
         ),
         "grating"           -> Json.obj("DisperserSouth" -> "MIRROR".asJson),
         "fpMask"            -> Json.obj("FPUnitSouth" -> "FPU_NONE".asJson),
-        // Remaining fields are defaulted for now.
-        "spectralBinning"   -> Json.fromInt(1),
+        "spectralBinning"   -> Json.fromInt(2),
         "site"              -> Json.fromString("GS"),
         "ccdType"           -> Json.fromString("HAMAMATSU"),
-        "ampReadMode"       -> Json.fromString("SLOW"),
+        "ampReadMode"       -> Json.fromString("FAST"),
         "builtinROI"        -> Json.fromString("FULL_FRAME"),
-        "spatialBinning"    -> Json.fromInt(1),
+        "spatialBinning"    -> Json.fromInt(2),
         "customSlitWidth"   -> Json.Null,
         "ampGain"           -> Json.fromString("LOW")
       )

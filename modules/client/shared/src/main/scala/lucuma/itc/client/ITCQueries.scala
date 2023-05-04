@@ -13,7 +13,7 @@ import io.circe.JsonObject
 import lucuma.itc.client.OptimizedSpectroscopyGraphResult
 import lucuma.itc.client.json.decoders.given
 
-object SpectroscopyQuery extends GraphQLOperation[Unit] {
+object ITCQueries extends GraphQLOperation[Unit] {
 
   type Data      = IntegrationTimeResult
   type Variables = IntegrationTimeInput
