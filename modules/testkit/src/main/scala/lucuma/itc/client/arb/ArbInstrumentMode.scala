@@ -19,19 +19,19 @@ trait ArbInstrumentMode {
   import ArbEnumerated.*
   import ArbGmosFpu.given
 
-  import InstrumentMode.GmosNorth
-  import InstrumentMode.GmosSouth
+  import InstrumentMode.GmosNorthSpectroscopy
+  import InstrumentMode.GmosSouthSpectroscopy
 
-  given Arbitrary[GmosNorth] =
+  given Arbitrary[GmosNorthSpectroscopy] =
     Arbitrary {
       for {
         g <- arbitrary[GmosNorthGrating]
         f <- arbitrary[Option[GmosNorthFilter]]
         u <- arbitrary[GmosFpu.North]
-      } yield GmosNorth(g, f, u)
+      } yield GmosNorthSpectroscopy(g, f, u)
     }
 
-  given Cogen[GmosNorth] =
+  given Cogen[GmosNorthSpectroscopy] =
     Cogen[
       (
         GmosNorthGrating,
@@ -46,16 +46,16 @@ trait ArbInstrumentMode {
       )
     }
 
-  given Arbitrary[GmosSouth] =
+  given Arbitrary[GmosSouthSpectroscopy] =
     Arbitrary {
       for {
         g <- arbitrary[GmosSouthGrating]
         f <- arbitrary[Option[GmosSouthFilter]]
         u <- arbitrary[GmosFpu.South]
-      } yield GmosSouth(g, f, u)
+      } yield GmosSouthSpectroscopy(g, f, u)
     }
 
-  given Cogen[GmosSouth] =
+  given Cogen[GmosSouthSpectroscopy] =
     Cogen[
       (
         GmosSouthGrating,
@@ -73,16 +73,16 @@ trait ArbInstrumentMode {
   given Arbitrary[InstrumentMode] =
     Arbitrary {
       Gen.oneOf(
-        arbitrary[GmosNorth],
-        arbitrary[GmosSouth]
+        arbitrary[GmosNorthSpectroscopy],
+        arbitrary[GmosSouthSpectroscopy]
       )
     }
 
   given Cogen[InstrumentMode] =
     Cogen[
       (
-        Option[GmosNorth],
-        Option[GmosSouth]
+        Option[GmosNorthSpectroscopy],
+        Option[GmosSouthSpectroscopy]
       )
     ].contramap { a =>
       (

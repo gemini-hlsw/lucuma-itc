@@ -27,16 +27,16 @@ sealed trait InstrumentMode
 
 object InstrumentMode {
 
-  final case class GmosNorth(
+  final case class GmosNorthSpectroscopy(
     grating: GmosNorthGrating,
     filter:  Option[GmosNorthFilter],
     fpu:     GmosFpu.North
   ) extends InstrumentMode
 
-  object GmosNorth {
+  object GmosNorthSpectroscopy {
 
-    given Encoder[GmosNorth] with
-      def apply(a: GmosNorth): Json =
+    given Encoder[GmosNorthSpectroscopy] with
+      def apply(a: GmosNorthSpectroscopy): Json =
         Json.fromFields(
           List(
             "grating" -> a.grating.asScreamingJson,
@@ -44,32 +44,32 @@ object InstrumentMode {
           ) ++ a.filter.map(_.asScreamingJson).tupleLeft("filter").toList
         )
 
-    given Decoder[GmosNorth] with
-      def apply(c: HCursor): Decoder.Result[GmosNorth] =
+    given Decoder[GmosNorthSpectroscopy] with
+      def apply(c: HCursor): Decoder.Result[GmosNorthSpectroscopy] =
         for {
           g <- c.downField("grating").as[GmosNorthGrating]
           f <- c.downField("filter").as[Option[GmosNorthFilter]]
           u <- c.downField("fpu").as[GmosFpu.North]
-        } yield GmosNorth(g, f, u)
+        } yield GmosNorthSpectroscopy(g, f, u)
 
-    given Eq[GmosNorth] with
-      def eqv(x: GmosNorth, y: GmosNorth): Boolean =
+    given Eq[GmosNorthSpectroscopy] with
+      def eqv(x: GmosNorthSpectroscopy, y: GmosNorthSpectroscopy): Boolean =
         (x.grating === y.grating) &&
           (x.filter === y.filter) &&
           (x.fpu === y.fpu)
 
   }
 
-  final case class GmosSouth(
+  final case class GmosSouthSpectroscopy(
     grating: GmosSouthGrating,
     filter:  Option[GmosSouthFilter],
     fpu:     GmosFpu.South
   ) extends InstrumentMode
 
-  object GmosSouth {
+  object GmosSouthSpectroscopy {
 
-    given Encoder[GmosSouth] with
-      def apply(a: GmosSouth): Json =
+    given Encoder[GmosSouthSpectroscopy] with
+      def apply(a: GmosSouthSpectroscopy): Json =
         Json.fromFields(
           List(
             "grating" -> a.grating.asScreamingJson,
@@ -77,16 +77,16 @@ object InstrumentMode {
           ) ++ a.filter.map(_.asScreamingJson).tupleLeft("filter").toList
         )
 
-    given Decoder[GmosSouth] with
-      def apply(c: HCursor): Decoder.Result[GmosSouth] =
+    given Decoder[GmosSouthSpectroscopy] with
+      def apply(c: HCursor): Decoder.Result[GmosSouthSpectroscopy] =
         for {
           g <- c.downField("grating").as[GmosSouthGrating]
           f <- c.downField("filter").as[Option[GmosSouthFilter]]
           u <- c.downField("fpu").as[GmosFpu.South]
-        } yield GmosSouth(g, f, u)
+        } yield GmosSouthSpectroscopy(g, f, u)
 
-    given Eq[GmosSouth] with
-      def eqv(x: GmosSouth, y: GmosSouth): Boolean =
+    given Eq[GmosSouthSpectroscopy] with
+      def eqv(x: GmosSouthSpectroscopy, y: GmosSouthSpectroscopy): Boolean =
         (x.grating === y.grating) &&
           (x.filter === y.filter) &&
           (x.fpu === y.fpu)
@@ -96,15 +96,15 @@ object InstrumentMode {
   given Encoder[InstrumentMode] with
     def apply(a: InstrumentMode): Json =
       a match {
-        case a @ GmosNorth(_, _, _) => Json.obj("gmosN" -> a.asJson)
-        case a @ GmosSouth(_, _, _) => Json.obj("gmosS" -> a.asJson)
+        case a @ GmosNorthSpectroscopy(_, _, _) => Json.obj("gmosNSpectroscopy" -> a.asJson)
+        case a @ GmosSouthSpectroscopy(_, _, _) => Json.obj("gmosSSpectroscopy" -> a.asJson)
       }
 
   given Decoder[InstrumentMode] with
     def apply(c: HCursor): Decoder.Result[InstrumentMode] =
       for {
-        n <- c.downField("gmosN").as[Option[GmosNorth]]
-        s <- c.downField("gmosS").as[Option[GmosSouth]]
+        n <- c.downField("gmosN").as[Option[GmosNorthSpectroscopy]]
+        s <- c.downField("gmosS").as[Option[GmosSouthSpectroscopy]]
         m <- (n, s) match {
                case (Some(n), None) => (n: InstrumentMode).asRight
                case (None, Some(s)) => (s: InstrumentMode).asRight
@@ -116,15 +116,15 @@ object InstrumentMode {
   given Eq[InstrumentMode] with
     def eqv(x: InstrumentMode, y: InstrumentMode): Boolean =
       (x, y) match {
-        case (x0: GmosNorth, y0: GmosNorth) => x0 === y0
-        case (x0: GmosSouth, y0: GmosSouth) => x0 === y0
-        case _                              => false
+        case (x0: GmosNorthSpectroscopy, y0: GmosNorthSpectroscopy) => x0 === y0
+        case (x0: GmosSouthSpectroscopy, y0: GmosSouthSpectroscopy) => x0 === y0
+        case _                                                      => false
       }
 
-  val gmosNorth: Prism[InstrumentMode, GmosNorth] =
-    GenPrism[InstrumentMode, GmosNorth]
+  val gmosNorth: Prism[InstrumentMode, GmosNorthSpectroscopy] =
+    GenPrism[InstrumentMode, GmosNorthSpectroscopy]
 
-  val gmosSouth: Prism[InstrumentMode, GmosSouth] =
-    GenPrism[InstrumentMode, GmosSouth]
+  val gmosSouth: Prism[InstrumentMode, GmosSouthSpectroscopy] =
+    GenPrism[InstrumentMode, GmosSouthSpectroscopy]
 
 }

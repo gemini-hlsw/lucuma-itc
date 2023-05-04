@@ -539,8 +539,8 @@ trait GracklePartials extends GrackleParsers:
     case (i, ("mode", m)) =>
       val modes = m match {
         case ObjectValue(
-              List(("gmosN", AbsentValue),
-                   ("gmosS", gmosS),
+              List(("gmosNSpectroscopy", AbsentValue),
+                   ("gmosSSpectroscopy", gmosS),
                    ("gmosNImaging", AbsentValue),
                    ("gmosSImaging", AbsentValue)
               )
@@ -570,8 +570,8 @@ trait GracklePartials extends GrackleParsers:
               none
 
         case ObjectValue(
-              List(("gmosN", gmosN),
-                   ("gmosS", AbsentValue),
+              List(("gmosNSpectroscopy", gmosN),
+                   ("gmosSSpectroscopy", AbsentValue),
                    ("gmosNImaging", AbsentValue),
                    ("gmosSImaging", AbsentValue)
               )
@@ -601,8 +601,8 @@ trait GracklePartials extends GrackleParsers:
               none
 
         case ObjectValue(
-              List(("gmosN", AbsentValue),
-                   ("gmosS", AbsentValue),
+              List(("gmosNSpectroscopy", AbsentValue),
+                   ("gmosSSpectroscopy", AbsentValue),
                    ("gmosNImaging", AbsentValue),
                    ("gmosSImaging", gmosS)
               )
@@ -618,8 +618,8 @@ trait GracklePartials extends GrackleParsers:
             case _                                =>
               none
         case ObjectValue(
-              List(("gmosN", AbsentValue),
-                   ("gmosS", AbsentValue),
+              List(("gmosNSpectroscopy", AbsentValue),
+                   ("gmosSSpectroscopy", AbsentValue),
                    ("gmosNImaging", gmosN),
                    ("gmosSImaging", AbsentValue)
               )

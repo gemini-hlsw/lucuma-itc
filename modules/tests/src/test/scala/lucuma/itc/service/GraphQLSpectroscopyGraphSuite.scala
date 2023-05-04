@@ -60,7 +60,7 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25

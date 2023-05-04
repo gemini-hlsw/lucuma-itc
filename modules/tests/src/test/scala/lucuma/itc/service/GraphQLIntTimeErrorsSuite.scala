@@ -57,7 +57,7 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: GG455,
                 fpu: {
                   builtin: LONG_SLIT_0_25

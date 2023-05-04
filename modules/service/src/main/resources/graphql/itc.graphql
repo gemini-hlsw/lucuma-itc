@@ -4729,14 +4729,16 @@ union InstrumentITCParams = GmosNITCParams | GmosSITCParams
 
 # Params for instrument modes
 input InstrumentModesInput {
-  # Gmos North
-  gmosN: GmosNSpectroscopyInput
+  # Gmos North Spectroscopy
+  gmosNSpectroscopy: GmosNSpectroscopyInput
 
-  # Gmos South
-  gmosS: GmosSSpectroscopyInput
+  # Gmos South Spectroscopy
+  gmosSSpectroscopy: GmosSSpectroscopyInput
 
+  # Gmos North Imaging
   gmosNImaging: GmosNImagingInput
 
+  # Gmos South Imaging
   gmosSImaging: GmosSImagingInput
 }
 

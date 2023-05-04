@@ -135,7 +135,7 @@ object WiringSuite {
         WaterVapor.VeryDry,
         AirMass.Default
       ),
-      InstrumentMode.GmosNorth(
+      InstrumentMode.GmosNorthSpectroscopy(
         GmosNorthGrating.B1200_G5301,
         GmosNorthFilter.GPrime.some,
         GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25)
@@ -157,7 +157,7 @@ object WiringSuite {
         WaterVapor.VeryDry,
         AirMass.Default
       ),
-      InstrumentMode.GmosNorth(
+      InstrumentMode.GmosNorthSpectroscopy(
         GmosNorthGrating.B1200_G5301,
         GmosNorthFilter.GPrime.some,
         GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25)

@@ -57,7 +57,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: GG455,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -161,7 +161,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosS: {
+              gmosSSpectroscopy: {
                 filter: RG610,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -267,7 +267,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               }
             },
             "mode": {
-              "gmosN": {
+              "gmosNSpectroscopy": {
                 "filter": "G_PRIME",
                 "fpu": {
                   "builtin": "LONG_SLIT_0_25"
@@ -353,7 +353,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -458,7 +458,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -547,7 +547,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -656,7 +656,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosS: {
+              gmosSSpectroscopy: {
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -765,7 +765,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                 }
               },
               mode: {
-                gmosN: {
+                gmosNSpectroscopy: {
                   filter: G_PRIME,
                   fpu: {
                     builtin: ${d.tag.toScreamingSnakeCase}
@@ -873,7 +873,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosS: {
+              gmosSSpectroscopy: {
                 filter: G_PRIME,
                 fpu: {
                   builtin: ${d.tag.toScreamingSnakeCase}
@@ -981,7 +981,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: ${d.tag.toScreamingSnakeCase}
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -1085,7 +1085,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosS: {
+              gmosSSpectroscopy: {
                 filter: ${d.tag.toScreamingSnakeCase}
                 fpu: {
                   builtin: LONG_SLIT_0_25
