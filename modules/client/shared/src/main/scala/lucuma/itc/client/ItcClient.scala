@@ -28,10 +28,10 @@ import org.typelevel.log4cats.Logger
  */
 trait ItcClient[F[_]] {
 
-  def spectroscopy(
-    input:    SpectroscopyIntegrationTimeInput,
+  def integrationTime(
+    input:    IntegrationTimeInput,
     useCache: Boolean = true
-  ): F[SpectroscopyResult]
+  ): F[IntegrationTimeResult]
 
   def optimizedSpectroscopyGraph(
     input:    OptimizedSpectroscopyGraphInput,
@@ -50,17 +50,17 @@ object ItcClient {
     client: Client[F]
   ): F[ItcClient[F]] =
     for {
-      cache      <- ItcCache.simple[F, SpectroscopyIntegrationTimeInput, SpectroscopyResult]
+      cache      <- ItcCache.simple[F, IntegrationTimeInput, IntegrationTimeResult]
       graphCache <-
         ItcCache.simple[F, OptimizedSpectroscopyGraphInput, OptimizedSpectroscopyGraphResult]
       http       <- Http4sHttpClient.of[F, Unit](uri)(Async[F], Http4sHttpBackend(client), Logger[F])
     } yield new ItcClient[F] {
-      override def spectroscopy(
-        input:    SpectroscopyIntegrationTimeInput,
+      override def integrationTime(
+        input:    IntegrationTimeInput,
         useCache: Boolean = true
-      ): F[SpectroscopyResult] = {
+      ): F[IntegrationTimeResult] = {
 
-        val callOut: F[SpectroscopyResult] =
+        val callOut: F[IntegrationTimeResult] =
           http.request(SpectroscopyQuery).withInput(input)
 
         for {

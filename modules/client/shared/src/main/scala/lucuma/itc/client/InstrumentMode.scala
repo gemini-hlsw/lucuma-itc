@@ -98,19 +98,25 @@ object InstrumentMode {
       a match {
         case a @ GmosNorthSpectroscopy(_, _, _) => Json.obj("gmosNSpectroscopy" -> a.asJson)
         case a @ GmosSouthSpectroscopy(_, _, _) => Json.obj("gmosSSpectroscopy" -> a.asJson)
+        case a @ GmosNorthImaging(_)            => Json.obj("gmosNImaging" -> a.asJson)
+        case a @ GmosSouthImaging(_)            => Json.obj("gmosSImaging" -> a.asJson)
       }
 
   given Decoder[InstrumentMode] with
     def apply(c: HCursor): Decoder.Result[InstrumentMode] =
       for {
-        n <- c.downField("gmosN").as[Option[GmosNorthSpectroscopy]]
-        s <- c.downField("gmosS").as[Option[GmosSouthSpectroscopy]]
-        m <- (n, s) match {
-               case (Some(n), None) => (n: InstrumentMode).asRight
-               case (None, Some(s)) => (s: InstrumentMode).asRight
-               case _               =>
-                 DecodingFailure("Expected exactly one of 'gmosN' or 'gmosS'.", c.history).asLeft
-             }
+        ns <- c.downField("gmosNSpectroscopy").as[Option[GmosNorthSpectroscopy]]
+        ss <- c.downField("gmosSSpectroscopy").as[Option[GmosSouthSpectroscopy]]
+        ni <- c.downField("gmosNImaging").as[Option[GmosNorthImaging]]
+        si <- c.downField("gmosSImaging").as[Option[GmosSouthImaging]]
+        m  <- (ns, ss, ni, si) match {
+                case (Some(n), None, None, None) => (n: InstrumentMode).asRight
+                case (None, Some(s), None, None) => (s: InstrumentMode).asRight
+                case (None, None, Some(s), None) => (s: InstrumentMode).asRight
+                case (None, None, None, Some(s)) => (s: InstrumentMode).asRight
+                case _                           =>
+                  DecodingFailure("Expected exactly one of 'gmosN' or 'gmosS'.", c.history).asLeft
+              }
       } yield m
 
   given Eq[InstrumentMode] with
@@ -118,8 +124,58 @@ object InstrumentMode {
       (x, y) match {
         case (x0: GmosNorthSpectroscopy, y0: GmosNorthSpectroscopy) => x0 === y0
         case (x0: GmosSouthSpectroscopy, y0: GmosSouthSpectroscopy) => x0 === y0
+        case (x0: GmosNorthImaging, y0: GmosNorthImaging)           => x0 === y0
+        case (x0: GmosSouthImaging, y0: GmosSouthImaging)           => x0 === y0
         case _                                                      => false
       }
+
+  final case class GmosNorthImaging(
+    filter: GmosNorthFilter
+  ) extends InstrumentMode
+
+  object GmosNorthImaging {
+
+    given Encoder[GmosNorthImaging] with
+      def apply(a: GmosNorthImaging): Json =
+        Json.obj(
+          "filter" -> a.filter.asScreamingJson
+        )
+
+    given Decoder[GmosNorthImaging] with
+      def apply(c: HCursor): Decoder.Result[GmosNorthImaging] =
+        for {
+          f <- c.downField("filter").as[GmosNorthFilter]
+        } yield GmosNorthImaging(f)
+
+    given Eq[GmosNorthImaging] with
+      def eqv(x: GmosNorthImaging, y: GmosNorthImaging): Boolean =
+        x.filter === y.filter
+
+  }
+
+  final case class GmosSouthImaging(
+    filter: GmosSouthFilter
+  ) extends InstrumentMode
+
+  object GmosSouthImaging {
+
+    given Encoder[GmosSouthImaging] with
+      def apply(a: GmosSouthImaging): Json =
+        Json.obj(
+          "filter" -> a.filter.asScreamingJson
+        )
+
+    given Decoder[GmosSouthImaging] with
+      def apply(c: HCursor): Decoder.Result[GmosSouthImaging] =
+        for {
+          f <- c.downField("filter").as[GmosSouthFilter]
+        } yield GmosSouthImaging(f)
+
+    given Eq[GmosSouthImaging] with
+      def eqv(x: GmosSouthImaging, y: GmosSouthImaging): Boolean =
+        x.filter === y.filter
+
+  }
 
   val gmosNorth: Prism[InstrumentMode, GmosNorthSpectroscopy] =
     GenPrism[InstrumentMode, GmosNorthSpectroscopy]

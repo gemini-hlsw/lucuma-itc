@@ -55,11 +55,11 @@ trait ClientSuite extends CatsEffectSuite {
     } yield c
 
   def spectroscopy(
-    in:       SpectroscopyIntegrationTimeInput,
-    expected: Either[String, SpectroscopyResult]
+    in:       IntegrationTimeInput,
+    expected: Either[String, IntegrationTimeResult]
   ): IO[Unit] =
     itcClient.flatMap {
-      _.spectroscopy(in).attempt
+      _.integrationTime(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
     }

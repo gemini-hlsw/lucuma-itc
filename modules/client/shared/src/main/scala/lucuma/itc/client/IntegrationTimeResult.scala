@@ -12,22 +12,22 @@ import io.circe.DecodingFailure
 import io.circe.HCursor
 import lucuma.itc.IntegrationTime
 
-final case class SpectroscopyResult(
+final case class IntegrationTimeResult(
   versions: ItcVersions,
   result:   NonEmptyList[IntegrationTime]
 )
 
-object SpectroscopyResult {
+object IntegrationTimeResult {
 
-  given Decoder[SpectroscopyResult] with
-    def apply(c: HCursor): Decoder.Result[SpectroscopyResult] =
+  given Decoder[IntegrationTimeResult] with
+    def apply(c: HCursor): Decoder.Result[IntegrationTimeResult] =
       for {
         v <- c.as[ItcVersions]
         r <- c.downField("results").as[NonEmptyList[IntegrationTime]]
-      } yield SpectroscopyResult(v, r)
+      } yield IntegrationTimeResult(v, r)
 
-  given Eq[SpectroscopyResult] with
-    def eqv(x: SpectroscopyResult, y: SpectroscopyResult): Boolean =
+  given Eq[IntegrationTimeResult] with
+    def eqv(x: IntegrationTimeResult, y: IntegrationTimeResult): Boolean =
       x.versions === y.versions && x.result === y.result
 
 }

@@ -15,8 +15,8 @@ import lucuma.itc.client.json.decoders.given
 
 object SpectroscopyQuery extends GraphQLOperation[Unit] {
 
-  type Data      = SpectroscopyResult
-  type Variables = SpectroscopyIntegrationTimeInput
+  type Data      = IntegrationTimeResult
+  type Variables = IntegrationTimeInput
 
   override val document: String =
     """
@@ -36,14 +36,14 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
     """
 
   override val varEncoder: Encoder.AsObject[Variables] =
-    Encoder.AsObject.instance[SpectroscopyIntegrationTimeInput] { input =>
+    Encoder.AsObject.instance[IntegrationTimeInput] { input =>
       JsonObject(
-        "spec" -> Encoder[SpectroscopyIntegrationTimeInput].apply(input)
+        "spec" -> Encoder[IntegrationTimeInput].apply(input)
       )
     }
 
-  override val dataDecoder: Decoder[SpectroscopyResult] =
-    (c: HCursor) => c.downField("spectroscopyIntegrationTime").as[SpectroscopyResult]
+  override val dataDecoder: Decoder[IntegrationTimeResult] =
+    (c: HCursor) => c.downField("spectroscopyIntegrationTime").as[IntegrationTimeResult]
 
 }
 

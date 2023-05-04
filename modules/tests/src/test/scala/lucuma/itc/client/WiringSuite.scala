@@ -50,8 +50,28 @@ class WiringSuite extends ClientSuite {
 
   test("ItcClient spectroscopy basic wiring and sanity check") {
     spectroscopy(
-      WiringSuite.Input,
-      SpectroscopyResult(
+      WiringSuite.SpectroscopyInput,
+      IntegrationTimeResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+          BuildInfo.ocslibHash.some
+        ),
+        NonEmptyList
+          .one(
+            IntegrationTime(
+              TimeSpan.FromString.getOption("PT1S").get,
+              PosInt.unsafeFrom(10),
+              SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
+            )
+          )
+      ).asRight
+    )
+  }
+
+  test("ItcClient imaging basic wiring and sanity check") {
+    spectroscopy(
+      WiringSuite.ImagingInput,
+      IntegrationTimeResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -69,13 +89,13 @@ class WiringSuite extends ClientSuite {
   }
 
   test("SignalToNoiseAt null is removed") {
-    WiringSuite.Input.asJson.asObject
+    WiringSuite.SpectroscopyInput.asJson.asObject
       .exists(!_.contains("signalToNoiseAt"))
   }
 
   test("SignalToNoiseAt non-null is included") {
     import lucuma.itc.client.json.given
-    WiringSuite.Input
+    WiringSuite.SpectroscopyInput
       .copy(signalToNoiseAt = Wavelength.Min.some)
       .asJson
       .asObject
@@ -123,8 +143,8 @@ class WiringSuite extends ClientSuite {
 
 object WiringSuite {
 
-  val Input: SpectroscopyIntegrationTimeInput =
-    SpectroscopyIntegrationTimeInput(
+  val SpectroscopyInput: IntegrationTimeInput =
+    IntegrationTimeInput(
       Wavelength.Min,
       SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
       Option.empty[Wavelength],
@@ -145,6 +165,27 @@ object WiringSuite {
       )
     )
 
+  val ImagingInput: IntegrationTimeInput          =
+    IntegrationTimeInput(
+      Wavelength.Min,
+      SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+      Option.empty[Wavelength],
+      SourceProfile.Point(BandNormalized[Integrated](Galaxy(Spiral).some, SortedMap.empty)),
+      Band.SloanU,
+      RadialVelocity.fromMetersPerSecond.getOption(1.0).get,
+      ConstraintSet(
+        ImageQuality.PointOne,
+        CloudExtinction.PointOne,
+        SkyBackground.Darkest,
+        WaterVapor.VeryDry,
+        AirMass.Default
+      ),
+      InstrumentMode.GmosNorthSpectroscopy(
+        GmosNorthGrating.B1200_G5301,
+        GmosNorthFilter.GPrime.some,
+        GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25)
+      )
+    )
   val GraphInput: OptimizedSpectroscopyGraphInput =
     OptimizedSpectroscopyGraphInput(
       Wavelength.Min,

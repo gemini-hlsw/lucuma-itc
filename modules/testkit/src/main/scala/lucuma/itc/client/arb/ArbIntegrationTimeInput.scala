@@ -21,7 +21,7 @@ import lucuma.core.util.arb.ArbEnumerated
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.*
 
-trait ArbSpectroscopyIntegrationTimeInput {
+trait ArbIntegrationTimeInput {
 
   import ArbConstraintSet.*
   import ArbEnumerated.*
@@ -34,7 +34,7 @@ trait ArbSpectroscopyIntegrationTimeInput {
 
   def genSpectroscopyIntegrationTimeInput(
     im: InstrumentMode
-  ): Gen[SpectroscopyIntegrationTimeInput] =
+  ): Gen[IntegrationTimeInput] =
     for {
       w   <- arbitrary[Wavelength]
       s2n <- arbitrary[SignalToNoise]
@@ -44,7 +44,7 @@ trait ArbSpectroscopyIntegrationTimeInput {
       rv  <- arbitrary[RadialVelocity]
       cs  <- arbitrary[ConstraintSet]
       im  <- arbitrary[InstrumentMode]
-    } yield SpectroscopyIntegrationTimeInput(
+    } yield IntegrationTimeInput(
       w,
       s2n,
       sat,
@@ -55,7 +55,7 @@ trait ArbSpectroscopyIntegrationTimeInput {
       im
     )
 
-  given Arbitrary[SpectroscopyIntegrationTimeInput] =
+  given Arbitrary[IntegrationTimeInput] =
     Arbitrary {
       for {
         im <- arbitrary[InstrumentMode]
@@ -63,7 +63,7 @@ trait ArbSpectroscopyIntegrationTimeInput {
       } yield sm
     }
 
-  given Cogen[SpectroscopyIntegrationTimeInput] =
+  given Cogen[IntegrationTimeInput] =
     Cogen[
       (
         Wavelength,
@@ -89,4 +89,4 @@ trait ArbSpectroscopyIntegrationTimeInput {
     }
 }
 
-object ArbSpectroscopyIntegrationTimeInput extends ArbSpectroscopyIntegrationTimeInput
+object ArbIntegrationTimeInput extends ArbIntegrationTimeInput
