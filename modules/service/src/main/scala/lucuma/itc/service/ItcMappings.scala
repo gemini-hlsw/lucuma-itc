@@ -49,7 +49,7 @@ import QueryCompiler.*
 
 case class GraphRequest(
   targetProfile: TargetProfile,
-  specMode:      ObservingMode.Spectroscopy,
+  specMode:      ObservingMode.SpectroscopyMode,
   constraints:   ItcObservingConditions,
   expTime:       NonNegDuration,
   exp:           PosLong
@@ -57,7 +57,7 @@ case class GraphRequest(
 
 case class SpectroscopyIntegrationTimeRequest(
   targetProfile:   TargetProfile,
-  specMode:        ObservingMode.Spectroscopy,
+  specMode:        ObservingMode.SpectroscopyMode,
   constraints:     ItcObservingConditions,
   signalToNoise:   SignalToNoise,
   signalToNoiseAt: Option[Wavelength]
@@ -65,7 +65,7 @@ case class SpectroscopyIntegrationTimeRequest(
 
 case class ImagingIntegrationTimeRequest(
   targetProfile: TargetProfile,
-  specMode:      ObservingMode.Imaging,
+  specMode:      ObservingMode.ImagingMode,
   constraints:   ItcObservingConditions,
   signalToNoise: SignalToNoise
 ) derives Hash
@@ -91,18 +91,16 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
      env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
      env.get[SignalToNoise]("signalToNoise"),
      env.get[SourceProfile]("sourceProfile"),
-     env.get[SpectroscopyParams | ImagingParams]("mode"),
+     env.get[ImagingParams]("mode"),
      env.get[Band]("band"),
      env.get[ItcObservingConditions]("constraints")
     ).traverseN { (wv, rs, sn, sp, mode, band, c) =>
-      println(mode)
       val imgMode = mode match {
         case GmosNImagingParams(filter) =>
-          ObservingMode.Imaging.GmosNorth(wv, filter)
+          ObservingMode.ImagingMode.GmosNorth(wv, filter)
         case GmosSImagingParams(filter) =>
-          ObservingMode.Imaging.GmosSouth(wv, filter)
+          ObservingMode.ImagingMode.GmosSouth(wv, filter)
       }
-      println(imgMode)
       imgTimeFromCacheOrRemote(
         ImagingIntegrationTimeRequest(
           TargetProfile(sp, band, rs),
@@ -111,7 +109,6 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           sn
         )
       )(itc, redis).map { r =>
-        println(r)
         IntegrationTimeCalculationResult(
           version(environment).value,
           BuildInfo.ocslibHash,
@@ -121,7 +118,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
       }
     }.map(
       _.getOrElse(
-        Problem(s"Missing parameters for imagingIntegrationTime $env").leftIorNec
+        Problem(s"Missing parameters for imagingIntegrationTime").leftIorNec
       )
     )
 
@@ -145,9 +142,9 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         ) *> {
           val specMode = mode match {
             case GmosNSpectrosocpyParams(grating, fpu, filter) =>
-              ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
+              ObservingMode.SpectroscopyMode.GmosNorth(wv, grating, fpu, filter)
             case GmosSSpectroscopyParams(grating, fpu, filter) =>
-              ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
+              ObservingMode.SpectroscopyMode.GmosSouth(wv, grating, fpu, filter)
           }
           specTimeFromCacheOrRemote(
             SpectroscopyIntegrationTimeRequest(
@@ -201,9 +198,9 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         val significantFigures = env.get[SignificantFigures]("significantFigures")
         val specMode           = mode match {
           case GmosNSpectrosocpyParams(grating, fpu, filter) =>
-            ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
+            ObservingMode.SpectroscopyMode.GmosNorth(wv, grating, fpu, filter)
           case GmosSSpectroscopyParams(grating, fpu, filter) =>
-            ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
+            ObservingMode.SpectroscopyMode.GmosSouth(wv, grating, fpu, filter)
         }
         graphFromCacheOrRemote(
           GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp)
@@ -254,9 +251,9 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         val signalToNoiseAt    = env.get[Wavelength]("signalToNoiseAt")
         val specMode           = mode match {
           case GmosNSpectrosocpyParams(grating, fpu, filter) =>
-            ObservingMode.Spectroscopy.GmosNorth(wv, grating, fpu, filter)
+            ObservingMode.SpectroscopyMode.GmosNorth(wv, grating, fpu, filter)
           case GmosSSpectroscopyParams(grating, fpu, filter) =>
-            ObservingMode.Spectroscopy.GmosSouth(wv, grating, fpu, filter)
+            ObservingMode.SpectroscopyMode.GmosSouth(wv, grating, fpu, filter)
         }
         import io.circe.syntax.*
 
@@ -368,7 +365,6 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                         .orElse(bandPartial)
                         .orElse(instrumentModePartial)
                         .orElse(constraintsPartial)
-                        // .orElse(signalToNoiseAtPartial)
                         .applyOrElse(
                           (e, c),
                           fallback

@@ -18,23 +18,85 @@ class GraphQLImagingTimeSuite extends GraphQLSuite {
       """
         query {
           imagingIntegrationTime(input: {
+            wavelength: {
+              picometers: 530000
+            },
+            signalToNoise: 600,
+            sourceProfile: {
+              point: {
+                bandNormalized: {
+                  sed: {
+                    stellarLibrary: O5_V
+                  },
+                  brightnesses: [
+                    {
+                      band: SLOAN_I,
+                      value: 9.484,
+                      units: VEGA_MAGNITUDE,
+                      error: 0.01
+                    },
+                    {
+                      band: B,
+                      value: 8.116,
+                      units: VEGA_MAGNITUDE
+                    },
+                    {
+                      band: V,
+                      value: 12.323,
+                      units: VEGA_MAGNITUDE,
+                      error: 0.01
+                    },
+                    {
+                      band: J,
+                      value: 14.442,
+                      units: VEGA_MAGNITUDE,
+                      error: 0.018
+                    },
+                    {
+                      band: H,
+                      value: 9.798,
+                      units: VEGA_MAGNITUDE,
+                      error: 0.029
+                    },
+                    {
+                      band: K,
+                      value: 10.65,
+                      units: VEGA_MAGNITUDE,
+                      error: 0.03
+                    }
+                  ]
+                }
+              }
+            },
+            band: V,
+            radialVelocity: {
+              metersPerSecond: 7560
+            },
+            constraints: {
+              imageQuality: TWO_POINT_ZERO,
+              cloudExtinction: THREE_POINT_ZERO,
+              skyBackground: BRIGHT,
+              waterVapor: WET,
+              elevationRange: {
+                airMass: {
+                  min: 1,
+                  max: 2
+                }
+              }
+            },
             mode: {
-              gmosN: {
-                filter: GG455,
-                fpu: {
-                  builtin: LONG_SLIT_0_25
-                },
-                grating: B1200_G5301
+              gmosNImaging: {
+                filter: G_PRIME
               }
             }
           }) {
             mode {
-              ... on SpectroscopyMode {
+              __typename
+              ... on ImagingMode {
                 instrument
-                resolution
                 params {
                   ... on GmosNITCParams {
-                    grating
+                    filter
                   }
                 }
                 wavelength {
@@ -56,19 +118,19 @@ class GraphQLImagingTimeSuite extends GraphQLSuite {
           "data": {
             "imagingIntegrationTime" : {
               "mode" : {
+                "__typename" : "ImagingMode",
                 "instrument" : "GMOS_NORTH",
-                "resolution" : 970,
                 "params": {
-                  "grating": "B1200_G5301"
+                  "filter": "G_PRIME"
                 },
                 "wavelength" : {
-                  "nanometers" : 60.000
+                  "nanometers" : 530.000
                 }
               },
               "result" : {
                 "exposures" : 10,
                 "exposureTime" : {
-                  "seconds" : 1.000000000
+                  "seconds" : 1.000000
                 }
               }
             }

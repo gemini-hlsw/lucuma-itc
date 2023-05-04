@@ -51,8 +51,8 @@ import lucuma.itc.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.ObservingMode.Spectroscopy.GmosNorth
-import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
+import lucuma.itc.search.ObservingMode.SpectroscopyMode.GmosNorth
+import lucuma.itc.search.ObservingMode.SpectroscopyMode.GmosSouth
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.service.config.*
 import lucuma.itc.service.syntax.all.*
@@ -538,7 +538,13 @@ trait GracklePartials extends GrackleParsers:
   def instrumentModePartial: PartialFunction[(Partial, (String, Value)), Partial] =
     case (i, ("mode", m)) =>
       val modes = m match {
-        case ObjectValue(List(("gmosN", AbsentValue), ("gmosS", gmosS))) =>
+        case ObjectValue(
+              List(("gmosN", AbsentValue),
+                   ("gmosS", gmosS),
+                   ("gmosNImaging", AbsentValue),
+                   ("gmosSImaging", AbsentValue)
+              )
+            ) =>
           gmosS match
             case ObjectValue(
                   List(("grating", TypedEnumValue(EnumValue(d, _, _, _))),
@@ -563,7 +569,13 @@ trait GracklePartials extends GrackleParsers:
             case _ =>
               none
 
-        case ObjectValue(List(("gmosN", gmosN), ("gmosS", AbsentValue))) =>
+        case ObjectValue(
+              List(("gmosN", gmosN),
+                   ("gmosS", AbsentValue),
+                   ("gmosNImaging", AbsentValue),
+                   ("gmosSImaging", AbsentValue)
+              )
+            ) =>
           gmosN match
             case ObjectValue(
                   List(("grating", TypedEnumValue(EnumValue(d, _, _, _))),
@@ -588,31 +600,6 @@ trait GracklePartials extends GrackleParsers:
             case _ =>
               none
 
-        // case ObjectValue(List(("gmosNImaging", gmosN), ("gmosSImaging", AbsentValue))) =>
-        //   gmosN match
-        //     case ObjectValue(
-        //           List(("grating", TypedEnumValue(EnumValue(d, _, _, _))),
-        //                ("fpu",
-        //                 ObjectValue(
-        //                   List(("customMask", AbsentValue),
-        //                        ("builtin", TypedEnumValue(EnumValue(fpu, _, _, _)))
-        //                   )
-        //                 )
-        //                ),
-        //                ("filter", f)
-        //           )
-        //         ) =>
-        //       val filterOpt = f match
-        //         case TypedEnumValue(EnumValue(f, _, _, _)) =>
-        //           gnFilter.get(f)
-        //         case _                                     => none
-        //
-        //       (gnGrating.get(d), gnFpu.get(fpu)).mapN((a, b) =>
-        //         GmosNITCParams(a, GmosNorthFpuParam(b), filterOpt)
-        //       )
-        //     case _ =>
-        //       none
-
         case ObjectValue(
               List(("gmosN", AbsentValue),
                    ("gmosS", AbsentValue),
@@ -626,7 +613,6 @@ trait GracklePartials extends GrackleParsers:
                 case TypedEnumValue(EnumValue(f, _, _, _)) =>
                   gsFilter.get(f)
                 case _                                     => none
-              println(s"SOUTH $filterOpt")
 
               filterOpt.map(GmosSImagingParams(_))
             case _                                =>
@@ -644,7 +630,6 @@ trait GracklePartials extends GrackleParsers:
                 case TypedEnumValue(EnumValue(f, _, _, _)) =>
                   gnFilter.get(f)
                 case _                                     => none
-              println(s"NORTH $filterOpt")
 
               filterOpt.map(GmosNImagingParams(_))
             case _                                =>

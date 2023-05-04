@@ -4,14 +4,14 @@
 package lucuma.itc.legacy
 
 import cats.data.NonEmptyList
-import cats.syntax.all._
+import cats.syntax.all.*
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.refineV
 import io.circe.*
-import io.circe.generic.semiauto._
+import io.circe.generic.semiauto.*
 import io.circe.refined.*
 import io.circe.syntax.*
-import lucuma.core.enums._
+import lucuma.core.enums.*
 import lucuma.core.math.Angle
 import lucuma.core.math.Redshift
 import lucuma.core.math.SignalToNoise
@@ -27,13 +27,13 @@ import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
 import lucuma.itc.legacy.ItcRemoteCcd
 import lucuma.itc.legacy.syntax.all.*
-import lucuma.itc.search.ObservingMode.Spectroscopy._
+import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
 import lucuma.itc.search.*
 import lucuma.itc.syntax.all.given
 
 import java.math.MathContext
-import scala.util.Try
 import scala.math.BigDecimal.RoundingMode
+import scala.util.Try
 
 ////////////////////////////////////////////////////////////
 //
@@ -61,9 +61,9 @@ given Encoder[ItcObservingConditions] =
     )
   }
 
-private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.Spectroscopy.GmosNorth] =
-  new Encoder[ObservingMode.Spectroscopy.GmosNorth] {
-    def apply(a: ObservingMode.Spectroscopy.GmosNorth): Json =
+private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.GmosNorth] =
+  new Encoder[ObservingMode.SpectroscopyMode.GmosNorth] {
+    def apply(a: ObservingMode.SpectroscopyMode.GmosNorth): Json =
       Json.obj(
         // Translate observing mode to OCS2 style
         "centralWavelength" -> Json.fromString(
@@ -88,9 +88,9 @@ private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.Spectroscopy.Gmos
       )
   }
 
-private val encodeGmosNorthImaging: Encoder[ObservingMode.Imaging.GmosNorth] =
-  new Encoder[ObservingMode.Imaging.GmosNorth] {
-    def apply(a: ObservingMode.Imaging.GmosNorth): Json =
+private val encodeGmosNorthImaging: Encoder[ObservingMode.ImagingMode.GmosNorth] =
+  new Encoder[ObservingMode.ImagingMode.GmosNorth] {
+    def apply(a: ObservingMode.ImagingMode.GmosNorth): Json =
       Json.obj(
         // Translate observing mode to OCS2 style
         "centralWavelength" -> Json.fromString(
@@ -114,9 +114,9 @@ private val encodeGmosNorthImaging: Encoder[ObservingMode.Imaging.GmosNorth] =
       )
   }
 
-private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.Spectroscopy.GmosSouth] =
-  new Encoder[ObservingMode.Spectroscopy.GmosSouth] {
-    def apply(a: ObservingMode.Spectroscopy.GmosSouth): Json =
+private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.GmosSouth] =
+  new Encoder[ObservingMode.SpectroscopyMode.GmosSouth] {
+    def apply(a: ObservingMode.SpectroscopyMode.GmosSouth): Json =
       Json.obj(
         // Translate observing mode to OCS2 style
         "centralWavelength" -> Json.fromString(
@@ -141,9 +141,9 @@ private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.Spectroscopy.Gmos
       )
   }
 
-private val encodeGmosSouthImaging: Encoder[ObservingMode.Imaging.GmosSouth] =
-  new Encoder[ObservingMode.Imaging.GmosSouth] {
-    def apply(a: ObservingMode.Imaging.GmosSouth): Json =
+private val encodeGmosSouthImaging: Encoder[ObservingMode.ImagingMode.GmosSouth] =
+  new Encoder[ObservingMode.ImagingMode.GmosSouth] {
+    def apply(a: ObservingMode.ImagingMode.GmosSouth): Json =
       Json.obj(
         // Translate observing mode to OCS2 style
         "centralWavelength" -> Json.fromString(
@@ -169,13 +169,13 @@ private val encodeGmosSouthImaging: Encoder[ObservingMode.Imaging.GmosSouth] =
 
 private given Encoder[ItcInstrumentDetails] = (a: ItcInstrumentDetails) =>
   a.mode match
-    case a: ObservingMode.Spectroscopy.GmosNorth =>
+    case a: ObservingMode.SpectroscopyMode.GmosNorth =>
       Json.obj("GmosParameters" -> encodeGmosNorthSpectroscopy(a))
-    case a: ObservingMode.Spectroscopy.GmosSouth =>
+    case a: ObservingMode.SpectroscopyMode.GmosSouth =>
       Json.obj("GmosParameters" -> encodeGmosSouthSpectroscopy(a))
-    case a: ObservingMode.Imaging.GmosNorth      =>
+    case a: ObservingMode.ImagingMode.GmosNorth      =>
       Json.obj("GmosParameters" -> encodeGmosNorthImaging(a))
-    case a: ObservingMode.Imaging.GmosSouth      =>
+    case a: ObservingMode.ImagingMode.GmosSouth      =>
       Json.obj("GmosParameters" -> encodeGmosSouthImaging(a))
 
 private given Encoder[ItcWavefrontSensor] = Encoder[String].contramap(_.ocs2Tag)

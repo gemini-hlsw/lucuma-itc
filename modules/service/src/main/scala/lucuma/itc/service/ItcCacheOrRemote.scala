@@ -10,11 +10,11 @@ import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
 import dev.profunktor.redis4cats.algebra.StringCommands
+import lucuma.core.math.SignalToNoise
 import lucuma.itc.ItcVersions
 import lucuma.itc.*
 import lucuma.itc.service.config.ExecutionEnvironment
 import lucuma.itc.service.redis.given
-import lucuma.core.math.SignalToNoise
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 

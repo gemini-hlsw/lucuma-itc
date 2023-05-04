@@ -112,14 +112,13 @@ object ItcImpl {
       ): F[IntegrationTime] =
         Trace[F].span("calculate-exposure-time") {
           observingMode match
-            case _: ObservingMode.Spectroscopy =>
+            case _: ObservingMode.SpectroscopyMode =>
               signalToNoiseAt match
                 case None     =>
                   spectroscopy(targetProfile, observingMode, constraints, signalToNoise, none)
                 case Some(at) =>
                   spectroscopySNAt(targetProfile, observingMode, constraints, signalToNoise, at)
-            case _: ObservingMode.Imaging      =>
-              println("INT TIME " + targetProfile)
+            case _: ObservingMode.ImagingMode      =>
               imaging(targetProfile, observingMode, constraints, signalToNoise)
         }
 
@@ -131,7 +130,7 @@ object ItcImpl {
         exposures:     PosLong
       ): F[GraphResult] =
         observingMode match
-          case _: ObservingMode.Spectroscopy =>
+          case _: ObservingMode.SpectroscopyMode =>
             spectroscopyGraph(
               targetProfile,
               observingMode,
@@ -139,10 +138,10 @@ object ItcImpl {
               BigDecimal(exposureTime.value.toMillis).withUnit[Millisecond].toUnit[Second],
               exposures.value
             )
-          case _: ObservingMode.Imaging      =>
-            ???
-
-          // TODO: imaging
+          case _: ObservingMode.ImagingMode      =>
+            MonadThrow[F].raiseError(
+              new IllegalArgumentException("Imaging mode not supported for graph calculation")
+            )
 
       // Convenience method to compute an OCS2 ITC result for the specified profile/mode.
       def itc(
@@ -451,7 +450,6 @@ object ItcImpl {
         import lucuma.itc.legacy.*
 
         Trace[F].span("legacy-itc-query") {
-          println(s"targetProfile: $targetProfile")
           val request =
             imagingParams(targetProfile, observingMode, constraints, sigma).asJson
 

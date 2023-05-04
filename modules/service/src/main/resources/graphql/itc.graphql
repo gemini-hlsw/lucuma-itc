@@ -4643,11 +4643,6 @@ type Query {
   versions: ItcVersions
 }
 
-type ImagingMode {
-  # instrument
-  instrument: InstrumentType
-}
-
 type ObservingModeSpectroscopy {
   # Wavelength in appropriate units
   wavelength: Wavelength!
@@ -4670,18 +4665,6 @@ type ItcVersions {
   dataVersion: String
 }
 
-
-type GmosSITCParams {
-  # Gmos South disperser
-  grating: GmosSouthGrating!
-
-  # Gmos South Focal plane unit
-  fpu: GmosSouthFpu
-
-  # Gmos South filter
-  filter: GmosSouthFilter
-}
-
 input GmosSSpectroscopyInput {
   # Gmos South disperser
   grating: GmosSouthGrating!
@@ -4698,19 +4681,6 @@ input GmosSImagingInput {
   filter: GmosSouthFilter!
 }
 
-type GmosNITCParams {
-  # Gmos North disperser
-  grating: GmosNorthGrating!
-
-  # Gmos North Focal plane unit
-  customMask: GmosCustomMask
-
-  fpu: GmosNorthFpu!
-
-  # Gmos North filter
-  filter: GmosNorthFilter
-}
-
 input GmosNSpectroscopyInput {
   # Gmos North disperser
   grating: GmosNorthGrating!
@@ -4725,6 +4695,34 @@ input GmosNSpectroscopyInput {
 input GmosNImagingInput {
   # Gmos North filter
   filter: GmosNorthFilter!
+}
+
+type GmosSITCParams {
+  # Gmos South disperser
+  grating: GmosSouthGrating
+
+  # Gmos North Focal plane unit
+  customMask: GmosCustomMask
+
+  # Gmos South Focal plane unit
+  fpu: GmosSouthFpu
+
+  # Gmos South filter
+  filter: GmosSouthFilter
+}
+
+type GmosNITCParams {
+  # Gmos North disperser
+  grating: GmosNorthGrating
+
+  # Gmos North Focal plane unit
+  customMask: GmosCustomMask
+
+  # Gmos North Focal plane unit
+  fpu: GmosNorthFpu
+
+  # Gmos North filter
+  filter: GmosNorthFilter
 }
 
 union InstrumentITCParams = GmosNITCParams | GmosSITCParams
@@ -4869,9 +4867,6 @@ input SpectroscopySignalToNoiseInput {
 }
 
 type IntegrationTime {
-  # unit id, e.g. CCD ID
-  #id: NonEmptyString!
-
   # Exposure time duration
   exposureTime: TimeSpan!
 
@@ -4880,20 +4875,6 @@ type IntegrationTime {
 
   # Signal/Noise ratio
   signalToNoise: SignalToNoise!
-}
-
-type SpectroscopyMode {
-  # Wavelength in appropriate units
-  wavelength: Wavelength!
-
-  # Resolution
-  resolution: BigDecimal!
-
-  # params
-  params: InstrumentITCParams!
-
-  # instrument
-  instrument: InstrumentType
 }
 
 type IntegrationTimeCalculationResult {
@@ -4911,7 +4892,36 @@ type IntegrationTimeCalculationResult {
   result: IntegrationTime!
 }
 
-union ObservingMode = SpectroscopyMode | ImagingMode
+interface ObservingMode {
+  # instrument
+  instrument: InstrumentType
+}
+
+type ImagingMode implements ObservingMode {
+  # Wavelength in appropriate units
+  wavelength: Wavelength!
+
+  # instrument
+  instrument: InstrumentType
+
+  # params
+  params: InstrumentITCParams!
+
+}
+
+type SpectroscopyMode implements ObservingMode {
+  # Wavelength in appropriate units
+  wavelength: Wavelength!
+
+  # Resolution
+  resolution: BigDecimal!
+
+  # params
+  params: InstrumentITCParams!
+
+  # instrument
+  instrument: InstrumentType
+}
 
 """Chart data types"""
 enum ItcSeriesType {

@@ -10,16 +10,16 @@ import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
+import lucuma.itc.GmosNImagingParams
 import lucuma.itc.GmosNSpectrosocpyParams
+import lucuma.itc.GmosSImagingParams
 import lucuma.itc.GmosSSpectroscopyParams
 import lucuma.itc.encoders.given
+import lucuma.itc.search.ItcObservationDetails.AnalysisMethod
 import lucuma.itc.search.hashes.given
 import lucuma.itc.search.syntax.*
 import spire.math.Interval
 import spire.math.Rational
-import lucuma.itc.search.ItcObservationDetails.AnalysisMethod
-import lucuma.itc.GmosNImagingParams
-import lucuma.itc.GmosSImagingParams
 
 case class GmosNorthFpuParam(
   builtin: GmosNorthFpu
@@ -41,20 +41,24 @@ sealed trait ObservingMode {
 }
 
 object ObservingMode {
+  given Encoder[ObservingMode] = Encoder.instance {
+    case spec: SpectroscopyMode => spec.asJson
+    case img: ImagingMode       => img.asJson
+  }
 
-  sealed trait Spectroscopy extends ObservingMode derives Hash {
+  sealed trait SpectroscopyMode extends ObservingMode derives Hash {
     def λ: Wavelength
     def resolution: Rational
     def coverage: Interval[Wavelength]
   }
 
-  object Spectroscopy {
-    given Encoder[ObservingMode.Spectroscopy] = Encoder.instance {
+  object SpectroscopyMode {
+    given Encoder[ObservingMode.SpectroscopyMode] = Encoder.instance {
       case gn: GmosNorth => gn.asJson
       case gs: GmosSouth => gs.asJson
     }
 
-    sealed trait GmosSpectroscopy extends Spectroscopy derives Hash {
+    sealed trait GmosSpectroscopy extends SpectroscopyMode derives Hash {
       def isIfu: Boolean
 
       def analysisMethod: ItcObservationDetails.AnalysisMethod =
@@ -131,19 +135,17 @@ object ObservingMode {
 
   }
 
-  sealed trait Imaging extends ObservingMode derives Hash {
-    // def λ: Wavelength
-    // def resolution: Rational
-    // def coverage: Interval[Wavelength]
+  sealed trait ImagingMode extends ObservingMode derives Hash {
+    def λ: Wavelength
   }
 
-  object Imaging {
-    given Encoder[ObservingMode.Imaging] = Encoder.instance {
+  object ImagingMode {
+    given Encoder[ObservingMode.ImagingMode] = Encoder.instance {
       case gn: GmosNorth => gn.asJson
       case gs: GmosSouth => gs.asJson
     }
 
-    sealed trait GmosImaging extends Imaging derives Hash {
+    sealed trait GmosImaging extends ImagingMode derives Hash {
 
       def analysisMethod: ItcObservationDetails.AnalysisMethod =
         ItcObservationDetails.AnalysisMethod.Aperture.Auto(
@@ -165,7 +167,6 @@ object ObservingMode {
       given Encoder[GmosNorth] = a =>
         Json.obj(
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-          // ("resolution", Json.fromInt(a.resolution.toInt)),
           ("params", GmosNImagingParams(a.filter).asJson),
           ("wavelength", a.λ.asJson)
         )
@@ -182,7 +183,6 @@ object ObservingMode {
       given Encoder[GmosSouth] = a =>
         Json.obj(
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-          // ("resolution", Json.fromInt(a.resolution.toInt)),
           ("params", GmosSImagingParams(a.filter).asJson),
           ("wavelength", a.λ.asJson)
         )
