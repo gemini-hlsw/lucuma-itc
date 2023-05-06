@@ -18,6 +18,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 
 import java.math.RoundingMode
+import eu.timepit.refined.types.numeric.PosLong
 
 type Nanosecond  = Nano * Second
 type Microsecond = Micro * Second
@@ -28,6 +29,7 @@ object encoders:
   given nelEncoder[A: Encoder]: Encoder[NonEmptyList[A]] = Encoder.encodeList[A].contramap(_.toList)
   given Encoder[NonEmptyString]                          = (s: NonEmptyString) => s.value.asJson
   given Encoder[PosInt]                                  = (s: PosInt) => s.value.asJson
+  given Encoder[PosLong]                                 = (s: PosLong) => s.value.asJson
 
   // TODO get this directly from odb schemas
   given Encoder[TimeSpan] =

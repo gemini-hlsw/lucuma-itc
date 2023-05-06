@@ -98,7 +98,7 @@ trait GrackleParsers:
   def parseNonNegDuration(units: List[(String, Value)]): Option[NonNegDuration] =
     (units.find(_._2 != Value.AbsentValue) match
       case Some(("microseconds", IntValue(n))) =>
-        Duration.ofNanos(n * 1000).some
+        Duration.ofNanos(n * 1000L).some
       case Some(("milliseconds", n))           =>
         bigDecimalValue(n).map(n => Duration.ofNanos((n * 1e6).toLong))
       case Some(("seconds", n))                =>
