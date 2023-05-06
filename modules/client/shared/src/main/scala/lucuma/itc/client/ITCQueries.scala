@@ -13,10 +13,10 @@ import io.circe.JsonObject
 import lucuma.itc.client.OptimizedSpectroscopyGraphResult
 import lucuma.itc.client.json.decoders.given
 
-object ITCQueries extends GraphQLOperation[Unit] {
+object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
 
   type Data      = IntegrationTimeResult
-  type Variables = IntegrationTimeInput
+  type Variables = SpectroscopyIntegrationTimeInput
 
   override val document: String =
     """
@@ -36,14 +36,48 @@ object ITCQueries extends GraphQLOperation[Unit] {
     """
 
   override val varEncoder: Encoder.AsObject[Variables] =
-    Encoder.AsObject.instance[IntegrationTimeInput] { input =>
+    Encoder.AsObject.instance[SpectroscopyIntegrationTimeInput] { input =>
       JsonObject(
-        "spec" -> Encoder[IntegrationTimeInput].apply(input)
+        "spec" -> Encoder[SpectroscopyIntegrationTimeInput].apply(input)
       )
     }
 
   override val dataDecoder: Decoder[IntegrationTimeResult] =
     (c: HCursor) => c.downField("spectroscopyIntegrationTime").as[IntegrationTimeResult]
+
+}
+
+object ImagingIntegrationTime extends GraphQLOperation[Unit] {
+
+  type Data      = IntegrationTimeResult
+  type Variables = ImagingIntegrationTimeInput
+
+  override val document: String =
+    """
+      query Imaging($spec: ImagingIntegrationTimeInput!) {
+        imagingIntegrationTime(input: $spec) {
+          serverVersion
+          dataVersion
+          results {
+            exposures
+            exposureTime {
+              microseconds
+            }
+            signalToNoise
+          }
+        }
+      }
+    """
+
+  override val varEncoder: Encoder.AsObject[Variables] =
+    Encoder.AsObject.instance[ImagingIntegrationTimeInput] { input =>
+      JsonObject(
+        "spec" -> Encoder[ImagingIntegrationTimeInput].apply(input)
+      )
+    }
+
+  override val dataDecoder: Decoder[IntegrationTimeResult] =
+    (c: HCursor) => c.downField("imagingIntegrationTime").as[IntegrationTimeResult]
 
 }
 

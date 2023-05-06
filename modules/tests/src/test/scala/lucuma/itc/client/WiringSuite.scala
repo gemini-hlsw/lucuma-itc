@@ -69,7 +69,7 @@ class WiringSuite extends ClientSuite {
   }
 
   test("ItcClient imaging basic wiring and sanity check") {
-    spectroscopy(
+    imaging(
       WiringSuite.ImagingInput,
       IntegrationTimeResult(
         ItcVersions(
@@ -143,8 +143,8 @@ class WiringSuite extends ClientSuite {
 
 object WiringSuite {
 
-  val SpectroscopyInput: IntegrationTimeInput =
-    IntegrationTimeInput(
+  val SpectroscopyInput: SpectroscopyIntegrationTimeInput =
+    SpectroscopyIntegrationTimeInput(
       Wavelength.Min,
       SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
       Option.empty[Wavelength],
@@ -165,11 +165,10 @@ object WiringSuite {
       )
     )
 
-  val ImagingInput: IntegrationTimeInput          =
-    IntegrationTimeInput(
+  val ImagingInput: ImagingIntegrationTimeInput =
+    ImagingIntegrationTimeInput(
       Wavelength.Min,
       SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
-      Option.empty[Wavelength],
       SourceProfile.Point(BandNormalized[Integrated](Galaxy(Spiral).some, SortedMap.empty)),
       Band.SloanU,
       RadialVelocity.fromMetersPerSecond.getOption(1.0).get,
@@ -180,12 +179,11 @@ object WiringSuite {
         WaterVapor.VeryDry,
         AirMass.Default
       ),
-      InstrumentMode.GmosNorthSpectroscopy(
-        GmosNorthGrating.B1200_G5301,
-        GmosNorthFilter.GPrime.some,
-        GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25)
+      InstrumentMode.GmosNorthImaging(
+        GmosNorthFilter.GPrime
       )
     )
+
   val GraphInput: OptimizedSpectroscopyGraphInput =
     OptimizedSpectroscopyGraphInput(
       Wavelength.Min,

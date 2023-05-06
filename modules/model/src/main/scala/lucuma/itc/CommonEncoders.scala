@@ -10,6 +10,7 @@ import coulomb.syntax.*
 import coulomb.units.si.prefixes.*
 import coulomb.units.time.*
 import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.PosLong
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
 import io.circe.Json
@@ -18,7 +19,6 @@ import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 
 import java.math.RoundingMode
-import eu.timepit.refined.types.numeric.PosLong
 
 type Nanosecond  = Nano * Second
 type Microsecond = Micro * Second

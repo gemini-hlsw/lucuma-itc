@@ -4622,11 +4622,14 @@ input TimeSpanInput {
 ##############
 
 type Query {
-  # Given an instrument and a mode, return an the integration time and the estimated S/N
+  # Given an instrument and a spectroscopyy mode,
+  # return an the integration time and the estimated S/N
   spectroscopyIntegrationTime(
     input: SpectroscopyIntegrationTimeInput!
   ): IntegrationTimeCalculationResult!
 
+  # Given an instrument and an imaging mode,
+  # return an the integration time and the estimated S/N
   imagingIntegrationTime(
     input: ImagingIntegrationTimeInput!
   ): IntegrationTimeCalculationResult!

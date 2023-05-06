@@ -82,7 +82,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         }.liftTo[F]
       }
 
-  def calculateImagingExposureTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+  def calculateImagingIntegrationTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
@@ -122,7 +122,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
       )
     )
 
-  def calculateSpectroscopyExposureTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+  def calculateSpectroscopyIntegrationTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
@@ -307,7 +307,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                   versions(environment, redis)
                 ),
                 RootEffect.computeEncodable("spectroscopyIntegrationTime") { (_, p, env) =>
-                  calculateSpectroscopyExposureTime(environment, redis, itc)(env)
+                  calculateSpectroscopyIntegrationTime(environment, redis, itc)(env)
                 },
                 RootEffect.computeEncodable("spectroscopySignalToNoise")((_, p, env) =>
                   calculateSignalToNoise(environment, redis, itc)(env)
@@ -316,7 +316,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                   spectroscopyGraph(environment, redis, itc)(env)
                 ),
                 RootEffect.computeEncodable("imagingIntegrationTime")((_, p, env) =>
-                  calculateImagingExposureTime(environment, redis, itc)(env)
+                  calculateImagingIntegrationTime(environment, redis, itc)(env)
                 )
               )
             ),
@@ -352,6 +352,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                           fallback
                         )
                   }.map(e => e.copy(child = Select("spectroscopyIntegrationTime", Nil, child)))
+
                 case Select("imagingIntegrationTime",
                             List(Binding("input", ObjectValue(wv))),
                             child
@@ -370,6 +371,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                           fallback
                         )
                   }.map(e => e.copy(child = Select("imagingIntegrationTime", Nil, child)))
+
                 case Select("optimizedSpectroscopyGraph",
                             List(Binding("input", ObjectValue(wv))),
                             child
@@ -390,6 +392,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                           fallback
                         )
                   }.map(e => e.copy(child = Select("optimizedSpectroscopyGraph", Nil, child)))
+
                 case Select("spectroscopySignalToNoise",
                             List(Binding("input", ObjectValue(wv))),
                             child

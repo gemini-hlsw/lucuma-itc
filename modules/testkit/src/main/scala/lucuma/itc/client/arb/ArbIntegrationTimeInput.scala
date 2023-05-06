@@ -34,7 +34,7 @@ trait ArbIntegrationTimeInput {
 
   def genSpectroscopyIntegrationTimeInput(
     im: InstrumentMode
-  ): Gen[IntegrationTimeInput] =
+  ): Gen[SpectroscopyIntegrationTimeInput] =
     for {
       w   <- arbitrary[Wavelength]
       s2n <- arbitrary[SignalToNoise]
@@ -44,7 +44,7 @@ trait ArbIntegrationTimeInput {
       rv  <- arbitrary[RadialVelocity]
       cs  <- arbitrary[ConstraintSet]
       im  <- arbitrary[InstrumentMode]
-    } yield IntegrationTimeInput(
+    } yield SpectroscopyIntegrationTimeInput(
       w,
       s2n,
       sat,
@@ -55,7 +55,7 @@ trait ArbIntegrationTimeInput {
       im
     )
 
-  given Arbitrary[IntegrationTimeInput] =
+  given Arbitrary[SpectroscopyIntegrationTimeInput] =
     Arbitrary {
       for {
         im <- arbitrary[InstrumentMode]
@@ -63,7 +63,7 @@ trait ArbIntegrationTimeInput {
       } yield sm
     }
 
-  given Cogen[IntegrationTimeInput] =
+  given Cogen[SpectroscopyIntegrationTimeInput] =
     Cogen[
       (
         Wavelength,

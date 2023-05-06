@@ -18,44 +18,41 @@ import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
 import lucuma.itc.encoders.given
 
-final case class IntegrationTimeInput(
-  wavelength:      Wavelength,
-  signalToNoise:   SignalToNoise,
-  signalToNoiseAt: Option[Wavelength],
-  sourceProfile:   SourceProfile,
-  band:            Band,
-  radialVelocity:  RadialVelocity,
-  constraints:     ConstraintSet,
-  mode:            InstrumentMode
+final case class ImagingIntegrationTimeInput(
+  wavelength:     Wavelength,
+  signalToNoise:  SignalToNoise,
+  sourceProfile:  SourceProfile,
+  band:           Band,
+  radialVelocity: RadialVelocity,
+  constraints:    ConstraintSet,
+  mode:           InstrumentMode
 )
 
-object IntegrationTimeInput {
+object ImagingIntegrationTimeInput {
 
-  given Encoder[IntegrationTimeInput] with
-    def apply(a: IntegrationTimeInput): Json =
+  given Encoder[ImagingIntegrationTimeInput] with
+    def apply(a: ImagingIntegrationTimeInput): Json =
       Json
         .obj(
-          "wavelength"      -> Json.obj("picometers" -> a.wavelength.toPicometers.value.asJson),
-          "signalToNoise"   -> a.signalToNoise.asJson,
-          "signalToNoiseAt" -> a.signalToNoiseAt.asJson,
-          "sourceProfile"   -> a.sourceProfile.asJson,
-          "band"            -> a.band.asScreamingJson,
-          "radialVelocity"  -> Json.obj(
+          "wavelength"     -> Json.obj("picometers" -> a.wavelength.toPicometers.value.asJson),
+          "signalToNoise"  -> a.signalToNoise.asJson,
+          "sourceProfile"  -> a.sourceProfile.asJson,
+          "band"           -> a.band.asScreamingJson,
+          "radialVelocity" -> Json.obj(
             "metersPerSecond" -> RadialVelocity.fromMetersPerSecond
               .reverseGet(a.radialVelocity)
               .asJson
           ),
-          "constraints"     -> a.constraints.asJson,
-          "mode"            -> a.mode.asJson
+          "constraints"    -> a.constraints.asJson,
+          "mode"           -> a.mode.asJson
         )
         .dropNullValues
 
-  given Eq[IntegrationTimeInput] =
+  given Eq[ImagingIntegrationTimeInput] =
     Eq.by { a =>
       (
         a.wavelength,
         a.signalToNoise,
-        a.signalToNoiseAt,
         a.sourceProfile,
         a.band,
         a.radialVelocity,
