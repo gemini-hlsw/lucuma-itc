@@ -80,10 +80,10 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     wfs = ItcWavefrontSensor.OIWFS
   )
   val instrument = ItcInstrumentDetails.fromObservingMode(
-    ObservingMode.Spectroscopy.GmosNorth(Wavelength.decimalNanometers.getOption(600).get,
-                                         GmosNorthGrating.B1200_G5301,
-                                         GmosNorthFpuParam(GmosNorthFpu.LongSlit_5_00),
-                                         none
+    ObservingMode.SpectroscopyMode.GmosNorth(Wavelength.decimalNanometers.getOption(600).get,
+                                             GmosNorthGrating.B1200_G5301,
+                                             GmosNorthFpuParam(GmosNorthFpu.LongSlit_5_00),
+                                             none
     )
   )
 
@@ -151,20 +151,22 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     }
   }
 
-  val gnConf = ObservingMode.Spectroscopy.GmosNorth(Wavelength.decimalNanometers.getOption(600).get,
-                                                    GmosNorthGrating.B1200_G5301,
-                                                    GmosNorthFpuParam(GmosNorthFpu.LongSlit_1_00),
-                                                    none
+  val gnConf = ObservingMode.SpectroscopyMode.GmosNorth(
+    Wavelength.decimalNanometers.getOption(600).get,
+    GmosNorthGrating.B1200_G5301,
+    GmosNorthFpuParam(GmosNorthFpu.LongSlit_1_00),
+    none
   )
 
-  val gsConf = ObservingMode.Spectroscopy.GmosSouth(Wavelength.decimalNanometers.getOption(600).get,
-                                                    GmosSouthGrating.B1200_G5321,
-                                                    GmosSouthFpuParam(GmosSouthFpu.LongSlit_1_00),
-                                                    none
+  val gsConf = ObservingMode.SpectroscopyMode.GmosSouth(
+    Wavelength.decimalNanometers.getOption(600).get,
+    GmosSouthGrating.B1200_G5321,
+    GmosSouthFpuParam(GmosSouthFpu.LongSlit_1_00),
+    none
   )
 
   def bodyConf(
-    c:        ObservingMode.Spectroscopy,
+    c:        ObservingMode.SpectroscopyMode,
     analysis: ItcObservationDetails.AnalysisMethod = lsAnalysisMethod
   ) =
     ItcParameters(

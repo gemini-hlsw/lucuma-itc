@@ -8,11 +8,11 @@ import cats.derived.*
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.*
-import io.circe.generic.semiauto._
+import io.circe.generic.semiauto.*
 import io.circe.syntax.*
-import lucuma.core.enums._
+import lucuma.core.enums.*
 import lucuma.core.math.Wavelength
-import lucuma.itc.search.ObservingMode.Spectroscopy._
+import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
 import lucuma.itc.search.*
 import lucuma.itc.search.hashes.*
 
@@ -21,18 +21,26 @@ import scala.concurrent.duration.FiniteDuration
 
 sealed trait SpectroscopyParams
 
-final case class GmosNITCParams(
+case class GmosNSpectrosocpyParams(
   grating: GmosNorthGrating,
   fpu:     GmosNorthFpuParam,
   filter:  Option[GmosNorthFilter]
 ) extends SpectroscopyParams
     derives Encoder.AsObject
 
-final case class GmosSITCParams(
+case class GmosSSpectroscopyParams(
   grating: GmosSouthGrating,
   fpu:     GmosSouthFpuParam,
   filter:  Option[GmosSouthFilter]
 ) extends SpectroscopyParams
+    derives Encoder.AsObject
+
+sealed trait ImagingParams
+
+case class GmosNImagingParams(filter: GmosNorthFilter) extends ImagingParams
+    derives Encoder.AsObject
+
+case class GmosSImagingParams(filter: GmosSouthFilter) extends ImagingParams
     derives Encoder.AsObject
 
 case class ItcObservingConditions(

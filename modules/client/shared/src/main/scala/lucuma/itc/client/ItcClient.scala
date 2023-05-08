@@ -31,7 +31,12 @@ trait ItcClient[F[_]] {
   def spectroscopy(
     input:    SpectroscopyIntegrationTimeInput,
     useCache: Boolean = true
-  ): F[SpectroscopyResult]
+  ): F[IntegrationTimeResult]
+
+  def imaging(
+    input:    ImagingIntegrationTimeInput,
+    useCache: Boolean = true
+  ): F[IntegrationTimeResult]
 
   def optimizedSpectroscopyGraph(
     input:    OptimizedSpectroscopyGraphInput,
@@ -50,7 +55,8 @@ object ItcClient {
     client: Client[F]
   ): F[ItcClient[F]] =
     for {
-      cache      <- ItcCache.simple[F, SpectroscopyIntegrationTimeInput, SpectroscopyResult]
+      specCache  <- ItcCache.simple[F, SpectroscopyIntegrationTimeInput, IntegrationTimeResult]
+      imgCache   <- ItcCache.simple[F, ImagingIntegrationTimeInput, IntegrationTimeResult]
       graphCache <-
         ItcCache.simple[F, OptimizedSpectroscopyGraphInput, OptimizedSpectroscopyGraphResult]
       http       <- Http4sHttpClient.of[F, Unit](uri)(Async[F], Http4sHttpBackend(client), Logger[F])
@@ -58,15 +64,31 @@ object ItcClient {
       override def spectroscopy(
         input:    SpectroscopyIntegrationTimeInput,
         useCache: Boolean = true
-      ): F[SpectroscopyResult] = {
+      ): F[IntegrationTimeResult] = {
 
-        val callOut: F[SpectroscopyResult] =
-          http.request(SpectroscopyQuery).withInput(input)
+        val callOut: F[IntegrationTimeResult] =
+          http.request(SpectroscopyIntegrationTime).withInput(input)
 
         for {
           _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")
-          v <- if (useCache) cache.getOrCalcF(input)(callOut)
-               else callOut.flatTap(cache.put(input))
+          v <- if (useCache) specCache.getOrCalcF(input)(callOut)
+               else callOut.flatTap(specCache.put(input))
+          _ <- Logger[F].debug(s"ITC Result:\n$v")
+        } yield v
+      }
+
+      override def imaging(
+        input:    ImagingIntegrationTimeInput,
+        useCache: Boolean = true
+      ): F[IntegrationTimeResult] = {
+
+        val callOut: F[IntegrationTimeResult] =
+          http.request(ImagingIntegrationTime).withInput(input)
+
+        for {
+          _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")
+          v <- if (useCache) imgCache.getOrCalcF(input)(callOut)
+               else callOut.flatTap(imgCache.put(input))
           _ <- Logger[F].debug(s"ITC Result:\n$v")
         } yield v
       }

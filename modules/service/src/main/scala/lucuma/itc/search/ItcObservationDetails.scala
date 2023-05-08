@@ -126,13 +126,32 @@ object ItcObservationDetails {
           }
       }
 
+      case class ImagingExp(
+        sigma:          Double,
+        coadds:         Option[Int],
+        sourceFraction: Double,
+        ditherOffset:   Angle
+      ) extends IntegrationTime
+
+      object ImagingExp {
+        val encoder: Encoder[ImagingExp] =
+          Encoder.instance { a =>
+            Json.obj(
+              "sigma"          -> a.sigma.asJson,
+              "coadds"         -> a.coadds.asJson,
+              "sourceFraction" -> a.sourceFraction.asJson,
+              "offset"         -> Angle.signedDecimalArcseconds.get(a.ditherOffset).asJson
+            )
+          }
+      }
+
       // We expect a spectroscopy option at some point
       val encoder: Encoder[IntegrationTime] =
         new Encoder[IntegrationTime] {
           def apply(a: IntegrationTime): Json =
             a match {
-              case a: Imaging => Json.obj("ImagingInt" -> Imaging.encoder(a))
-              // case a: Spectroscpy => Json.Null
+              case a: Imaging    => Json.obj("ImagingInt" -> Imaging.encoder(a))
+              case a: ImagingExp => Json.obj("ImagingExp" -> ImagingExp.encoder(a))
             }
         }
 

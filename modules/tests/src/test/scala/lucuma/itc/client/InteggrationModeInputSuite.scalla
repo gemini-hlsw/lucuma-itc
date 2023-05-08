@@ -4,14 +4,14 @@
 package lucuma.itc.client
 
 import cats.kernel.laws.discipline.*
-import lucuma.itc.client.arb.ArbSpectroscopyIntegrationTimeInput
+import lucuma.itc.client.arb.ArbIntegrationTimeInput
 import monocle.law.discipline._
 import munit._
 
-final class SpectroscopyIntegrationTimeInputSuite extends DisciplineSuite {
+final class IntegrationTimeInputSuite extends DisciplineSuite {
 
-  import ArbSpectroscopyIntegrationTimeInput.given
+  import ArbIntegrationTimeInput.given
 
-  checkAll("SpectroscopyIntegrationTimeInput", EqTests[SpectroscopyIntegrationTimeInput].eqv)
+  checkAll("SpectroscopyIntegrationTimeInput", EqTests[IntegrationTimeInput].eqv)
 
 }

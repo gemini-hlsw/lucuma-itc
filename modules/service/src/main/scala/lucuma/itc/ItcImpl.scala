@@ -109,16 +109,17 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
-      ): F[IntegrationTime] =
+      ): F[NonEmptyList[IntegrationTime]] =
         Trace[F].span("calculate-exposure-time") {
           observingMode match
-            case _: ObservingMode.Spectroscopy =>
+            case _: ObservingMode.SpectroscopyMode =>
               signalToNoiseAt match
                 case None     =>
                   spectroscopy(targetProfile, observingMode, constraints, signalToNoise, none)
                 case Some(at) =>
                   spectroscopySNAt(targetProfile, observingMode, constraints, signalToNoise, at)
-            // TODO: imaging
+            case _: ObservingMode.ImagingMode      =>
+              imaging(targetProfile, observingMode, constraints, signalToNoise)
         }
 
       def calculateGraph(
@@ -129,7 +130,7 @@ object ItcImpl {
         exposures:     PosLong
       ): F[GraphResult] =
         observingMode match
-          case _: ObservingMode.Spectroscopy =>
+          case _: ObservingMode.SpectroscopyMode =>
             spectroscopyGraph(
               targetProfile,
               observingMode,
@@ -137,7 +138,10 @@ object ItcImpl {
               BigDecimal(exposureTime.value.toMillis).withUnit[Millisecond].toUnit[Second],
               exposures.value
             )
-          // TODO: imaging
+          case _: ObservingMode.ImagingMode      =>
+            MonadThrow[F].raiseError(
+              new IllegalArgumentException("Imaging mode not supported for graph calculation")
+            )
 
       // Convenience method to compute an OCS2 ITC result for the specified profile/mode.
       def itc(
@@ -254,7 +258,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
-      ): F[IntegrationTime] = {
+      ): F[NonEmptyList[IntegrationTime]] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise
@@ -393,6 +397,7 @@ object ItcImpl {
                   }
 
                 }
+                .map(NonEmptyList.one)
             }
 
       }
@@ -407,11 +412,7 @@ object ItcImpl {
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Wavelength
-      ): F[IntegrationTime] = {
-        val startExpTime      = BigDecimal(1200.0).withUnit[Second]
-        val numberOfExposures = 1
-        val requestedSN       = signalToNoise
-
+      ): F[NonEmptyList[IntegrationTime]] =
         L.info(s"Desired S/N $signalToNoise") *>
           L.info(
             s"Target brightness ${targetProfile} at band ${targetProfile.band}"
@@ -420,27 +421,86 @@ object ItcImpl {
             .span("itc.calctime.spectroscopy-exp-time-at") {
               itcWithSNAt(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
                 .flatMap { r =>
-                  TimeSpan
-                    .fromSeconds(r.exposureCalculation.exposureTime)
-                    .map(expTime =>
-                      IntegrationTime(
-                        expTime,
-                        r.exposureCalculation.exposures,
-                        r.exposureCalculation.signalToNoise
+                  r.exposureCalculation.traverse(r =>
+                    TimeSpan
+                      .fromSeconds(r.exposureTime)
+                      .map(expTime =>
+                        IntegrationTime(expTime, r.exposures, r.signalToNoise).pure[F]
                       )
-                        .pure[F]
-                    )
-                    .getOrElse {
-                      MonadThrow[F].raiseError(
-                        CalculationError(
-                          s"Negative exposure time ${r.exposureCalculation.exposureTime}"
+                      .getOrElse {
+                        MonadThrow[F].raiseError(
+                          CalculationError(
+                            s"Negative exposure time ${r.exposureTime}"
+                          )
                         )
-                      )
-                    }
+                      }
+                  )
                 }
             }
 
-      }
-    }
+      def imagingLegacy(
+        targetProfile: TargetProfile,
+        observingMode: ObservingMode,
+        constraints:   ItcObservingConditions,
+        sigma:         SignalToNoise
+      ): F[legacy.ExposureTimeRemoteResult] =
+        import lucuma.itc.legacy.given
+        import lucuma.itc.legacy.*
 
+        Trace[F].span("legacy-itc-query") {
+          val request =
+            imagingParams(targetProfile, observingMode, constraints, sigma).asJson
+
+          Trace[F].put("itc.query" -> request.spaces2) *>
+            Trace[F].put("itc.sigma" -> sigma.toBigDecimal.toDouble) *>
+            Logger[F].info(request.noSpaces) *>
+            (itcLocal.calculateExposureTime(request.noSpaces) match {
+              case Right(r)  =>
+                r.pure[F]
+              case Left(msg) =>
+                L.warn(s"Upstream error $msg") *>
+                  ApplicativeThrow[F].raiseError(new UpstreamException(msg.mkString("\n")))
+            })
+        }
+
+      /**
+       * Compute the exposure time and number of exposures required to achieve the desired
+       * signal-to-noise under the requested conditions. Only for spectroscopy modes
+       */
+      def imaging(
+        targetProfile: TargetProfile,
+        observingMode: ObservingMode,
+        constraints:   ItcObservingConditions,
+        signalToNoise: SignalToNoise
+      ): F[NonEmptyList[IntegrationTime]] =
+        L.info(s"Desired S/N $signalToNoise") *>
+          L.info(
+            s"Target brightness ${targetProfile} at band ${targetProfile.band}"
+          ) *> Trace[F]
+            .span("itc.calctime.spectroscopy-exp-time-at") {
+              imagingLegacy(
+                targetProfile,
+                observingMode,
+                constraints,
+                signalToNoise
+              )
+                .flatMap { r =>
+                  r.exposureCalculation.traverse(r =>
+                    TimeSpan
+                      .fromSeconds(r.exposureTime)
+                      .map(expTime =>
+                        IntegrationTime(expTime, r.exposures, r.signalToNoise).pure[F]
+                      )
+                      .getOrElse {
+                        MonadThrow[F].raiseError(
+                          CalculationError(
+                            s"Negative exposure time ${r.exposureTime}"
+                          )
+                        )
+                      }
+                  )
+                }
+            }
+
+    }
 }

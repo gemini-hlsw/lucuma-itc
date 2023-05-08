@@ -21,7 +21,7 @@ import lucuma.core.util.arb.ArbEnumerated
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.*
 
-trait ArbSpectroscopyIntegrationTimeInput {
+trait ArbIntegrationTimeInput {
 
   import ArbConstraintSet.*
   import ArbEnumerated.*
@@ -87,6 +87,58 @@ trait ArbSpectroscopyIntegrationTimeInput {
         a.mode
       )
     }
+
+  def genImagingIntegrationTimeInput(
+    im: InstrumentMode
+  ): Gen[ImagingIntegrationTimeInput] =
+    for {
+      w   <- arbitrary[Wavelength]
+      s2n <- arbitrary[SignalToNoise]
+      sp  <- arbitrary[SourceProfile]
+      b   <- arbitrary[Band]
+      rv  <- arbitrary[RadialVelocity]
+      cs  <- arbitrary[ConstraintSet]
+      im  <- arbitrary[InstrumentMode]
+    } yield ImagingIntegrationTimeInput(
+      w,
+      s2n,
+      sp,
+      b,
+      rv,
+      cs,
+      im
+    )
+
+  given Arbitrary[ImagingIntegrationTimeInput] =
+    Arbitrary {
+      for {
+        im <- arbitrary[InstrumentMode]
+        sm <- genImagingIntegrationTimeInput(im)
+      } yield sm
+    }
+
+  given Cogen[ImagingIntegrationTimeInput] =
+    Cogen[
+      (
+        Wavelength,
+        SignalToNoise,
+        SourceProfile,
+        Band,
+        RadialVelocity,
+        ConstraintSet,
+        InstrumentMode
+      )
+    ].contramap { a =>
+      (
+        a.wavelength,
+        a.signalToNoise,
+        a.sourceProfile,
+        a.band,
+        a.radialVelocity,
+        a.constraints,
+        a.mode
+      )
+    }
 }
 
-object ArbSpectroscopyIntegrationTimeInput extends ArbSpectroscopyIntegrationTimeInput
+object ArbIntegrationTimeInput extends ArbIntegrationTimeInput

@@ -25,4 +25,4 @@ case class ExposureCalculation(
   signalToNoise: SignalToNoise
 )
 
-case class ExposureTimeRemoteResult(exposureCalculation: ExposureCalculation)
+case class ExposureTimeRemoteResult(exposureCalculation: NonEmptyList[ExposureCalculation])

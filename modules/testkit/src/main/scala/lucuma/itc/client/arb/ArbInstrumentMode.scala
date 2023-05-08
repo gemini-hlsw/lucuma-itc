@@ -19,19 +19,21 @@ trait ArbInstrumentMode {
   import ArbEnumerated.*
   import ArbGmosFpu.given
 
-  import InstrumentMode.GmosNorth
-  import InstrumentMode.GmosSouth
+  import InstrumentMode.GmosNorthSpectroscopy
+  import InstrumentMode.GmosSouthSpectroscopy
+  import InstrumentMode.GmosNorthImaging
+  import InstrumentMode.GmosSouthImaging
 
-  given Arbitrary[GmosNorth] =
+  given Arbitrary[GmosNorthSpectroscopy] =
     Arbitrary {
       for {
         g <- arbitrary[GmosNorthGrating]
         f <- arbitrary[Option[GmosNorthFilter]]
         u <- arbitrary[GmosFpu.North]
-      } yield GmosNorth(g, f, u)
+      } yield GmosNorthSpectroscopy(g, f, u)
     }
 
-  given Cogen[GmosNorth] =
+  given Cogen[GmosNorthSpectroscopy] =
     Cogen[
       (
         GmosNorthGrating,
@@ -46,16 +48,16 @@ trait ArbInstrumentMode {
       )
     }
 
-  given Arbitrary[GmosSouth] =
+  given Arbitrary[GmosSouthSpectroscopy] =
     Arbitrary {
       for {
         g <- arbitrary[GmosSouthGrating]
         f <- arbitrary[Option[GmosSouthFilter]]
         u <- arbitrary[GmosFpu.South]
-      } yield GmosSouth(g, f, u)
+      } yield GmosSouthSpectroscopy(g, f, u)
     }
 
-  given Cogen[GmosSouth] =
+  given Cogen[GmosSouthSpectroscopy] =
     Cogen[
       (
         GmosSouthGrating,
@@ -70,24 +72,50 @@ trait ArbInstrumentMode {
       )
     }
 
+  given Arbitrary[GmosNorthImaging] =
+    Arbitrary {
+      for {
+        f <- arbitrary[GmosNorthFilter]
+      } yield GmosNorthImaging(f)
+    }
+
+  given Cogen[GmosNorthImaging] =
+    Cogen[GmosNorthFilter].contramap(_.filter)
+
+  given Arbitrary[GmosSouthImaging] =
+    Arbitrary {
+      for {
+        f <- arbitrary[GmosSouthFilter]
+      } yield GmosSouthImaging(f)
+    }
+
+  given Cogen[GmosSouthImaging] =
+    Cogen[GmosSouthFilter].contramap(_.filter)
+
   given Arbitrary[InstrumentMode] =
     Arbitrary {
       Gen.oneOf(
-        arbitrary[GmosNorth],
-        arbitrary[GmosSouth]
+        arbitrary[GmosNorthSpectroscopy],
+        arbitrary[GmosSouthSpectroscopy],
+        arbitrary[GmosNorthImaging],
+        arbitrary[GmosSouthImaging]
       )
     }
 
   given Cogen[InstrumentMode] =
     Cogen[
       (
-        Option[GmosNorth],
-        Option[GmosSouth]
+        Option[GmosNorthSpectroscopy],
+        Option[GmosSouthSpectroscopy],
+        Option[GmosNorthImaging],
+        Option[GmosSouthImaging]
       )
     ].contramap { a =>
       (
-        InstrumentMode.gmosNorth.getOption(a),
-        InstrumentMode.gmosSouth.getOption(a)
+        InstrumentMode.gmosNorthSpectroscopy.getOption(a),
+        InstrumentMode.gmosSouthSpectroscopy.getOption(a),
+        InstrumentMode.gmosNorthImaging.getOption(a),
+        InstrumentMode.gmosSouthImaging.getOption(a)
       )
     }
 }

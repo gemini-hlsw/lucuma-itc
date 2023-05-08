@@ -11,7 +11,7 @@ import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcObservingConditions
 
-class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
+class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
 
   test("gmos north case") {
     query(
@@ -57,7 +57,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: GG455,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -80,7 +80,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               }
             }
-            result {
+            results {
               exposures
               exposureTime {
                 seconds
@@ -103,12 +103,12 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   "nanometers" : 60.000
                 }
               },
-              "result" : {
+              "results" : [{
                 "exposures" : 10,
                 "exposureTime" : {
                   "seconds" : 1.000000000
                 }
-              }
+              }]
             }
           }
         }
@@ -161,7 +161,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosS: {
+              gmosSSpectroscopy: {
                 filter: RG610,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -184,7 +184,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                   }
                 }
               }
-              result {
+              results {
                   exposures
                   exposureTime {
                     seconds
@@ -207,12 +207,12 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                     "nanometers" : 60.000
                   }
                 },
-                "result" : {
+                "results" : [{
                   "exposures" : 10,
                   "exposureTime" : {
                     "seconds" : 1.000000000
                   }
-                }
+                }]
               }
           }
         }
@@ -267,7 +267,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
               }
             },
             "mode": {
-              "gmosN": {
+              "gmosNSpectroscopy": {
                 "filter": "G_PRIME",
                 "fpu": {
                   "builtin": "LONG_SLIT_0_25"
@@ -353,7 +353,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -376,7 +376,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                   exposures
                   exposureTime {
                     seconds
@@ -400,12 +400,12 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                         "nanometers" : 60.000
                       }
                     },
-                    "result" : {
+                    "results" : [{
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1.000000000
                       }
-                    }
+                    }]
               }
           }
         }
@@ -458,7 +458,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -481,7 +481,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                   exposures
                   exposureTime {
                     seconds
@@ -547,7 +547,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -569,7 +569,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                   exposures
                   exposureTime {
                     seconds
@@ -592,12 +592,12 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                         "nanometers" : 60.00
                       }
                     },
-                    "result" : {
+                    "results" : [{
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1
                       }
-                    }
+                    }]
               }
           }
         }
@@ -656,7 +656,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosS: {
+              gmosSSpectroscopy: {
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -678,7 +678,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                   exposures
                   exposureTime {
                     seconds
@@ -701,12 +701,12 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                         "nanometers" : 60.00
                       }
                     },
-                    "result" : {
+                    "results" : [{
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1
                       }
-                    }
+                    }]
                   }
           }
         }
@@ -765,7 +765,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                 }
               },
               mode: {
-                gmosN: {
+                gmosNSpectroscopy: {
                   filter: G_PRIME,
                   fpu: {
                     builtin: ${d.tag.toScreamingSnakeCase}
@@ -789,7 +789,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                       }
                     }
                   }
-                  result {
+                  results {
                     exposures
                     exposureTime {
                       seconds
@@ -814,12 +814,12 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                       "nanometers" : 60.00
                     }
                   },
-                  "result" : {
+                  "results" : [{
                     "exposures" : 10,
                     "exposureTime" : {
                       "seconds" : 1.000000000
                     }
-                  }
+                  }]
                 }
         }
       }
@@ -873,7 +873,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosS: {
+              gmosSSpectroscopy: {
                 filter: G_PRIME,
                 fpu: {
                   builtin: ${d.tag.toScreamingSnakeCase}
@@ -897,7 +897,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                   exposures
                   exposureTime {
                     seconds
@@ -922,12 +922,12 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                         "nanometers" : 60.00
                       }
                     },
-                    "result" : {
+                    "results" : [{
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1.000000000
                       }
-                    }
+                    }]
                   }
           }
         }
@@ -981,7 +981,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: ${d.tag.toScreamingSnakeCase}
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -1003,7 +1003,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                     exposures
                     exposureTime {
                       seconds
@@ -1026,12 +1026,12 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                         "nanometers" : 60.000
                       }
                     },
-                    "result" : {
+                    "results" : [{
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1.000000000
                       }
-                    }
+                    }]
                   }
           }
         }
@@ -1085,7 +1085,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
               }
             },
             mode: {
-              gmosS: {
+              gmosSSpectroscopy: {
                 filter: ${d.tag.toScreamingSnakeCase}
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -1107,7 +1107,7 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                result {
+                results {
                     exposures
                     exposureTime {
                       seconds
@@ -1130,12 +1130,12 @@ class GraphQLCalculateExposureTimeSuite extends GraphQLSuite {
                         "nanometers" : 60.000
                       }
                     },
-                    "result" : {
+                    "results" : [{
                       "exposures" : 10,
                       "exposureTime" : {
                         "seconds" : 1.000000000
                       }
-                    }
+                    }]
               }
           }
         }

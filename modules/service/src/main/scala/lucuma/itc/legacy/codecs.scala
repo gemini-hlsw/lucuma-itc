@@ -4,14 +4,14 @@
 package lucuma.itc.legacy
 
 import cats.data.NonEmptyList
-import cats.syntax.all._
+import cats.syntax.all.*
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.refineV
 import io.circe.*
-import io.circe.generic.semiauto._
+import io.circe.generic.semiauto.*
 import io.circe.refined.*
 import io.circe.syntax.*
-import lucuma.core.enums._
+import lucuma.core.enums.*
 import lucuma.core.math.Angle
 import lucuma.core.math.Redshift
 import lucuma.core.math.SignalToNoise
@@ -27,11 +27,12 @@ import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
 import lucuma.itc.legacy.ItcRemoteCcd
 import lucuma.itc.legacy.syntax.all.*
-import lucuma.itc.search.ObservingMode.Spectroscopy._
+import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
 import lucuma.itc.search.*
 import lucuma.itc.syntax.all.given
 
 import java.math.MathContext
+import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
 
 ////////////////////////////////////////////////////////////
@@ -60,9 +61,9 @@ given Encoder[ItcObservingConditions] =
     )
   }
 
-private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.Spectroscopy.GmosNorth] =
-  new Encoder[ObservingMode.Spectroscopy.GmosNorth] {
-    def apply(a: ObservingMode.Spectroscopy.GmosNorth): Json =
+private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.GmosNorth] =
+  new Encoder[ObservingMode.SpectroscopyMode.GmosNorth] {
+    def apply(a: ObservingMode.SpectroscopyMode.GmosNorth): Json =
       Json.obj(
         // Translate observing mode to OCS2 style
         "centralWavelength" -> Json.fromString(
@@ -87,9 +88,34 @@ private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.Spectroscopy.Gmos
       )
   }
 
-private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.Spectroscopy.GmosSouth] =
-  new Encoder[ObservingMode.Spectroscopy.GmosSouth] {
-    def apply(a: ObservingMode.Spectroscopy.GmosSouth): Json =
+private val encodeGmosNorthImaging: Encoder[ObservingMode.ImagingMode.GmosNorth] =
+  new Encoder[ObservingMode.ImagingMode.GmosNorth] {
+    def apply(a: ObservingMode.ImagingMode.GmosNorth): Json =
+      Json.obj(
+        // Translate observing mode to OCS2 style
+        "centralWavelength" -> Json.fromString(
+          s"${Wavelength.decimalNanometers.reverseGet(a.λ)} nm"
+        ),
+        "filter"            -> Json.obj(
+          "FilterNorth" ->
+            Json.fromString(a.filter.ocs2Tag)
+        ),
+        "grating"           -> Json.obj("DisperserNorth" -> "MIRROR".asJson),
+        "fpMask"            -> Json.obj("FPUnitNorth" -> "FPU_NONE".asJson),
+        "spectralBinning"   -> Json.fromInt(2),
+        "site"              -> Json.fromString("GN"),
+        "ccdType"           -> Json.fromString("HAMAMATSU"),
+        "ampReadMode"       -> Json.fromString("SLOW"),
+        "builtinROI"        -> Json.fromString("FULL_FRAME"),
+        "spatialBinning"    -> Json.fromInt(2),
+        "customSlitWidth"   -> Json.Null,
+        "ampGain"           -> Json.fromString("LOW")
+      )
+  }
+
+private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.GmosSouth] =
+  new Encoder[ObservingMode.SpectroscopyMode.GmosSouth] {
+    def apply(a: ObservingMode.SpectroscopyMode.GmosSouth): Json =
       Json.obj(
         // Translate observing mode to OCS2 style
         "centralWavelength" -> Json.fromString(
@@ -106,7 +132,7 @@ private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.Spectroscopy.Gmos
         "spectralBinning"   -> Json.fromInt(1),
         "site"              -> Json.fromString("GS"),
         "ccdType"           -> Json.fromString("HAMAMATSU"),
-        "ampReadMode"       -> Json.fromString("SLOW"),
+        "ampReadMode"       -> Json.fromString("FAST"),
         "builtinROI"        -> Json.fromString("FULL_FRAME"),
         "spatialBinning"    -> Json.fromInt(1),
         "customSlitWidth"   -> Json.Null,
@@ -114,12 +140,41 @@ private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.Spectroscopy.Gmos
       )
   }
 
+private val encodeGmosSouthImaging: Encoder[ObservingMode.ImagingMode.GmosSouth] =
+  new Encoder[ObservingMode.ImagingMode.GmosSouth] {
+    def apply(a: ObservingMode.ImagingMode.GmosSouth): Json =
+      Json.obj(
+        // Translate observing mode to OCS2 style
+        "centralWavelength" -> Json.fromString(
+          s"${Wavelength.decimalNanometers.reverseGet(a.λ)} nm"
+        ),
+        "filter"            -> Json.obj(
+          "FilterSouth" ->
+            Json.fromString(a.filter.ocs2Tag)
+        ),
+        "grating"           -> Json.obj("DisperserSouth" -> "MIRROR".asJson),
+        "fpMask"            -> Json.obj("FPUnitSouth" -> "FPU_NONE".asJson),
+        "spectralBinning"   -> Json.fromInt(2),
+        "site"              -> Json.fromString("GS"),
+        "ccdType"           -> Json.fromString("HAMAMATSU"),
+        "ampReadMode"       -> Json.fromString("FAST"),
+        "builtinROI"        -> Json.fromString("FULL_FRAME"),
+        "spatialBinning"    -> Json.fromInt(2),
+        "customSlitWidth"   -> Json.Null,
+        "ampGain"           -> Json.fromString("LOW")
+      )
+  }
+
 private given Encoder[ItcInstrumentDetails] = (a: ItcInstrumentDetails) =>
   a.mode match
-    case a: ObservingMode.Spectroscopy.GmosNorth =>
+    case a: ObservingMode.SpectroscopyMode.GmosNorth =>
       Json.obj("GmosParameters" -> encodeGmosNorthSpectroscopy(a))
-    case a: ObservingMode.Spectroscopy.GmosSouth =>
+    case a: ObservingMode.SpectroscopyMode.GmosSouth =>
       Json.obj("GmosParameters" -> encodeGmosSouthSpectroscopy(a))
+    case a: ObservingMode.ImagingMode.GmosNorth      =>
+      Json.obj("GmosParameters" -> encodeGmosNorthImaging(a))
+    case a: ObservingMode.ImagingMode.GmosSouth      =>
+      Json.obj("GmosParameters" -> encodeGmosSouthImaging(a))
 
 private given Encoder[ItcWavefrontSensor] = Encoder[String].contramap(_.ocs2Tag)
 
@@ -361,16 +416,32 @@ given Decoder[GraphsRemoteResult] = (c: HCursor) =>
 
 given Decoder[ExposureCalculation] = (c: HCursor) =>
   for
-    time  <- c.downField("exposureCalculation").downField("exposureTime").as[Double]
-    count <-
-      c.downField("exposureCalculation")
-        .downField("exposures")
-        .as[Int]
-        .flatMap(refineV[Positive](_).leftMap(e => DecodingFailure(e, List.empty)))
-    sn    <- c.downField("exposureCalculation").downField("signalToNoise").as[SignalToNoise]
+    time  <- c.downField("exposureTime").as[Double]
+    count <- c
+               .downField("exposures")
+               .as[Int]
+               .flatMap(refineV[Positive](_).leftMap(e => DecodingFailure(e, List.empty)))
+    sn    <-
+      c
+        .downField("signalToNoise")
+        .as[BigDecimal]
+        .flatMap(s =>
+          SignalToNoise.FromBigDecimalRounding
+            .getOption(s)
+            .toRight(DecodingFailure(s"Invalid s/n value $s", Nil))
+        )
   yield ExposureCalculation(time, count, sn)
 
 given Decoder[ExposureTimeRemoteResult] = (c: HCursor) =>
-  for calc <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
-                .as[ExposureCalculation]
-  yield ExposureTimeRemoteResult(calc)
+  val spec: Decoder.Result[ExposureTimeRemoteResult] =
+    c.downField("ItcSpectroscopyResult")
+      .downField("exposureCalculation")
+      .as[ExposureCalculation]
+      .map(c => ExposureTimeRemoteResult(NonEmptyList.one(c)))
+
+  val img: Decoder.Result[ExposureTimeRemoteResult] =
+    c.downField("ItcImagingResult")
+      .downField("exposureCalculation")
+      .as[NonEmptyList[ExposureCalculation]]
+      .map(c => ExposureTimeRemoteResult(c))
+  spec.orElse(img)

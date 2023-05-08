@@ -13,6 +13,7 @@ import lucuma.core.model.NonNegDuration
 import lucuma.core.util.Enumerated
 import lucuma.core.util.TimeSpan
 import lucuma.itc.encoders.given
+import lucuma.itc.encoders.given
 import lucuma.itc.search.ObservingMode
 
 import scala.concurrent.duration.FiniteDuration
@@ -39,6 +40,6 @@ object CalculationError {
 case class IntegrationTimeCalculationResult(
   serverVersion: String,
   dataVersion:   String,
-  mode:          ObservingMode.Spectroscopy,
-  result:        IntegrationTime
+  mode:          ObservingMode,
+  results:       NonEmptyList[IntegrationTime]
 ) derives Encoder.AsObject

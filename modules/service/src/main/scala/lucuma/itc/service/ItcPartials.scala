@@ -46,19 +46,13 @@ import lucuma.core.syntax.enumerated.*
 import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
 import lucuma.core.util.Of
-import lucuma.itc.GmosNITCParams
-import lucuma.itc.GmosSITCParams
-import lucuma.itc.Itc
-import lucuma.itc.ItcObservingConditions
-import lucuma.itc.SignificantFigures
-import lucuma.itc.SpectroscopyParams
-import lucuma.itc.UpstreamException
+import lucuma.itc.*
 import lucuma.itc.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.ObservingMode.Spectroscopy.GmosNorth
-import lucuma.itc.search.ObservingMode.Spectroscopy.GmosSouth
+import lucuma.itc.search.ObservingMode.SpectroscopyMode.GmosNorth
+import lucuma.itc.search.ObservingMode.SpectroscopyMode.GmosSouth
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.service.config.*
 import lucuma.itc.service.syntax.all.*
@@ -104,7 +98,7 @@ trait GrackleParsers:
   def parseNonNegDuration(units: List[(String, Value)]): Option[NonNegDuration] =
     (units.find(_._2 != Value.AbsentValue) match
       case Some(("microseconds", IntValue(n))) =>
-        Duration.ofNanos(n * 1000).some
+        Duration.ofNanos(n * 1000L).some
       case Some(("milliseconds", n))           =>
         bigDecimalValue(n).map(n => Duration.ofNanos((n * 1e6).toLong))
       case Some(("seconds", n))                =>
@@ -544,7 +538,13 @@ trait GracklePartials extends GrackleParsers:
   def instrumentModePartial: PartialFunction[(Partial, (String, Value)), Partial] =
     case (i, ("mode", m)) =>
       val modes = m match {
-        case ObjectValue(List(("gmosN", AbsentValue), ("gmosS", gmosS))) =>
+        case ObjectValue(
+              List(("gmosNSpectroscopy", AbsentValue),
+                   ("gmosSSpectroscopy", gmosS),
+                   ("gmosNImaging", AbsentValue),
+                   ("gmosSImaging", AbsentValue)
+              )
+            ) =>
           gmosS match
             case ObjectValue(
                   List(("grating", TypedEnumValue(EnumValue(d, _, _, _))),
@@ -564,12 +564,18 @@ trait GracklePartials extends GrackleParsers:
                 case _                                     => none
 
               (gsGrating.get(d), gsFpu.get(fpu)).mapN((a, b) =>
-                GmosSITCParams(a, GmosSouthFpuParam(b), filterOpt)
+                GmosSSpectroscopyParams(a, GmosSouthFpuParam(b), filterOpt)
               )
             case _ =>
               none
 
-        case ObjectValue(List(("gmosN", gmosN), ("gmosS", AbsentValue))) =>
+        case ObjectValue(
+              List(("gmosNSpectroscopy", gmosN),
+                   ("gmosSSpectroscopy", AbsentValue),
+                   ("gmosNImaging", AbsentValue),
+                   ("gmosSImaging", AbsentValue)
+              )
+            ) =>
           gmosN match
             case ObjectValue(
                   List(("grating", TypedEnumValue(EnumValue(d, _, _, _))),
@@ -589,11 +595,45 @@ trait GracklePartials extends GrackleParsers:
                 case _                                     => none
 
               (gnGrating.get(d), gnFpu.get(fpu)).mapN((a, b) =>
-                GmosNITCParams(a, GmosNorthFpuParam(b), filterOpt)
+                GmosNSpectrosocpyParams(a, GmosNorthFpuParam(b), filterOpt)
               )
             case _ =>
               none
 
+        case ObjectValue(
+              List(("gmosNSpectroscopy", AbsentValue),
+                   ("gmosSSpectroscopy", AbsentValue),
+                   ("gmosNImaging", AbsentValue),
+                   ("gmosSImaging", gmosS)
+              )
+            ) =>
+          gmosS match
+            case ObjectValue(List(("filter", f))) =>
+              val filterOpt = f match
+                case TypedEnumValue(EnumValue(f, _, _, _)) =>
+                  gsFilter.get(f)
+                case _                                     => none
+
+              filterOpt.map(GmosSImagingParams(_))
+            case _                                =>
+              none
+        case ObjectValue(
+              List(("gmosNSpectroscopy", AbsentValue),
+                   ("gmosSSpectroscopy", AbsentValue),
+                   ("gmosNImaging", gmosN),
+                   ("gmosSImaging", AbsentValue)
+              )
+            ) =>
+          gmosN match
+            case ObjectValue(List(("filter", f))) =>
+              val filterOpt = f match
+                case TypedEnumValue(EnumValue(f, _, _, _)) =>
+                  gnFilter.get(f)
+                case _                                     => none
+
+              filterOpt.map(GmosNImagingParams(_))
+            case _                                =>
+              none
         case _ => none
       }
       modes

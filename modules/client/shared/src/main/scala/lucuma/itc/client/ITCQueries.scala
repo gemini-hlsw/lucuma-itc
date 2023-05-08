@@ -13,9 +13,9 @@ import io.circe.JsonObject
 import lucuma.itc.client.OptimizedSpectroscopyGraphResult
 import lucuma.itc.client.json.decoders.given
 
-object SpectroscopyQuery extends GraphQLOperation[Unit] {
+object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
 
-  type Data      = SpectroscopyResult
+  type Data      = IntegrationTimeResult
   type Variables = SpectroscopyIntegrationTimeInput
 
   override val document: String =
@@ -24,7 +24,7 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
         spectroscopyIntegrationTime(input: $spec) {
           serverVersion
           dataVersion
-          result {
+          results {
             exposures
             exposureTime {
               microseconds
@@ -42,8 +42,42 @@ object SpectroscopyQuery extends GraphQLOperation[Unit] {
       )
     }
 
-  override val dataDecoder: Decoder[SpectroscopyResult] =
-    (c: HCursor) => c.downField("spectroscopyIntegrationTime").as[SpectroscopyResult]
+  override val dataDecoder: Decoder[IntegrationTimeResult] =
+    (c: HCursor) => c.downField("spectroscopyIntegrationTime").as[IntegrationTimeResult]
+
+}
+
+object ImagingIntegrationTime extends GraphQLOperation[Unit] {
+
+  type Data      = IntegrationTimeResult
+  type Variables = ImagingIntegrationTimeInput
+
+  override val document: String =
+    """
+      query Imaging($spec: ImagingIntegrationTimeInput!) {
+        imagingIntegrationTime(input: $spec) {
+          serverVersion
+          dataVersion
+          results {
+            exposures
+            exposureTime {
+              microseconds
+            }
+            signalToNoise
+          }
+        }
+      }
+    """
+
+  override val varEncoder: Encoder.AsObject[Variables] =
+    Encoder.AsObject.instance[ImagingIntegrationTimeInput] { input =>
+      JsonObject(
+        "spec" -> Encoder[ImagingIntegrationTimeInput].apply(input)
+      )
+    }
+
+  override val dataDecoder: Decoder[IntegrationTimeResult] =
+    (c: HCursor) => c.downField("imagingIntegrationTime").as[IntegrationTimeResult]
 
 }
 

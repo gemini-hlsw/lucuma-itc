@@ -57,7 +57,7 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
               }
             },
             mode: {
-              gmosN: {
+              gmosNSpectroscopy: {
                 filter: GG455,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -80,7 +80,7 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
                 }
               }
             }
-            result {
+            results {
               exposures
               exposureTime {
                 seconds

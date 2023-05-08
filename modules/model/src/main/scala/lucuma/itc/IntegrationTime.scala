@@ -7,8 +7,10 @@ import cats.Eq
 import cats.derived.*
 import eu.timepit.refined.cats.*
 import eu.timepit.refined.types.numeric.PosInt
+import io.circe.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.TimeSpan
+import lucuma.itc.encoders.given
 
 import java.math.MathContext
 
@@ -16,7 +18,8 @@ case class IntegrationTime(
   exposureTime:  TimeSpan,
   exposures:     PosInt,
   signalToNoise: SignalToNoise
-) derives Eq
+) derives Eq,
+      Encoder.AsObject
 
 extension (signalToNoise: SignalToNoise)
   def stepSignalToNoise(exposures: PosInt): Option[SignalToNoise] =

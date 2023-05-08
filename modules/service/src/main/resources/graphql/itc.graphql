@@ -4622,9 +4622,16 @@ input TimeSpanInput {
 ##############
 
 type Query {
-  # Given an instrument and a mode, return an the integration time and the estimated S/N
+  # Given an instrument and a spectroscopyy mode,
+  # return an the integration time and the estimated S/N
   spectroscopyIntegrationTime(
     input: SpectroscopyIntegrationTimeInput!
+  ): IntegrationTimeCalculationResult!
+
+  # Given an instrument and an imaging mode,
+  # return an the integration time and the estimated S/N
+  imagingIntegrationTime(
+    input: ImagingIntegrationTimeInput!
   ): IntegrationTimeCalculationResult!
 
   spectroscopySignalToNoise(
@@ -4637,11 +4644,6 @@ type Query {
   ): OptimizedSpectroscopyGraphResult!
 
   versions: ItcVersions
-}
-
-type ImagingMode {
-  # instrument
-  instrument: InstrumentType
 }
 
 type ObservingModeSpectroscopy {
@@ -4666,19 +4668,7 @@ type ItcVersions {
   dataVersion: String
 }
 
-
-type GmosSITCParams {
-  # Gmos South disperser
-  grating: GmosSouthGrating!
-
-  # Gmos South Focal plane unit
-  fpu: GmosSouthFpu
-
-  # Gmos South filter
-  filter: GmosSouthFilter
-}
-
-input GmosSITCInput {
+input GmosSSpectroscopyInput {
   # Gmos South disperser
   grating: GmosSouthGrating!
 
@@ -4689,20 +4679,12 @@ input GmosSITCInput {
   filter: GmosSouthFilter
 }
 
-type GmosNITCParams {
-  # Gmos North disperser
-  grating: GmosNorthGrating!
-
-  # Gmos North Focal plane unit
-  customMask: GmosCustomMask
-
-  fpu: GmosNorthFpu!
-
-  # Gmos North filter
-  filter: GmosNorthFilter
+input GmosSImagingInput {
+  # Gmos South filter
+  filter: GmosSouthFilter!
 }
 
-input GmosNITCInput {
+input GmosNSpectroscopyInput {
   # Gmos North disperser
   grating: GmosNorthGrating!
 
@@ -4713,15 +4695,54 @@ input GmosNITCInput {
   filter: GmosNorthFilter
 }
 
+input GmosNImagingInput {
+  # Gmos North filter
+  filter: GmosNorthFilter!
+}
+
+type GmosSITCParams {
+  # Gmos South disperser
+  grating: GmosSouthGrating
+
+  # Gmos North Focal plane unit
+  customMask: GmosCustomMask
+
+  # Gmos South Focal plane unit
+  fpu: GmosSouthFpu
+
+  # Gmos South filter
+  filter: GmosSouthFilter
+}
+
+type GmosNITCParams {
+  # Gmos North disperser
+  grating: GmosNorthGrating
+
+  # Gmos North Focal plane unit
+  customMask: GmosCustomMask
+
+  # Gmos North Focal plane unit
+  fpu: GmosNorthFpu
+
+  # Gmos North filter
+  filter: GmosNorthFilter
+}
+
 union InstrumentITCParams = GmosNITCParams | GmosSITCParams
 
 # Params for instrument modes
 input InstrumentModesInput {
-  # Gmos North
-  gmosN: GmosNITCInput
+  # Gmos North Spectroscopy
+  gmosNSpectroscopy: GmosNSpectroscopyInput
 
-  # Gmos South
-  gmosS: GmosSITCInput
+  # Gmos South Spectroscopy
+  gmosSSpectroscopy: GmosSSpectroscopyInput
+
+  # Gmos North Imaging
+  gmosNImaging: GmosNImagingInput
+
+  # Gmos South Imaging
+  gmosSImaging: GmosSImagingInput
 }
 
 # Configuration alternatives query
@@ -4731,6 +4752,30 @@ input SpectroscopyIntegrationTimeInput {
 
   # Wavelength at which to measure Signal to Noise
   signalToNoiseAt: WavelengthInput
+
+  # Minimum desired signal-to-noise ratio.
+  signalToNoise: SignalToNoise!
+
+  # Spatial profile PointSource/UniformSource/GaussianSource.
+  sourceProfile: SourceProfileInput!
+
+  # Observing Band
+  band: Band!
+
+  # Target radial velocity
+  radialVelocity: RadialVelocityInput!
+
+  # Conditions
+  constraints: ConstraintSetInput!
+
+  # Instrument modes
+  mode: InstrumentModesInput
+}
+
+# Configuration alternatives query
+input ImagingIntegrationTimeInput {
+  # Observing wavelength.
+  wavelength: WavelengthInput!
 
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!
@@ -4837,7 +4882,39 @@ type IntegrationTime {
   signalToNoise: SignalToNoise!
 }
 
-type SpectroscopyMode {
+type IntegrationTimeCalculationResult {
+
+  # id of the backend server
+  serverVersion: String
+
+  # token for the itc data version, can be null
+  dataVersion: String
+
+  # queried mode
+  mode: ObservingMode!
+
+  # ITC results, there maybe one per CCD or a single result
+  results: [IntegrationTime!]!
+}
+
+interface ObservingMode {
+  # instrument
+  instrument: InstrumentType
+}
+
+type ImagingMode implements ObservingMode {
+  # Wavelength in appropriate units
+  wavelength: Wavelength!
+
+  # instrument
+  instrument: InstrumentType
+
+  # params
+  params: InstrumentITCParams!
+
+}
+
+type SpectroscopyMode implements ObservingMode {
   # Wavelength in appropriate units
   wavelength: Wavelength!
 
@@ -4850,23 +4927,6 @@ type SpectroscopyMode {
   # instrument
   instrument: InstrumentType
 }
-
-type IntegrationTimeCalculationResult {
-
-  # id of the backend server
-  serverVersion: String
-
-  # token for the itc data version, can be null
-  dataVersion: String
-
-  # queried mode
-  mode: ObservingMode!
-
-  # ITC results
-  result: IntegrationTime!
-}
-
-union ObservingMode = SpectroscopyMode | ImagingMode
 
 """Chart data types"""
 enum ItcSeriesType {
