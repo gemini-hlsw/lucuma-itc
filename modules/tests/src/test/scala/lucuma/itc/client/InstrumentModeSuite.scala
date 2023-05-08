@@ -13,7 +13,9 @@ final class InstrumentModeSuite extends DisciplineSuite {
   import ArbInstrumentMode.given
 
   checkAll("InstrumentMode", EqTests[InstrumentMode].eqv)
-  checkAll("InstrumentMode.gmosNorth", PrismTests(InstrumentMode.gmosNorth))
-  checkAll("InstrumentMode.gmosSouth", PrismTests(InstrumentMode.gmosSouth))
+  checkAll("InstrumentMode.gmosNorthSpectroscopy", PrismTests(InstrumentMode.gmosNorthSpectroscopy))
+  checkAll("InstrumentMode.gmosSouthSpectroscopy", PrismTests(InstrumentMode.gmosSouthSpectroscopy))
+  checkAll("InstrumentMode.gmosNorthImaging", PrismTests(InstrumentMode.gmosNorthImaging))
+  checkAll("InstrumentMode.gmosSouthImaging", PrismTests(InstrumentMode.gmosSouthImaging))
 
 }

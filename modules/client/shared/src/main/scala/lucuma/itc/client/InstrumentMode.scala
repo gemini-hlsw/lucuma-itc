@@ -177,10 +177,15 @@ object InstrumentMode {
 
   }
 
-  val gmosNorth: Prism[InstrumentMode, GmosNorthSpectroscopy] =
+  val gmosNorthSpectroscopy: Prism[InstrumentMode, GmosNorthSpectroscopy] =
     GenPrism[InstrumentMode, GmosNorthSpectroscopy]
 
-  val gmosSouth: Prism[InstrumentMode, GmosSouthSpectroscopy] =
+  val gmosSouthSpectroscopy: Prism[InstrumentMode, GmosSouthSpectroscopy] =
     GenPrism[InstrumentMode, GmosSouthSpectroscopy]
 
+  val gmosNorthImaging: Prism[InstrumentMode, GmosNorthImaging] =
+    GenPrism[InstrumentMode, GmosNorthImaging]
+
+  val gmosSouthImaging: Prism[InstrumentMode, GmosSouthImaging] =
+    GenPrism[InstrumentMode, GmosSouthImaging]
 }
