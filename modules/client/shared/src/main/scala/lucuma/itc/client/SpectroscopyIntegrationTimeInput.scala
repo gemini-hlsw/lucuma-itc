@@ -37,7 +37,9 @@ object SpectroscopyIntegrationTimeInput {
         .obj(
           "wavelength"      -> Json.obj("picometers" -> a.wavelength.toPicometers.value.asJson),
           "signalToNoise"   -> a.signalToNoise.asJson,
-          "signalToNoiseAt" -> a.signalToNoiseAt.asJson,
+          "signalToNoiseAt" -> a.signalToNoiseAt
+            .map(w => Json.obj("picometers" -> w.toPicometers.value.asJson))
+            .getOrElse(Json.Null),
           "sourceProfile"   -> a.sourceProfile.asJson,
           "band"            -> a.band.asScreamingJson,
           "radialVelocity"  -> Json.obj(
