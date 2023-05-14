@@ -14,6 +14,8 @@ import com.comcast.ip4s._
 import dev.profunktor.redis4cats.Redis
 import dev.profunktor.redis4cats.data.RedisCodec
 import dev.profunktor.redis4cats.log4cats.*
+import fs2.compression.Compression
+import fs2.io.net.Network
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
