@@ -14,6 +14,7 @@ import com.comcast.ip4s._
 import dev.profunktor.redis4cats.Redis
 import dev.profunktor.redis4cats.data.RedisCodec
 import dev.profunktor.redis4cats.log4cats.*
+import fs2.compression.Compression
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
@@ -120,7 +121,7 @@ object Main extends IOApp with ItcCacheOrRemote {
       .withHttpWebSocketApp(app)
       .build
 
-  def routes[F[_]: Async: Concurrent: Logger: Parallel: Trace](
+  def routes[F[_]: Async: Concurrent: Logger: Parallel: Trace: Compression](
     cfg: Config,
     itc: LocalItc
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
