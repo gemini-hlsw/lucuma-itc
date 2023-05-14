@@ -14,6 +14,8 @@ import com.comcast.ip4s._
 import dev.profunktor.redis4cats.Redis
 import dev.profunktor.redis4cats.data.RedisCodec
 import dev.profunktor.redis4cats.log4cats.*
+import fs2.compression.Compression
+import fs2.io.net.Network
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
@@ -108,7 +110,7 @@ object Main extends IOApp with ItcCacheOrRemote {
       }
   }
 
-  def serverResource[F[_]: Async](
+  def serverResource[F[_]: Async: Network](
     app: WebSocketBuilder2[F] => HttpApp[F],
     cfg: Config
   ): Resource[F, Server] =
@@ -120,7 +122,7 @@ object Main extends IOApp with ItcCacheOrRemote {
       .withHttpWebSocketApp(app)
       .build
 
-  def routes[F[_]: Async: Concurrent: Logger: Parallel: Trace](
+  def routes[F[_]: Async: Concurrent: Logger: Parallel: Trace: Compression](
     cfg: Config,
     itc: LocalItc
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
@@ -181,11 +183,11 @@ object Main extends IOApp with ItcCacheOrRemote {
    * Our main server, as a resource that starts up our server on acquire and shuts it all down in
    * cleanup, yielding an `ExitCode`. Users will `use` this resource and hold it forever.
    */
-  def server[F[_]: Async: Parallel: Logger](cfg: Config): Resource[F, ExitCode] =
+  def server(cfg: Config)(using Logger[IO]): Resource[IO, ExitCode] =
     for
-      cl <- Resource.eval(legacyItcLoader[F](cfg))
-      _  <- Resource.eval(banner(cfg))
-      ep <- entryPointResource(cfg.honeycomb)
+      cl <- Resource.eval(legacyItcLoader[IO](cfg))
+      _  <- Resource.eval(banner[IO](cfg))
+      ep <- entryPointResource[IO](cfg.honeycomb)
       ap <- ep.wsLiftR(routes(cfg, cl)).map(_.map(_.orNotFound))
       _  <- serverResource(ap, cfg)
     yield ExitCode.Success
@@ -194,6 +196,6 @@ object Main extends IOApp with ItcCacheOrRemote {
     for
       cfg              <- Config.config.load[IO]
       given Logger[IO] <- Slf4jLogger.create[IO]
-      _                <- server[IO](cfg).use(_ => IO.never[ExitCode])
+      _                <- server(cfg).use(_ => IO.never[ExitCode])
     yield ExitCode.Success
 }

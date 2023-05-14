@@ -1,6 +1,6 @@
 import NativePackagerHelper._
 
-val catsEffectVersion           = "3.4.11"
+val catsEffectVersion           = "3.5.0"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsVersion                 = "2.9.0"
 val catsScalacheckVersion       = "0.3.2"
@@ -8,9 +8,9 @@ val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.5"
 val cirisVersion                = "3.1.0"
 val clueVersion                 = "0.31.0"
-val http4sVersion               = "0.23.18"
+val http4sVersion               = "0.23.19"
 val http4sJdkHttpClientVersion  = "0.9.1"
-val fs2Version                  = "3.6.1"
+val fs2Version                  = "3.7.0"
 val kindProjectorVersion        = "0.13.2"
 val lucumaCoreVersion           = "0.76.0"
 val lucumaRefinedVersion        = "0.1.1"
@@ -36,7 +36,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.2.2"
 ThisBuild / crossScalaVersions  := Seq("3.2.2")
-ThisBuild / tlBaseVersion       := "0.12"
+ThisBuild / tlBaseVersion       := "0.13"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
