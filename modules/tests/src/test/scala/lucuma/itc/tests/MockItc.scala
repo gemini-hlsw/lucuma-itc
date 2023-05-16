@@ -41,11 +41,12 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
       .pure[IO]
 
   override def calculateGraph(
-    targetProfile: TargetProfile,
-    observingMode: ObservingMode,
-    constraints:   ItcObservingConditions,
-    exposureTime:  NonNegDuration,
-    exposures:     PosLong
+    targetProfile:   TargetProfile,
+    observingMode:   ObservingMode,
+    constraints:     ItcObservingConditions,
+    exposureTime:    NonNegDuration,
+    exposures:       PosLong,
+    signalToNoiseAt: Option[Wavelength]
   ): IO[GraphResult] =
     GraphResult(
       NonEmptyList.of(
@@ -72,7 +73,9 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
             )
           )
         )
-      )
+      ),
+      SignalToNoise.unsafeFromBigDecimalExact(1000.0),
+      SignalToNoise.fromInt(1001)
     )
       .pure[IO]
 
@@ -88,11 +91,12 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     IO.raiseError(CalculationError("A calculation error"))
 
   override def calculateGraph(
-    targetProfile: TargetProfile,
-    observingMode: ObservingMode,
-    constraints:   ItcObservingConditions,
-    exposureTime:  NonNegDuration,
-    exposures:     PosLong
+    targetProfile:   TargetProfile,
+    observingMode:   ObservingMode,
+    constraints:     ItcObservingConditions,
+    exposureTime:    NonNegDuration,
+    exposures:       PosLong,
+    signalToNoiseAt: Option[Wavelength]
   ): IO[GraphResult] =
     GraphResult(
       NonEmptyList.of(
@@ -119,6 +123,8 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
             )
           )
         )
-      )
+      ),
+      SignalToNoise.unsafeFromBigDecimalExact(1000.0),
+      SignalToNoise.fromInt(1001)
     )
       .pure[IO]

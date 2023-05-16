@@ -133,6 +133,8 @@ object SpectroscopyGraphQuery
             }
           }
         }
+        peakSNRatio
+        atWavelengthSNRatio
       }
     }
   """

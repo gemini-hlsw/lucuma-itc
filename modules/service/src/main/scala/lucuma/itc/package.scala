@@ -22,14 +22,17 @@ import scala.concurrent.duration.FiniteDuration
 case class UpstreamException(msg: String) extends RuntimeException(msg)
 
 case class GraphResult(
-  ccds:   NonEmptyList[ItcCcd],
-  charts: NonEmptyList[ItcChartGroup]
+  ccds:                NonEmptyList[ItcCcd],
+  charts:              NonEmptyList[ItcChartGroup],
+  peakSNRatio:         SignalToNoise,
+  atWavelengthSNRatio: Option[SignalToNoise]
 )
 
 object GraphResult:
   def fromLegacy(
-    ccds:   NonEmptyList[ItcRemoteCcd],
-    charts: NonEmptyList[ItcChartGroup]
+    ccds:            NonEmptyList[ItcRemoteCcd],
+    charts:          NonEmptyList[ItcChartGroup],
+    signalToNoiseAt: Option[Wavelength]
   ): GraphResult = {
     def maxWavelength(chart: ItcChart, seriesDataType: SeriesDataType): List[Wavelength] =
       chart.series
@@ -42,6 +45,19 @@ object GraphResult:
             .flatMap(d => Wavelength.intPicometers.getOption((d * 1000).toInt))
         }
         .flattenOption
+
+    def valueAt(chart: ItcChart, seriesDataType: SeriesDataType): Option[SignalToNoise] =
+      chart.series
+        .filter(_.seriesType === seriesDataType)
+        .zip(ccds.toList)
+        .map { case (sn, _) =>
+          signalToNoiseAt
+            .flatMap(at => sn.data.find(_._1 >= at.toNanometers.value.value))
+            .map(_._2)
+        }
+        .flattenOption
+        .headOption
+        .flatMap(v => SignalToNoise.FromBigDecimalRounding.getOption(v))
 
     def maxValue(chart: ItcChart, seriesDataType: SeriesDataType): List[Double] =
       chart.series
@@ -90,8 +106,21 @@ object GraphResult:
             .toList
             .flattenOption
         }
+
+    val maxTotalSNRatio = calculatedCCDs.map(_.maxTotalSNRatio).max
+    val peakSNRatio     = SignalToNoise.FromBigDecimalRounding
+      .getOption(maxTotalSNRatio)
+      .getOrElse(throw UpstreamException("Peak SN ratio is not a number"))
+    val wvAtRatio       =
+      charts
+        .flatMap(_.charts)
+        .filter(_.chartType === ChartType.S2NChart)
+        .map(c => valueAt(c, SeriesDataType.FinalS2NData))
+        .collect { case Some(v) => v }
+        .headOption
+
     assert(calculatedCCDs.length === ccds.length)
-    GraphResult(NonEmptyList.fromListUnsafe(calculatedCCDs), charts)
+    GraphResult(NonEmptyList.fromListUnsafe(calculatedCCDs), charts, peakSNRatio, wvAtRatio)
   }
 
 enum SNResultType(val tag: String) derives Enumerated:

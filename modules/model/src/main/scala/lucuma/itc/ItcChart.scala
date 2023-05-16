@@ -17,6 +17,7 @@ import io.circe.Json
 import io.circe.generic.semiauto.*
 import io.circe.refined.*
 import lucuma.core.enums.*
+import lucuma.core.math.SignalToNoise
 import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
 import lucuma.itc.math.*
@@ -76,8 +77,10 @@ case class ItcChart(chartType: ChartType, series: List[ItcSeries]) derives Encod
 case class ItcChartGroup(charts: NonEmptyList[ItcChart]) derives Encoder.AsObject
 
 case class SpectroscopyGraphResult(
-  serverVersion: String,
-  dataVersion:   String,
-  ccds:          NonEmptyList[ItcCcd],
-  charts:        NonEmptyList[ItcChart]
+  serverVersion:       String,
+  dataVersion:         String,
+  ccds:                NonEmptyList[ItcCcd],
+  charts:              NonEmptyList[ItcChart],
+  peakSNRatio:         SignalToNoise,
+  atWavelengthSNRatio: Option[SignalToNoise]
 ) derives Encoder.AsObject

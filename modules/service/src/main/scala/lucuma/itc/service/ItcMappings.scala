@@ -48,11 +48,12 @@ import Value.*
 import QueryCompiler.*
 
 case class GraphRequest(
-  targetProfile: TargetProfile,
-  specMode:      ObservingMode.SpectroscopyMode,
-  constraints:   ItcObservingConditions,
-  expTime:       NonNegDuration,
-  exp:           PosLong
+  targetProfile:   TargetProfile,
+  specMode:        ObservingMode.SpectroscopyMode,
+  constraints:     ItcObservingConditions,
+  expTime:         NonNegDuration,
+  exp:             PosLong,
+  signalToNoiseAt: Option[Wavelength]
 ) derives Hash
 
 case class SpectroscopyIntegrationTimeRequest(
@@ -203,17 +204,21 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
             ObservingMode.SpectroscopyMode.GmosSouth(wv, grating, fpu, filter)
         }
         graphFromCacheOrRemote(
-          GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp)
+          GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp, signalToNoiseAt)
         )(itc, redis)
           .map { r =>
-            val charts =
+            val charts      =
               significantFigures.fold(r.charts)(v => r.charts.map(_.adjustSignificantFigures(v)))
-            val ccds   =
+            val ccds        =
               significantFigures.fold(r.ccds)(v => r.ccds.map(_.adjustSignificantFigures(v)))
+            val peakSNRatio =
+              significantFigures.fold(r.peakSNRatio)(r.peakSNRatio.adjustSignificantFigures)
             SpectroscopyGraphResult(version(environment).value,
                                     BuildInfo.ocslibHash,
                                     ccds,
-                                    charts.flatMap(_.charts)
+                                    charts.flatMap(_.charts),
+                                    r.peakSNRatio,
+                                    r.atWavelengthSNRatio
             )
           }
       }
@@ -258,7 +263,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         import io.circe.syntax.*
 
         graphFromCacheOrRemote(
-          GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp)
+          GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp, signalToNoiseAt)
         )(itc, redis)
           .flatMap { r =>
             itc.calculateSignalToNoise(r.charts, signalToNoiseAt)
@@ -387,6 +392,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                         .orElse(instrumentModePartial)
                         .orElse(constraintsPartial)
                         .orElse(significantFiguresPartial)
+                        .orElse(signalToNoiseAtPartial)
                         .applyOrElse(
                           (e, c),
                           fallback

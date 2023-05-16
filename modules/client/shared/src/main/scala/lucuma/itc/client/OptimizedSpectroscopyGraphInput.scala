@@ -25,6 +25,7 @@ import lucuma.itc.encoders.given
 
 final case class OptimizedSpectroscopyGraphInput(
   wavelength:         Wavelength,
+  signalToNoiseAt:    Option[Wavelength],
   exposureTime:       TimeSpan,
   exposures:          PosInt,
   sourceProfile:      SourceProfile,
@@ -41,6 +42,9 @@ object OptimizedSpectroscopyGraphInput {
   given Encoder.AsObject[OptimizedSpectroscopyGraphInput] = a =>
     JsonObject(
       "wavelength"         -> Json.obj("picometers" -> a.wavelength.toPicometers.value.asJson),
+      "signalToNoiseAt"    -> a.signalToNoiseAt
+        .map(w => Json.obj("picometers" -> w.toPicometers.value.asJson))
+        .asJson,
       "exposureTime"       -> Json.obj("microseconds" -> a.exposureTime.asJson),
       "exposures"          -> a.exposures.value.asJson,
       "sourceProfile"      -> a.sourceProfile.asJson,
@@ -59,6 +63,7 @@ object OptimizedSpectroscopyGraphInput {
     Eq.by { a =>
       (
         a.wavelength,
+        a.signalToNoiseAt,
         a.exposureTime,
         a.exposures,
         a.sourceProfile,

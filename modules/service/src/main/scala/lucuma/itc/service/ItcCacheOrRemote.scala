@@ -83,7 +83,8 @@ trait ItcCacheOrRemote extends Version:
             request.specMode,
             request.constraints,
             request.expTime,
-            request.exp
+            request.exp,
+            request.signalToNoiseAt
         )
 
   /**

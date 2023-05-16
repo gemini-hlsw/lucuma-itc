@@ -135,7 +135,9 @@ class WiringSuite extends ClientSuite {
               )
             )
           )
-        )
+        ),
+        SignalToNoise.unsafeFromBigDecimalExact(1000.0),
+        SignalToNoise.fromInt(1001)
       ).asRight
     )
   }
@@ -187,6 +189,7 @@ object WiringSuite {
   val GraphInput: OptimizedSpectroscopyGraphInput =
     OptimizedSpectroscopyGraphInput(
       Wavelength.Min,
+      Wavelength.fromIntMicrometers(1),
       TimeSpan.fromSeconds(1).get,
       PosInt.unsafeFrom(5),
       SourceProfile.Point(BandNormalized[Integrated](Galaxy(Spiral).some, SortedMap.empty)),
