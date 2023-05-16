@@ -6,6 +6,7 @@ package lucuma.itc.service.syntax
 import cats.data._
 import edu.gemini.grackle.Problem
 import edu.gemini.grackle.Query.Environment
+import lucuma.core.math.SignalToNoise
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcChartGroup
@@ -63,6 +64,17 @@ trait ItcChartSyntax:
   extension (chart: ItcChart)
     def adjustSignificantFigures(figures: SignificantFigures): ItcChart =
       chart.copy(series = chart.series.map(_.adjustSignificantFigures(figures)))
+
+  extension (sn: SignalToNoise)
+    def adjustSignificantFigures(figures: SignificantFigures): SignalToNoise =
+      figures.ccd match
+        case Some(v) =>
+          SignalToNoise.FromBigDecimalRounding
+            .getOption(
+              roundToSignificantFigures(sn.toBigDecimal, v.value)
+            )
+            .getOrElse(sn)
+        case _       => sn
 
   extension (group: ItcChartGroup)
     def adjustSignificantFigures(figures: SignificantFigures): ItcChartGroup =

@@ -4813,6 +4813,9 @@ input OptimizedSpectroscopyGraphInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
 
+  # Wavelength at which to measure Signal to Noise
+  signalToNoiseAt: WavelengthInput
+
   # Exposure time duration
   exposureTime: NonNegDurationInput!
 
@@ -5047,6 +5050,11 @@ type OptimizedSpectroscopyGraphResult {
   # Chart data
   charts: [ItcChart!]!
 
+  # Peak SN Ratio
+  peakSNRatio: SignalToNoise!
+
+  # SN Ratio at the requested wavelength if passed along
+  atWavelengthSNRatio: SignalToNoise
 }
 
 """Calculation result types"""

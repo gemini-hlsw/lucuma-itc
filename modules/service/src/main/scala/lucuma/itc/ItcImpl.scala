@@ -123,11 +123,12 @@ object ItcImpl {
         }
 
       def calculateGraph(
-        targetProfile: TargetProfile,
-        observingMode: ObservingMode,
-        constraints:   ItcObservingConditions,
-        exposureTime:  NonNegDuration,
-        exposures:     PosLong
+        targetProfile:   TargetProfile,
+        observingMode:   ObservingMode,
+        constraints:     ItcObservingConditions,
+        exposureTime:    NonNegDuration,
+        exposures:       PosLong,
+        signalToNoiseAt: Option[Wavelength]
       ): F[GraphResult] =
         observingMode match
           case _: ObservingMode.SpectroscopyMode =>
@@ -136,7 +137,8 @@ object ItcImpl {
               observingMode,
               constraints,
               BigDecimal(exposureTime.value.toMillis).withUnit[Millisecond].toUnit[Second],
-              exposures.value
+              exposures.value,
+              signalToNoiseAt
             )
           case _: ObservingMode.ImagingMode      =>
             MonadThrow[F].raiseError(
@@ -242,10 +244,11 @@ object ItcImpl {
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
         exposureDuration: Quantity[BigDecimal, Second],
-        exposures:        Long
+        exposures:        Long,
+        signalToNoiseAt:  Option[Wavelength]
       ): F[GraphResult] =
         itcGraph(targetProfile, observingMode, constraints, exposureDuration, exposures).map { r =>
-          GraphResult.fromLegacy(r.ccds, r.groups)
+          GraphResult.fromLegacy(r.ccds, r.groups, signalToNoiseAt)
         }
 
       /**

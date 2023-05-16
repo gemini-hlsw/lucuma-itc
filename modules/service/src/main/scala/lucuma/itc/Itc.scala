@@ -37,11 +37,12 @@ trait Itc[F[_]]:
    * Retrieve the graph data for the given mode and exposureTime and exposures
    */
   def calculateGraph(
-    targetProfile: TargetProfile,
-    observingMode: ObservingMode,
-    constraints:   ItcObservingConditions,
-    exposureTime:  NonNegDuration,
-    exposures:     PosLong
+    targetProfile:   TargetProfile,
+    observingMode:   ObservingMode,
+    constraints:     ItcObservingConditions,
+    exposureTime:    NonNegDuration,
+    exposures:       PosLong,
+    signalToNoiseAt: Option[Wavelength]
   ): F[GraphResult]
 
   /**

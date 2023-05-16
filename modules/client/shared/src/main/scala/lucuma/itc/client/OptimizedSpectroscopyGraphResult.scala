@@ -11,6 +11,7 @@ import io.circe.Decoder
 import io.circe.DecodingFailure
 import io.circe.Encoder
 import io.circe.HCursor
+import lucuma.core.math.SignalToNoise
 import lucuma.itc.IntegrationTime
 import lucuma.itc.*
 
@@ -27,8 +28,10 @@ case class OptimizedChartResult(chartType: ChartType, series: List[OptimizedSeri
     derives Encoder.AsObject
 
 case class OptimizedSpectroscopyGraphResult(
-  serverVersion: String,
-  dataVersion:   String,
-  ccds:          NonEmptyList[ItcCcd],
-  charts:        NonEmptyList[OptimizedChartResult]
+  serverVersion:       String,
+  dataVersion:         String,
+  ccds:                NonEmptyList[ItcCcd],
+  charts:              NonEmptyList[OptimizedChartResult],
+  peakSNRatio:         SignalToNoise,
+  atWavelengthSNRatio: Option[SignalToNoise]
 ) derives Encoder.AsObject
