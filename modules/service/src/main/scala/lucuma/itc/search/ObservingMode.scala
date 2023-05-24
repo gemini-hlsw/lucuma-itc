@@ -11,7 +11,7 @@ import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import lucuma.itc.GmosNImagingParams
-import lucuma.itc.GmosNSpectrosocpyParams
+import lucuma.itc.GmosNSpectroscopyParams
 import lucuma.itc.GmosSImagingParams
 import lucuma.itc.GmosSSpectroscopyParams
 import lucuma.itc.encoders.given
@@ -99,7 +99,7 @@ object ObservingMode {
         Json.obj(
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
           ("resolution", Json.fromInt(a.resolution.toInt)),
-          ("params", GmosNSpectrosocpyParams(a.disperser, a.fpu, a.filter).asJson),
+          ("params", GmosNSpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
           ("wavelength", a.λ.asJson)
         )
 

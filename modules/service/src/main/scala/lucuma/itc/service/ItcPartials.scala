@@ -23,7 +23,6 @@ import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
-import eu.timepit.refined.types.numeric.PosLong
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
 import io.circe.Json
@@ -394,7 +393,7 @@ trait GracklePartials extends GrackleParsers:
 
   def exposuresPartial: PartialFunction[(Partial, (String, Value)), Partial] =
     case (i, ("exposures", v)) =>
-      posLongValue(v)
+      posIntValue(v)
         .map(m => cursorEnvAdd("exposures", m)(i))
         .getOrElse(i.addProblem("Exposures must be a positive int"))
 
@@ -515,12 +514,6 @@ trait GracklePartials extends GrackleParsers:
         refineV[Positive](r).fold(_ => none, _.some)
       case _                    => none
 
-  def posLongValue(v: Value): Option[PosLong] =
-    v match
-      case IntValue(r) if r > 0 =>
-        refineV[Positive](r.toLong).fold(_ => none, _.some)
-      case _                    => none
-
   def significantFiguresPartial: PartialFunction[(Partial, (String, Value)), Partial] =
 
     case (i, ("significantFigures", ObjectValue(r))) =>
@@ -595,7 +588,7 @@ trait GracklePartials extends GrackleParsers:
                 case _                                     => none
 
               (gnGrating.get(d), gnFpu.get(fpu)).mapN((a, b) =>
-                GmosNSpectrosocpyParams(a, GmosNorthFpuParam(b), filterOpt)
+                GmosNSpectroscopyParams(a, GmosNorthFpuParam(b), filterOpt)
               )
             case _ =>
               none
