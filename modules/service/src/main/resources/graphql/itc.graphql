@@ -4818,11 +4818,11 @@ input SpectroscopyIntegrationTimeAndGraphInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
 
-  # Wavelength at which to measure Signal to Noise
-  signalToNoiseAt: WavelengthInput
-
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!
+
+  # Wavelength at which to measure Signal to Noise
+  signalToNoiseAt: WavelengthInput
 
   # Spatial profile PointSource/UniformSource/GaussianSource.
   sourceProfile: SourceProfileInput!

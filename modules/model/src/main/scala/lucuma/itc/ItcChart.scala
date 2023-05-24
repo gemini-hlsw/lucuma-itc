@@ -19,11 +19,11 @@ import io.circe.generic.semiauto.*
 import io.circe.refined.*
 import lucuma.core.enums.*
 import lucuma.core.math.SignalToNoise
-import lucuma.core.util.TimeSpan
 import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
-import lucuma.itc.math.*
+import lucuma.core.util.TimeSpan
 import lucuma.itc.encoders.given
+import lucuma.itc.math.*
 
 enum SeriesDataType(val tag: String) derives Enumerated:
   case SignalData     extends SeriesDataType("signal_data")
@@ -87,29 +87,3 @@ case class SpectroscopyGraphResult(
   peakSNRatio:         SignalToNoise,
   atWavelengthSNRatio: Option[SignalToNoise]
 ) derives Encoder.AsObject
-
-case class SpectroscopyTimeAndGraphResult(
-  serverVersion:       String,
-  dataVersion:         String,
-  exposureTime:        TimeSpan,
-  exposures:           PosInt,
-  ccds:                NonEmptyList[ItcCcd],
-  charts:              NonEmptyList[ItcChart],
-  peakSNRatio:         SignalToNoise,
-  atWavelengthSNRatio: Option[SignalToNoise]
-) derives Encoder.AsObject
-
-object SpectroscopyTimeAndGraphResult:
-  def fromTimeAndGraph(
-    exposureTime: TimeSpan,
-    exposures:    PosInt,
-    graph:        SpectroscopyGraphResult
-  ): SpectroscopyTimeAndGraphResult = SpectroscopyTimeAndGraphResult(graph.serverVersion,
-                                                                     graph.dataVersion,
-                                                                     exposureTime,
-                                                                     exposures,
-                                                                     graph.ccds,
-                                                                     graph.charts,
-                                                                     graph.peakSNRatio,
-                                                                     graph.atWavelengthSNRatio
-  )

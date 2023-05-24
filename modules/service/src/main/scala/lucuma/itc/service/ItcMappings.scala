@@ -13,8 +13,8 @@ import dev.profunktor.redis4cats.algebra.StringCommands
 import edu.gemini.grackle.*
 import edu.gemini.grackle.circe.CirceMapping
 import eu.timepit.refined.*
-import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.numeric.NonNegative
+import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
@@ -24,9 +24,9 @@ import lucuma.core.enums.*
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
-import lucuma.core.util.TimeSpan
 import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
+import lucuma.core.util.TimeSpan
 import lucuma.itc.ItcVersions
 import lucuma.itc.SpectroscopyGraphResult
 import lucuma.itc.*
@@ -40,10 +40,10 @@ import lucuma.itc.service.syntax.all.*
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
+import java.time.Duration
 import scala.concurrent.duration.*
 import scala.io.Source
 import scala.util.Using
-import java.time.Duration
 
 import Query.*
 import Value.*
