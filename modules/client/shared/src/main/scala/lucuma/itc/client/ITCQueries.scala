@@ -149,3 +149,78 @@ object SpectroscopyGraphQuery
   override val dataDecoder: Decoder[OptimizedSpectroscopyGraphResult] =
     (c: HCursor) => c.downField("optimizedSpectroscopyGraph").as[OptimizedSpectroscopyGraphResult]
 }
+
+object SpectroscopyIntegrationTimeAndGraphQuery
+    extends GraphQLOperation.Typed[Unit,
+                                   SpectroscopyIntegrationTimeAndGraphInput,
+                                   SpectroscopyIntegrationTimeAndGraphResult
+    ] {
+
+  val document =
+    """
+    query($input: SpectroscopyIntegrationTimeAndGraphInput!) {
+      spectroscopyIntegrationTimeAndGraph(input: $input) {
+        serverVersion
+        dataVersion
+        exposureTime {
+          microseconds
+        }
+        exposures
+        ccds {
+          singleSNRatio
+          totalSNRatio
+          peakPixelFlux
+          ampGain
+          maxTotalSNRatio
+          maxSingleSNRatio
+          wavelengthForMaxTotalSNRatio {
+            picometers
+          }
+          wavelengthForMaxSingleSNRatio {
+            picometers
+          }
+          wellDepth
+          warnings {
+            msg
+          }
+        }
+        charts {
+          chartType
+          series {
+            title
+            seriesType
+            dataY
+            xAxis {
+              start
+              end
+              count
+              min
+              max
+            }
+            yAxis {
+              start
+              end
+              count
+              min
+              max
+            }
+          }
+        }
+        peakSNRatio
+        atWavelengthSNRatio
+      }
+    }
+  """
+
+  override val varEncoder: Encoder.AsObject[Variables] =
+    Encoder.AsObject.instance[SpectroscopyIntegrationTimeAndGraphInput] { input =>
+      JsonObject(
+        "input" -> Encoder[SpectroscopyIntegrationTimeAndGraphInput].apply(input)
+      )
+    }
+
+  override val dataDecoder: Decoder[SpectroscopyIntegrationTimeAndGraphResult] =
+    (c: HCursor) =>
+      c.downField("spectroscopyIntegrationTimeAndGraph")
+        .as[SpectroscopyIntegrationTimeAndGraphResult]
+}

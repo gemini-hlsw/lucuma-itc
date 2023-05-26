@@ -18,7 +18,6 @@ import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.refineV
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosInt
-import eu.timepit.refined.types.numeric.PosLong
 import io.circe.Decoder
 import io.circe.syntax.*
 import lucuma.core.math.Angle
@@ -127,7 +126,7 @@ object ItcImpl {
         observingMode:   ObservingMode,
         constraints:     ItcObservingConditions,
         exposureTime:    NonNegDuration,
-        exposures:       PosLong,
+        exposures:       PosInt,
         signalToNoiseAt: Option[Wavelength]
       ): F[GraphResult] =
         observingMode match

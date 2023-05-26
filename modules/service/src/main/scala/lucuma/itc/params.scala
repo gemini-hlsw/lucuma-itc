@@ -21,7 +21,7 @@ import scala.concurrent.duration.FiniteDuration
 
 sealed trait SpectroscopyParams
 
-case class GmosNSpectrosocpyParams(
+case class GmosNSpectroscopyParams(
   grating: GmosNorthGrating,
   fpu:     GmosNorthFpuParam,
   filter:  Option[GmosNorthFilter]

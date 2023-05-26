@@ -4643,6 +4643,11 @@ type Query {
     input: OptimizedSpectroscopyGraphInput!
   ): OptimizedSpectroscopyGraphResult!
 
+  # Given an instrument and a mode, return the graph data in an optimized format
+  spectroscopyIntegrationTimeAndGraph(
+    input: SpectroscopyIntegrationTimeAndGraphInput!
+  ): SpectroscopyIntegrationTimeAndGraphResult!
+
   versions: ItcVersions
 }
 
@@ -4806,6 +4811,36 @@ input SignificantFiguresInput {
 
   # Significant figures for ccds
   ccd: PosInt
+}
+
+# Parameters to retrieve graph data
+input SpectroscopyIntegrationTimeAndGraphInput {
+  # Observing wavelength.
+  wavelength: WavelengthInput!
+
+  # Minimum desired signal-to-noise ratio.
+  signalToNoise: SignalToNoise!
+
+  # Wavelength at which to measure Signal to Noise
+  signalToNoiseAt: WavelengthInput
+
+  # Spatial profile PointSource/UniformSource/GaussianSource.
+  sourceProfile: SourceProfileInput!
+
+  # Observing Band
+  band: Band!
+
+  # Target radial velocity
+  radialVelocity: RadialVelocityInput!
+
+  # Conditions
+  constraints: ConstraintSetInput!
+
+  # Instrument modes
+  mode: InstrumentModesInput!
+
+  # Significant figures, truncates the amount of significant value
+  significantFigures: SignificantFiguresInput
 }
 
 # Parameters to retrieve graph data
@@ -5043,6 +5078,33 @@ type OptimizedSpectroscopyGraphResult {
 
   # token for the itc data version, can be null
   dataVersion: String!
+
+  # Results for each CCD
+  ccds: [ItcCcd!]!
+
+  # Chart data
+  charts: [ItcChart!]!
+
+  # Peak SN Ratio
+  peakSNRatio: SignalToNoise!
+
+  # SN Ratio at the requested wavelength if passed along
+  atWavelengthSNRatio: SignalToNoise
+}
+
+type SpectroscopyIntegrationTimeAndGraphResult {
+
+  # id of the backend server
+  serverVersion: String!
+
+  # token for the itc data version, can be null
+  dataVersion: String!
+
+  # Exposure time duration
+  exposureTime: TimeSpan!
+
+  # Exposures
+  exposures: PosInt!
 
   # Results for each CCD
   ccds: [ItcCcd!]!
