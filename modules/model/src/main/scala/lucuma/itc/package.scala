@@ -5,9 +5,17 @@ package lucuma.itc
 
 import cats.data.NonEmptyList
 import io.circe.*
+import lucuma.core.math.SignalToNoise
+import lucuma.core.util.NewType
 import lucuma.itc.encoders.given
 
 case class ItcVersions(
   serverVersion: String,
   dataVersion:   Option[String]
 ) derives Encoder.AsObject
+
+object FinalSN extends NewType[SignalToNoise]
+type FinalSN = FinalSN.Type
+
+object SingleSN extends NewType[SignalToNoise]
+type SingleSN = SingleSN.Type

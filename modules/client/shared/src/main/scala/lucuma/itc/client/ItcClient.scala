@@ -43,6 +43,11 @@ trait ItcClient[F[_]] {
     useCache: Boolean = true
   ): F[OptimizedSpectroscopyGraphResult]
 
+  def spectroscopyIntegrationTimeAndGraph(
+    input:    SpectroscopyIntegrationTimeAndGraphInput,
+    useCache: Boolean = true
+  ): F[SpectroscopyIntegrationTimeAndGraphResult]
+
   def versions: F[ItcVersions]
 
 }
@@ -55,11 +60,16 @@ object ItcClient {
     client: Client[F]
   ): F[ItcClient[F]] =
     for {
-      specCache  <- ItcCache.simple[F, SpectroscopyIntegrationTimeInput, IntegrationTimeResult]
-      imgCache   <- ItcCache.simple[F, ImagingIntegrationTimeInput, IntegrationTimeResult]
-      graphCache <-
+      specCache         <- ItcCache.simple[F, SpectroscopyIntegrationTimeInput, IntegrationTimeResult]
+      imgCache          <- ItcCache.simple[F, ImagingIntegrationTimeInput, IntegrationTimeResult]
+      graphCache        <-
         ItcCache.simple[F, OptimizedSpectroscopyGraphInput, OptimizedSpectroscopyGraphResult]
-      http       <- Http4sHttpClient.of[F, Unit](uri)(Async[F], Http4sHttpBackend(client), Logger[F])
+      timeAndGraphCache <-
+        ItcCache.simple[F,
+                        SpectroscopyIntegrationTimeAndGraphInput,
+                        SpectroscopyIntegrationTimeAndGraphResult
+        ]
+      http              <- Http4sHttpClient.of[F, Unit](uri)(Async[F], Http4sHttpBackend(client), Logger[F])
     } yield new ItcClient[F] {
       override def spectroscopy(
         input:    SpectroscopyIntegrationTimeInput,
@@ -111,6 +121,20 @@ object ItcClient {
         } yield v
       }
 
+      def spectroscopyIntegrationTimeAndGraph(
+        input:    SpectroscopyIntegrationTimeAndGraphInput,
+        useCache: Boolean = true
+      ): F[SpectroscopyIntegrationTimeAndGraphResult] = {
+        val callOut: F[SpectroscopyIntegrationTimeAndGraphResult] =
+          http.request(SpectroscopyIntegrationTimeAndGraphQuery).withInput(input)
+
+        for {
+          _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")
+          v <- if (useCache) timeAndGraphCache.getOrCalcF(input)(callOut)
+               else callOut.flatTap(timeAndGraphCache.put(input))
+          _ <- Logger[F].debug(s"ITC Result:\n$v")
+        } yield v
+      }
     }
 
 }

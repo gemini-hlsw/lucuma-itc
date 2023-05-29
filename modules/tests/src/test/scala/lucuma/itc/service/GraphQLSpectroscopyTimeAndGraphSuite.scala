@@ -11,23 +11,20 @@ import lucuma.core.syntax.string._
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcObservingConditions
 
-class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
+class GraphQLSpectroscopyTimeAndGraphSuite extends GraphQLSuite {
 
   test("gmos graph") {
     query(
       """
         query {
-          optimizedSpectroscopyGraph(input: {
+          spectroscopyIntegrationTimeAndGraph(input: {
             wavelength: {
               nanometers: 60,
             },
             radialVelocity: {
               kilometersPerSecond: 1000
             },
-            exposureTime: {
-              milliseconds: 2.5,
-            },
-            exposures: 10,
+            signalToNoise: 2,
             sourceProfile: {
               point: {
                 bandNormalized: {
@@ -72,10 +69,10 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
               xAxis: 4
             }
           }) {
-            peakFinalSNRatio
-            peakSingleSNRatio
-            atWavelengthFinalSNRatio
-            atWavelengthSingleSNRatio
+            exposureTime {
+              seconds
+            }
+            exposures
             ccds {
               singleSNRatio
               totalSNRatio
@@ -102,11 +99,11 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
         """,
       json"""{
           "data": {
-            "optimizedSpectroscopyGraph": {
-              "peakFinalSNRatio" : 1009.000,
-              "peakSingleSNRatio" : 1003.000,
-              "atWavelengthFinalSNRatio" : 1001.000,
-              "atWavelengthSingleSNRatio" : 1002.000,
+            "spectroscopyIntegrationTimeAndGraph": {
+              "exposures" : 10,
+              "exposureTime" : {
+                "seconds" : 1.000000000
+              },
               "ccds" : [
                 {
                   "singleSNRatio" : 1.0,

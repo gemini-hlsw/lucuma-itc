@@ -5,7 +5,7 @@ package lucuma.itc
 
 import cats.data.NonEmptyList
 import cats.syntax.all.*
-import eu.timepit.refined.types.numeric.PosLong
+import eu.timepit.refined.types.numeric.PosInt
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.math.SignalToNoise
@@ -41,7 +41,7 @@ trait Itc[F[_]]:
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     exposureTime:    NonNegDuration,
-    exposures:       PosLong,
+    exposures:       PosInt,
     signalToNoiseAt: Option[Wavelength]
   ): F[GraphResult]
 

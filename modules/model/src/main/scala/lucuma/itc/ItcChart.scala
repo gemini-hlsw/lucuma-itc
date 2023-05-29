@@ -8,6 +8,7 @@ import cats.syntax.all.*
 import eu.timepit.refined.*
 import eu.timepit.refined.numeric.NonNegative
 import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.PosInt
 import io.circe.CursorOp
 import io.circe.Decoder
 import io.circe.DecodingFailure
@@ -20,6 +21,8 @@ import lucuma.core.enums.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
+import lucuma.core.util.TimeSpan
+import lucuma.itc.encoders.given
 import lucuma.itc.math.*
 
 enum SeriesDataType(val tag: String) derives Enumerated:
@@ -77,10 +80,12 @@ case class ItcChart(chartType: ChartType, series: List[ItcSeries]) derives Encod
 case class ItcChartGroup(charts: NonEmptyList[ItcChart]) derives Encoder.AsObject
 
 case class SpectroscopyGraphResult(
-  serverVersion:       String,
-  dataVersion:         String,
-  ccds:                NonEmptyList[ItcCcd],
-  charts:              NonEmptyList[ItcChart],
-  peakSNRatio:         SignalToNoise,
-  atWavelengthSNRatio: Option[SignalToNoise]
+  serverVersion:             String,
+  dataVersion:               String,
+  ccds:                      NonEmptyList[ItcCcd],
+  charts:                    NonEmptyList[ItcChart],
+  peakFinalSNRatio:          FinalSN,
+  atWavelengthFinalSNRatio:  Option[FinalSN],
+  peakSingleSNRatio:         SingleSN,
+  atWavelengthSingleSNRatio: Option[SingleSN]
 ) derives Encoder.AsObject

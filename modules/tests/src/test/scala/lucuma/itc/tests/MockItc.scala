@@ -6,7 +6,7 @@ package lucuma.itc.tests
 import cats.data.NonEmptyList
 import cats.effect.IO
 import cats.syntax.applicative.*
-import eu.timepit.refined.types.numeric.PosLong
+import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
@@ -45,7 +45,7 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     exposureTime:    NonNegDuration,
-    exposures:       PosLong,
+    exposures:       PosInt,
     signalToNoiseAt: Option[Wavelength]
   ): IO[GraphResult] =
     GraphResult(
@@ -74,8 +74,10 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
           )
         )
       ),
-      SignalToNoise.unsafeFromBigDecimalExact(1000.0),
-      SignalToNoise.fromInt(1001)
+      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
+      SignalToNoise.fromInt(1001).map(FinalSN.apply(_)),
+      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
+      SignalToNoise.fromInt(1002).map(SingleSN.apply(_))
     )
       .pure[IO]
 
@@ -95,7 +97,7 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     exposureTime:    NonNegDuration,
-    exposures:       PosLong,
+    exposures:       PosInt,
     signalToNoiseAt: Option[Wavelength]
   ): IO[GraphResult] =
     GraphResult(
@@ -124,7 +126,9 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
           )
         )
       ),
-      SignalToNoise.unsafeFromBigDecimalExact(1000.0),
-      SignalToNoise.fromInt(1001)
+      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1000.0)),
+      SignalToNoise.fromInt(1001).map(FinalSN.apply(_)),
+      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
+      SignalToNoise.fromInt(1002).map(SingleSN.apply(_))
     )
       .pure[IO]

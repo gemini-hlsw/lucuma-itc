@@ -12,7 +12,7 @@ val http4sVersion               = "0.23.19"
 val http4sJdkHttpClientVersion  = "0.9.1"
 val fs2Version                  = "3.7.0"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.77.1"
+val lucumaCoreVersion           = "0.76.0"
 val lucumaRefinedVersion        = "0.1.1"
 val slf4jVersion                = "2.0.7"
 val log4catsVersion             = "2.6.0"
@@ -36,7 +36,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.2.2"
 ThisBuild / crossScalaVersions  := Seq("3.2.2")
-ThisBuild / tlBaseVersion       := "0.13"
+ThisBuild / tlBaseVersion       := "0.15"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
