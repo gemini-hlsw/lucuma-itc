@@ -28,10 +28,12 @@ case class OptimizedChartResult(chartType: ChartType, series: List[OptimizedSeri
     derives Encoder.AsObject
 
 case class OptimizedSpectroscopyGraphResult(
-  serverVersion:       String,
-  dataVersion:         String,
-  ccds:                NonEmptyList[ItcCcd],
-  charts:              NonEmptyList[OptimizedChartResult],
-  peakSNRatio:         SignalToNoise,
-  atWavelengthSNRatio: Option[SignalToNoise]
+  serverVersion:             String,
+  dataVersion:               String,
+  ccds:                      NonEmptyList[ItcCcd],
+  charts:                    NonEmptyList[OptimizedChartResult],
+  peakFinalSNRatio:          FinalSN,
+  atWavelengthFinalSNRatio:  Option[FinalSN],
+  peakSingleSNRatio:         SingleSN,
+  atWavelengthSingleSNRatio: Option[SingleSN]
 ) derives Encoder.AsObject

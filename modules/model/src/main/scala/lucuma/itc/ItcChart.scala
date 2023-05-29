@@ -80,10 +80,12 @@ case class ItcChart(chartType: ChartType, series: List[ItcSeries]) derives Encod
 case class ItcChartGroup(charts: NonEmptyList[ItcChart]) derives Encoder.AsObject
 
 case class SpectroscopyGraphResult(
-  serverVersion:       String,
-  dataVersion:         String,
-  ccds:                NonEmptyList[ItcCcd],
-  charts:              NonEmptyList[ItcChart],
-  peakSNRatio:         SignalToNoise,
-  atWavelengthSNRatio: Option[SignalToNoise]
+  serverVersion:             String,
+  dataVersion:               String,
+  ccds:                      NonEmptyList[ItcCcd],
+  charts:                    NonEmptyList[ItcChart],
+  peakFinalSNRatio:          FinalSN,
+  atWavelengthFinalSNRatio:  Option[FinalSN],
+  peakSingleSNRatio:         SingleSN,
+  atWavelengthSingleSNRatio: Option[SingleSN]
 ) derives Encoder.AsObject

@@ -70,6 +70,8 @@ given Pickler[ItcChart]      = generatePickler
 given Pickler[ItcChartGroup] = generatePickler
 given Pickler[ItcWarning]    = generatePickler
 given Pickler[ItcCcd]        = generatePickler
+given Pickler[FinalSN]       = transformPickler((s: SignalToNoise) => FinalSN(s))(_.value)
+given Pickler[SingleSN]      = transformPickler((s: SignalToNoise) => SingleSN(s))(_.value)
 given Pickler[GraphResult]   = generatePickler
 
 given Pickler[IntegrationTime] = generatePickler

@@ -12,12 +12,14 @@ import lucuma.itc.*
 import lucuma.itc.encoders.given
 
 case class SpectroscopyIntegrationTimeAndGraphResult(
-  serverVersion:       String,
-  dataVersion:         String,
-  exposureTime:        TimeSpan,
-  exposures:           PosInt,
-  ccds:                NonEmptyList[ItcCcd],
-  charts:              NonEmptyList[OptimizedChartResult],
-  peakSNRatio:         SignalToNoise,
-  atWavelengthSNRatio: Option[SignalToNoise]
+  serverVersion:             String,
+  dataVersion:               String,
+  exposureTime:              TimeSpan,
+  exposures:                 PosInt,
+  ccds:                      NonEmptyList[ItcCcd],
+  charts:                    NonEmptyList[OptimizedChartResult],
+  peakFinalSNRatio:          FinalSN,
+  atWavelengthFinalSNRatio:  Option[FinalSN],
+  peakSingleSNRatio:         SingleSN,
+  atWavelengthSingleSNRatio: Option[SingleSN]
 ) derives Encoder.AsObject

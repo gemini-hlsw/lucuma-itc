@@ -18,10 +18,12 @@ import lucuma.itc.search.*
 import lucuma.itc.service.*
 
 case class GraphResult(
-  ccds:                NonEmptyList[ItcCcd],
-  charts:              NonEmptyList[ItcChartGroup],
-  peakSNRatio:         SignalToNoise,
-  atWavelengthSNRatio: Option[SignalToNoise]
+  ccds:                      NonEmptyList[ItcCcd],
+  charts:                    NonEmptyList[ItcChartGroup],
+  peakFinalSNRatio:          FinalSN,
+  atWavelengthFinalSNRatio:  Option[FinalSN],
+  peakSingleSNRatio:         SingleSN,
+  atWavelengthSingleSNRatio: Option[SingleSN]
 )
 
 object GraphResult:
@@ -103,18 +105,33 @@ object GraphResult:
             .flattenOption
         }
 
-    val maxTotalSNRatio = calculatedCCDs.map(_.maxTotalSNRatio).max
-    val peakSNRatio     = SignalToNoise.FromBigDecimalRounding
+    val maxTotalSNRatio   = calculatedCCDs.map(_.maxTotalSNRatio).max
+    val peakFinalSNRatio  = SignalToNoise.FromBigDecimalRounding
       .getOption(maxTotalSNRatio)
-      .getOrElse(throw UpstreamException("Peak SN ratio is not a number"))
-    val wvAtRatio       =
+      .getOrElse(throw UpstreamException("Peak Total SN is not a number"))
+    val maxSingleSNRatio  = calculatedCCDs.map(_.maxSingleSNRatio).max
+    val peakSingleSNRatio = SignalToNoise.FromBigDecimalRounding
+      .getOption(maxSingleSNRatio)
+      .getOrElse(throw UpstreamException("Peak Single SN is not a number"))
+
+    def wvAtRatio(seriesType: SeriesDataType) =
       charts
         .flatMap(_.charts)
         .filter(_.chartType === ChartType.S2NChart)
-        .map(c => valueAt(c, SeriesDataType.FinalS2NData))
+        .map(c => valueAt(c, seriesType))
         .collect { case Some(v) => v }
         .headOption
 
+    val wvAtFinalRatio  = wvAtRatio(SeriesDataType.FinalS2NData)
+    val wvAtSingleRatio = wvAtRatio(SeriesDataType.SingleS2NData)
+
     assert(calculatedCCDs.length === ccds.length)
-    GraphResult(NonEmptyList.fromListUnsafe(calculatedCCDs), charts, peakSNRatio, wvAtRatio)
+    GraphResult(
+      NonEmptyList.fromListUnsafe(calculatedCCDs),
+      charts,
+      FinalSN(peakFinalSNRatio),
+      wvAtFinalRatio.map(FinalSN.apply(_)),
+      SingleSN(peakSingleSNRatio),
+      wvAtSingleRatio.map(SingleSN.apply(_))
+    )
   }
