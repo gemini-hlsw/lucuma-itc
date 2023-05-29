@@ -72,6 +72,10 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
               xAxis: 4
             }
           }) {
+            peakFinalSNRatio
+            peakSingleSNRatio
+            atWavelengthFinalSNRatio
+            atWavelengthSingleSNRatio
             ccds {
               singleSNRatio
               totalSNRatio
@@ -99,6 +103,10 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
       json"""{
           "data": {
             "optimizedSpectroscopyGraph": {
+              "peakFinalSNRatio" : 1000.000,
+              "peakSingleSNRatio" : 1003.000,
+              "atWavelengthFinalSNRatio" : 1001.000,
+              "atWavelengthSingleSNRatio" : 1002.000,
               "ccds" : [
                 {
                   "singleSNRatio" : 1.0,

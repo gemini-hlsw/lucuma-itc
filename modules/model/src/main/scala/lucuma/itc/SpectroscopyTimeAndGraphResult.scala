@@ -26,14 +26,16 @@ import lucuma.itc.encoders.given
 import lucuma.itc.math.*
 
 case class SpectroscopyTimeAndGraphResult(
-  serverVersion:       String,
-  dataVersion:         String,
-  exposureTime:        TimeSpan,
-  exposures:           PosInt,
-  ccds:                NonEmptyList[ItcCcd],
-  charts:              NonEmptyList[ItcChart],
-  peakSNRatio:         SignalToNoise,
-  atWavelengthSNRatio: Option[SignalToNoise]
+  serverVersion:             String,
+  dataVersion:               String,
+  exposureTime:              TimeSpan,
+  exposures:                 PosInt,
+  ccds:                      NonEmptyList[ItcCcd],
+  charts:                    NonEmptyList[ItcChart],
+  peakFinalSNRatio:          SignalToNoise,
+  atWavelengthFinalSNRatio:  Option[SignalToNoise],
+  peakSingleSNRatio:         SignalToNoise,
+  atWavelengthSingleSNRatio: Option[SignalToNoise]
 ) derives Encoder.AsObject
 
 object SpectroscopyTimeAndGraphResult:
@@ -41,12 +43,15 @@ object SpectroscopyTimeAndGraphResult:
     exposureTime: TimeSpan,
     exposures:    PosInt,
     graph:        SpectroscopyGraphResult
-  ): SpectroscopyTimeAndGraphResult = SpectroscopyTimeAndGraphResult(graph.serverVersion,
-                                                                     graph.dataVersion,
-                                                                     exposureTime,
-                                                                     exposures,
-                                                                     graph.ccds,
-                                                                     graph.charts,
-                                                                     graph.peakSNRatio,
-                                                                     graph.atWavelengthSNRatio
+  ): SpectroscopyTimeAndGraphResult = SpectroscopyTimeAndGraphResult(
+    graph.serverVersion,
+    graph.dataVersion,
+    exposureTime,
+    exposures,
+    graph.ccds,
+    graph.charts,
+    graph.peakFinalSNRatio,
+    graph.atWavelengthFinalSNRatio,
+    graph.peakSingleSNRatio,
+    graph.atWavelengthSingleSNRatio
   )

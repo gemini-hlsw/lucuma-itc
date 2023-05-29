@@ -230,18 +230,34 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp, signalToNoiseAt)
         )(itc, redis)
           .map { r =>
-            val charts      =
+            val charts                                   =
               significantFigures.fold(r.charts)(v => r.charts.map(_.adjustSignificantFigures(v)))
-            val ccds        =
+            val ccds                                     =
               significantFigures.fold(r.ccds)(v => r.ccds.map(_.adjustSignificantFigures(v)))
-            val peakSNRatio =
-              significantFigures.fold(r.peakSNRatio)(r.peakSNRatio.adjustSignificantFigures)
+            val peakFinalSNRatio                         =
+              significantFigures.fold(r.peakFinalSNRatio)(
+                r.peakFinalSNRatio.adjustSignificantFigures
+              )
+            val peakSingleSNRatio                        =
+              significantFigures.fold(r.peakSingleSNRatio)(
+                r.peakSingleSNRatio.adjustSignificantFigures
+              )
+            val atWvFinalSNRatio: Option[SignalToNoise]  =
+              significantFigures.fold(r.atWavelengthFinalSNRatio)(s =>
+                r.atWavelengthFinalSNRatio.map(_.adjustSignificantFigures(s))
+              )
+            val atWvSingleSNRatio: Option[SignalToNoise] =
+              significantFigures.fold(r.atWavelengthSingleSNRatio)(s =>
+                r.atWavelengthSingleSNRatio.map(_.adjustSignificantFigures(s))
+              )
             SpectroscopyGraphResult(version(environment).value,
                                     BuildInfo.ocslibHash,
                                     ccds,
                                     charts.flatMap(_.charts),
-                                    r.peakSNRatio,
-                                    r.atWavelengthSNRatio
+                                    peakFinalSNRatio,
+                                    atWvFinalSNRatio,
+                                    peakSingleSNRatio,
+                                    atWvSingleSNRatio
             )
           }
       }

@@ -75,7 +75,9 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
         )
       ),
       SignalToNoise.unsafeFromBigDecimalExact(1000.0),
-      SignalToNoise.fromInt(1001)
+      SignalToNoise.fromInt(1001),
+      SignalToNoise.unsafeFromBigDecimalExact(1003.0),
+      SignalToNoise.fromInt(1002)
     )
       .pure[IO]
 
@@ -125,6 +127,8 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
         )
       ),
       SignalToNoise.unsafeFromBigDecimalExact(1000.0),
-      SignalToNoise.fromInt(1001)
+      SignalToNoise.fromInt(1001),
+      SignalToNoise.unsafeFromBigDecimalExact(1003.0),
+      SignalToNoise.fromInt(1002)
     )
       .pure[IO]
