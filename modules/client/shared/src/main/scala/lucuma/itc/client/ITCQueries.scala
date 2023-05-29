@@ -93,6 +93,10 @@ object SpectroscopyGraphQuery
       optimizedSpectroscopyGraph(input: $input) {
         serverVersion
         dataVersion
+        peakFinalSNRatio
+        atWavelengthFinalSNRatio
+        peakSingleSNRatio
+        atWavelengthSingleSNRatio
         ccds {
           singleSNRatio
           totalSNRatio
@@ -133,10 +137,6 @@ object SpectroscopyGraphQuery
             }
           }
         }
-        peakFinalSNRatio
-        atWavelengthFinalSNRatio
-        peakSingleSNRatio
-        atWavelengthSingleSNRatio
       }
     }
   """
@@ -164,6 +164,10 @@ object SpectroscopyIntegrationTimeAndGraphQuery
       spectroscopyIntegrationTimeAndGraph(input: $input) {
         serverVersion
         dataVersion
+        peakFinalSNRatio
+        atWavelengthFinalSNRatio
+        peakSingleSNRatio
+        atWavelengthSingleSNRatio
         exposureTime {
           microseconds
         }
@@ -208,10 +212,6 @@ object SpectroscopyIntegrationTimeAndGraphQuery
             }
           }
         }
-        peakFinalSNRatio
-        atWavelengthFinalSNRatio
-        peakSingleSNRatio
-        atWavelengthSingleSNRatio
       }
     }
   """

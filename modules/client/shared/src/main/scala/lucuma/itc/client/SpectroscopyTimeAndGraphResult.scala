@@ -18,8 +18,8 @@ case class SpectroscopyIntegrationTimeAndGraphResult(
   exposures:                 PosInt,
   ccds:                      NonEmptyList[ItcCcd],
   charts:                    NonEmptyList[OptimizedChartResult],
-  peakFinalSNRatio:          SignalToNoise,
-  atWavelengthFinalSNRatio:  Option[SignalToNoise],
-  peakSingleSNRatio:         SignalToNoise,
-  atWavelengthSingleSNRatio: Option[SignalToNoise]
+  peakFinalSNRatio:          FinalSN,
+  atWavelengthFinalSNRatio:  Option[FinalSN],
+  peakSingleSNRatio:         SingleSN,
+  atWavelengthSingleSNRatio: Option[SingleSN]
 ) derives Encoder.AsObject

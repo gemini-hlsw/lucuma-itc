@@ -74,10 +74,10 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
           )
         )
       ),
-      SignalToNoise.FromBigDecimalRounding.getOption(1009.0).get,
-      SignalToNoise.fromInt(1001),
-      SignalToNoise.unsafeFromBigDecimalExact(1003.0),
-      SignalToNoise.fromInt(1002)
+      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
+      SignalToNoise.fromInt(1001).map(FinalSN.apply(_)),
+      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
+      SignalToNoise.fromInt(1002).map(SingleSN.apply(_))
     )
       .pure[IO]
 
@@ -126,9 +126,9 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
           )
         )
       ),
-      SignalToNoise.unsafeFromBigDecimalExact(1000.0),
-      SignalToNoise.fromInt(1001),
-      SignalToNoise.unsafeFromBigDecimalExact(1003.0),
-      SignalToNoise.fromInt(1002)
+      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1000.0)),
+      SignalToNoise.fromInt(1001).map(FinalSN.apply(_)),
+      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
+      SignalToNoise.fromInt(1002).map(SingleSN.apply(_))
     )
       .pure[IO]

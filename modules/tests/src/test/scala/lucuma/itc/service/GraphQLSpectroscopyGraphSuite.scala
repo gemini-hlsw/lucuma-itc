@@ -103,7 +103,7 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
       json"""{
           "data": {
             "optimizedSpectroscopyGraph": {
-              "peakFinalSNRatio" : 1000.000,
+              "peakFinalSNRatio" : 1009.000,
               "peakSingleSNRatio" : 1003.000,
               "atWavelengthFinalSNRatio" : 1001.000,
               "atWavelengthSingleSNRatio" : 1002.000,

@@ -32,6 +32,7 @@ import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED.Galaxy
 import lucuma.core.util.TimeSpan
 import lucuma.itc.ChartType
+import lucuma.itc.FinalSN
 import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcAxis
 import lucuma.itc.ItcCcd
@@ -39,6 +40,7 @@ import lucuma.itc.ItcChart
 import lucuma.itc.ItcChartGroup
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
+import lucuma.itc.SingleSN
 import lucuma.itc.client.json.encoders.given
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
 import lucuma.refined.*
@@ -136,10 +138,10 @@ class WiringSuite extends ClientSuite {
             )
           )
         ),
-        SignalToNoise.unsafeFromBigDecimalExact(1009.0),
-        SignalToNoise.fromInt(1001),
-        SignalToNoise.unsafeFromBigDecimalExact(1003.0),
-        SignalToNoise.fromInt(1002)
+        FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
+        SignalToNoise.fromInt(1001).map(FinalSN(_)),
+        SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
+        SignalToNoise.fromInt(1002).map(SingleSN(_))
       ).asRight
     )
   }

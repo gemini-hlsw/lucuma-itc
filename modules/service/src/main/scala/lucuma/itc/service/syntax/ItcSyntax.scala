@@ -7,14 +7,18 @@ import cats.data._
 import edu.gemini.grackle.Problem
 import edu.gemini.grackle.Query.Environment
 import lucuma.core.math.SignalToNoise
+import lucuma.itc.FinalSN
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcChartGroup
 import lucuma.itc.ItcSeries
 import lucuma.itc.SignificantFigures
+import lucuma.itc.SingleSN
 import lucuma.itc.math.roundToSignificantFigures
 import monocle.Focus
 import monocle.std.these._
+
+import scala.annotation.targetName
 
 trait ItcSyntax:
 
@@ -64,6 +68,16 @@ trait ItcChartSyntax:
   extension (chart: ItcChart)
     def adjustSignificantFigures(figures: SignificantFigures): ItcChart =
       chart.copy(series = chart.series.map(_.adjustSignificantFigures(figures)))
+
+  extension (sn: FinalSN)
+    @targetName("finalAdjust")
+    def adjustSignificantFigures(figures: SignificantFigures): FinalSN =
+      FinalSN(sn.value.adjustSignificantFigures(figures))
+
+  extension (sn: SingleSN)
+    @targetName("finalSingle")
+    def adjustSignificantFigures(figures: SignificantFigures): SingleSN =
+      SingleSN(sn.value.adjustSignificantFigures(figures))
 
   extension (sn: SignalToNoise)
     def adjustSignificantFigures(figures: SignificantFigures): SignalToNoise =

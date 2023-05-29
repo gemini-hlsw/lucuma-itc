@@ -20,10 +20,10 @@ import lucuma.itc.service.*
 case class GraphResult(
   ccds:                      NonEmptyList[ItcCcd],
   charts:                    NonEmptyList[ItcChartGroup],
-  peakFinalSNRatio:          SignalToNoise,
-  atWavelengthFinalSNRatio:  Option[SignalToNoise],
-  peakSingleSNRatio:         SignalToNoise,
-  atWavelengthSingleSNRatio: Option[SignalToNoise]
+  peakFinalSNRatio:          FinalSN,
+  atWavelengthFinalSNRatio:  Option[FinalSN],
+  peakSingleSNRatio:         SingleSN,
+  atWavelengthSingleSNRatio: Option[SingleSN]
 )
 
 object GraphResult:
@@ -126,11 +126,12 @@ object GraphResult:
     val wvAtSingleRatio = wvAtRatio(SeriesDataType.SingleS2NData)
 
     assert(calculatedCCDs.length === ccds.length)
-    GraphResult(NonEmptyList.fromListUnsafe(calculatedCCDs),
-                charts,
-                peakFinalSNRatio,
-                wvAtFinalRatio,
-                peakSingleSNRatio,
-                wvAtSingleRatio
+    GraphResult(
+      NonEmptyList.fromListUnsafe(calculatedCCDs),
+      charts,
+      FinalSN(peakFinalSNRatio),
+      wvAtFinalRatio.map(FinalSN.apply(_)),
+      SingleSN(peakSingleSNRatio),
+      wvAtSingleRatio.map(SingleSN.apply(_))
     )
   }
