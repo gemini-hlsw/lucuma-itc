@@ -133,8 +133,10 @@ object SpectroscopyGraphQuery
             }
           }
         }
-        peakSNRatio
-        atWavelengthSNRatio
+        peakFinalSNRatio
+        atWavelengthFinalSNRatio
+        peakSingleSNRatio
+        atWavelengthSingleSNRatio
       }
     }
   """
@@ -206,8 +208,10 @@ object SpectroscopyIntegrationTimeAndGraphQuery
             }
           }
         }
-        peakSNRatio
-        atWavelengthSNRatio
+        peakFinalSNRatio
+        atWavelengthFinalSNRatio
+        peakSingleSNRatio
+        atWavelengthSingleSNRatio
       }
     }
   """

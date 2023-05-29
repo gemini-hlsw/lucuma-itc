@@ -74,7 +74,7 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
           )
         )
       ),
-      SignalToNoise.unsafeFromBigDecimalExact(1000.0),
+      SignalToNoise.FromBigDecimalRounding.getOption(1009.0).get,
       SignalToNoise.fromInt(1001),
       SignalToNoise.unsafeFromBigDecimalExact(1003.0),
       SignalToNoise.fromInt(1002)

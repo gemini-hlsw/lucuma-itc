@@ -129,15 +129,17 @@ class WiringSuite extends ClientSuite {
             List(
               OptimizedSeriesResult("title",
                                     SeriesDataType.FinalS2NData,
-                                    List(1000.0, 1000.0),
+                                    List(1000.0, 1001.0),
                                     ItcAxis(1, 2, 1, 2, 2).some,
-                                    ItcAxis(1000.0, 1000.0, 1000, 1000, 2).some
+                                    ItcAxis(1000.0, 1001.0, 1000, 1001, 2).some
               )
             )
           )
         ),
-        SignalToNoise.unsafeFromBigDecimalExact(1000.0),
-        SignalToNoise.fromInt(1001)
+        SignalToNoise.unsafeFromBigDecimalExact(1009.0),
+        SignalToNoise.fromInt(1001),
+        SignalToNoise.unsafeFromBigDecimalExact(1003.0),
+        SignalToNoise.fromInt(1002)
       ).asRight
     )
   }

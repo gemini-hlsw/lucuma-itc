@@ -43,15 +43,18 @@ object SpectroscopyTimeAndGraphResult:
     exposureTime: TimeSpan,
     exposures:    PosInt,
     graph:        SpectroscopyGraphResult
-  ): SpectroscopyTimeAndGraphResult = SpectroscopyTimeAndGraphResult(
-    graph.serverVersion,
-    graph.dataVersion,
-    exposureTime,
-    exposures,
-    graph.ccds,
-    graph.charts,
-    graph.peakFinalSNRatio,
-    graph.atWavelengthFinalSNRatio,
-    graph.peakSingleSNRatio,
-    graph.atWavelengthSingleSNRatio
-  )
+  ): SpectroscopyTimeAndGraphResult = {
+    println(graph)
+    SpectroscopyTimeAndGraphResult(
+      graph.serverVersion,
+      graph.dataVersion,
+      exposureTime,
+      exposures,
+      graph.ccds,
+      graph.charts,
+      graph.peakFinalSNRatio,
+      graph.atWavelengthFinalSNRatio,
+      graph.peakSingleSNRatio,
+      graph.atWavelengthSingleSNRatio
+    )
+  }
