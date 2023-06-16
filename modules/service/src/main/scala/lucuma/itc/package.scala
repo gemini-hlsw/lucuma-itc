@@ -19,7 +19,7 @@ import lucuma.itc.service.*
 
 import scala.concurrent.duration.FiniteDuration
 
-case class UpstreamException(msg: String) extends RuntimeException(msg)
+case class UpstreamException(msg: List[String]) extends RuntimeException(msg.mkString("\n"))
 
 enum SNResultType(val tag: String) derives Enumerated:
   case Success          extends SNResultType("success")

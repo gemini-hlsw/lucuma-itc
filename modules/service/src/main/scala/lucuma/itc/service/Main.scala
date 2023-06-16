@@ -56,6 +56,8 @@ object Main extends IOApp with ItcCacheOrRemote {
   val ServiceName     = "lucuma-itc"
   val DefaultCacheTTL = 6.hours
 
+  override protected def blockedThreadDetectionEnabled = true
+
   /** A startup action that prints a banner. */
   def banner[F[_]: Applicative: Logger](cfg: Config): F[Unit] =
     val banner =

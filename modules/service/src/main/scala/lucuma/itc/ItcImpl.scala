@@ -173,7 +173,7 @@ object ItcImpl {
                 r.pure[F]
               case Left(msg) =>
                 L.warn(s"Upstream error $msg") *>
-                  ApplicativeThrow[F].raiseError(new UpstreamException(msg.mkString("\n")))
+                  ApplicativeThrow[F].raiseError(new UpstreamException(msg))
             })
         }
 
@@ -203,7 +203,7 @@ object ItcImpl {
                 r.pure[F]
               case Left(msg) =>
                 L.warn(s"Upstream error $msg") *>
-                  ApplicativeThrow[F].raiseError(new UpstreamException(msg.mkString("\n")))
+                  ApplicativeThrow[F].raiseError(new UpstreamException(msg))
             })
         }
 
@@ -232,7 +232,7 @@ object ItcImpl {
               case Right(r)  => r.pure[F]
               case Left(msg) =>
                 L.warn(s"Upstream error $msg") *>
-                  ApplicativeThrow[F].raiseError(new UpstreamException(msg.mkString("\n")))
+                  ApplicativeThrow[F].raiseError(new UpstreamException(msg))
             })
         }
 
@@ -461,7 +461,7 @@ object ItcImpl {
                 r.pure[F]
               case Left(msg) =>
                 L.warn(s"Upstream error $msg") *>
-                  ApplicativeThrow[F].raiseError(new UpstreamException(msg.mkString("\n")))
+                  ApplicativeThrow[F].raiseError(new UpstreamException(msg))
             })
         }
 
