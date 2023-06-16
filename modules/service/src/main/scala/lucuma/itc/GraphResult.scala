@@ -108,11 +108,11 @@ object GraphResult:
     val maxTotalSNRatio   = calculatedCCDs.map(_.maxTotalSNRatio).max
     val peakFinalSNRatio  = SignalToNoise.FromBigDecimalRounding
       .getOption(maxTotalSNRatio)
-      .getOrElse(throw UpstreamException("Peak Total SN is not a number"))
+      .getOrElse(throw UpstreamException(List("Peak Total SN is not a number")))
     val maxSingleSNRatio  = calculatedCCDs.map(_.maxSingleSNRatio).max
     val peakSingleSNRatio = SignalToNoise.FromBigDecimalRounding
       .getOption(maxSingleSNRatio)
-      .getOrElse(throw UpstreamException("Peak Single SN is not a number"))
+      .getOrElse(throw UpstreamException(List("Peak Single SN is not a number")))
 
     def wvAtRatio(seriesType: SeriesDataType) =
       charts
