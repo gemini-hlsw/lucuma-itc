@@ -171,6 +171,8 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         .handleError {
           case x: IntegrationTimeError =>
             Problem(x.message).leftIorNec
+          case UpstreamException(msg)  =>
+            Problem(msg.mkString("\n")).leftIorNec
           case x                       =>
             Problem(s"Error calculating itc $x").leftIorNec
         }
@@ -265,6 +267,8 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         .handleError {
           case x: IntegrationTimeError =>
             Problem(x.message).leftIorNec
+          case UpstreamException(msg)  =>
+            Problem(msg.mkString("\n")).leftIorNec
           case x                       =>
             Problem(s"Error calculating itc $x").leftIorNec
         }
