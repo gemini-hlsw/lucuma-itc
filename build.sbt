@@ -7,7 +7,7 @@ val catsScalacheckVersion       = "0.3.2"
 val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.5"
 val cirisVersion                = "3.2.0"
-val clueVersion                 = "0.31.0"
+val clueVersion                 = "0.31.1"
 val http4sVersion               = "0.23.19"
 val http4sJdkHttpClientVersion  = "0.9.1"
 val fs2Version                  = "3.7.0"
@@ -36,7 +36,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.2.2"
 ThisBuild / crossScalaVersions  := Seq("3.2.2")
-ThisBuild / tlBaseVersion       := "0.15"
+ThisBuild / tlBaseVersion       := "0.16"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
