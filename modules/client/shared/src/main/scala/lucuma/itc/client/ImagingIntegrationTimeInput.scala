@@ -4,7 +4,6 @@
 package lucuma.itc.client
 
 import cats.Eq
-import eu.timepit.refined.cats.*
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*

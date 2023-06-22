@@ -5,19 +5,12 @@ package lucuma.itc
 
 import cats.data.NonEmptyList
 import cats.syntax.all.*
-import eu.timepit.refined.types.numeric.PosLong
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
-import lucuma.core.model.NonNegDuration
 import lucuma.core.util.Enumerated
 import lucuma.itc.encoders.given
-import lucuma.itc.legacy.ItcRemoteCcd
-import lucuma.itc.search.*
-import lucuma.itc.service.*
-
-import scala.concurrent.duration.FiniteDuration
 
 case class UpstreamException(msg: List[String]) extends RuntimeException(msg.mkString("\n"))
 

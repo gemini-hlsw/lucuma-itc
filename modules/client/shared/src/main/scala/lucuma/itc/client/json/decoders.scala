@@ -4,11 +4,9 @@
 package lucuma.itc.client.json
 
 import cats.syntax.either.*
-import cats.syntax.option.*
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.*
 import io.circe.generic.semiauto.*
-import io.circe.syntax.*
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.ItcCcd

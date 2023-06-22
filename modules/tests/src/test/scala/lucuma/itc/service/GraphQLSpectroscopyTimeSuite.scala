@@ -3,11 +3,10 @@
 
 package lucuma.itc.service
 
-import cats.syntax.all._
-import io.circe.literal._
-import lucuma.core.enums._
-import lucuma.core.syntax.enumerated._
-import lucuma.core.syntax.string._
+import cats.syntax.all.*
+import io.circe.literal.*
+import lucuma.core.enums.*
+import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcObservingConditions
 

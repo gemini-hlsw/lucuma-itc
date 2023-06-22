@@ -4,11 +4,8 @@
 package lucuma.itc.service
 
 import buildinfo.BuildInfo
-import cats._
-import cats.data._
-import cats.syntax.all._
 import eu.timepit.refined.types.string.NonEmptyString
-import lucuma.itc.service.config._
+import lucuma.itc.service.config.*
 
 import java.time.Instant
 import java.time.ZoneId

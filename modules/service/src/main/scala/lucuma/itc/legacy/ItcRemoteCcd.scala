@@ -4,7 +4,6 @@
 package lucuma.itc.legacy
 
 import io.circe.Decoder
-import io.circe.Encoder
 import lucuma.itc.ItcWarning
 
 case class ItcRemoteCcd(

@@ -8,18 +8,18 @@ val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.5"
 val cirisVersion                = "3.2.0"
 val clueVersion                 = "0.31.1"
-val http4sVersion               = "0.23.19"
+val http4sVersion               = "0.23.21"
 val http4sJdkHttpClientVersion  = "0.9.1"
 val fs2Version                  = "3.7.0"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.80.0"
-val lucumaRefinedVersion        = "0.1.1"
+val lucumaCoreVersion           = "0.80.1"
+val lucumaRefinedVersion        = "0.1.2"
 val slf4jVersion                = "2.0.7"
 val log4catsVersion             = "2.6.0"
 val monocleVersion              = "3.2.0"
 val munitCatsEffectVersion      = "1.0.7"
 val graphQLRoutesVersion        = "0.6.1"
-val refinedVersion              = "0.10.3"
+val refinedVersion              = "0.11.0"
 val grackleVersion              = "0.11.0"
 val natcchezHttp4sVersion       = "0.5.0"
 val natchezVersion              = "0.3.2"
@@ -34,8 +34,8 @@ val boopickleVersion            = "1.4.0"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / scalaVersion        := "3.2.2"
-ThisBuild / crossScalaVersions  := Seq("3.2.2")
+ThisBuild / scalaVersion        := "3.3.0"
+ThisBuild / crossScalaVersions  := Seq("3.3.0")
 ThisBuild / tlBaseVersion       := "0.16"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 

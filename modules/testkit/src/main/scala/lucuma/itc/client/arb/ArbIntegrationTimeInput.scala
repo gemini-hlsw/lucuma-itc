@@ -4,13 +4,11 @@
 package lucuma.itc.client
 package arb
 
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.enums.Band
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.math.arb.ArbRadialVelocity
-import lucuma.core.math.arb.ArbRefined
 import lucuma.core.math.arb.ArbSignalToNoise
 import lucuma.core.math.arb.ArbWavelength
 import lucuma.core.model.ConstraintSet
@@ -27,7 +25,6 @@ trait ArbIntegrationTimeInput {
   import ArbEnumerated.*
   import ArbInstrumentMode.given
   import ArbRadialVelocity.*
-  import ArbRefined.given
   import ArbSignalToNoise.given
   import ArbSourceProfile.given
   import ArbWavelength.*

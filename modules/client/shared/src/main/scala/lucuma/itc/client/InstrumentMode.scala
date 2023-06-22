@@ -14,10 +14,8 @@ import io.circe.HCursor
 import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.enums.GmosNorthFilter
-import lucuma.core.enums.GmosNorthFpu
 import lucuma.core.enums.GmosNorthGrating
 import lucuma.core.enums.GmosSouthFilter
-import lucuma.core.enums.GmosSouthFpu
 import lucuma.core.enums.GmosSouthGrating
 import lucuma.itc.client.json.syntax.*
 import monocle.Prism
