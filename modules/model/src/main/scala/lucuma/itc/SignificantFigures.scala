@@ -4,10 +4,10 @@
 package lucuma.itc
 
 import eu.timepit.refined.types.numeric.PosInt
-import io.circe._
-import io.circe.refined._
+import io.circe.*
+import io.circe.refined.*
 
-import scala.math._
+import scala.math.*
 
 case class SignificantFigures(xAxis: Option[PosInt], yAxis: Option[PosInt], ccd: Option[PosInt])
     derives Encoder.AsObject,

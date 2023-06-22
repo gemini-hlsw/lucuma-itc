@@ -5,19 +5,10 @@ package lucuma.itc
 
 import cats.Hash
 import cats.derived.*
-import eu.timepit.refined.types.numeric.PosInt
-import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.*
-import io.circe.generic.semiauto.*
-import io.circe.syntax.*
 import lucuma.core.enums.*
-import lucuma.core.math.Wavelength
 import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
 import lucuma.itc.search.*
-import lucuma.itc.search.hashes.*
-
-import java.math.RoundingMode
-import scala.concurrent.duration.FiniteDuration
 
 sealed trait SpectroscopyParams
 

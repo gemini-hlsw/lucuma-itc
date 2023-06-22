@@ -31,8 +31,9 @@ case class LocalItc(classLoader: ClassLoader):
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculateExposureTime", classOf[String])
 
-  private val LegacyRight = """Right\((.*)\)""".r
-  private val LegacyLeft  = """Left\((.*?):(?s)(.*)?\)?""".r
+  private val LegacyRight    = """Right\((.*)\)""".r
+  private val LegacyLeft     = """Left\(([\s\S]*?)\)""".r
+  private val LegacyLeftList = """Left\(List\(([\s\S]*?)\)\)""".r
 
   /**
    * This method does a call to the method ItcCalculation.calculation via reflection. This is done
@@ -71,11 +72,13 @@ case class LocalItc(classLoader: ClassLoader):
       .asInstanceOf[String]
 
     res match
-      case LegacyRight(result)          =>
+      case LegacyRight(result)    =>
         decode[legacy.ExposureTimeRemoteResult](result).leftMap { e =>
           List(e.getMessage())
         }
-      case LegacyLeft(result1, result2) =>
-        Left(List(result1, result2))
-      case m                            =>
+      case LegacyLeft(result)     =>
+        Left(result.split("\n").toList)
+      case LegacyLeftList(result) =>
+        Left(result.split("\n").toList)
+      case m                      =>
         Left(List(m))

@@ -6,7 +6,6 @@ package lucuma.itc.client
 import cats.Eq
 import cats.syntax.eq.*
 import io.circe.Decoder
-import io.circe.DecodingFailure
 import io.circe.Encoder
 import io.circe.HCursor
 import io.circe.Json

@@ -15,11 +15,7 @@ import edu.gemini.grackle.circe.CirceMapping
 import eu.timepit.refined.*
 import eu.timepit.refined.numeric.NonNegative
 import eu.timepit.refined.numeric.Positive
-import eu.timepit.refined.types.numeric.NonNegInt
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
-import eu.timepit.refined.types.string.NonEmptyString
-import io.circe.syntax.*
 import lucuma.core.enums.*
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.SignalToNoise
@@ -31,7 +27,6 @@ import lucuma.itc.ItcVersions
 import lucuma.itc.SpectroscopyGraphResult
 import lucuma.itc.*
 import lucuma.itc.encoders.given
-import lucuma.itc.search.ItcObservationDetails
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.search.hashes.given
@@ -41,7 +36,6 @@ import natchez.Trace
 import org.typelevel.log4cats.Logger
 
 import java.time.Duration
-import scala.concurrent.duration.*
 import scala.io.Source
 import scala.util.Using
 
@@ -171,6 +165,8 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         .handleError {
           case x: IntegrationTimeError =>
             Problem(x.message).leftIorNec
+          case UpstreamException(msg)  =>
+            Problem(msg.mkString("\n")).leftIorNec
           case x                       =>
             Problem(s"Error calculating itc $x").leftIorNec
         }
@@ -265,6 +261,8 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
         .handleError {
           case x: IntegrationTimeError =>
             Problem(x.message).leftIorNec
+          case UpstreamException(msg)  =>
+            Problem(msg.mkString("\n")).leftIorNec
           case x                       =>
             Problem(s"Error calculating itc $x").leftIorNec
         }
@@ -291,15 +289,13 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
       Logger[F].info(
         s"ITC sn calculation for $mode, conditions $c, exposureTime $expTime x $exp and profile $sp"
       ) *> {
-        val significantFigures = env.get[SignificantFigures]("significantFigures")
-        val signalToNoiseAt    = env.get[Wavelength]("signalToNoiseAt")
-        val specMode           = mode match {
+        val signalToNoiseAt = env.get[Wavelength]("signalToNoiseAt")
+        val specMode        = mode match {
           case GmosNSpectroscopyParams(grating, fpu, filter) =>
             ObservingMode.SpectroscopyMode.GmosNorth(wv, grating, fpu, filter)
           case GmosSSpectroscopyParams(grating, fpu, filter) =>
             ObservingMode.SpectroscopyMode.GmosSouth(wv, grating, fpu, filter)
         }
-        import io.circe.syntax.*
 
         graphFromCacheOrRemote(
           GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp, signalToNoiseAt)

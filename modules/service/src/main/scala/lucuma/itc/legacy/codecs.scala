@@ -25,14 +25,12 @@ import lucuma.itc.ItcChartGroup
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
-import lucuma.itc.legacy.ItcRemoteCcd
 import lucuma.itc.legacy.syntax.all.*
 import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
 import lucuma.itc.search.*
 import lucuma.itc.syntax.all.given
 
 import java.math.MathContext
-import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
 
 ////////////////////////////////////////////////////////////

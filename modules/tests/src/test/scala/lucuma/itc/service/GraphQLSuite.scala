@@ -3,27 +3,18 @@
 
 package lucuma.itc.service
 
-import cats.Applicative
-import cats.ApplicativeThrow
-import cats.data.NonEmptyList
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
 import io.circe.Json
-import io.circe.parser._
-import lucuma.core.math.Wavelength
+import io.circe.parser.*
 import lucuma.itc.Itc
 import lucuma.itc.tests.FailingMockItc
 import lucuma.itc.tests.MockItc
-import lucuma.itc.tests.NoOpRedis
 import natchez.Trace.Implicits.noop
-import org.http4s._
-import org.http4s.circe._
-import org.http4s.syntax.all._
+import org.http4s.*
+import org.http4s.circe.*
+import org.http4s.syntax.all.*
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
-
-import java.time.Duration
-import scala.concurrent.duration._
 
 trait GraphQLSuiteBase extends munit.CatsEffectSuite:
   given Logger[IO] = Slf4jLogger.getLogger[IO]

@@ -3,22 +3,12 @@
 
 package lucuma.itc.client
 
-import cats.Applicative
-import cats.ApplicativeError
 import cats.effect.Async
-import cats.effect.Ref
-import cats.effect.Resource
-import cats.syntax.applicativeError.*
-import cats.syntax.apply.*
-import cats.syntax.either.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
-import cats.syntax.option.*
 import clue.http4s.Http4sHttpBackend
 import clue.http4s.Http4sHttpClient
 import io.circe.syntax.*
-import lucuma.core.model.Observation
-import lucuma.itc.client.OptimizedSpectroscopyGraphResult
 import org.http4s.Uri
 import org.http4s.client.Client
 import org.typelevel.log4cats.Logger

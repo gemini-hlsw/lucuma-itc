@@ -6,7 +6,6 @@ package lucuma.itc.legacy
 import cats.data.NonEmptyList
 import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.PosInt
-import io.circe.Decoder
 import lucuma.core.math.SignalToNoise
 import lucuma.itc.ItcChartGroup
 

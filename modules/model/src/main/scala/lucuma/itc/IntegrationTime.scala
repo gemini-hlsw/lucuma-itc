@@ -11,6 +11,7 @@ import io.circe.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.TimeSpan
 import lucuma.itc.encoders.given
+import spire.implicits.*
 
 import java.math.MathContext
 
@@ -27,6 +28,6 @@ extension (signalToNoise: SignalToNoise)
       BigDecimal(
         (signalToNoise.toBigDecimal * signalToNoise.toBigDecimal / exposures.value)
           .underlying()
-          .sqrt(MathContext.DECIMAL128)
       )
+        .sqrt(MathContext.DECIMAL128)
     )

@@ -5,10 +5,8 @@ package lucuma.itc
 
 import cats.Eq
 import cats.derived.*
-import io.circe.Decoder
 import io.circe.Encoder
 import lucuma.core.math.Wavelength
-import lucuma.itc.ItcWarning
 import lucuma.itc.encoders.given
 
 case class ItcCcd(
