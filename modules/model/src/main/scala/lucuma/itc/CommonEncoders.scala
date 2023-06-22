@@ -5,8 +5,6 @@ package lucuma.itc
 
 import cats.data.NonEmptyList
 import coulomb.*
-import coulomb.policy.spire.standard.given
-import coulomb.syntax.*
 import coulomb.units.si.prefixes.*
 import coulomb.units.time.*
 import eu.timepit.refined.types.numeric.PosInt
@@ -17,8 +15,6 @@ import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
-
-import java.math.RoundingMode
 
 type Nanosecond  = Nano * Second
 type Microsecond = Micro * Second

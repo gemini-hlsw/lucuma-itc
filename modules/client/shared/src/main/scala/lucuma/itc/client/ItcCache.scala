@@ -3,17 +3,9 @@
 
 package lucuma.itc.client
 
-import cats.Applicative
-import cats.Monad
 import cats.effect.Ref
-import cats.effect.Resource
 import cats.effect.Sync
-import cats.effect.std.Semaphore
 import cats.syntax.all.*
-
-import java.time.Duration
-import java.time.Instant
-import scala.util.Try
 
 trait ItcCache[F[_], K, V] {
 

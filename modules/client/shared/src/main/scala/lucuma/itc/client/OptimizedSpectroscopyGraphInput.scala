@@ -12,12 +12,9 @@ import io.circe.JsonObject
 import io.circe.syntax.*
 import lucuma.core.enums.Band
 import lucuma.core.math.RadialVelocity
-import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.ConstraintSet
-import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
-import lucuma.core.model.given
 import lucuma.core.util.TimeSpan
 import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*

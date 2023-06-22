@@ -6,40 +6,27 @@ package lucuma.itc
 import algebra.instances.all.given
 import cats.*
 import cats.data.NonEmptyList
-import cats.effect.*
 import cats.syntax.all.*
 import coulomb.*
-import coulomb.ops.algebra.spire.all.given
 import coulomb.policy.spire.standard.given
 import coulomb.syntax.*
 import coulomb.units.si.*
-import coulomb.units.si.given
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.refineV
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosInt
-import io.circe.Decoder
 import io.circe.syntax.*
-import lucuma.core.math.Angle
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.core.util.TimeSpan
-import lucuma.itc.Itc
 import lucuma.itc.legacy.LocalItc
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
-import lucuma.itc.service.*
 import lucuma.refined.*
 import natchez.Trace
-import natchez.http4s.NatchezMiddleware
-import org.http4s.*
-import org.http4s.circe.*
-import org.http4s.dsl.io.*
-import org.http4s.syntax.all.*
 import org.typelevel.log4cats.Logger
 
-import java.time.Duration
 import scala.concurrent.duration.*
 import scala.math.*
 
@@ -358,7 +345,6 @@ object ItcImpl {
                     s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} halfWellTime: $halfWellTime"
                   ) *> {
                     if (halfWellTime < 1.0) {
-                      val msg = s"Target is too bright. Well half filled in $halfWellTime"
                       MonadThrow[F].raiseError(SourceTooBright(halfWellTime))
                     } else {
                       val maxTime = startExpTime.value.min(halfWellTime)

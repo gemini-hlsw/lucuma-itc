@@ -6,9 +6,7 @@ package lucuma.itc.client
 import cats.Eq
 import cats.data.NonEmptyList
 import cats.syntax.eq.*
-import cats.syntax.traverse.*
 import io.circe.Decoder
-import io.circe.DecodingFailure
 import io.circe.HCursor
 import lucuma.itc.IntegrationTime
 

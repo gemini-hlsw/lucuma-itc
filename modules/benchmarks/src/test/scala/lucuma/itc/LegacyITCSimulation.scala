@@ -7,7 +7,6 @@ import cats.implicits.*
 import coulomb.*
 import coulomb.syntax.*
 import coulomb.units.si.*
-import eu.timepit.refined.auto.*
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import io.gatling.core.Predef.*
