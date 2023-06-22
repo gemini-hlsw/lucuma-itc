@@ -5,8 +5,6 @@ package lucuma.itc.client
 
 import cats.Eq
 import cats.syntax.either.*
-import cats.syntax.eq.*
-import cats.syntax.option.*
 import io.circe.Decoder
 import io.circe.DecodingFailure
 import io.circe.Encoder

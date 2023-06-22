@@ -3,11 +3,9 @@
 
 package lucuma.itc
 
-import cats.data.NonEmptyList
 import io.circe.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.NewType
-import lucuma.itc.encoders.given
 
 case class ItcVersions(
   serverVersion: String,

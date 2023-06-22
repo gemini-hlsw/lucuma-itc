@@ -4,7 +4,6 @@
 package lucuma.itc.client
 
 import cats.Eq
-import eu.timepit.refined.cats.*
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.Encoder
 import io.circe.Json
@@ -15,9 +14,7 @@ import lucuma.core.math.RadialVelocity
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.ConstraintSet
-import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
-import lucuma.core.model.given
 import lucuma.core.util.TimeSpan
 import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*

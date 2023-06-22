@@ -6,26 +6,16 @@ package lucuma.itc.service
 import algebra.instances.all.given
 import cats.*
 import cats.data.*
-import cats.effect.*
 import cats.syntax.all.*
 import coulomb.*
-import coulomb.ops.algebra.spire.all.given
 import coulomb.policy.spire.standard.given
 import coulomb.syntax.*
 import coulomb.units.si.*
-import coulomb.units.si.given
 import coulomb.units.si.prefixes.*
-import coulomb.units.time.*
 import edu.gemini.grackle.*
-import edu.gemini.grackle.circe.CirceMapping
 import eu.timepit.refined.*
 import eu.timepit.refined.numeric.Positive
-import eu.timepit.refined.types.numeric.NonNegInt
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
-import eu.timepit.refined.types.string.NonEmptyString
-import io.circe.Encoder
-import io.circe.Json
 import lucuma.core.enums.*
 import lucuma.core.math.Angle
 import lucuma.core.math.BrightnessUnits.*
@@ -46,32 +36,15 @@ import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
 import lucuma.core.util.Of
 import lucuma.itc.*
-import lucuma.itc.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
-import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.ObservingMode.SpectroscopyMode.GmosNorth
-import lucuma.itc.search.ObservingMode.SpectroscopyMode.GmosSouth
-import lucuma.itc.search.TargetProfile
-import lucuma.itc.service.config.*
 import lucuma.itc.service.syntax.all.*
-import natchez.Trace
-import org.typelevel.log4cats.Logger
 
-import java.math.RoundingMode
 import java.time.Duration
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 import scala.collection.immutable.SortedMap
-import scala.concurrent.duration.*
-import scala.io.Source
-import scala.util.Using
 
 import Query.*
 import Value.*
-import QueryCompiler.*
 
 trait GrackleParsers:
   def bigDecimalValue(v: Value): Option[BigDecimal] =

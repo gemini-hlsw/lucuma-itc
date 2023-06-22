@@ -7,8 +7,6 @@ import buildinfo.BuildInfo
 import cats.data.NonEmptyList
 import cats.syntax.either.*
 import cats.syntax.option.*
-import eu.timepit.refined.auto.*
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.enums.Band
@@ -18,7 +16,6 @@ import lucuma.core.enums.GmosNorthFilter
 import lucuma.core.enums.GmosNorthFpu
 import lucuma.core.enums.GmosNorthGrating
 import lucuma.core.enums.ImageQuality
-import lucuma.core.enums.Instrument
 import lucuma.core.enums.SkyBackground
 import lucuma.core.enums.WaterVapor
 import lucuma.core.math.BrightnessUnits.Integrated
@@ -36,9 +33,6 @@ import lucuma.itc.FinalSN
 import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcAxis
 import lucuma.itc.ItcCcd
-import lucuma.itc.ItcChart
-import lucuma.itc.ItcChartGroup
-import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
 import lucuma.itc.SingleSN
 import lucuma.itc.client.json.encoders.given
@@ -96,7 +90,6 @@ class WiringSuite extends ClientSuite {
   }
 
   test("SignalToNoiseAt non-null is included") {
-    import lucuma.itc.client.json.given
     WiringSuite.SpectroscopyInput
       .copy(signalToNoiseAt = Wavelength.Min.some)
       .asJson

@@ -8,9 +8,9 @@ import cats.Applicative
 import cats.Functor
 import cats.Parallel
 import cats.data.Kleisli
-import cats.effect._
-import cats.syntax.all._
-import com.comcast.ip4s._
+import cats.effect.*
+import cats.syntax.all.*
+import com.comcast.ip4s.*
 import dev.profunktor.redis4cats.Redis
 import dev.profunktor.redis4cats.data.RedisCodec
 import dev.profunktor.redis4cats.log4cats.*
@@ -20,25 +20,23 @@ import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
 import lucuma.itc.legacy.LocalItc
-import lucuma.itc.service.config.ExecutionEnvironment._
-import lucuma.itc.service.config._
+import lucuma.itc.service.config.ExecutionEnvironment.*
+import lucuma.itc.service.config.*
 import natchez.EntryPoint
 import natchez.Trace
 import natchez.honeycomb.Honeycomb
 import natchez.http4s.NatchezMiddleware
-import natchez.http4s.implicits._
+import natchez.http4s.implicits.*
 import natchez.log.Log
 import org.http4s.HttpApp
-import org.http4s._
+import org.http4s.*
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.headers.`Cache-Control`
-import org.http4s.implicits._
+import org.http4s.implicits.*
 import org.http4s.server.Server
 import org.http4s.server.middleware.CORS
 import org.http4s.server.middleware.CORSPolicy
 import org.http4s.server.middleware.GZip
-import org.http4s.server.middleware.{Logger => Http4sLogger}
-import org.http4s.server.staticcontent._
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
@@ -47,8 +45,7 @@ import java.io.File
 import java.io.FileFilter
 import java.net.URL
 import java.net.URLClassLoader
-import java.nio.file.Files
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.util.Try
 
 // #server

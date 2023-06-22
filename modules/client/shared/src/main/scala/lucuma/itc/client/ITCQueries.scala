@@ -3,14 +3,12 @@
 
 package lucuma.itc.client
 
-import cats.syntax.traverse.*
 import clue.GraphQLOperation
 import io.circe.Decoder
 import io.circe.Encoder
 import io.circe.HCursor
 import io.circe.Json
 import io.circe.JsonObject
-import lucuma.itc.client.OptimizedSpectroscopyGraphResult
 import lucuma.itc.client.json.decoders.given
 
 object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {

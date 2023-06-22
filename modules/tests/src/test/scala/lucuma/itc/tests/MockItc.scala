@@ -25,8 +25,6 @@ import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
 import lucuma.refined.*
 
-import scala.concurrent.duration._
-
 object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
   override def calculateIntegrationTime(

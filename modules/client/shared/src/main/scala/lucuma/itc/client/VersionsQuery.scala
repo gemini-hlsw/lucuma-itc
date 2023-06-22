@@ -3,12 +3,10 @@
 
 package lucuma.itc.client
 
-import cats.syntax.traverse.*
 import clue.GraphQLOperation
 import io.circe.Decoder
 import io.circe.Encoder
 import io.circe.HCursor
-import io.circe.Json
 
 object VersionsQuery extends GraphQLOperation[Unit] {
 
