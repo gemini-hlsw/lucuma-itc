@@ -12,7 +12,7 @@ val http4sVersion               = "0.23.21"
 val http4sJdkHttpClientVersion  = "0.9.1"
 val fs2Version                  = "3.7.0"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.80.1"
+val lucumaCoreVersion           = "0.80.2"
 val lucumaRefinedVersion        = "0.1.2"
 val slf4jVersion                = "2.0.7"
 val log4catsVersion             = "2.6.0"
@@ -77,11 +77,13 @@ lazy val model = crossProject(JVMPlatform, JSPlatform)
   .settings(
     name := "lucuma-itc",
     libraryDependencies ++= Seq(
-      "org.typelevel" %%% "cats-core"    % catsVersion,
-      "edu.gemini"    %%% "lucuma-core"  % lucumaCoreVersion,
-      "eu.timepit"    %%% "refined"      % refinedVersion,
-      "eu.timepit"    %%% "refined-cats" % refinedVersion,
-      "org.typelevel" %%% "kittens"      % kittensVersion
+      "io.circe"      %%% "circe-generic" % circeVersion,
+      "io.circe"      %%% "circe-refined" % circeVersion,
+      "org.typelevel" %%% "cats-core"     % catsVersion,
+      "edu.gemini"    %%% "lucuma-core"   % lucumaCoreVersion,
+      "eu.timepit"    %%% "refined"       % refinedVersion,
+      "eu.timepit"    %%% "refined-cats"  % refinedVersion,
+      "org.typelevel" %%% "kittens"       % kittensVersion
     )
   )
 
