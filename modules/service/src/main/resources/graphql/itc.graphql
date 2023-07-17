@@ -7365,7 +7365,7 @@ input OptimizedSpectroscopyGraphInput {
   signalToNoiseAt: WavelengthInput
 
   # Exposure time duration
-  exposureTime: NonNegDurationInput!
+  exposureTime: TimeSpanInput!
 
   # Exposures
   exposures: PosInt!
