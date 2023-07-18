@@ -7175,7 +7175,7 @@ type ObservingModeSpectroscopy {
   params: InstrumentITCParams!
 
   # instrument
-  instrument: InstrumentType
+  instrument: Instrument
 }
 
 type ItcVersions {
@@ -7450,7 +7450,7 @@ type IntegrationTimeCalculationResult {
 
 interface ITCObservingMode {
   # instrument
-  instrument: InstrumentType
+  instrument: Instrument
 }
 
 type ImagingMode implements ITCObservingMode {
@@ -7458,7 +7458,7 @@ type ImagingMode implements ITCObservingMode {
   wavelength: Wavelength!
 
   # instrument
-  instrument: InstrumentType
+  instrument: Instrument
 
   # params
   params: InstrumentITCParams!
@@ -7476,7 +7476,7 @@ type SpectroscopyMode implements ITCObservingMode {
   params: InstrumentITCParams!
 
   # instrument
-  instrument: InstrumentType
+  instrument: Instrument
 }
 
 """Chart data types"""

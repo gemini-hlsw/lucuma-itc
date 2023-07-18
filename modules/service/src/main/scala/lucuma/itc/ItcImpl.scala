@@ -18,11 +18,10 @@ import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
-import lucuma.core.model.NonNegDuration
-import lucuma.core.util.TimeSpan
 import lucuma.itc.legacy.LocalItc
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
+import lucuma.core.util.TimeSpan
 import lucuma.refined.*
 import natchez.Trace
 import org.typelevel.log4cats.Logger
@@ -112,7 +111,7 @@ object ItcImpl {
         targetProfile:   TargetProfile,
         observingMode:   ObservingMode,
         constraints:     ItcObservingConditions,
-        exposureTime:    NonNegDuration,
+        exposureTime:    TimeSpan,
         exposures:       PosInt,
         signalToNoiseAt: Option[Wavelength]
       ): F[GraphResult] =
@@ -122,7 +121,7 @@ object ItcImpl {
               targetProfile,
               observingMode,
               constraints,
-              BigDecimal(exposureTime.value.toMillis).withUnit[Millisecond].toUnit[Second],
+              exposureTime.toMilliseconds.withUnit[Millisecond].toUnit[Second],
               exposures.value,
               signalToNoiseAt
             )

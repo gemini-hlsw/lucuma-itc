@@ -34,7 +34,7 @@ object OptimizedSpectroscopyGraphInput {
     ObjectFieldsBinding.rmap {
       case List(
             WavelengthInput.Binding("wavelength", wavelength),
-            WavelengthInput.Binding.Option("signalToNoiseAt", signalToNoiseAt),
+            WavelengthInput.Binding.Option("signaToNoiseAt", signalToNoiseAt),
             TimeSpanInput.Binding("exposureTime", exposureTime),
             PosIntBinding("exposures", exposures),
             SourceProfileInput.CreateBinding("sourceProfile", sourceProfile),
