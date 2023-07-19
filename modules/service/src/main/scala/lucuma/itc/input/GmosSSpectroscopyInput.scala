@@ -4,12 +4,12 @@
 package lucuma.itc.input
 
 import cats.syntax.parallel.*
+import lucuma.core.enums.GmosSouthFilter
+import lucuma.core.enums.GmosSouthFpu
+import lucuma.core.enums.GmosSouthGrating
+import lucuma.core.model.sequence.gmos.GmosFpuMask
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
-import lucuma.core.enums.GmosSouthGrating
-import lucuma.core.enums.GmosSouthFpu
-import lucuma.core.enums.GmosSouthFilter
-import lucuma.core.model.sequence.gmos.GmosFpuMask
 
 case class GmosSSpectroscopyInput(
   grating: GmosSouthGrating,

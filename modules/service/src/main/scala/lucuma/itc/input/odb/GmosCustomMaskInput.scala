@@ -15,14 +15,15 @@ object GmosCustomMaskInput {
   val Binding: Matcher[Custom] =
     ObjectFieldsBinding.rmap {
       case List(
-        StringBinding("filename", rFilename),
-        GmosCustomSlitWidthBinding("slitWidth", rSlitWidth)
-      ) => (rFilename, rSlitWidth).parTupled.flatMap { (filename, slitWidth) =>
-        NonEmptyString.from(filename) match {
-          case Left(_)  => Result.failure("The GMOS custom FPU mask 'filename' cannot be empty.")
-          case Right(n) => Result(Custom(n, slitWidth))
+            StringBinding("filename", rFilename),
+            GmosCustomSlitWidthBinding("slitWidth", rSlitWidth)
+          ) =>
+        (rFilename, rSlitWidth).parTupled.flatMap { (filename, slitWidth) =>
+          NonEmptyString.from(filename) match {
+            case Left(_)  => Result.failure("The GMOS custom FPU mask 'filename' cannot be empty.")
+            case Right(n) => Result(Custom(n, slitWidth))
+          }
         }
-      }
     }
 
 }

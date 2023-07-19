@@ -27,8 +27,7 @@ final case class HourAngleRangeInput(
 
   def create: Result[HourAngle] =
     Result.fromOption(
-      (minHours, maxHours)
-        .tupled
+      (minHours, maxHours).tupled
         .flatMap(HourAngle.fromOrderedDecimalHours.getOption),
       HourAngleRangeInput.messages.BothMinAndMax
     )
@@ -56,9 +55,10 @@ object HourAngleRangeInput {
   val Binding: Matcher[HourAngleRangeInput] =
     ObjectFieldsBinding.rmap {
       case List(
-        HourAngleDecimalHour.Option("minHours", rMin),
-        HourAngleDecimalHour.Option("maxHours", rMax)
-      ) => (rMin, rMax).parMapN(HourAngleRangeInput(_, _))
+            HourAngleDecimalHour.Option("minHours", rMin),
+            HourAngleDecimalHour.Option("maxHours", rMax)
+          ) =>
+        (rMin, rMax).parMapN(HourAngleRangeInput(_, _))
     }
 
 }

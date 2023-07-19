@@ -30,10 +30,10 @@ object FluxDensityContinuumInput {
   ): Matcher[FluxDensityContinuumMeasure[A]] =
     ObjectFieldsBinding.rmap {
       case List(
-        FluxDensityContinuumBinding("value", rValue),
-        unitsBinding("units", rUnits),
-        FluxDensityContinuumBinding.Option("error", rError),
-      ) =>
+            FluxDensityContinuumBinding("value", rValue),
+            unitsBinding("units", rUnits),
+            FluxDensityContinuumBinding.Option("error", rError)
+          ) =>
         (rUnits, rValue, rError).mapN(_.withValueTagged(_, _))
     }
 

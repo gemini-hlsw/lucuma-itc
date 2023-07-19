@@ -31,16 +31,17 @@ object BandBrightnessInput {
   ): Matcher[(Band, BrightnessMeasure[A])] =
     ObjectFieldsBinding.rmap {
       case List(
-        BandBinding("band", rBand),
-        BrightnessValueBinding.Option("value", rValue),
-        unitsBinding.Option("units", rUnits),
-        BrightnessValueBinding.Option("error", rError)
-      ) => (rBand, rValue, rUnits, rError).parTupled.flatMap {
-        case (band, Some(value), Some(units), error) =>
-          Result((band, units.withValueTagged(value, error)))
-        case _ =>
-          Result.failure(s"Both value and units are required on creation.")
-      }
+            BandBinding("band", rBand),
+            BrightnessValueBinding.Option("value", rValue),
+            unitsBinding.Option("units", rUnits),
+            BrightnessValueBinding.Option("error", rError)
+          ) =>
+        (rBand, rValue, rUnits, rError).parTupled.flatMap {
+          case (band, Some(value), Some(units), error) =>
+            Result((band, units.withValueTagged(value, error)))
+          case _                                       =>
+            Result.failure(s"Both value and units are required on creation.")
+        }
     }
 
 }

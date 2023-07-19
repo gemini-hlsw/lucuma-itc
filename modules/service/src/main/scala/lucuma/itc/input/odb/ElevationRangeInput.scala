@@ -41,12 +41,14 @@ object ElevationRangeInput {
   val Binding: Matcher[ElevationRangeInput] =
     ObjectFieldsBinding.rmap {
       case List(
-        AirMassRangeInput.Binding.Option("airMass", rAir),
-        HourAngleRangeInput.Binding.Option("hourAngle", rHour)
-      ) => (rAir, rHour).parMapN(ElevationRangeInput(_, _)).flatMap {
-        case ElevationRangeInput(Some(_), Some(_)) => Result.failure[ElevationRangeInput](messages.OnlyOneDefinition)
-        case other                                 => Result(other)
-      }
+            AirMassRangeInput.Binding.Option("airMass", rAir),
+            HourAngleRangeInput.Binding.Option("hourAngle", rHour)
+          ) =>
+        (rAir, rHour).parMapN(ElevationRangeInput(_, _)).flatMap {
+          case ElevationRangeInput(Some(_), Some(_)) =>
+            Result.failure[ElevationRangeInput](messages.OnlyOneDefinition)
+          case other                                 => Result(other)
+        }
     }
 
 }

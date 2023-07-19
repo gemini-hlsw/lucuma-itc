@@ -9,11 +9,11 @@ import edu.gemini.grackle.Value
 import scala.util.control.NonFatal
 
 val LongBinding: Matcher[Long] = {
-  case Value.IntValue(v)     => v.toLong.asRight
-  case Value.StringValue(v)  =>
+  case Value.IntValue(v)    => v.toLong.asRight
+  case Value.StringValue(v) =>
     try v.toLong.asRight
     catch { case NonFatal(e) => s"Invalid Long: $v: ${e.getMessage}".asLeft }
-  case Value.NullValue       => s"cannot be null".asLeft
-  case Value.AbsentValue     => s"cannot be absent".asLeft
-  case other                 => s"Expected Long, got $other".asLeft
+  case Value.NullValue      => s"cannot be null".asLeft
+  case Value.AbsentValue    => s"cannot be absent".asLeft
+  case other                => s"Expected Long, got $other".asLeft
 }

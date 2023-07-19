@@ -15,31 +15,36 @@ object GaussianInput {
   val CreateBinding: Matcher[SourceProfile.Gaussian] =
     ObjectFieldsBinding.rmap {
       case List(
-        AngleInput.Binding.Option("fwhm", rFwhm),
-        SpectralDefinitionInput.Integrated.CreateBinding.Option("spectralDefinition", rSpectralDefinition)
-      ) =>
+            AngleInput.Binding.Option("fwhm", rFwhm),
+            SpectralDefinitionInput.Integrated.CreateBinding
+              .Option("spectralDefinition", rSpectralDefinition)
+          ) =>
         (rFwhm, rSpectralDefinition).parTupled.flatMap {
-          case (Some(fwhm), Some(spectralDefinition)) => Result(SourceProfile.Gaussian(fwhm, spectralDefinition))
-          case _ => Result.failure("Both fwhm and spectralDefinition must be provided on creation")
+          case (Some(fwhm), Some(spectralDefinition)) =>
+            Result(SourceProfile.Gaussian(fwhm, spectralDefinition))
+          case _                                      => Result.failure("Both fwhm and spectralDefinition must be provided on creation")
         }
     }
 
   val EditBinding: Matcher[SourceProfile.Gaussian => Result[SourceProfile.Gaussian]] =
     ObjectFieldsBinding.rmap {
       case List(
-        AngleInput.Binding.Option("fwhm", rFwhm),
-        SpectralDefinitionInput.Integrated.EditBinding.Option("spectralDefinition", rSpectralDefinition)
-      ) =>
+            AngleInput.Binding.Option("fwhm", rFwhm),
+            SpectralDefinitionInput.Integrated.EditBinding
+              .Option("spectralDefinition", rSpectralDefinition)
+          ) =>
         (rFwhm, rSpectralDefinition).parMapN {
           case (None, None)       => g => Result(g)
           case (Some(v), None)    => g => Result(g.copy(fwhm = v))
-          case (None, Some(f))    => g => f(g.spectralDefinition).map(sd => g.copy(spectralDefinition = sd))
-          case (Some(v), Some(f)) => g => f(g.spectralDefinition).map(sd => g.copy(fwhm = v, spectralDefinition = sd))
+          case (None, Some(f))    =>
+            g => f(g.spectralDefinition).map(sd => g.copy(spectralDefinition = sd))
+          case (Some(v), Some(f)) =>
+            g => f(g.spectralDefinition).map(sd => g.copy(fwhm = v, spectralDefinition = sd))
         }
 
     }
 
   val CreateOrEditBinding =
-    CreateBinding or EditBinding
+    CreateBinding.or(EditBinding)
 
 }

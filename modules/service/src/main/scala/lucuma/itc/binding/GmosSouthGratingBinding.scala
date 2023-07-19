@@ -7,4 +7,3 @@ import lucuma.core.enums.GmosSouthGrating
 
 val GmosSouthGratingBinding: Matcher[GmosSouthGrating] =
   enumeratedBinding
-

@@ -8,10 +8,10 @@ import cats.derived.*
 import cats.syntax.all.*
 import io.circe.*
 import lucuma.core.enums.*
-import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
-import lucuma.itc.search.*
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange
+import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
+import lucuma.itc.search.*
 
 sealed trait SpectroscopyParams
 

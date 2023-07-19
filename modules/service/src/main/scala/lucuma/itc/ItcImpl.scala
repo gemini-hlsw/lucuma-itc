@@ -18,10 +18,10 @@ import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
+import lucuma.core.util.TimeSpan
 import lucuma.itc.legacy.LocalItc
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
-import lucuma.core.util.TimeSpan
 import lucuma.refined.*
 import natchez.Trace
 import org.typelevel.log4cats.Logger

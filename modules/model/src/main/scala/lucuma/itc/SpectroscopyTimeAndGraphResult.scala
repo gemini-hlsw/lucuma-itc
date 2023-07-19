@@ -30,8 +30,7 @@ object SpectroscopyTimeAndGraphResult:
     exposureTime: TimeSpan,
     exposures:    PosInt,
     graph:        SpectroscopyGraphResult
-  ): SpectroscopyTimeAndGraphResult = {
-    println(graph)
+  ): SpectroscopyTimeAndGraphResult =
     SpectroscopyTimeAndGraphResult(
       graph.serverVersion,
       graph.dataVersion,
@@ -44,4 +43,3 @@ object SpectroscopyTimeAndGraphResult:
       graph.peakSingleSNRatio,
       graph.atWavelengthSingleSNRatio
     )
-  }

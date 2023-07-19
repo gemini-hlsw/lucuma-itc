@@ -32,11 +32,11 @@ object WavelengthInput {
   val Binding: Matcher[Wavelength] =
     ObjectFieldsBinding.rmap {
       case List(
-        Picometers.Option("picometers", rPicometers),
-        Angstroms.Option("angstroms", rAngstroms),
-        Nanometers.Option("nanometers", rNanometers),
-        Micrometers.Option("micrometers", rMicrometers)
-      ) =>
+            Picometers.Option("picometers", rPicometers),
+            Angstroms.Option("angstroms", rAngstroms),
+            Nanometers.Option("nanometers", rNanometers),
+            Micrometers.Option("micrometers", rMicrometers)
+          ) =>
         (rPicometers, rAngstroms, rNanometers, rMicrometers).parTupled.flatMap {
           case (picometers, angstroms, nanometers, micrometers) =>
             oneOrFail(

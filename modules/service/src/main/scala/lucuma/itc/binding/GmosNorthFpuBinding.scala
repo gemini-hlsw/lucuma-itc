@@ -7,4 +7,3 @@ import lucuma.core.enums.GmosNorthFpu
 
 val GmosNorthFpuBinding: Matcher[GmosNorthFpu] =
   enumeratedBinding
-

@@ -43,10 +43,10 @@ object ConstraintSetInput {
   val NominalConstraints: ConstraintSet =
     ConstraintSet(
       cloudExtinction = CloudExtinction.PointThree,
-      imageQuality    = ImageQuality.PointEight,
-      skyBackground   = SkyBackground.Bright,
-      waterVapor      = WaterVapor.Wet,
-      elevationRange  = ElevationRange.AirMass.Default
+      imageQuality = ImageQuality.PointEight,
+      skyBackground = SkyBackground.Bright,
+      waterVapor = WaterVapor.Wet,
+      elevationRange = ElevationRange.AirMass.Default
     )
 
   val Default: ConstraintSetInput =
@@ -73,12 +73,13 @@ object ConstraintSetInput {
   val Binding: Matcher[ConstraintSetInput] =
     ObjectFieldsBinding.rmap {
       case List(
-        ImageQualityBinding.Option("imageQuality", rImage),
-        CloudExtinctionBinding.Option("cloudExtinction", rCloud),
-        SkyBackgroundBinding.Option("skyBackground", rSky),
-        WaterVaporBinding.Option("waterVapor", rWater),
-        ElevationRangeInput.Binding.Option("elevationRange", rElevation)
-      ) => (rCloud, rImage, rSky, rWater, rElevation).parMapN(ConstraintSetInput(_, _, _, _, _))
+            ImageQualityBinding.Option("imageQuality", rImage),
+            CloudExtinctionBinding.Option("cloudExtinction", rCloud),
+            SkyBackgroundBinding.Option("skyBackground", rSky),
+            WaterVaporBinding.Option("waterVapor", rWater),
+            ElevationRangeInput.Binding.Option("elevationRange", rElevation)
+          ) =>
+        (rCloud, rImage, rSky, rWater, rElevation).parMapN(ConstraintSetInput(_, _, _, _, _))
     }
 
 }

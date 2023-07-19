@@ -4,11 +4,11 @@
 package lucuma.itc.input
 
 import cats.syntax.parallel.*
+import lucuma.core.enums.Band
+import lucuma.core.math.RadialVelocity
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
-import lucuma.core.enums.Band
 import lucuma.core.model.SourceProfile
-import lucuma.core.math.RadialVelocity
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 import lucuma.odb.graphql.input.sourceprofile.*

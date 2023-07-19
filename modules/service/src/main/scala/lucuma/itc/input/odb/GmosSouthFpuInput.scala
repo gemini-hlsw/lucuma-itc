@@ -15,14 +15,15 @@ object GmosSouthFpuInput {
   val Binding: Matcher[GmosFpuMask[GmosSouthFpu]] =
     ObjectFieldsBinding.rmap {
       case List(
-        GmosCustomMaskInput.Binding.Option("customMask", rCustomMask),
-        GmosSouthFpuBinding.Option("builtin", rBuiltin)
-      ) => (rCustomMask, rBuiltin).parTupled.flatMap { (custom, builtin) =>
-        oneOrFail(
-          custom.widen[GmosFpuMask[GmosSouthFpu]] -> "customMask",
-          builtin.map(GmosFpuMask.Builtin(_))     -> "builtin"
-        )
-      }
+            GmosCustomMaskInput.Binding.Option("customMask", rCustomMask),
+            GmosSouthFpuBinding.Option("builtin", rBuiltin)
+          ) =>
+        (rCustomMask, rBuiltin).parTupled.flatMap { (custom, builtin) =>
+          oneOrFail(
+            custom.widen[GmosFpuMask[GmosSouthFpu]] -> "customMask",
+            builtin.map(GmosFpuMask.Builtin(_))     -> "builtin"
+          )
+        }
     }
 
 }

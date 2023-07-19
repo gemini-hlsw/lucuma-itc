@@ -15,13 +15,13 @@ object TimeSpanInput {
   val Binding: Matcher[TimeSpan] =
     ObjectFieldsBinding.rmap {
       case List(
-        TimeSpanBinding.Microseconds.Option("microseconds", rMicroseconds),
-        TimeSpanBinding.Milliseconds.Option("milliseconds", rMilliseconds),
-        TimeSpanBinding.Seconds.Option("seconds", rSeconds),
-        TimeSpanBinding.Minutes.Option("minutes", rMinutes),
-        TimeSpanBinding.Hours.Option("hours", rHours),
-        TimeSpanBinding.Iso.Option("iso", rIso)
-      ) =>
+            TimeSpanBinding.Microseconds.Option("microseconds", rMicroseconds),
+            TimeSpanBinding.Milliseconds.Option("milliseconds", rMilliseconds),
+            TimeSpanBinding.Seconds.Option("seconds", rSeconds),
+            TimeSpanBinding.Minutes.Option("minutes", rMinutes),
+            TimeSpanBinding.Hours.Option("hours", rHours),
+            TimeSpanBinding.Iso.Option("iso", rIso)
+          ) =>
         (rMicroseconds, rMilliseconds, rSeconds, rMinutes, rHours, rIso).parTupled.flatMap {
           case (microseconds, milliseconds, seconds, minutes, hours, iso) =>
             oneOrFail(
@@ -35,4 +35,3 @@ object TimeSpanInput {
         }
     }
 }
-

@@ -28,8 +28,7 @@ final case class AirMassRangeInput(
 
   def create: Result[AirMass] =
     Result.fromOption(
-      (min, max)
-        .tupled
+      (min, max).tupled
         .flatMap(AirMass.fromOrderedDecimalValues.getOption),
       AirMassRangeInput.messages.BothMinAndMax
     )
@@ -57,9 +56,10 @@ object AirMassRangeInput {
   val Binding: Matcher[AirMassRangeInput] =
     ObjectFieldsBinding.rmap {
       case List(
-        AirMassDecimalValue.Option("min", rMin),
-        AirMassDecimalValue.Option("max", rMax)
-      ) => (rMin, rMax).parMapN(AirMassRangeInput(_, _))
+            AirMassDecimalValue.Option("min", rMin),
+            AirMassDecimalValue.Option("max", rMax)
+          ) =>
+        (rMin, rMax).parMapN(AirMassRangeInput(_, _))
     }
 
 }

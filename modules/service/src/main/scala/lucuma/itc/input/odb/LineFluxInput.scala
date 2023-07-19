@@ -15,34 +15,34 @@ import lucuma.odb.graphql.binding._
 object LineFluxInput {
   object Integrated {
     val Binding: Matcher[LineFluxMeasure[Integrated]] =
-      DecimalInput("LineFluxIntegrated") {
-        case (bd, tag) =>
-          LineFluxValue.from(bd) match {
-            case Left(err) => Result.failure(err)
-            case Right(lfv) =>
-              tag match {
-                case "W_PER_M_SQUARED" =>
-                  Result(WattsPerMeter2IsIntegratedLineFluxUnit.unit.withValueTagged(lfv))
-                case "ERG_PER_S_PER_CM_SQUARED" =>
-                  Result(ErgsPerSecondCentimeter2IsIntegratedLineFluxUnit.unit.withValueTagged(lfv))
-              }
-          }
+      DecimalInput("LineFluxIntegrated") { case (bd, tag) =>
+        LineFluxValue.from(bd) match {
+          case Left(err)  => Result.failure(err)
+          case Right(lfv) =>
+            tag match {
+              case "W_PER_M_SQUARED"          =>
+                Result(WattsPerMeter2IsIntegratedLineFluxUnit.unit.withValueTagged(lfv))
+              case "ERG_PER_S_PER_CM_SQUARED" =>
+                Result(ErgsPerSecondCentimeter2IsIntegratedLineFluxUnit.unit.withValueTagged(lfv))
+            }
+        }
       }
   }
-  object Surface {
+  object Surface    {
     val Binding: Matcher[LineFluxMeasure[Surface]] =
-      DecimalInput("LineFluxSurface") {
-        case (bd, tag) =>
-          LineFluxValue.from(bd) match {
-            case Left(err) => Result.failure(err)
-            case Right(lfv) =>
-              tag match {
-                case "W_PER_M_SQUARED_PER_ARCSEC_SQUARED" =>
-                  Result(WattsPerMeter2Arcsec2IsSurfaceLineFluxUnit.unit.withValueTagged(lfv))
-                case "ERG_PER_S_PER_CM_SQUARED_PER_ARCSEC_SQUARED" =>
-                  Result(ErgsPerSecondCentimeter2Arcsec2IsSurfaceLineFluxUnit.unit.withValueTagged(lfv))
-              }
-          }
+      DecimalInput("LineFluxSurface") { case (bd, tag) =>
+        LineFluxValue.from(bd) match {
+          case Left(err)  => Result.failure(err)
+          case Right(lfv) =>
+            tag match {
+              case "W_PER_M_SQUARED_PER_ARCSEC_SQUARED"          =>
+                Result(WattsPerMeter2Arcsec2IsSurfaceLineFluxUnit.unit.withValueTagged(lfv))
+              case "ERG_PER_S_PER_CM_SQUARED_PER_ARCSEC_SQUARED" =>
+                Result(
+                  ErgsPerSecondCentimeter2Arcsec2IsSurfaceLineFluxUnit.unit.withValueTagged(lfv)
+                )
+            }
+        }
       }
   }
 }

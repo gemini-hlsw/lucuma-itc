@@ -4,16 +4,16 @@
 package lucuma.itc.input
 
 import cats.syntax.parallel.*
-import lucuma.core.math.Wavelength
+import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.enums.Band
-import lucuma.core.model.SourceProfile
 import lucuma.core.math.RadialVelocity
+import lucuma.core.math.Wavelength
+import lucuma.core.model.SourceProfile
+import lucuma.core.util.TimeSpan
+import lucuma.itc.SignificantFigures
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
-import lucuma.core.util.TimeSpan
 import lucuma.odb.graphql.input.sourceprofile.*
-import eu.timepit.refined.types.numeric.PosInt
-import lucuma.itc.SignificantFigures
 
 case class OptimizedSpectroscopyGraphInput(
   wavelength:         Wavelength,
@@ -34,7 +34,7 @@ object OptimizedSpectroscopyGraphInput {
     ObjectFieldsBinding.rmap {
       case List(
             WavelengthInput.Binding("wavelength", wavelength),
-            WavelengthInput.Binding.Option("signaToNoiseAt", signalToNoiseAt),
+            WavelengthInput.Binding.Option("signalToNoiseAt", signalToNoiseAt),
             TimeSpanInput.Binding("exposureTime", exposureTime),
             PosIntBinding("exposures", exposures),
             SourceProfileInput.CreateBinding("sourceProfile", sourceProfile),

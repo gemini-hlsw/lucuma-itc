@@ -4,8 +4,8 @@
 package lucuma.itc.input
 
 import cats.syntax.parallel.*
-import lucuma.odb.graphql.binding.*
 import lucuma.core.enums.GmosSouthFilter
+import lucuma.odb.graphql.binding.*
 
 case class GmosSImagingInput(
   filter: GmosSouthFilter

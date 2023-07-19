@@ -13,18 +13,18 @@ import lucuma.odb.graphql.binding._
 
 object AngleInput {
 
-  def getMicroarcseconds(d: Long)  = Angle.microarcseconds.reverseGet(d)
-  def getMicroseconds(d: Long)     = HourAngle.fromMicroseconds(d)
-  def getMilliarcseconds(d: Int)   = Angle.milliarcseconds.reverseGet(d)
-  def getMilliseconds(d: Int)      = HourAngle.milliseconds.reverseGet(d)
-  def getArcSeconds(d: Double)     = Angle.fromDoubleArcseconds(d)
-  def getSeconds(d: Int)           = HourAngle.seconds.reverseGet(d)
-  def getArcMinutes(d: Int)        = Angle.arcminutes.reverseGet(d)
-  def getMinutes(d: Int)           = HourAngle.minutes.reverseGet(d)
-  def getDegrees(d: Double)        = Angle.fromDoubleDegrees(d)
-  def getHours(d: Double)          = HourAngle.fromDoubleHours(d)
-  def getDMS(s: String)            = Angle.fromStringDMS.getOption(s).toRight(s"Invalid DMS angle: $s")
-  def getHMS(s: String)            = HourAngle.fromStringHMS.getOption(s).toRight(s"Invalid HMS angle: $s")
+  def getMicroarcseconds(d: Long)   = Angle.microarcseconds.reverseGet(d)
+  def getMicroseconds(d:    Long)   = HourAngle.fromMicroseconds(d)
+  def getMilliarcseconds(d: Int)    = Angle.milliarcseconds.reverseGet(d)
+  def getMilliseconds(d:    Int)    = HourAngle.milliseconds.reverseGet(d)
+  def getArcSeconds(d:      Double) = Angle.fromDoubleArcseconds(d)
+  def getSeconds(d:         Int)    = HourAngle.seconds.reverseGet(d)
+  def getArcMinutes(d:      Int)    = Angle.arcminutes.reverseGet(d)
+  def getMinutes(d:         Int)    = HourAngle.minutes.reverseGet(d)
+  def getDegrees(d:         Double) = Angle.fromDoubleDegrees(d)
+  def getHours(d:           Double) = HourAngle.fromDoubleHours(d)
+  def getDMS(s:             String) = Angle.fromStringDMS.getOption(s).toRight(s"Invalid DMS angle: $s")
+  def getHMS(s:             String) = HourAngle.fromStringHMS.getOption(s).toRight(s"Invalid HMS angle: $s")
 
   // N.B. many of these truncate precision because there aren't decimal/double constructors. Need to go back and fix.
   val Microarcseconds = LongBinding.map(getMicroarcseconds)
@@ -43,21 +43,45 @@ object AngleInput {
   val Binding: Matcher[Angle] =
     ObjectFieldsBinding.rmap {
       case List(
-        Microarcseconds.Option("microarcseconds", rMicroarcseconds),
-        Microseconds.Option("microseconds", rMicroseconds),
-        Milliarcseconds.Option("milliarcseconds", rMilliarcseconds),
-        Milliseconds.Option("milliseconds", rMilliseconds),
-        ArcSeconds.Option("arcseconds", rArcSeconds),
-        Seconds.Option("seconds", rSeconds),
-        ArcMinutes.Option("arcminutes", rArcMinutes),
-        Minutes.Option("minutes", rMinutes),
-        Degrees.Option("degrees", rDegrees),
-        Hours.Option("hours", rHours),
-        DMS.Option("dms", rDMS),
-        HMS.Option("hms", rHMS),
-      ) =>
-        (rMicroarcseconds, rMicroseconds, rMilliarcseconds, rMilliseconds, rArcSeconds, rSeconds, rArcMinutes, rMinutes, rDegrees, rHours, rDMS, rHMS).parTupled.flatMap {
-          case (microarcseconds, microseconds, milliarcseconds, milliseconds, arcseconds, seconds, arcminutes, minutes, degrees, hours, dms, hms) =>
+            Microarcseconds.Option("microarcseconds", rMicroarcseconds),
+            Microseconds.Option("microseconds", rMicroseconds),
+            Milliarcseconds.Option("milliarcseconds", rMilliarcseconds),
+            Milliseconds.Option("milliseconds", rMilliseconds),
+            ArcSeconds.Option("arcseconds", rArcSeconds),
+            Seconds.Option("seconds", rSeconds),
+            ArcMinutes.Option("arcminutes", rArcMinutes),
+            Minutes.Option("minutes", rMinutes),
+            Degrees.Option("degrees", rDegrees),
+            Hours.Option("hours", rHours),
+            DMS.Option("dms", rDMS),
+            HMS.Option("hms", rHMS)
+          ) =>
+        (rMicroarcseconds,
+         rMicroseconds,
+         rMilliarcseconds,
+         rMilliseconds,
+         rArcSeconds,
+         rSeconds,
+         rArcMinutes,
+         rMinutes,
+         rDegrees,
+         rHours,
+         rDMS,
+         rHMS
+        ).parTupled.flatMap {
+          case (microarcseconds,
+                microseconds,
+                milliarcseconds,
+                milliseconds,
+                arcseconds,
+                seconds,
+                arcminutes,
+                minutes,
+                degrees,
+                hours,
+                dms,
+                hms
+              ) =>
             oneOrFail(
               microarcseconds -> "microarcseconds",
               microseconds    -> "microseconds",
@@ -75,4 +99,3 @@ object AngleInput {
         }
     }
 }
-

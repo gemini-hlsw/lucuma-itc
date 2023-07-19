@@ -17,12 +17,15 @@ import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.enums.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
+import lucuma.core.model.sequence.gmos.GmosFpuMask
 import lucuma.core.util.TimeSpan
 import lucuma.itc.ItcVersions
 import lucuma.itc.SpectroscopyGraphResult
 import lucuma.itc.*
-import lucuma.itc.input.*
 import lucuma.itc.encoders.given
+import lucuma.itc.input.*
+import lucuma.itc.search.GmosNorthFpuParam
+import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
 import lucuma.itc.search.hashes.given
@@ -36,9 +39,6 @@ import scala.util.Using
 
 import Query.*
 import QueryCompiler.*
-import lucuma.core.model.sequence.gmos.GmosFpuMask
-import lucuma.itc.search.GmosNorthFpuParam
-import lucuma.itc.search.GmosSouthFpuParam
 
 case class GraphRequest(
   targetProfile:      TargetProfile,
@@ -65,7 +65,7 @@ case class ImagingIntegrationTimeRequest(
   signalToNoise: SignalToNoise
 ) derives Hash
 
-object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
+object ItcMapping extends ItcCacheOrRemote with Version {
 
   // In principle this is a pure operation because resources are constant values, but the potential
   // for error in dev is high and it's nice to handle failures in `F`.
@@ -123,28 +123,32 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     }
   }
 
+  private def recoverResult[A]: PartialFunction[Throwable, Result[A]] = {
+    case x: IntegrationTimeError =>
+      Result.failure(x.message)
+    case UpstreamException(msg)  =>
+      Result.failure(msg.mkString("\n"))
+    case x                       =>
+      Result.failure(s"Error calculating itc $x")
+  }
+
   def calculateSpectroscopyIntegrationTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(input: SpectroscopyIntegrationTimeRequest): F[IntegrationTimeCalculationResult] =
+  )(input: SpectroscopyIntegrationTimeRequest): F[Result[IntegrationTimeCalculationResult]] =
     specTimeFromCacheOrRemote(input)(itc, redis)
-      .adaptError {
-        case x: IntegrationTimeError =>
-          new RuntimeException(x.message)
-        case UpstreamException(msg)  =>
-          new RuntimeException(msg.mkString("\n"))
-        case x                       =>
-          new RuntimeException(s"Error calculating itc $x")
-      }
       .map { r =>
-        IntegrationTimeCalculationResult(
-          version(environment).value,
-          BuildInfo.ocslibHash,
-          input.specMode,
-          r
+        Result(
+          IntegrationTimeCalculationResult(
+            version(environment).value,
+            BuildInfo.ocslibHash,
+            input.specMode,
+            r
+          )
         )
       }
+      .recover(recoverResult)
 
   private def toImagingTimeRequest(
     input: ImagingIntegrationTimeInput
@@ -185,24 +189,19 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(input: ImagingIntegrationTimeRequest): F[IntegrationTimeCalculationResult] =
+  )(input: ImagingIntegrationTimeRequest): F[Result[IntegrationTimeCalculationResult]] =
     imgTimeFromCacheOrRemote(input)(itc, redis)
-      .adaptError {
-        case x: IntegrationTimeError =>
-          new RuntimeException(x.message)
-        case UpstreamException(msg)  =>
-          new RuntimeException(msg.mkString("\n"))
-        case x                       =>
-          new RuntimeException(s"Error calculating itc $x")
-      }
       .map { r =>
-        IntegrationTimeCalculationResult(
-          version(environment).value,
-          BuildInfo.ocslibHash,
-          input.specMode,
-          r
+        Result(
+          IntegrationTimeCalculationResult(
+            version(environment).value,
+            BuildInfo.ocslibHash,
+            input.specMode,
+            r
+          )
         )
       }
+      .recover(recoverResult)
 
   private def toGraphRequest(
     input: OptimizedSpectroscopyGraphInput
@@ -259,13 +258,13 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
   )(
     tr:          SpectroscopyIntegrationTimeRequest,
     fig:         Option[SignificantFigures]
-  ): F[SpectroscopyTimeAndGraphResult] =
-    for {
+  ): F[Result[SpectroscopyTimeAndGraphResult]] =
+    (for {
       specTime <-
-        calculateSpectroscopyIntegrationTime(environment, redis, itc)(tr)
+        ResultT(calculateSpectroscopyIntegrationTime(environment, redis, itc)(tr))
       expTime   = specTime.results.head.exposureTime
       exps      = specTime.results.head.exposures
-      gr        = GraphRequest(tr.targetProfile,
+      req       = GraphRequest(tr.targetProfile,
                                tr.specMode,
                                tr.constraints,
                                expTime,
@@ -273,7 +272,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                                tr.signalToNoiseAt,
                                fig
                   )
-      gr       <- spectroscopyGraph(environment, redis, itc)(gr)
+      gr       <- ResultT(spectroscopyGraph(environment, redis, itc)(req))
     } yield SpectroscopyTimeAndGraphResult(
       gr.serverVersion,
       gr.dataVersion,
@@ -285,13 +284,13 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
       gr.atWavelengthFinalSNRatio,
       gr.peakSingleSNRatio,
       gr.atWavelengthSingleSNRatio
-    )
+    )).value
 
   def spectroscopyGraph[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
-  )(input: GraphRequest): F[SpectroscopyGraphResult] =
+  )(input: GraphRequest): F[Result[SpectroscopyGraphResult]] =
     graphFromCacheOrRemote(input)(itc, redis)
       .map { r =>
         val charts                              =
@@ -314,69 +313,20 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
           input.significantFigures.fold(r.atWavelengthSingleSNRatio)(s =>
             r.atWavelengthSingleSNRatio.map(_.adjustSignificantFigures(s))
           )
-        SpectroscopyGraphResult(version(environment).value,
-                                BuildInfo.ocslibHash,
-                                ccds,
-                                charts.flatMap(_.charts),
-                                peakFinalSNRatio,
-                                atWvFinalSNRatio,
-                                peakSingleSNRatio,
-                                atWvSingleSNRatio
+        Result(
+          SpectroscopyGraphResult(version(environment).value,
+                                  BuildInfo.ocslibHash,
+                                  ccds,
+                                  charts.flatMap(_.charts),
+                                  peakFinalSNRatio,
+                                  atWvFinalSNRatio,
+                                  peakSingleSNRatio,
+                                  atWvSingleSNRatio
+          )
         )
       }
-      .adaptError {
-        case x: IntegrationTimeError =>
-          new RuntimeException(x.message)
-        case UpstreamException(msg)  =>
-          new RuntimeException(msg.mkString("\n"))
-        case x                       =>
-          new RuntimeException(s"Error calculating itc $x")
-      }
+      .recover(recoverResult)
 
-  //
-  // def calculateSignalToNoise[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
-  //   environment: ExecutionEnvironment,
-  //   redis:       StringCommands[F, Array[Byte], Array[Byte]],
-  //   itc:         Itc[F]
-  // )(env: Cursor.Env): F[Result[SNCalcResult]] =
-  //   (env.get[Wavelength]("wavelength"),
-  //    env.get[RadialVelocity]("radialVelocity").flatMap(_.toRedshift),
-  //    env.get[NonNegDuration]("exposureTime"),
-  //    env.get[PosInt]("exposures"),
-  //    env.get[SourceProfile]("sourceProfile"),
-  //    env.get[Band]("band"),
-  //    env.get[SpectroscopyParams]("mode"),
-  //    env.get[ItcObservingConditions]("constraints")
-  //   ).traverseN { (wv, rs, expTime, exp, sp, sd, mode, c) =>
-  //     Logger[F].info(
-  //       s"ITC sn calculation for $mode, conditions $c, exposureTime $expTime x $exp and profile $sp"
-  //     ) *> {
-  //       val signalToNoiseAt = env.get[Wavelength]("signalToNoiseAt")
-  //       val specMode        = mode match {
-  //         case GmosNSpectroscopyParams(grating, fpu, filter) =>
-  //           ObservingMode.SpectroscopyMode.GmosNorth(wv, grating, fpu, filter)
-  //         case GmosSSpectroscopyParams(grating, fpu, filter) =>
-  //           ObservingMode.SpectroscopyMode.GmosSouth(wv, grating, fpu, filter)
-  //       }
-  //
-  //       graphFromCacheOrRemote(
-  //         GraphRequest(TargetProfile(sp, sd, rs), specMode, c, expTime, exp, signalToNoiseAt)
-  //       )(itc, redis)
-  //         .flatMap { r =>
-  //           itc.calculateSignalToNoise(r.charts, signalToNoiseAt)
-  //         }
-  //     }
-  //       .map(_.rightIor[NonEmptyChain[Problem]])
-  //       .handleError {
-  //         case x: IntegrationTimeError =>
-  //           Problem(x.message).leftIorNec
-  //         case x                       =>
-  //           Problem(s"Error calculating itc $x").leftIorNec
-  //       }
-  //   }.map(
-  //     _.getOrElse(Problem(s"Missing parameters for signal to noise calculation$env").leftIorNec)
-  //   )
-  //
   def versions[F[_]: Applicative: Logger](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
@@ -411,7 +361,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                   env
                     .getR[SpectroscopyIntegrationTimeInput]("input")
                     .flatMap(toSpectroscopyTimeRequest)
-                    .traverse(
+                    .flatTraverse(
                       calculateSpectroscopyIntegrationTime(environment, redis, itc)
                     )
                 },
@@ -419,7 +369,7 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                   env
                     .getR[ImagingIntegrationTimeInput]("input")
                     .flatMap(toImagingTimeRequest)
-                    .traverse(
+                    .flatTraverse(
                       calculateImagingIntegrationTime(environment, redis, itc)
                     )
                 },
@@ -427,17 +377,15 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                   env
                     .getR[OptimizedSpectroscopyGraphInput]("input")
                     .flatMap(toGraphRequest)
-                    .traverse(
+                    .flatTraverse(
                       spectroscopyGraph(environment, redis, itc)
                     )
                 },
                 RootEffect.computeEncodable("spectroscopyIntegrationTimeAndGraph") { (_, p, env) =>
-                  println(env
-                    .getR[SpectroscopyIntegrationTimeAndGraphInput]("input"))
                   env
                     .getR[SpectroscopyIntegrationTimeAndGraphInput]("input")
                     .flatMap(u => toSpectroscopyTimeRequest(u).map((_, u.significantFigures)))
-                    .traverse { case (tr, fig) =>
+                    .flatTraverse { case (tr, fig) =>
                       spectroscopyIntegrationTimeAndGraph(environment, redis, itc)(tr, fig)
                     }
                 }
@@ -484,12 +432,10 @@ object ItcMapping extends ItcCacheOrRemote with Version with GracklePartials {
                   )
 
                 case Select(
-                        "spectroscopyIntegrationTimeAndGraph",
+                      "spectroscopyIntegrationTimeAndGraph",
                       List(SpectroscopyIntegrationTimeAndGraphInput.binding("input", input)),
                       child
                     ) =>
-                  println("-----")
-                  println(input)
                   input.map(i =>
                     Environment(Cursor.Env(("input", i)), child)
                       .copy(child = Select("spectroscopyIntegrationTimeAndGraph", Nil, child))

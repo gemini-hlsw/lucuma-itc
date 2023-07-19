@@ -9,4 +9,3 @@ import lucuma.odb.graphql.binding.Matcher
 
 val BrightnessValueBinding: Matcher[BrightnessValue] =
   BigDecimalBinding.emap(BrightnessValue.from)
-
