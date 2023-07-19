@@ -14,6 +14,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
 import lucuma.core.util.Enumerated
+import lucuma.core.util.TimeSpan
 
 import java.time.Duration
 
@@ -28,3 +29,4 @@ given Hash[NonNegDuration] = Hash.by(_.value)
 given Hash[SourceProfile]  = Hash.fromUniversalHashCode[SourceProfile]
 given Hash[SignalToNoise]  = Hash.by(_.toBigDecimal)
 given Hash[Wavelength]     = Hash.by(_.toPicometers.value)
+given Hash[TimeSpan]       = Hash.by(_.toMilliseconds)

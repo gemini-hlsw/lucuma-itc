@@ -9,7 +9,6 @@ import cats.syntax.applicative.*
 import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
-import lucuma.core.model.NonNegDuration
 import lucuma.core.util.TimeSpan
 import lucuma.itc.ChartType
 import lucuma.itc.IntegrationTime
@@ -42,7 +41,7 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     targetProfile:   TargetProfile,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
-    exposureTime:    NonNegDuration,
+    exposureTime:    TimeSpan,
     exposures:       PosInt,
     signalToNoiseAt: Option[Wavelength]
   ): IO[GraphResult] =
@@ -94,7 +93,7 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     targetProfile:   TargetProfile,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
-    exposureTime:    NonNegDuration,
+    exposureTime:    TimeSpan,
     exposures:       PosInt,
     signalToNoiseAt: Option[Wavelength]
   ): IO[GraphResult] =

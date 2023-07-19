@@ -218,7 +218,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         """
     )
   }
-//
+
   test("gmos north case with variables") {
     query(
       """
@@ -260,7 +260,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               "waterVapor" : "DRY",
               "elevationRange" : {
                 "airMass": {
-                  "min": "0.1",
+                  "min": "1.1",
                   "max": "1.3"
                 }
               }
@@ -491,9 +491,10 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         """,
       json"""
         {
+          "data": null,
           "errors": [
             {
-              "message" : "Airmass max value 1 must be more than the min value 2"
+              "message" : "Creating an air mass range requires specifying both min and max where min < max"
             }
           ]
         }
