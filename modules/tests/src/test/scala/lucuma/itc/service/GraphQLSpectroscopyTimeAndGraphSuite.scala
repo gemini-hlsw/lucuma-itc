@@ -15,10 +15,10 @@ class GraphQLSpectroscopyTimeAndGraphSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            radialVelocity: {
-              kilometersPerSecond: 1000
-            },
             signalToNoise: 2,
+            signalToNoiseAt: {
+              nanometers: 60,
+            },
             sourceProfile: {
               point: {
                 bandNormalized: {
@@ -38,6 +38,9 @@ class GraphQLSpectroscopyTimeAndGraphSuite extends GraphQLSuite {
               }
             },
             band: J,
+            radialVelocity: {
+              kilometersPerSecond: 1000
+            },
             constraints: {
               imageQuality: POINT_THREE,
               cloudExtinction: POINT_FIVE,
