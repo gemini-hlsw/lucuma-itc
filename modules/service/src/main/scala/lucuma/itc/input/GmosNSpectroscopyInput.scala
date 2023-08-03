@@ -7,6 +7,7 @@ import cats.syntax.parallel.*
 import lucuma.core.enums.GmosNorthFilter
 import lucuma.core.enums.GmosNorthFpu
 import lucuma.core.enums.GmosNorthGrating
+import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.model.sequence.gmos.GmosFpuMask
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
@@ -14,7 +15,8 @@ import lucuma.odb.graphql.input.*
 case class GmosNSpectroscopyInput(
   grating: GmosNorthGrating,
   fpu:     GmosFpuMask[GmosNorthFpu],
-  filter:  Option[GmosNorthFilter]
+  filter:  Option[GmosNorthFilter],
+  ccdMode: Option[GmosCcdMode]
 ) extends InstrumentModesInput
 
 object GmosNSpectroscopyInput {
@@ -24,9 +26,10 @@ object GmosNSpectroscopyInput {
       case List(
             GmosNorthGratingBinding("grating", grating),
             GmosNorthFpuInput.Binding("fpu", fpu),
-            GmosNorthFilterBinding.Option("filter", filter)
+            GmosNorthFilterBinding.Option("filter", filter),
+            GmosCcdModeInput.Binding.Option("ccdMode", ccdMode)
           ) =>
-        (grating, fpu, filter).parMapN(apply)
+        (grating, fpu, filter, ccdMode).parMapN(apply)
     }
 
 }

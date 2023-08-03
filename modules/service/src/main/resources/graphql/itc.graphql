@@ -7200,11 +7200,17 @@ input GmosSSpectroscopyInput {
 
   # Gmos South filter
   filter: GmosSouthFilter
+
+  # ccd mode
+  ccdMode: GmosCcdModeInput
 }
 
 input GmosSImagingInput {
   # Gmos South filter
   filter: GmosSouthFilter!
+
+  # ccd mode
+  ccdMode: GmosCcdModeInput
 }
 
 input GmosNSpectroscopyInput {
@@ -7216,11 +7222,17 @@ input GmosNSpectroscopyInput {
 
   # Gmos North filter
   filter: GmosNorthFilter
+
+  # ccd mode
+  ccdMode: GmosCcdModeInput
 }
 
 input GmosNImagingInput {
   # Gmos North filter
   filter: GmosNorthFilter!
+
+  # ccd mode
+  ccdMode: GmosCcdModeInput
 }
 
 type GmosSITCParams {
@@ -7235,6 +7247,7 @@ type GmosSITCParams {
 
   # Gmos South filter
   filter: GmosSouthFilter
+
 }
 
 type GmosNITCParams {

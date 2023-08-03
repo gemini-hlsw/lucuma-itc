@@ -10,6 +10,7 @@ import io.circe.syntax.*
 import lucuma.core.enums._
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
+import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.itc.GmosNImagingParams
 import lucuma.itc.GmosNSpectroscopyParams
 import lucuma.itc.GmosSImagingParams
@@ -77,7 +78,8 @@ object ObservingMode {
       λ:         Wavelength,
       disperser: GmosNorthGrating,
       fpu:       GmosNorthFpuParam,
-      filter:    Option[GmosNorthFilter]
+      filter:    Option[GmosNorthFilter],
+      ccdMode:   Option[GmosCcdMode]
     ) extends GmosSpectroscopy
         derives Hash {
       val isIfu = fpu.isIfu
@@ -107,7 +109,8 @@ object ObservingMode {
       λ:         Wavelength,
       disperser: GmosSouthGrating,
       fpu:       GmosSouthFpuParam,
-      filter:    Option[GmosSouthFilter]
+      filter:    Option[GmosSouthFilter],
+      ccdMode:   Option[GmosCcdMode]
     ) extends GmosSpectroscopy
         derives Hash {
       val isIfu = fpu.isIfu
@@ -154,8 +157,9 @@ object ObservingMode {
     }
 
     case class GmosNorth(
-      λ:      Wavelength,
-      filter: GmosNorthFilter
+      λ:       Wavelength,
+      filter:  GmosNorthFilter,
+      ccdMode: Option[GmosCcdMode]
     ) extends GmosImaging {
 
       val instrument: Instrument =
@@ -172,8 +176,9 @@ object ObservingMode {
         )
 
     case class GmosSouth(
-      λ:      Wavelength,
-      filter: GmosSouthFilter
+      λ:       Wavelength,
+      filter:  GmosSouthFilter,
+      ccdMode: Option[GmosCcdMode]
     ) extends GmosImaging {
       val instrument: Instrument =
         Instrument.GmosSouth

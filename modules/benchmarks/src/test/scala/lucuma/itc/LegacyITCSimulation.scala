@@ -82,6 +82,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     ObservingMode.SpectroscopyMode.GmosNorth(Wavelength.decimalNanometers.getOption(600).get,
                                              GmosNorthGrating.B1200_G5301,
                                              GmosNorthFpuParam(GmosNorthFpu.LongSlit_5_00),
+                                             none,
                                              none
     )
   )
@@ -154,6 +155,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     Wavelength.decimalNanometers.getOption(600).get,
     GmosNorthGrating.B1200_G5301,
     GmosNorthFpuParam(GmosNorthFpu.LongSlit_1_00),
+    none,
     none
   )
 
@@ -161,6 +163,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     Wavelength.decimalNanometers.getOption(600).get,
     GmosSouthGrating.B1200_G5321,
     GmosSouthFpuParam(GmosSouthFpu.LongSlit_1_00),
+    none,
     none
   )
 

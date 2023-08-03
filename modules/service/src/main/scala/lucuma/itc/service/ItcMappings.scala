@@ -94,17 +94,17 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
     val redshift = Result.fromOption(radialVelocity.toRedshift, "Invalid radial velocity")
     val specMode = mode match {
-      case GmosNSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter) =>
+      case GmosNSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode) =>
         Result(
           ObservingMode.SpectroscopyMode
-            .GmosNorth(wavelength, grating, GmosNorthFpuParam(fpu), filter)
+            .GmosNorth(wavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode)
         )
-      case GmosSSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter) =>
+      case GmosSSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode) =>
         Result(
           ObservingMode.SpectroscopyMode
-            .GmosSouth(wavelength, grating, GmosSouthFpuParam(fpu), filter)
+            .GmosSouth(wavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode)
         )
-      case _                                                                 =>
+      case _                                                                          =>
         Result.failure("Invalid spectroscopy mode")
     }
 
@@ -164,11 +164,13 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
     val redshift = Result.fromOption(radialVelocity.toRedshift, "Invalid radial velocity")
     val specMode = mode match {
-      case GmosNImagingInput(filter) =>
-        Result(ObservingMode.ImagingMode.GmosNorth(wavelength, filter))
-      case GmosSImagingInput(filter) =>
-        Result(ObservingMode.ImagingMode.GmosSouth(wavelength, filter))
-      case _                         =>
+      case GmosNImagingInput(filter, ccdMode) =>
+        Result(
+          ObservingMode.ImagingMode.GmosNorth(wavelength, filter, ccdMode)
+        )
+      case GmosSImagingInput(filter, ccdMode) =>
+        Result(ObservingMode.ImagingMode.GmosSouth(wavelength, filter, ccdMode))
+      case _                                  =>
         Result.failure("Invalid spectroscopy mode")
     }
 
@@ -220,17 +222,17 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
     val redshift = Result.fromOption(radialVelocity.toRedshift, "Invalid radial velocity")
     val specMode = mode match {
-      case GmosNSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter) =>
+      case GmosNSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode) =>
         Result(
           ObservingMode.SpectroscopyMode
-            .GmosNorth(wavelength, grating, GmosNorthFpuParam(fpu), filter)
+            .GmosNorth(wavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode)
         )
-      case GmosSSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter) =>
+      case GmosSSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode) =>
         Result(
           ObservingMode.SpectroscopyMode
-            .GmosSouth(wavelength, grating, GmosSouthFpuParam(fpu), filter)
+            .GmosSouth(wavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode)
         )
-      case _                                                                 =>
+      case _                                                                          =>
         Result.failure("Invalid spectroscopy mode")
     }
 
