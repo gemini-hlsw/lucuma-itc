@@ -6,8 +6,11 @@ package arb
 
 import lucuma.core.enums.GmosNorthFilter
 import lucuma.core.enums.GmosNorthGrating
+import lucuma.core.enums.GmosRoi
 import lucuma.core.enums.GmosSouthFilter
 import lucuma.core.enums.GmosSouthGrating
+import lucuma.core.model.sequence.gmos.GmosCcdMode
+import lucuma.core.model.sequence.gmos.arb.ArbGmosCcdMode
 import lucuma.core.util.arb.ArbEnumerated
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.*
@@ -16,6 +19,7 @@ trait ArbInstrumentMode {
 
   import ArbEnumerated.*
   import ArbGmosFpu.given
+  import ArbGmosCcdMode.given
 
   import InstrumentMode.GmosNorthSpectroscopy
   import InstrumentMode.GmosSouthSpectroscopy
@@ -28,7 +32,9 @@ trait ArbInstrumentMode {
         g <- arbitrary[GmosNorthGrating]
         f <- arbitrary[Option[GmosNorthFilter]]
         u <- arbitrary[GmosFpu.North]
-      } yield GmosNorthSpectroscopy(g, f, u)
+        c <- arbitrary[Option[GmosCcdMode]]
+        r <- arbitrary[Option[GmosRoi]]
+      } yield GmosNorthSpectroscopy(g, f, u, c, r)
     }
 
   given Cogen[GmosNorthSpectroscopy] =
@@ -52,7 +58,9 @@ trait ArbInstrumentMode {
         g <- arbitrary[GmosSouthGrating]
         f <- arbitrary[Option[GmosSouthFilter]]
         u <- arbitrary[GmosFpu.South]
-      } yield GmosSouthSpectroscopy(g, f, u)
+        c <- arbitrary[Option[GmosCcdMode]]
+        r <- arbitrary[Option[GmosRoi]]
+      } yield GmosSouthSpectroscopy(g, f, u, c, r)
     }
 
   given Cogen[GmosSouthSpectroscopy] =

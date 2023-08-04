@@ -4,6 +4,7 @@
 package lucuma.itc.input
 
 import cats.syntax.parallel.*
+import lucuma.core.enums.GmosRoi
 import lucuma.core.enums.GmosSouthFilter
 import lucuma.core.enums.GmosSouthFpu
 import lucuma.core.enums.GmosSouthGrating
@@ -16,7 +17,8 @@ case class GmosSSpectroscopyInput(
   grating: GmosSouthGrating,
   fpu:     GmosFpuMask[GmosSouthFpu],
   filter:  Option[GmosSouthFilter],
-  ccdMode: Option[GmosCcdMode]
+  ccdMode: Option[GmosCcdMode],
+  roi:     Option[GmosRoi]
 ) extends InstrumentModesInput
 
 object GmosSSpectroscopyInput {
@@ -27,9 +29,10 @@ object GmosSSpectroscopyInput {
             GmosSouthGratingBinding("grating", grating),
             GmosSouthFpuInput.Binding("fpu", fpu),
             GmosSouthFilterBinding.Option("filter", filter),
-            GmosCcdModeInput.Binding.Option("ccdMode", ccdMode)
+            GmosCcdModeInput.Binding.Option("ccdMode", ccdMode),
+            GmosRoiBinding.Option("roi", roi)
           ) =>
-        (grating, fpu, filter, ccdMode).parMapN(apply)
+        (grating, fpu, filter, ccdMode, roi).parMapN(apply)
     }
 
 }

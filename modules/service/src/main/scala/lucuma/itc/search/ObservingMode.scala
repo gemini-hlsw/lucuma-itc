@@ -79,7 +79,8 @@ object ObservingMode {
       disperser: GmosNorthGrating,
       fpu:       GmosNorthFpuParam,
       filter:    Option[GmosNorthFilter],
-      ccdMode:   Option[GmosCcdMode]
+      ccdMode:   Option[GmosCcdMode],
+      roi:       Option[GmosRoi]
     ) extends GmosSpectroscopy
         derives Hash {
       val isIfu = fpu.isIfu
@@ -110,7 +111,8 @@ object ObservingMode {
       disperser: GmosSouthGrating,
       fpu:       GmosSouthFpuParam,
       filter:    Option[GmosSouthFilter],
-      ccdMode:   Option[GmosCcdMode]
+      ccdMode:   Option[GmosCcdMode],
+      roi:       Option[GmosRoi]
     ) extends GmosSpectroscopy
         derives Hash {
       val isIfu = fpu.isIfu

@@ -15,9 +15,12 @@ import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.enums.GmosNorthFilter
 import lucuma.core.enums.GmosNorthGrating
+import lucuma.core.enums.GmosRoi
 import lucuma.core.enums.GmosSouthFilter
 import lucuma.core.enums.GmosSouthGrating
+import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.itc.client.json.syntax.*
+import lucuma.odb.json.gmos.given
 import monocle.Prism
 import monocle.macros.GenPrism
 
@@ -28,7 +31,9 @@ object InstrumentMode {
   final case class GmosNorthSpectroscopy(
     grating: GmosNorthGrating,
     filter:  Option[GmosNorthFilter],
-    fpu:     GmosFpu.North
+    fpu:     GmosFpu.North,
+    ccdMode: Option[GmosCcdMode],
+    roi:     Option[GmosRoi]
   ) extends InstrumentMode
 
   object GmosNorthSpectroscopy {
@@ -38,7 +43,9 @@ object InstrumentMode {
         Json.fromFields(
           List(
             "grating" -> a.grating.asScreamingJson,
-            "fpu"     -> a.fpu.asJson
+            "fpu"     -> a.fpu.asJson,
+            "ccdMode" -> a.ccdMode.asJson,
+            "roi"     -> a.roi.asJson
           ) ++ a.filter.map(_.asScreamingJson).tupleLeft("filter").toList
         )
 
@@ -48,7 +55,9 @@ object InstrumentMode {
           g <- c.downField("grating").as[GmosNorthGrating]
           f <- c.downField("filter").as[Option[GmosNorthFilter]]
           u <- c.downField("fpu").as[GmosFpu.North]
-        } yield GmosNorthSpectroscopy(g, f, u)
+          d <- c.downField("ccdMode").as[Option[GmosCcdMode]]
+          r <- c.downField("roi").as[Option[GmosRoi]]
+        } yield GmosNorthSpectroscopy(g, f, u, d, r)
 
     given Eq[GmosNorthSpectroscopy] with
       def eqv(x: GmosNorthSpectroscopy, y: GmosNorthSpectroscopy): Boolean =
@@ -61,7 +70,9 @@ object InstrumentMode {
   final case class GmosSouthSpectroscopy(
     grating: GmosSouthGrating,
     filter:  Option[GmosSouthFilter],
-    fpu:     GmosFpu.South
+    fpu:     GmosFpu.South,
+    ccdMode: Option[GmosCcdMode],
+    roi:     Option[GmosRoi]
   ) extends InstrumentMode
 
   object GmosSouthSpectroscopy {
@@ -71,7 +82,9 @@ object InstrumentMode {
         Json.fromFields(
           List(
             "grating" -> a.grating.asScreamingJson,
-            "fpu"     -> a.fpu.asJson
+            "fpu"     -> a.fpu.asJson,
+            "ccdMode" -> a.ccdMode.asJson,
+            "roi"     -> a.roi.asJson
           ) ++ a.filter.map(_.asScreamingJson).tupleLeft("filter").toList
         )
 
@@ -81,7 +94,9 @@ object InstrumentMode {
           g <- c.downField("grating").as[GmosSouthGrating]
           f <- c.downField("filter").as[Option[GmosSouthFilter]]
           u <- c.downField("fpu").as[GmosFpu.South]
-        } yield GmosSouthSpectroscopy(g, f, u)
+          d <- c.downField("ccdMode").as[Option[GmosCcdMode]]
+          r <- c.downField("roi").as[Option[GmosRoi]]
+        } yield GmosSouthSpectroscopy(g, f, u, d, r)
 
     given Eq[GmosSouthSpectroscopy] with
       def eqv(x: GmosSouthSpectroscopy, y: GmosSouthSpectroscopy): Boolean =
@@ -94,10 +109,10 @@ object InstrumentMode {
   given Encoder[InstrumentMode] with
     def apply(a: InstrumentMode): Json =
       a match {
-        case a @ GmosNorthSpectroscopy(_, _, _) => Json.obj("gmosNSpectroscopy" -> a.asJson)
-        case a @ GmosSouthSpectroscopy(_, _, _) => Json.obj("gmosSSpectroscopy" -> a.asJson)
-        case a @ GmosNorthImaging(_)            => Json.obj("gmosNImaging" -> a.asJson)
-        case a @ GmosSouthImaging(_)            => Json.obj("gmosSImaging" -> a.asJson)
+        case a @ GmosNorthSpectroscopy(_, _, _, _, _) => Json.obj("gmosNSpectroscopy" -> a.asJson)
+        case a @ GmosSouthSpectroscopy(_, _, _, _, _) => Json.obj("gmosSSpectroscopy" -> a.asJson)
+        case a @ GmosNorthImaging(_)                  => Json.obj("gmosNImaging" -> a.asJson)
+        case a @ GmosSouthImaging(_)                  => Json.obj("gmosSImaging" -> a.asJson)
       }
 
   given Decoder[InstrumentMode] with

@@ -22,7 +22,7 @@ object GmosCcdModeInput {
             GmosYBinningBinding.Option("yBin", rYBin),
             GmosAmpCountBinding.Option("ampCount", rAmpCount),
             GmosAmpGainBinding.Option("ampGain", rAmpGain),
-            GmosAmpReadModeBinding.Option("ampRead", rAmpRead)
+            GmosAmpReadModeBinding.Option("ampReadMode", rAmpRead)
           ) =>
         (rXBin, rYBin, rAmpCount, rAmpGain, rAmpRead).parMapN {
           (xBin, yBin, ampCount, ampGain, ampRead) =>

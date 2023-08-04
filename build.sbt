@@ -13,6 +13,7 @@ val http4sJdkHttpClientVersion  = "0.9.1"
 val fs2Version                  = "3.8.0"
 val kindProjectorVersion        = "0.13.2"
 val lucumaCoreVersion           = "0.83.0"
+val lucumaODBSchema             = "0.5.1"
 val lucumaRefinedVersion        = "0.1.2"
 val slf4jVersion                = "2.0.7"
 val log4catsVersion             = "2.6.0"
@@ -155,6 +156,7 @@ lazy val client = crossProject(JVMPlatform, JSPlatform)
     libraryDependencies ++= Seq(
       "edu.gemini"    %%% "lucuma-core"         % lucumaCoreVersion,
       "edu.gemini"    %%% "lucuma-refined"      % lucumaRefinedVersion,
+      "edu.gemini"    %%% "lucuma-odb-schema"   % lucumaODBSchema,
       "org.typelevel" %%% "cats-core"           % catsVersion,
       "org.typelevel" %%% "cats-effect"         % catsEffectVersion,
       "org.http4s"    %%% "http4s-circe"        % http4sVersion,

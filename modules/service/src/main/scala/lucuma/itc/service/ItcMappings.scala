@@ -94,17 +94,17 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
     val redshift = Result.fromOption(radialVelocity.toRedshift, "Invalid radial velocity")
     val specMode = mode match {
-      case GmosNSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode) =>
+      case GmosNSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode, roi) =>
         Result(
           ObservingMode.SpectroscopyMode
-            .GmosNorth(wavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode)
+            .GmosNorth(wavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode, roi)
         )
-      case GmosSSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode) =>
+      case GmosSSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode, roi) =>
         Result(
           ObservingMode.SpectroscopyMode
-            .GmosSouth(wavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode)
+            .GmosSouth(wavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode, roi)
         )
-      case _                                                                          =>
+      case _                                                                               =>
         Result.failure("Invalid spectroscopy mode")
     }
 
@@ -222,17 +222,17 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
     val redshift = Result.fromOption(radialVelocity.toRedshift, "Invalid radial velocity")
     val specMode = mode match {
-      case GmosNSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode) =>
+      case GmosNSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode, roi) =>
         Result(
           ObservingMode.SpectroscopyMode
-            .GmosNorth(wavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode)
+            .GmosNorth(wavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode, roi)
         )
-      case GmosSSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode) =>
+      case GmosSSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode, roi) =>
         Result(
           ObservingMode.SpectroscopyMode
-            .GmosSouth(wavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode)
+            .GmosSouth(wavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode, roi)
         )
-      case _                                                                          =>
+      case _                                                                               =>
         Result.failure("Invalid spectroscopy mode")
     }
 

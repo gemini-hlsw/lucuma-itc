@@ -12,9 +12,15 @@ import io.circe.syntax.*
 import lucuma.core.enums.Band
 import lucuma.core.enums.CloudExtinction
 import lucuma.core.enums.GalaxySpectrum.Spiral
+import lucuma.core.enums.GmosAmpCount
+import lucuma.core.enums.GmosAmpGain
+import lucuma.core.enums.GmosAmpReadMode
 import lucuma.core.enums.GmosNorthFilter
 import lucuma.core.enums.GmosNorthFpu
 import lucuma.core.enums.GmosNorthGrating
+import lucuma.core.enums.GmosRoi
+import lucuma.core.enums.GmosXBinning
+import lucuma.core.enums.GmosYBinning
 import lucuma.core.enums.ImageQuality
 import lucuma.core.enums.SkyBackground
 import lucuma.core.enums.WaterVapor
@@ -27,6 +33,7 @@ import lucuma.core.model.ElevationRange.AirMass
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED.Galaxy
+import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.TimeSpan
 import lucuma.itc.ChartType
 import lucuma.itc.FinalSN
@@ -160,7 +167,14 @@ object WiringSuite {
       InstrumentMode.GmosNorthSpectroscopy(
         GmosNorthGrating.B1200_G5301,
         GmosNorthFilter.GPrime.some,
-        GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25)
+        GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
+        GmosCcdMode(GmosXBinning.Two,
+                    GmosYBinning.Two,
+                    GmosAmpCount.Twelve,
+                    GmosAmpGain.High,
+                    GmosAmpReadMode.Fast
+        ).some,
+        GmosRoi.FullFrame.some
       )
     )
 
@@ -202,7 +216,14 @@ object WiringSuite {
       InstrumentMode.GmosNorthSpectroscopy(
         GmosNorthGrating.B1200_G5301,
         GmosNorthFilter.GPrime.some,
-        GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25)
+        GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
+        GmosCcdMode(GmosXBinning.Two,
+                    GmosYBinning.Two,
+                    GmosAmpCount.Twelve,
+                    GmosAmpGain.High,
+                    GmosAmpReadMode.Fast
+        ).some,
+        GmosRoi.FullFrame.some
       ),
       Some(SignificantFiguresInput(2.refined, 2.refined, 2.refined))
     )

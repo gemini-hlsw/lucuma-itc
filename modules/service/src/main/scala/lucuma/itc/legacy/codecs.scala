@@ -19,6 +19,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
+import lucuma.core.syntax.string.*
 import lucuma.itc.ChartType
 import lucuma.itc.ItcChart
 import lucuma.itc.ItcChartGroup
@@ -80,7 +81,9 @@ private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.
         "ampReadMode"       -> Json.fromString(
           a.ccdMode.map(_.ampReadMode).getOrElse(GmosAmpReadMode.Fast).tag.toUpperCase
         ),
-        "builtinROI"        -> Json.fromString("FULL_FRAME"),
+        "builtinROI"        -> Json.fromString(
+          a.roi.getOrElse(GmosRoi.FullFrame).tag.toScreamingSnakeCase
+        ),
         "spatialBinning"    -> Json.fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.One).count),
         "customSlitWidth"   -> Json.Null,
         "ampGain"           -> Json.fromString(
@@ -139,7 +142,9 @@ private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.
         "ampReadMode"       -> Json.fromString(
           a.ccdMode.map(_.ampReadMode).getOrElse(GmosAmpReadMode.Fast).tag.toUpperCase
         ),
-        "builtinROI"        -> Json.fromString("FULL_FRAME"),
+        "builtinROI"        -> Json.fromString(
+          a.roi.getOrElse(GmosRoi.FullFrame).tag.toScreamingSnakeCase
+        ),
         "spatialBinning"    -> Json.fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.One).count),
         "customSlitWidth"   -> Json.Null,
         "ampGain"           -> Json.fromString(
