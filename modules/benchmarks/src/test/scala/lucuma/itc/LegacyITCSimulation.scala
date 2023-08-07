@@ -23,6 +23,7 @@ import lucuma.core.math.units.*
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
+import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.Enumerated
 import lucuma.itc.legacy.*
 import lucuma.itc.legacy.given
@@ -79,10 +80,18 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     wfs = ItcWavefrontSensor.OIWFS
   )
   val instrument = ItcInstrumentDetails.fromObservingMode(
-    ObservingMode.SpectroscopyMode.GmosNorth(Wavelength.decimalNanometers.getOption(600).get,
-                                             GmosNorthGrating.B1200_G5301,
-                                             GmosNorthFpuParam(GmosNorthFpu.LongSlit_5_00),
-                                             none
+    ObservingMode.SpectroscopyMode.GmosNorth(
+      Wavelength.decimalNanometers.getOption(600).get,
+      GmosNorthGrating.B1200_G5301,
+      GmosNorthFpuParam(GmosNorthFpu.LongSlit_5_00),
+      none,
+      GmosCcdMode(GmosXBinning.Two,
+                  GmosYBinning.Two,
+                  GmosAmpCount.Twelve,
+                  GmosAmpGain.High,
+                  GmosAmpReadMode.Fast
+      ).some,
+      GmosRoi.FullFrame.some
     )
   )
 
@@ -154,14 +163,28 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
     Wavelength.decimalNanometers.getOption(600).get,
     GmosNorthGrating.B1200_G5301,
     GmosNorthFpuParam(GmosNorthFpu.LongSlit_1_00),
-    none
+    none,
+    GmosCcdMode(GmosXBinning.Two,
+                GmosYBinning.Two,
+                GmosAmpCount.Twelve,
+                GmosAmpGain.High,
+                GmosAmpReadMode.Fast
+    ).some,
+    GmosRoi.FullFrame.some
   )
 
   val gsConf = ObservingMode.SpectroscopyMode.GmosSouth(
     Wavelength.decimalNanometers.getOption(600).get,
     GmosSouthGrating.B1200_G5321,
     GmosSouthFpuParam(GmosSouthFpu.LongSlit_1_00),
-    none
+    none,
+    GmosCcdMode(GmosXBinning.Two,
+                GmosYBinning.Two,
+                GmosAmpCount.Twelve,
+                GmosAmpGain.High,
+                GmosAmpReadMode.Fast
+    ).some,
+    GmosRoi.FullFrame.some
   )
 
   def bodyConf(

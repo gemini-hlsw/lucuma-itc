@@ -5,17 +5,23 @@ package lucuma.itc.input
 
 import cats.syntax.parallel.*
 import lucuma.core.enums.GmosNorthFilter
+import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.odb.graphql.binding.*
+import lucuma.odb.graphql.input.GmosCcdModeInput
 
 case class GmosNImagingInput(
-  filter: GmosNorthFilter
+  filter:  GmosNorthFilter,
+  ccdMode: Option[GmosCcdMode]
 ) extends InstrumentModesInput
 
 object GmosNImagingInput {
 
   def binding: Matcher[GmosNImagingInput] =
-    ObjectFieldsBinding.rmap { case List(GmosNorthFilterBinding("filter", filter)) =>
-      filter.map(apply)
+    ObjectFieldsBinding.rmap {
+      case List(GmosNorthFilterBinding("filter", filter),
+                GmosCcdModeInput.Binding.Option("ccdMode", ccdMode)
+          ) =>
+        (filter, ccdMode).parMapN(apply)
     }
 
 }
