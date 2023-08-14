@@ -2,7 +2,7 @@ import NativePackagerHelper._
 
 val catsEffectVersion           = "3.5.1"
 val catsTestkitScalaTestVersion = "2.1.5"
-val catsVersion                 = "2.9.0"
+val catsVersion                 = "2.10.0"
 val catsScalacheckVersion       = "0.3.2"
 val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.5"
