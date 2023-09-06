@@ -10532,6 +10532,9 @@ type IntegrationTimeCalculationResult {
 
   # ITC results, there maybe one per CCD or a single result
   results: [IntegrationTime!]!
+
+  # Index of the preferred result, it is mode dependent
+  preferredIndex: NonNegInt!
 }
 
 interface ITCObservingMode {

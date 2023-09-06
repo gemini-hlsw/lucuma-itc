@@ -3,11 +3,11 @@
 
 package lucuma.itc
 
-import cats.data.NonEmptyList
 import cats.syntax.all.*
 import io.circe.*
 import lucuma.itc.encoders.given
 import lucuma.itc.search.ObservingMode
+import lucuma.core.data.Zipper
 
 sealed trait IntegrationTimeError extends RuntimeException {
   def message: String
@@ -32,5 +32,15 @@ case class IntegrationTimeCalculationResult(
   serverVersion: String,
   dataVersion:   String,
   mode:          ObservingMode,
-  results:       NonEmptyList[IntegrationTime]
-) derives Encoder.AsObject
+  results:       Zipper[IntegrationTime]
+)
+
+object IntegrationTimeCalculationResult {
+  given Encoder[IntegrationTimeCalculationResult] = Encoder.forProduct5(
+    "serverVersion",
+    "dataVersion",
+    "mode",
+    "results",
+    "preferredIndex"
+  )(r => (r.serverVersion, r.dataVersion, r.mode, r.results.toNel, r.results.indexOfFocus))
+}
