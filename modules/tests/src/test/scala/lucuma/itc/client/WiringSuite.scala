@@ -9,6 +9,7 @@ import cats.syntax.either.*
 import cats.syntax.option.*
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
+import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
 import lucuma.core.enums.CloudExtinction
 import lucuma.core.enums.GalaxySpectrum.Spiral
@@ -59,15 +60,16 @@ class WiringSuite extends ClientSuite {
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
         ),
-        NonEmptyList
-          .one(
-            IntegrationTime(
-              TimeSpan.FromString.getOption("PT1S").get,
-              PosInt.unsafeFrom(10),
-              SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
+        Zipper.fromNel(
+          NonEmptyList
+            .one(
+              IntegrationTime(
+                TimeSpan.FromString.getOption("PT1S").get,
+                PosInt.unsafeFrom(10),
+                SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
+              )
             )
-          ),
-        0.refined
+        )
       ).asRight
     )
   }
@@ -80,15 +82,16 @@ class WiringSuite extends ClientSuite {
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
         ),
-        NonEmptyList
-          .one(
-            IntegrationTime(
-              TimeSpan.FromString.getOption("PT1S").get,
-              PosInt.unsafeFrom(10),
-              SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
+        Zipper.fromNel(
+          NonEmptyList
+            .one(
+              IntegrationTime(
+                TimeSpan.FromString.getOption("PT1S").get,
+                PosInt.unsafeFrom(10),
+                SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
+              )
             )
-          ),
-        0.refined
+        )
       ).asRight
     )
   }

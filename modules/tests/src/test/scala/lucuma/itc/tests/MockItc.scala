@@ -88,8 +88,10 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     signalToNoiseAt: Option[Wavelength]
   ): IO[NonEmptyList[IntegrationTime]] =
     NonEmptyList
-      .of(IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get),
-        IntegrationTime(TimeSpan.fromSeconds(2).get, 5.refined, SignalToNoise.fromInt(20).get))
+      .of(
+        IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get),
+        IntegrationTime(TimeSpan.fromSeconds(2).get, 5.refined, SignalToNoise.fromInt(20).get)
+      )
       .pure[IO]
 
   override def calculateGraph(
@@ -132,7 +134,6 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
       SignalToNoise.fromInt(1002).map(SingleSN.apply(_))
     )
       .pure[IO]
-
 
 object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 

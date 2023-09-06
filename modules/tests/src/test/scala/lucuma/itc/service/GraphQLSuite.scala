@@ -8,8 +8,8 @@ import io.circe.Json
 import io.circe.parser.*
 import lucuma.itc.Itc
 import lucuma.itc.tests.FailingMockItc
-import lucuma.itc.tests.MockItc
 import lucuma.itc.tests.MockImagingItc
+import lucuma.itc.tests.MockItc
 import natchez.Trace.Implicits.noop
 import org.http4s.*
 import org.http4s.circe.*

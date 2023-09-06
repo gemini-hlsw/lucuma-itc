@@ -5,9 +5,9 @@ package lucuma.itc
 
 import cats.syntax.all.*
 import io.circe.*
+import lucuma.core.data.Zipper
 import lucuma.itc.encoders.given
 import lucuma.itc.search.ObservingMode
-import lucuma.core.data.Zipper
 
 sealed trait IntegrationTimeError extends RuntimeException {
   def message: String
