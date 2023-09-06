@@ -5,14 +5,17 @@ package lucuma.itc.client
 
 import cats.Eq
 import cats.data.NonEmptyList
-import cats.syntax.eq.*
+import cats.syntax.all.*
 import io.circe.Decoder
 import io.circe.HCursor
 import lucuma.itc.IntegrationTime
+import eu.timepit.refined.types.numeric.NonNegInt
+import io.circe.DecodingFailure
 
 final case class IntegrationTimeResult(
-  versions: ItcVersions,
-  result:   NonEmptyList[IntegrationTime]
+  versions:       ItcVersions,
+  result:         NonEmptyList[IntegrationTime],
+  preferredIndex: NonNegInt
 )
 
 object IntegrationTimeResult {
@@ -22,7 +25,10 @@ object IntegrationTimeResult {
       for {
         v <- c.as[ItcVersions]
         r <- c.downField("results").as[NonEmptyList[IntegrationTime]]
-      } yield IntegrationTimeResult(v, r)
+        i <- c.downField("preferredIndex")
+               .as[Int]
+               .flatMap(NonNegInt.from(_).leftMap(DecodingFailure(_, Nil)))
+      } yield IntegrationTimeResult(v, r, i)
 
   given Eq[IntegrationTimeResult] with
     def eqv(x: IntegrationTimeResult, y: IntegrationTimeResult): Boolean =

@@ -66,7 +66,8 @@ class WiringSuite extends ClientSuite {
               PosInt.unsafeFrom(10),
               SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
             )
-          )
+          ),
+        0.refined
       ).asRight
     )
   }
@@ -86,7 +87,8 @@ class WiringSuite extends ClientSuite {
               PosInt.unsafeFrom(10),
               SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
             )
-          )
+          ),
+        0.refined
       ).asRight
     )
   }

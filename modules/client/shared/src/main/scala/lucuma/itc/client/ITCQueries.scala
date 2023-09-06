@@ -29,6 +29,7 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
             }
             signalToNoise
           }
+          preferredIndex
         }
       }
     """
@@ -63,6 +64,7 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
             }
             signalToNoise
           }
+          preferredIndex
         }
       }
     """
