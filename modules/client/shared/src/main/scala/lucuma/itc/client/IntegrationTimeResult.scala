@@ -4,13 +4,11 @@
 package lucuma.itc.client
 
 import cats.Eq
-import cats.data.NonEmptyList
 import cats.syntax.all.*
-import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.Decoder
-import io.circe.DecodingFailure
 import io.circe.HCursor
 import lucuma.core.data.Zipper
+import lucuma.core.data.ZipperCodec.given
 import lucuma.itc.IntegrationTime
 
 final case class IntegrationTimeResult(
@@ -24,14 +22,7 @@ object IntegrationTimeResult {
     def apply(c: HCursor): Decoder.Result[IntegrationTimeResult] =
       for {
         v <- c.as[ItcVersions]
-        r <- c.downField("results").as[NonEmptyList[IntegrationTime]]
-        i <- c.downField("preferredIndex")
-               .as[Int]
-               .flatMap(NonNegInt.from(_).leftMap(DecodingFailure(_, Nil)))
-        z <- Zipper
-               .fromNel(r)
-               .focusIndex(i.value)
-               .toRight(DecodingFailure("Inconsistent preferredIndex", Nil))
+        z <- c.as[Zipper[IntegrationTime]]
       } yield IntegrationTimeResult(v, z)
 
   given Eq[IntegrationTimeResult] with

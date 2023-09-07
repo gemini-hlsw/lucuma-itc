@@ -74,7 +74,7 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
                 }
               }
             }
-            results {
+            selected {
               exposures
               exposureTime {
                 seconds

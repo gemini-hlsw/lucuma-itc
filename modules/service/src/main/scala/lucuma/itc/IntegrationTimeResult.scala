@@ -5,8 +5,9 @@ package lucuma.itc
 
 import cats.syntax.all.*
 import io.circe.*
+import io.circe.syntax.*
 import lucuma.core.data.Zipper
-import lucuma.itc.encoders.given
+import lucuma.core.data.ZipperCodec.given
 import lucuma.itc.search.ObservingMode
 
 sealed trait IntegrationTimeError extends RuntimeException {
@@ -36,11 +37,13 @@ case class IntegrationTimeCalculationResult(
 )
 
 object IntegrationTimeCalculationResult {
-  given Encoder[IntegrationTimeCalculationResult] = Encoder.forProduct5(
-    "serverVersion",
-    "dataVersion",
-    "mode",
-    "results",
-    "preferredIndex"
-  )(r => (r.serverVersion, r.dataVersion, r.mode, r.results.toNel, r.results.indexOfFocus))
+  given Encoder[IntegrationTimeCalculationResult] =
+    r =>
+      Json
+        .obj(
+          "serverVersion" -> r.serverVersion.asJson,
+          "dataVersion"   -> r.dataVersion.asJson,
+          "mode"          -> r.mode.asJson
+        )
+        .deepMerge(r.results.asJson)
 }

@@ -22,14 +22,21 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
         spectroscopyIntegrationTime(input: $spec) {
           serverVersion
           dataVersion
-          results {
+          index
+          all {
             exposures
             exposureTime {
               microseconds
             }
             signalToNoise
           }
-          preferredIndex
+          selected {
+            exposures
+            exposureTime {
+              microseconds
+            }
+            signalToNoise
+          }
         }
       }
     """
@@ -57,14 +64,21 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
         imagingIntegrationTime(input: $spec) {
           serverVersion
           dataVersion
-          results {
+          index
+          all {
             exposures
             exposureTime {
               microseconds
             }
             signalToNoise
           }
-          preferredIndex
+          selected {
+            exposures
+            exposureTime {
+              microseconds
+            }
+            signalToNoise
+          }
         }
       }
     """

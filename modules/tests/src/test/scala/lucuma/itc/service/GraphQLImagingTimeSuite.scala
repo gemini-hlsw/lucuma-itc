@@ -98,13 +98,20 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
                 }
               }
             }
-            results {
+            all {
               exposures
               exposureTime {
                 seconds
               }
+              signalToNoise
             }
-            preferredIndex
+            selected {
+              exposures
+              exposureTime {
+                seconds
+              }
+              signalToNoise
+            }
           }
         }
         """,
@@ -122,18 +129,26 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
                   "nanometers" : 530.000
                 }
               },
-              "results" : [{
+              "all" : [{
                 "exposures" : 10,
                 "exposureTime" : {
                   "seconds" : 1.000000
-                }
-              },{
+                },
+                "signalToNoise": 10.000
+              }, {
                 "exposures" : 5,
                 "exposureTime" : {
                   "seconds" : 2.000000
-                }
+                },
+                "signalToNoise": 20.000
               }],
-              "preferredIndex": 1
+              "selected" : {
+                "exposures" : 5,
+                "exposureTime" : {
+                  "seconds" : 2.000000
+                },
+                "signalToNoise": 20.000
+              }
             }
           }
         }
