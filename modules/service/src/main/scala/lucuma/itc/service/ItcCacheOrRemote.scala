@@ -124,7 +124,7 @@ trait ItcCacheOrRemote extends Version:
         itc
           .calculateIntegrationTime(
             calcRequest.targetProfile,
-            calcRequest.specMode,
+            calcRequest.imagingMode,
             calcRequest.constraints,
             calcRequest.signalToNoise,
             none

@@ -14,6 +14,7 @@ import edu.gemini.grackle.circe.CirceMapping
 import eu.timepit.refined.*
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.PosInt
+import lucuma.core.data.Zipper
 import lucuma.core.enums.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
@@ -60,7 +61,7 @@ case class SpectroscopyIntegrationTimeRequest(
 
 case class ImagingIntegrationTimeRequest(
   targetProfile: TargetProfile,
-  specMode:      ObservingMode.ImagingMode,
+  imagingMode:   ObservingMode.ImagingMode,
   constraints:   ItcObservingConditions,
   signalToNoise: SignalToNoise
 ) derives Hash
@@ -144,7 +145,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             version(environment).value,
             BuildInfo.ocslibHash,
             input.specMode,
-            r
+            Zipper.fromNel(r) // In spectroscopy we always get a single result
           )
         )
       }
@@ -198,8 +199,16 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           IntegrationTimeCalculationResult(
             version(environment).value,
             BuildInfo.ocslibHash,
-            input.specMode,
-            r
+            input.imagingMode,
+            // This is mode specific
+            input.imagingMode match {
+              case ObservingMode.ImagingMode.GmosNorth(_, _, _) |
+                  ObservingMode.ImagingMode.GmosSouth(_, _, _) =>
+                Zipper
+                  .fromNel(r)
+                  .focusIndex(1)
+                  .getOrElse(Zipper.fromNel(r)) // For gmos focus on the second CCD
+            }
           )
         )
       }
@@ -264,8 +273,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     (for {
       specTime <-
         ResultT(calculateSpectroscopyIntegrationTime(environment, redis, itc)(tr))
-      expTime   = specTime.results.head.exposureTime
-      exps      = specTime.results.head.exposures
+      expTime   = specTime.results.focus.exposureTime
+      exps      = specTime.results.focus.exposures
       req       = GraphRequest(tr.targetProfile,
                                tr.specMode,
                                tr.constraints,
