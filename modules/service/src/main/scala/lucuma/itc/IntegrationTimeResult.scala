@@ -3,11 +3,11 @@
 
 package lucuma.itc
 
-import cats.syntax.all.*
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.data.Zipper
 import lucuma.core.data.ZipperCodec.given
+import lucuma.core.syntax.string.*
 import lucuma.itc.search.ObservingMode
 
 sealed trait IntegrationTimeError extends RuntimeException {
@@ -16,7 +16,7 @@ sealed trait IntegrationTimeError extends RuntimeException {
 
 case class SourceTooBright(halfWellTime: BigDecimal) extends IntegrationTimeError
     derives Encoder.AsObject {
-  val message: String = f"Source saturates in $halfWellTime%.2f seconds"
+  val message: String = f"Source too bright, well half filled in $halfWellTime%.2f seconds"
 }
 
 /** Generic calculation error */
@@ -36,7 +36,7 @@ case class IntegrationTimeCalculationResult(
   results:       Zipper[IntegrationTime]
 )
 
-object IntegrationTimeCalculationResult {
+object IntegrationTimeCalculationResult:
   given Encoder[IntegrationTimeCalculationResult] =
     r =>
       Json
@@ -46,4 +46,23 @@ object IntegrationTimeCalculationResult {
           "mode"          -> r.mode.asJson
         )
         .deepMerge(r.results.asJson)
-}
+
+enum ErrorCode:
+  case SourceTooBright
+
+sealed trait Extension(val errorCode: ErrorCode)
+
+object Extension:
+  given Encoder.AsObject[Extension] = r =>
+    JsonObject(
+      "errorCode" -> r.errorCode.toString.toScreamingSnakeCase.asJson
+    )
+
+case class SourceTooBrightExtension(hw: BigDecimal) extends Extension(ErrorCode.SourceTooBright)
+
+object SourceTooBrightExtension:
+  given Encoder.AsObject[SourceTooBrightExtension] = r =>
+    JsonObject(
+      "errorCode" -> r.errorCode.toString.toScreamingSnakeCase.asJson,
+      "error"     -> Json.obj("halfWell" -> r.hw.asJson)
+    )
