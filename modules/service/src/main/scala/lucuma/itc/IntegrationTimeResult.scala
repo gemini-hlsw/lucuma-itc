@@ -46,23 +46,3 @@ object IntegrationTimeCalculationResult:
           "mode"          -> r.mode.asJson
         )
         .deepMerge(r.results.asJson)
-
-enum ErrorCode:
-  case SourceTooBright
-
-sealed trait Extension(val errorCode: ErrorCode)
-
-object Extension:
-  given Encoder.AsObject[Extension] = r =>
-    JsonObject(
-      "errorCode" -> r.errorCode.toString.toScreamingSnakeCase.asJson
-    )
-
-case class SourceTooBrightExtension(hw: BigDecimal) extends Extension(ErrorCode.SourceTooBright)
-
-object SourceTooBrightExtension:
-  given Encoder.AsObject[SourceTooBrightExtension] = r =>
-    JsonObject(
-      "errorCode" -> r.errorCode.toString.toScreamingSnakeCase.asJson,
-      "error"     -> Json.obj("halfWell" -> r.hw.asJson)
-    )
