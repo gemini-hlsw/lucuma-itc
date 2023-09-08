@@ -14,6 +14,7 @@ import edu.gemini.grackle.circe.CirceMapping
 import eu.timepit.refined.*
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.PosInt
+import io.circe.syntax.*
 import lucuma.core.data.Zipper
 import lucuma.core.enums.*
 import lucuma.core.math.SignalToNoise
@@ -125,6 +126,10 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   }
 
   private def recoverResult[A]: PartialFunction[Throwable, Result[A]] = {
+    case x @ SourceTooBright(hw) =>
+      Result.failure(
+        Problem(x.message, extension = SourceTooBrightExtension(hw).asJsonObject.some)
+      )
     case x: IntegrationTimeError =>
       Result.failure(x.message)
     case UpstreamException(msg)  =>
