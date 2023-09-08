@@ -19,6 +19,7 @@ import fs2.io.net.Network
 import lucuma.graphql.routes.GrackleGraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
+import lucuma.itc.legacy.FLocalItc
 import lucuma.itc.legacy.LocalItc
 import lucuma.itc.service.config.ExecutionEnvironment.*
 import lucuma.itc.service.config.*
@@ -126,7 +127,7 @@ object Main extends IOApp with ItcCacheOrRemote {
     itc: LocalItc
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
-      itc     <- Resource.eval(ItcImpl.build(itc).pure[F])
+      itc     <- Resource.eval(ItcImpl.build(FLocalItc[F](itc)).pure[F])
       redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
       _       <- Resource.eval(checkVersionToPurge[F](redis, itc))
       mapping <- Resource.eval(ItcMapping(cfg.environment, redis, itc))

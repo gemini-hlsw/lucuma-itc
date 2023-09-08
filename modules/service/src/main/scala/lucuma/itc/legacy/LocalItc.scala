@@ -23,11 +23,11 @@ import java.lang.reflect.Method
  */
 case class LocalItc(classLoader: ClassLoader):
   // We need to keep a single reference to the reflected method
-  val calculateChartsMethod: Method = classLoader
+  private val calculateChartsMethod: Method = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculateCharts", classOf[String])
 
-  val calculateExposureTimeMethod = classLoader
+  private val calculateExposureTimeMethod = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculateExposureTime", classOf[String])
 

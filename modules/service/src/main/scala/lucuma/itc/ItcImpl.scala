@@ -19,7 +19,8 @@ import io.circe.syntax.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
-import lucuma.itc.legacy.LocalItc
+import lucuma.itc.legacy.ExposureTimeRemoteResult
+import lucuma.itc.legacy.FLocalItc
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetProfile
 import lucuma.refined.*
@@ -29,7 +30,7 @@ import org.typelevel.log4cats.Logger
 import scala.concurrent.duration.*
 import scala.math.*
 
-trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
+trait SignalToNoiseCalculation[F[_]: Applicative] { this: Itc[F] =>
   def calculateSignalToNoise(
     graph:           NonEmptyList[ItcChartGroup],
     signalToNoiseAt: Option[Wavelength]
@@ -84,9 +85,10 @@ trait SignalToNoiseCalculation[F[_]: cats.Applicative] { this: Itc[F] =>
 object ItcImpl {
   opaque type NumberOfExposures = Int
 
-  def build[F[_]: MonadThrow: Logger: Trace](itcLocal: LocalItc): Itc[F] =
+  def build[F[_]: MonadThrow: Logger: Trace](itcLocal: FLocalItc[F]): Itc[F] =
     new Itc[F] with SignalToNoiseCalculation[F] {
       val L = Logger[F]
+      val T = Trace[F]
 
       def calculateIntegrationTime(
         targetProfile:   TargetProfile,
@@ -95,7 +97,7 @@ object ItcImpl {
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
       ): F[NonEmptyList[IntegrationTime]] =
-        Trace[F].span("calculate-exposure-time") {
+        T.span("calculate-exposure-time"):
           observingMode match
             case _: ObservingMode.SpectroscopyMode =>
               signalToNoiseAt match
@@ -105,7 +107,6 @@ object ItcImpl {
                   spectroscopySNAt(targetProfile, observingMode, constraints, signalToNoise, at)
             case _: ObservingMode.ImagingMode      =>
               imaging(targetProfile, observingMode, constraints, signalToNoise)
-        }
 
       def calculateGraph(
         targetProfile:   TargetProfile,
@@ -130,8 +131,7 @@ object ItcImpl {
               new IllegalArgumentException("Imaging mode not supported for graph calculation")
             )
 
-      // Convenience method to compute an OCS2 ITC result for the specified profile/mode.
-      def itc(
+      private def itc(
         targetProfile:    TargetProfile,
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
@@ -142,7 +142,7 @@ object ItcImpl {
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
-        Trace[F].span("legacy-itc-query") {
+        T.span("legacy-itc-query") {
           val request =
             spectroscopyParams(targetProfile,
                                observingMode,
@@ -150,20 +150,17 @@ object ItcImpl {
                                constraints,
                                exposures
             ).asJson
-          Trace[F].put("itc.query" -> request.spaces2) *>
-            Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
-            Trace[F].put("itc.exposures" -> exposures) *>
-            Trace[F].put("itc.level" -> level.value) *>
-            (itcLocal.calculateCharts(request.noSpaces) match {
-              case Right(r)  =>
-                r.pure[F]
-              case Left(msg) =>
-                L.warn(s"Upstream error $msg") *>
-                  ApplicativeThrow[F].raiseError(new UpstreamException(msg))
-            })
+
+          for {
+            _ <- T.put("itc.query" -> request.spaces2)
+            _ <- T.put("itc.exposureDuration" -> exposureDuration.value.toInt)
+            _ <- T.put("itc.exposures" -> exposures)
+            _ <- T.put("itc.level" -> level.value)
+            r <- itcLocal.calculateCharts(request.noSpaces)
+          } yield r
         }
 
-      def itcWithSNAt(
+      private def itcWithSNAt(
         targetProfile: TargetProfile,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
@@ -173,7 +170,7 @@ object ItcImpl {
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
-        Trace[F].span("legacy-itc-query") {
+        T.span("legacy-itc-query") {
           val request =
             spectroscopyWithSNAtParams(targetProfile,
                                        observingMode,
@@ -181,19 +178,16 @@ object ItcImpl {
                                        sigma,
                                        wavelength
             ).asJson
-          Trace[F].put("itc.query" -> request.spaces2) *>
-            Trace[F].put("itc.sigma" -> sigma.toBigDecimal.toDouble) *>
-            Logger[F].info(request.noSpaces) *>
-            (itcLocal.calculateExposureTime(request.noSpaces) match {
-              case Right(r)  =>
-                r.pure[F]
-              case Left(msg) =>
-                L.warn(s"Upstream error $msg") *>
-                  ApplicativeThrow[F].raiseError(new UpstreamException(msg))
-            })
+
+          for {
+            _ <- T.put("itc.query" -> request.spaces2)
+            _ <- T.put("itc.sigma" -> sigma.toBigDecimal.toDouble)
+            _ <- L.info(request.noSpaces) // Request to the legacy itc
+            a <- itcLocal.calculateExposureTime(request.noSpaces)
+          } yield a
         }
 
-      def itcGraph(
+      private def itcGraph(
         targetProfile:    TargetProfile,
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
@@ -203,7 +197,7 @@ object ItcImpl {
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
-        Trace[F].span("legacy-itc-query") {
+        T.span("legacy-itc-query") {
           val json =
             spectroscopyParams(targetProfile,
                                observingMode,
@@ -211,20 +205,15 @@ object ItcImpl {
                                constraints,
                                exposures.toInt
             ).asJson
-          Trace[F].put("itc.query" -> json.spaces2) *>
-            Trace[F].put("itc.exposureDuration" -> exposureDuration.value.toInt) *>
-            Trace[F].put("itc.exposures" -> exposures.toInt) *>
-            (itcLocal.calculateCharts(json.noSpaces) match {
-              case Right(r)  => r.pure[F]
-              case Left(msg) =>
-                L.warn(s"Upstream error $msg") *>
-                  ApplicativeThrow[F].raiseError(new UpstreamException(msg))
-            })
+          for {
+            _ <- T.put("itc.query" -> json.spaces2)
+            _ <- T.put("itc.exposureDuration" -> exposureDuration.value.toInt)
+            _ <- T.put("itc.exposures" -> exposures.toInt)
+            r <- itcLocal.calculateCharts(json.noSpaces)
+          } yield r
         }
 
-      val MaxIterations = 10
-
-      def spectroscopyGraph(
+      private def spectroscopyGraph(
         targetProfile:    TargetProfile,
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
@@ -240,7 +229,7 @@ object ItcImpl {
        * Compute the exposure time and number of exposures required to achieve the desired
        * signal-to-noise under the requested conditions. Only for spectroscopy modes
        */
-      def spectroscopy(
+      private def spectroscopy(
         targetProfile:   TargetProfile,
         observingMode:   ObservingMode,
         constraints:     ItcObservingConditions,
@@ -250,6 +239,7 @@ object ItcImpl {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise
+        val MaxIterations     = 10
 
         // This loops should be necessary only a few times but put a circuit breaker just in case
         def itcStep(
@@ -328,64 +318,63 @@ object ItcImpl {
 
         L.info(s"Desired S/N $signalToNoise") *>
           L.info(s"Target brightness ${targetProfile} at band ${targetProfile.band}") *>
-          Trace[F]
-            .span("itc.calctime.spectroscopy") {
+          T.span("itc.calctime.spectroscopy") {
 
-              itc(targetProfile,
-                  observingMode,
-                  constraints,
-                  startExpTime,
-                  numberOfExposures,
-                  1.refined
-              )
-                .flatMap { r =>
-                  val halfWellTime = r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime.value
-                  L.info(
-                    s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} halfWellTime: $halfWellTime"
-                  ) *> {
-                    if (halfWellTime < 1.0) {
-                      MonadThrow[F].raiseError(SourceTooBright(halfWellTime))
-                    } else {
-                      val maxTime = startExpTime.value.min(halfWellTime)
-                      calculateSignalToNoise(r.groups, signalToNoiseAt)
-                        .flatMap {
-                          // degenerate case where the ITC cannot compute a S/N
-                          case SNCalcResult.SNCalcSuccess(snr) if snr.toBigDecimal <= 0.0 =>
-                            MonadThrow[F].raiseError(
-                              CalculationError("No signal can be achieved")
+            itc(targetProfile,
+                observingMode,
+                constraints,
+                startExpTime,
+                numberOfExposures,
+                1.refined
+            )
+              .flatMap { r =>
+                val halfWellTime = r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime.value
+                L.info(
+                  s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} halfWellTime: $halfWellTime"
+                ) *> {
+                  if (halfWellTime < 1.0) {
+                    MonadThrow[F].raiseError(SourceTooBright(halfWellTime))
+                  } else {
+                    val maxTime = startExpTime.value.min(halfWellTime)
+                    calculateSignalToNoise(r.groups, signalToNoiseAt)
+                      .flatMap {
+                        // degenerate case where the ITC cannot compute a S/N
+                        case SNCalcResult.SNCalcSuccess(snr) if snr.toBigDecimal <= 0.0 =>
+                          MonadThrow[F].raiseError(
+                            CalculationError("No signal can be achieved")
+                          )
+                        case SNCalcResult.SNCalcSuccess(snr)                            =>
+                          itcStep(numberOfExposures,
+                                  0,
+                                  startExpTime,
+                                  BigDecimal(0).withUnit[Second],
+                                  snr,
+                                  maxTime.withUnit[Second],
+                                  r,
+                                  0.refined
+                          )
+                        case SNCalcResult.WavelengthAtAboveRange(w)                     =>
+                          MonadThrow[F].raiseError(
+                            CalculationError(
+                              f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm above range"
                             )
-                          case SNCalcResult.SNCalcSuccess(snr)                            =>
-                            itcStep(numberOfExposures,
-                                    0,
-                                    startExpTime,
-                                    BigDecimal(0).withUnit[Second],
-                                    snr,
-                                    maxTime.withUnit[Second],
-                                    r,
-                                    0.refined
+                          )
+                        case SNCalcResult.WavelengthAtBelowRange(w)                     =>
+                          MonadThrow[F].raiseError(
+                            CalculationError(
+                              f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm below range"
                             )
-                          case SNCalcResult.WavelengthAtAboveRange(w)                     =>
-                            MonadThrow[F].raiseError(
-                              CalculationError(
-                                f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm above range"
-                              )
-                            )
-                          case SNCalcResult.WavelengthAtBelowRange(w)                     =>
-                            MonadThrow[F].raiseError(
-                              CalculationError(
-                                f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm below range"
-                              )
-                            )
-                          case r                                                          =>
-                            MonadThrow[F].raiseError(CalculationError(r.toString))
-                        }
+                          )
+                        case r                                                          =>
+                          MonadThrow[F].raiseError(CalculationError(r.toString))
+                      }
 
-                    }
                   }
-
                 }
-                .map(NonEmptyList.one)
-            }
+
+              }
+              .map(NonEmptyList.one)
+          }
 
       }
 
@@ -393,39 +382,28 @@ object ItcImpl {
        * Compute the exposure time and number of exposures required to achieve the desired
        * signal-to-noise under the requested conditions. Only for spectroscopy modes
        */
-      def spectroscopySNAt(
+      private def spectroscopySNAt(
         targetProfile:   TargetProfile,
         observingMode:   ObservingMode,
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Wavelength
       ): F[NonEmptyList[IntegrationTime]] =
-        L.info(s"Desired S/N $signalToNoise") *>
-          L.info(
-            s"Target brightness ${targetProfile} at band ${targetProfile.band}"
-          ) *>
-          Trace[F]
-            .span("itc.calctime.spectroscopy-exp-time-at") {
-              itcWithSNAt(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
-                .flatMap { r =>
-                  r.exposureCalculation.traverse(r =>
-                    TimeSpan
-                      .fromSeconds(r.exposureTime)
-                      .map(expTime =>
-                        IntegrationTime(expTime, r.exposures, r.signalToNoise).pure[F]
-                      )
-                      .getOrElse {
-                        MonadThrow[F].raiseError(
-                          CalculationError(
-                            s"Negative exposure time ${r.exposureTime}"
-                          )
-                        )
-                      }
-                  )
-                }
-            }
+        for {
+          _ <- L.info(s"Desired S/N $signalToNoise")
+          _ <- L.info(s"Target ${targetProfile} at band ${targetProfile.band}")
+          r <- T.span("itc.calctime.spectroscopy-exp-time-at") {
+                 itcWithSNAt(targetProfile,
+                             observingMode,
+                             constraints,
+                             signalToNoise,
+                             signalToNoiseAt
+                 )
+               }
+          t <- calculationResults(r)
+        } yield t
 
-      def imagingLegacy(
+      private def imagingLegacy(
         targetProfile: TargetProfile,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
@@ -434,60 +412,52 @@ object ItcImpl {
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
-        Trace[F].span("legacy-itc-query") {
+        T.span("legacy-itc-query") {
           val request =
             imagingParams(targetProfile, observingMode, constraints, sigma).asJson
 
-          Trace[F].put("itc.query" -> request.spaces2) *>
-            Trace[F].put("itc.sigma" -> sigma.toBigDecimal.toDouble) *>
-            Logger[F].info(request.noSpaces) *>
-            (itcLocal.calculateExposureTime(request.noSpaces) match {
-              case Right(r)  =>
-                r.pure[F]
-              case Left(msg) =>
-                L.warn(s"Upstream error $msg") *>
-                  ApplicativeThrow[F].raiseError(new UpstreamException(msg))
-            })
+          for {
+            _ <- T.put("itc.query" -> request.spaces2)
+            _ <- T.put("itc.sigma" -> sigma.toBigDecimal.toDouble)
+            _ <- L.info(request.noSpaces)
+            r <- itcLocal.calculateExposureTime(request.noSpaces)
+          } yield r
         }
+
+      private def calculationResults(
+        r: ExposureTimeRemoteResult
+      ): F[NonEmptyList[IntegrationTime]] =
+        r.exposureCalculation.traverse(r =>
+          TimeSpan
+            .fromSeconds(r.exposureTime)
+            .map(expTime => IntegrationTime(expTime, r.exposures, r.signalToNoise).pure[F])
+            .getOrElse {
+              MonadThrow[F].raiseError(
+                CalculationError(
+                  s"Negative exposure time ${r.exposureTime}"
+                )
+              )
+            }
+        )
 
       /**
        * Compute the exposure time and number of exposures required to achieve the desired
        * signal-to-noise under the requested conditions. Only for spectroscopy modes
        */
-      def imaging(
+      private def imaging(
         targetProfile: TargetProfile,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         signalToNoise: SignalToNoise
       ): F[NonEmptyList[IntegrationTime]] =
-        L.info(s"Desired S/N $signalToNoise") *>
-          L.info(
-            s"Target brightness ${targetProfile} at band ${targetProfile.band}"
-          ) *> Trace[F]
-            .span("itc.calctime.spectroscopy-exp-time-at") {
-              imagingLegacy(
-                targetProfile,
-                observingMode,
-                constraints,
-                signalToNoise
-              )
-                .flatMap { r =>
-                  r.exposureCalculation.traverse(r =>
-                    TimeSpan
-                      .fromSeconds(r.exposureTime)
-                      .map(expTime =>
-                        IntegrationTime(expTime, r.exposures, r.signalToNoise).pure[F]
-                      )
-                      .getOrElse {
-                        MonadThrow[F].raiseError(
-                          CalculationError(
-                            s"Negative exposure time ${r.exposureTime}"
-                          )
-                        )
-                      }
-                  )
-                }
-            }
+        for {
+          _ <- L.info(s"Desired S/N $signalToNoise")
+          _ <- L.info(s"Target ${targetProfile} at band ${targetProfile.band}")
+          r <- T.span("itc.calctime.spectroscopy-exp-time-at") {
+                 imagingLegacy(targetProfile, observingMode, constraints, signalToNoise)
+               }
+          t <- calculationResults(r)
+        } yield t
 
     }
 }
