@@ -128,7 +128,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   private def recoverResult[A]: PartialFunction[Throwable, Result[A]] = {
     case x @ SourceTooBright(hw) =>
       Result.failure(
-        Problem(x.message, extension = SourceTooBrightExtension(hw).asJsonObject.some)
+        Problem(x.message, extensions = SourceTooBrightExtension(hw).asJsonObject.some)
       )
     case x: IntegrationTimeError =>
       Result.failure(x.message)
