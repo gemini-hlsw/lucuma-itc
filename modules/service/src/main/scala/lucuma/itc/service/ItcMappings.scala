@@ -9,11 +9,12 @@ import cats.derived.*
 import cats.effect.*
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.StringCommands
-import grackle.*
-import grackle.circe.CirceMapping
 import eu.timepit.refined.*
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.PosInt
+import grackle.QueryCompiler.Elab
+import grackle.*
+import grackle.circe.CirceMapping
 import io.circe.syntax.*
 import lucuma.core.data.Zipper
 import lucuma.core.enums.*
@@ -41,7 +42,6 @@ import scala.util.Using
 
 import Query.*
 import QueryCompiler.*
-import grackle.QueryCompiler.Elab
 
 case class GraphRequest(
   targetProfile:      TargetProfile,
