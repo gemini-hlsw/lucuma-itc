@@ -9,8 +9,8 @@ import cats.derived.*
 import cats.effect.*
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.StringCommands
-import edu.gemini.grackle.*
-import edu.gemini.grackle.circe.CirceMapping
+import grackle.*
+import grackle.circe.CirceMapping
 import eu.timepit.refined.*
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.PosInt
@@ -41,6 +41,7 @@ import scala.util.Using
 
 import Query.*
 import QueryCompiler.*
+import grackle.QueryCompiler.Elab
 
 case class GraphRequest(
   targetProfile:      TargetProfile,
@@ -369,11 +370,11 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             ObjectMapping(
               tpe = QueryType,
               fieldMappings = List(
-                RootEffect.computeEncodable("versions")((_, p, env) =>
+                RootEffect.computeEncodable("versions")((p, env) =>
                   versions(environment, redis)
                 ),
-                RootEffect.computeEncodable("test")((_, p, env) => Result("unsupported").pure[F]),
-                RootEffect.computeEncodable("spectroscopyIntegrationTime") { (_, p, env) =>
+                RootEffect.computeEncodable("test")((p, env) => Result("unsupported").pure[F]),
+                RootEffect.computeEncodable("spectroscopyIntegrationTime") { (p, env) =>
                   env
                     .getR[SpectroscopyIntegrationTimeInput]("input")
                     .flatMap(toSpectroscopyTimeRequest)
@@ -381,7 +382,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                       calculateSpectroscopyIntegrationTime(environment, redis, itc)
                     )
                 },
-                RootEffect.computeEncodable("imagingIntegrationTime") { (_, p, env) =>
+                RootEffect.computeEncodable("imagingIntegrationTime") { (p, env) =>
                   env
                     .getR[ImagingIntegrationTimeInput]("input")
                     .flatMap(toImagingTimeRequest)
@@ -389,7 +390,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                       calculateImagingIntegrationTime(environment, redis, itc)
                     )
                 },
-                RootEffect.computeEncodable("optimizedSpectroscopyGraph") { (_, p, env) =>
+                RootEffect.computeEncodable("optimizedSpectroscopyGraph") { (p, env) =>
                   env
                     .getR[OptimizedSpectroscopyGraphInput]("input")
                     .flatMap(toGraphRequest)
@@ -397,7 +398,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                       spectroscopyGraph(environment, redis, itc)
                     )
                 },
-                RootEffect.computeEncodable("spectroscopyIntegrationTimeAndGraph") { (_, p, env) =>
+                RootEffect.computeEncodable("spectroscopyIntegrationTimeAndGraph") { (p, env) =>
                   env
                     .getR[SpectroscopyIntegrationTimeAndGraphInput]("input")
                     .flatMap(u => toSpectroscopyTimeRequest(u).map((_, u.significantFigures)))
@@ -414,51 +415,14 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           )
 
         override val selectElaborator =
-          new SelectElaborator(
-            Map(
-              QueryType -> {
-                case Select(
-                      "spectroscopyIntegrationTime",
-                      List(SpectroscopyIntegrationTimeInput.binding("input", input)),
-                      child
-                    ) =>
-                  input.map(i =>
-                    Environment(Cursor.Env(("input", i)), child)
-                      .copy(child = Select("spectroscopyIntegrationTime", Nil, child))
-                  )
-
-                case Select(
-                      "imagingIntegrationTime",
-                      List(ImagingIntegrationTimeInput.binding("input", input)),
-                      child
-                    ) =>
-                  input.map(i =>
-                    Environment(Cursor.Env(("input", i)), child)
-                      .copy(child = Select("imagingIntegrationTime", Nil, child))
-                  )
-
-                case Select(
-                      "optimizedSpectroscopyGraph",
-                      List(OptimizedSpectroscopyGraphInput.binding("input", input)),
-                      child
-                    ) =>
-                  input.map(i =>
-                    Environment(Cursor.Env(("input", i)), child)
-                      .copy(child = Select("optimizedSpectroscopyGraph", Nil, child))
-                  )
-
-                case Select(
-                      "spectroscopyIntegrationTimeAndGraph",
-                      List(SpectroscopyIntegrationTimeAndGraphInput.binding("input", input)),
-                      child
-                    ) =>
-                  input.map(i =>
-                    Environment(Cursor.Env(("input", i)), child)
-                      .copy(child = Select("spectroscopyIntegrationTimeAndGraph", Nil, child))
-                  )
-              }
-            )
-          )
+          def handle[A](input: Result[A]): Elab[Unit] = Elab.liftR(input).flatMap { i => Elab.env("input" -> i) }
+          SelectElaborator {
+            case (QueryType, "spectroscopyIntegrationTime", List(SpectroscopyIntegrationTimeInput.binding("input", input)))                 => handle(input)
+            case (QueryType, "imagingIntegrationTime", List(ImagingIntegrationTimeInput.binding("input", input)))                           => handle(input)
+            case (QueryType, "optimizedSpectroscopyGraph", List(OptimizedSpectroscopyGraphInput.binding("input", input)))                   => handle(input)
+            case (QueryType, "spectroscopyIntegrationTimeAndGraph", List(SpectroscopyIntegrationTimeAndGraphInput.binding("input", input))) => handle(input)
+          }
+          
       }
     }
 }

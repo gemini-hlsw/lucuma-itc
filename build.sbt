@@ -7,20 +7,20 @@ val catsScalacheckVersion       = "0.3.2"
 val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.6"
 val cirisVersion                = "3.4.0"
-val clueVersion                 = "0.32.0"
+val clueVersion                 = "0.34.0"
 val http4sVersion               = "0.23.23"
 val http4sJdkHttpClientVersion  = "0.9.1"
 val fs2Version                  = "3.9.3"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.88.0"
+val lucumaCoreVersion           = "0.88.1"
 val lucumaRefinedVersion        = "0.1.2"
 val slf4jVersion                = "2.0.9"
 val log4catsVersion             = "2.6.0"
 val monocleVersion              = "3.2.0"
 val munitCatsEffectVersion      = "1.0.7"
-val graphQLRoutesVersion        = "0.6.6"
+val graphQLRoutesVersion        = "0.8-84eda11-20231106T215930Z-SNAPSHOT"
 val refinedVersion              = "0.11.0"
-val grackleVersion              = "0.13.0"
+val grackleVersion              = "0.16.0"
 val natcchezHttp4sVersion       = "0.5.0"
 val natchezVersion              = "0.3.4"
 val munitVersion                = "0.7.29"
@@ -107,10 +107,10 @@ lazy val service = project
       "REDISCLOUD_URL" -> "redis://localhost"
     ),
     libraryDependencies ++= Seq(
-      "edu.gemini"     %% "gsp-graphql-core"              % grackleVersion,
-      "edu.gemini"     %% "gsp-graphql-generic"           % grackleVersion,
-      "edu.gemini"     %% "gsp-graphql-circe"             % grackleVersion,
-      "edu.gemini"     %% "lucuma-graphql-routes-grackle" % graphQLRoutesVersion,
+      "org.typelevel"     %% "grackle-core"              % grackleVersion,
+      "org.typelevel"     %% "grackle-generic"           % grackleVersion,
+      "org.typelevel"     %% "grackle-circe"             % grackleVersion,
+      "edu.gemini"     %% "lucuma-graphql-routes" % graphQLRoutesVersion,
       "org.tpolecat"   %% "natchez-honeycomb"             % natchezVersion,
       "org.tpolecat"   %% "natchez-log"                   % natchezVersion,
       "org.tpolecat"   %% "natchez-http4s"                % natcchezHttp4sVersion,

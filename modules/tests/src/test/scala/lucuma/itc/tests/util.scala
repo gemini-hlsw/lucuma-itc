@@ -5,7 +5,7 @@ package lucuma.itc.tests
 
 import cats.effect.IO
 import cats.syntax.option.*
-import lucuma.graphql.routes.GrackleGraphQLService
+import lucuma.graphql.routes.GraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.Itc
 import lucuma.itc.service.ItcMapping
@@ -31,7 +31,7 @@ def routesForWsb(
     new NoOpRedis[IO, Array[Byte], Array[Byte]](),
     itc
   ).map { itcMap => (wsb: WebSocketBuilder2[IO]) =>
-    Routes.forService(_ => IO.pure(GrackleGraphQLService(itcMap).some), wsb)
+    Routes.forService(_ => IO.pure(GraphQLService(itcMap).some), wsb)
   }
 
 def routes(itc: Itc[IO])(using Logger[IO], Trace[IO]): IO[HttpRoutes[IO]] =

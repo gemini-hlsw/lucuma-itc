@@ -16,7 +16,7 @@ import dev.profunktor.redis4cats.data.RedisCodec
 import dev.profunktor.redis4cats.log4cats.*
 import fs2.compression.Compression
 import fs2.io.net.Network
-import lucuma.graphql.routes.GrackleGraphQLService
+import lucuma.graphql.routes.GraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
 import lucuma.itc.legacy.FLocalItc
@@ -137,7 +137,7 @@ object Main extends IOApp with ItcCacheOrRemote {
         GZip(
           cors(cfg.environment, none)(
             cacheMiddleware(
-              Routes.forService(_ => GrackleGraphQLService[F](mapping).some.pure[F], wsb, "itc")
+              Routes.forService(_ => GraphQLService[F](mapping).some.pure[F], wsb, "itc")
             )
           )
         )
