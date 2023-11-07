@@ -7,4 +7,3 @@ import grackle.Value.EnumValue
 
 val EnumBinding: Matcher[String] =
   primitiveBinding("EnumValue") { case EnumValue(name) => name }
-

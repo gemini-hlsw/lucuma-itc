@@ -370,9 +370,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             ObjectMapping(
               tpe = QueryType,
               fieldMappings = List(
-                RootEffect.computeEncodable("versions")((p, env) =>
-                  versions(environment, redis)
-                ),
+                RootEffect.computeEncodable("versions")((p, env) => versions(environment, redis)),
                 RootEffect.computeEncodable("test")((p, env) => Result("unsupported").pure[F]),
                 RootEffect.computeEncodable("spectroscopyIntegrationTime") { (p, env) =>
                   env
@@ -415,14 +413,31 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           )
 
         override val selectElaborator =
-          def handle[A](input: Result[A]): Elab[Unit] = Elab.liftR(input).flatMap { i => Elab.env("input" -> i) }
+          def handle[A](input: Result[A]): Elab[Unit] =
+            Elab.liftR(input).flatMap(i => Elab.env("input" -> i))
           SelectElaborator {
-            case (QueryType, "spectroscopyIntegrationTime", List(SpectroscopyIntegrationTimeInput.binding("input", input)))                 => handle(input)
-            case (QueryType, "imagingIntegrationTime", List(ImagingIntegrationTimeInput.binding("input", input)))                           => handle(input)
-            case (QueryType, "optimizedSpectroscopyGraph", List(OptimizedSpectroscopyGraphInput.binding("input", input)))                   => handle(input)
-            case (QueryType, "spectroscopyIntegrationTimeAndGraph", List(SpectroscopyIntegrationTimeAndGraphInput.binding("input", input))) => handle(input)
+            case (QueryType,
+                  "spectroscopyIntegrationTime",
+                  List(SpectroscopyIntegrationTimeInput.binding("input", input))
+                ) =>
+              handle(input)
+            case (QueryType,
+                  "imagingIntegrationTime",
+                  List(ImagingIntegrationTimeInput.binding("input", input))
+                ) =>
+              handle(input)
+            case (QueryType,
+                  "optimizedSpectroscopyGraph",
+                  List(OptimizedSpectroscopyGraphInput.binding("input", input))
+                ) =>
+              handle(input)
+            case (QueryType,
+                  "spectroscopyIntegrationTimeAndGraph",
+                  List(SpectroscopyIntegrationTimeAndGraphInput.binding("input", input))
+                ) =>
+              handle(input)
           }
-          
+
       }
     }
 }
