@@ -4,8 +4,8 @@
 package lucuma.itc.service.syntax
 
 import cats.data._
-import edu.gemini.grackle.Problem
-import edu.gemini.grackle.Query.Environment
+import grackle.Problem
+import grackle.Query.Environment
 import lucuma.core.math.SignalToNoise
 import lucuma.itc.FinalSN
 import lucuma.itc.ItcCcd

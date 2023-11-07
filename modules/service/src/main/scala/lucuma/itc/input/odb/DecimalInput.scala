@@ -5,7 +5,7 @@ package lucuma.odb.graphql
 package input
 
 import cats.syntax.all._
-import edu.gemini.grackle.Result
+import grackle.Result
 import lucuma.odb.graphql.binding._
 
 /**
@@ -23,9 +23,9 @@ object DecimalInput {
     ObjectFieldsBinding.rmap {
       case List(
             BigDecimalBinding("value", rValue),
-            TypedEnumBinding("units", rEnum)
+            EnumBinding("units", rEnum)
           ) =>
-        (rValue, rEnum.map(_.name)).parTupled.flatMap { case (value, label) =>
+        (rValue, rEnum).parTupled.flatMap { case (value, label) =>
           handler.lift((value, label)) match {
             case Some(r) => r
             case None    => Result.failure(s"Unexpected ${name}Units value: $label")

@@ -7,7 +7,7 @@ val catsScalacheckVersion       = "0.3.2"
 val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.6"
 val cirisVersion                = "3.4.0"
-val clueVersion                 = "0.32.0"
+val clueVersion                 = "0.34.0"
 val http4sVersion               = "0.23.23"
 val http4sJdkHttpClientVersion  = "0.9.1"
 val fs2Version                  = "3.9.3"
@@ -18,9 +18,9 @@ val slf4jVersion                = "2.0.9"
 val log4catsVersion             = "2.6.0"
 val monocleVersion              = "3.2.0"
 val munitCatsEffectVersion      = "1.0.7"
-val graphQLRoutesVersion        = "0.6.6"
+val graphQLRoutesVersion        = "0.8.2"
 val refinedVersion              = "0.11.0"
-val grackleVersion              = "0.13.0"
+val grackleVersion              = "0.16.0"
 val natcchezHttp4sVersion       = "0.5.0"
 val natchezVersion              = "0.3.4"
 val munitVersion                = "0.7.29"
@@ -36,7 +36,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.3.1"
 ThisBuild / crossScalaVersions  := Seq("3.3.1")
-ThisBuild / tlBaseVersion       := "0.20"
+ThisBuild / tlBaseVersion       := "0.21"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -107,29 +107,29 @@ lazy val service = project
       "REDISCLOUD_URL" -> "redis://localhost"
     ),
     libraryDependencies ++= Seq(
-      "edu.gemini"     %% "gsp-graphql-core"              % grackleVersion,
-      "edu.gemini"     %% "gsp-graphql-generic"           % grackleVersion,
-      "edu.gemini"     %% "gsp-graphql-circe"             % grackleVersion,
-      "edu.gemini"     %% "lucuma-graphql-routes-grackle" % graphQLRoutesVersion,
-      "org.tpolecat"   %% "natchez-honeycomb"             % natchezVersion,
-      "org.tpolecat"   %% "natchez-log"                   % natchezVersion,
-      "org.tpolecat"   %% "natchez-http4s"                % natcchezHttp4sVersion,
-      "co.fs2"         %% "fs2-core"                      % fs2Version,
-      "edu.gemini"     %% "lucuma-core"                   % lucumaCoreVersion,
-      "org.typelevel"  %% "cats-core"                     % catsVersion,
-      "org.typelevel"  %% "cats-effect"                   % catsEffectVersion,
-      "is.cir"         %% "ciris"                         % cirisVersion,
-      "org.typelevel"  %% "log4cats-slf4j"                % log4catsVersion,
-      "org.slf4j"       % "slf4j-simple"                  % slf4jVersion,
-      "org.http4s"     %% "http4s-core"                   % http4sVersion,
-      "org.http4s"     %% "http4s-ember-server"           % http4sVersion,
-      "eu.timepit"     %% "refined"                       % refinedVersion,
-      "eu.timepit"     %% "refined-cats"                  % refinedVersion,
-      "dev.profunktor" %% "redis4cats-effects"            % redis4CatsVersion,
-      "dev.profunktor" %% "redis4cats-log4cats"           % redis4CatsVersion,
-      "com.lihaoyi"    %% "pprint"                        % pprintVersion,
-      "io.suzaku"      %% "boopickle"                     % boopickleVersion,
-      "org.typelevel"  %% "munit-cats-effect-3"           % munitCatsEffectVersion % Test
+      "org.typelevel"  %% "grackle-core"          % grackleVersion,
+      "org.typelevel"  %% "grackle-generic"       % grackleVersion,
+      "org.typelevel"  %% "grackle-circe"         % grackleVersion,
+      "edu.gemini"     %% "lucuma-graphql-routes" % graphQLRoutesVersion,
+      "org.tpolecat"   %% "natchez-honeycomb"     % natchezVersion,
+      "org.tpolecat"   %% "natchez-log"           % natchezVersion,
+      "org.tpolecat"   %% "natchez-http4s"        % natcchezHttp4sVersion,
+      "co.fs2"         %% "fs2-core"              % fs2Version,
+      "edu.gemini"     %% "lucuma-core"           % lucumaCoreVersion,
+      "org.typelevel"  %% "cats-core"             % catsVersion,
+      "org.typelevel"  %% "cats-effect"           % catsEffectVersion,
+      "is.cir"         %% "ciris"                 % cirisVersion,
+      "org.typelevel"  %% "log4cats-slf4j"        % log4catsVersion,
+      "org.slf4j"       % "slf4j-simple"          % slf4jVersion,
+      "org.http4s"     %% "http4s-core"           % http4sVersion,
+      "org.http4s"     %% "http4s-ember-server"   % http4sVersion,
+      "eu.timepit"     %% "refined"               % refinedVersion,
+      "eu.timepit"     %% "refined-cats"          % refinedVersion,
+      "dev.profunktor" %% "redis4cats-effects"    % redis4CatsVersion,
+      "dev.profunktor" %% "redis4cats-log4cats"   % redis4CatsVersion,
+      "com.lihaoyi"    %% "pprint"                % pprintVersion,
+      "io.suzaku"      %% "boopickle"             % boopickleVersion,
+      "org.typelevel"  %% "munit-cats-effect-3"   % munitCatsEffectVersion % Test
     ),
     buildInfoKeys     := Seq[BuildInfoKey](
       scalaVersion,
