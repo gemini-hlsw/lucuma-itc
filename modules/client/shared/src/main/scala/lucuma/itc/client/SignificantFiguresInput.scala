@@ -33,7 +33,7 @@ object SignificantFiguresInput {
       (
         a.xAxis,
         a.yAxis,
-        a.ccd,
+        a.ccd
       )
     }
 }
