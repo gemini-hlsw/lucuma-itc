@@ -29,7 +29,7 @@ val gatlingVersion              = "3.9.5"
 val spireVersion                = "0.18.0"
 val redis4CatsVersion           = "1.5.2"
 val pprintVersion               = "0.8.1"
-val kittensVersion              = "3.1.0"
+val kittensVersion              = "3.2.0"
 val boopickleVersion            = "1.4.0"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
