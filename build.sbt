@@ -182,6 +182,7 @@ lazy val benchmark = project
       ("io.gatling" % "gatling-test-framework" % gatlingVersion)
         .exclude("org.typelevel", "spire-macros_2.13")
         .exclude("io.suzaku", "boopickle_2.13")
+        .exclude("org.scala-lang.modules", "scala-collection-compat_2.13")
     )
   )
   .dependsOn(service)
