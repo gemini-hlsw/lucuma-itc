@@ -150,7 +150,7 @@ trait ItcCacheOrRemote extends Version:
    * cache
    */
   def checkVersionToPurge[F[_]: MonadThrow: Logger](
-    redis: StringCommands[F, Array[Byte], Array[Byte]] with Flush[F, Array[Byte]],
+    redis: StringCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]],
     itc:   Itc[F]
   ): F[Unit] = {
     val L      = Logger[F]
