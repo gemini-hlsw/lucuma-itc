@@ -12,15 +12,15 @@ val http4sVersion               = "0.23.25"
 val http4sJdkHttpClientVersion  = "0.9.1"
 val fs2Version                  = "3.9.4"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.91.0"
+val lucumaCoreVersion           = "0.92.0"
 val lucumaRefinedVersion        = "0.1.3"
 val slf4jVersion                = "2.0.12"
 val log4catsVersion             = "2.6.0"
 val monocleVersion              = "3.2.0"
 val munitCatsEffectVersion      = "1.0.7"
-val graphQLRoutesVersion        = "0.8.5"
+val graphQLRoutesVersion        = "0.8.6"
 val refinedVersion              = "0.11.1"
-val grackleVersion              = "0.17.2"
+val grackleVersion              = "0.18.1"
 val natcchezHttp4sVersion       = "0.5.0"
 val natchezVersion              = "0.3.5"
 val munitVersion                = "0.7.29"
@@ -182,6 +182,7 @@ lazy val benchmark = project
       ("io.gatling" % "gatling-test-framework" % gatlingVersion)
         .exclude("org.typelevel", "spire-macros_2.13")
         .exclude("io.suzaku", "boopickle_2.13")
+        .exclude("org.scala-lang.modules", "scala-collection-compat_2.13")
     )
   )
   .dependsOn(service)
