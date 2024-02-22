@@ -41,7 +41,7 @@ given picklerNonEmptyList[A: Pickler]: Pickler[NonEmptyList[A]] =
   transformPickler(NonEmptyList.fromListUnsafe[A])(_.toList)
 
 given Pickler[ItcSeries]      =
-  transformPickler(Function.tupled(ItcSeries.apply _))(x => (x.title, x.seriesType, x.data))
+  transformPickler(Function.tupled(ItcSeries.apply))(x => (x.title, x.seriesType, x.data))
 given Pickler[FiniteDuration] =
   transformPickler(n => new FiniteDuration(n, NANOSECONDS))(_.toNanos)
 

@@ -23,7 +23,7 @@ given [T]: Encoder[EmissionLines[T]] with
               "units" -> l.lineFlux.units.serialized.asJson
             )
         )
-      }: _*),
+      }*),
       "fluxDensityContinuum" ->
         Json.obj(
           "value" -> el.fluxDensityContinuum.value.asJson,

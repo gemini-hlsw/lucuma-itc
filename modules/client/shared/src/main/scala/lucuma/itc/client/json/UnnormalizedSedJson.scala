@@ -45,5 +45,5 @@ given Encoder[UnnormalizedSED] = {
         "wavelength" -> w.asJson,
         "density"    -> d.asJson
       )
-    }: _*)
+    }*)
 }

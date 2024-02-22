@@ -23,5 +23,5 @@ given [T]: Encoder[BandNormalized[T]] with
             "units" -> m.units.serialized.asJson
           ) ++ m.error.toList.map(v => "error" -> v.asJson)
         )
-      }: _*)
+      }*)
     )
