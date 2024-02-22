@@ -17,7 +17,7 @@ import grackle.*
 import grackle.circe.CirceMapping
 import io.circe.syntax.*
 import lucuma.core.data.Zipper
-import lucuma.core.enums.*
+import lucuma.core.enums.{ExecutionEnvironment => _, *}
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.sequence.gmos.GmosFpuMask
@@ -357,6 +357,11 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   ): F[Mapping[F]] =
     loadSchema[F].map { loadedSchema =>
       new CirceMapping[F] {
+
+        override def parserConfig: GraphQLParser.Config =
+          GraphQLParser.defaultConfig.copy(maxInputValueDepth =
+            16
+          ) // set a more reasonable input depth limit
 
         val schema: Schema    = loadedSchema
         val QueryType         = schema.ref("Query")
