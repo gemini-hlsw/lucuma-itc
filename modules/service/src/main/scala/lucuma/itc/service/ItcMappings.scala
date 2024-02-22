@@ -359,7 +359,9 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       new CirceMapping[F] {
 
         override def parserConfig: GraphQLParser.Config =
-          GraphQLParser.defaultConfig.copy(maxInputValueDepth = 16) // set a more reasonable input depth limit
+          GraphQLParser.defaultConfig.copy(maxInputValueDepth =
+            16
+          ) // set a more reasonable input depth limit
 
         val schema: Schema    = loadedSchema
         val QueryType         = schema.ref("Query")
