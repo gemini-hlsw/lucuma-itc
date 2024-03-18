@@ -22,12 +22,12 @@ import org.scalacheck.*
 trait ArbIntegrationTimeInput {
 
   import ArbConstraintSet.*
-  import ArbEnumerated.*
+  import ArbEnumerated.given
   import ArbInstrumentMode.given
-  import ArbRadialVelocity.*
+  import ArbRadialVelocity.given
   import ArbSignalToNoise.given
   import ArbSourceProfile.given
-  import ArbWavelength.*
+  import ArbWavelength.given
 
   def genSpectroscopyIntegrationTimeInput(
     im: InstrumentMode

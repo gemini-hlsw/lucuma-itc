@@ -17,7 +17,7 @@ import org.scalacheck.*
 
 trait ArbInstrumentMode {
 
-  import ArbEnumerated.*
+  import ArbEnumerated.given
   import ArbGmosFpu.given
   import ArbGmosCcdMode.given
 
