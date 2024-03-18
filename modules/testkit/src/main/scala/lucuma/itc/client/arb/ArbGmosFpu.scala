@@ -12,7 +12,7 @@ import org.scalacheck.*
 
 trait ArbGmosFpu {
 
-  import ArbEnumerated.*
+  import ArbEnumerated.given
   import ArbGmosCustomMask.given
   import GmosFpu.North
   import GmosFpu.South

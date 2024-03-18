@@ -11,7 +11,7 @@ import org.scalacheck.*
 
 trait ArbGmosCustomMask {
 
-  import ArbEnumerated.*
+  import ArbEnumerated.given
 
   given Arbitrary[GmosCustomMask] =
     Arbitrary {
