@@ -30,8 +30,8 @@ object RadialVelocityInput {
             .semiflatMap(resultFromKilometersPerSecond)
             .value
 
-        // comment to prevent code formatter from merging with the previous
-        // definition
+        // format: off
+        // prevent code formatter from merging with the previous definition
         (rCentimetersPerSecondʹ, rMetersPerSecondʹ, rKilometersPerSecondʹ).parTupled
           .flatMap { case (centimetersPerSecond, metersPerSecond, kilometersPerSecond) =>
             List(centimetersPerSecond, metersPerSecond, kilometersPerSecond).flatten match {
@@ -42,6 +42,7 @@ object RadialVelocityInput {
                 )
             }
           }
+        // format: on
     }
 
   def resultFromCentimetersPerSecond(cmps: BigDecimal): Result[RadialVelocity] =
