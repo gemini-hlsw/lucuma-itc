@@ -28,7 +28,7 @@ val disciplineMunitVersion      = "1.0.9"
 val gatlingVersion              = "3.10.5"
 val spireVersion                = "0.18.0"
 val redis4CatsVersion           = "1.7.0"
-val pprintVersion               = "0.8.1"
+val pprintVersion               = "0.9.0"
 val kittensVersion              = "3.3.0"
 val boopickleVersion            = "1.4.0"
 
