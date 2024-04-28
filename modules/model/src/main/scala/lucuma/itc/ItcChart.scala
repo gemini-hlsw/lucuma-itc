@@ -7,7 +7,6 @@ import cats.data.NonEmptyList
 import cats.syntax.all.*
 import io.circe.Decoder
 import io.circe.Encoder
-import io.circe.HCursor
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.Enumerated
 import lucuma.itc.encoders.given
