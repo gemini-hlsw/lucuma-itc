@@ -21,9 +21,20 @@ case class GraphResult(
 object GraphResult:
   def fromLegacy(
     ccds:            NonEmptyList[ItcRemoteCcd],
-    charts:          NonEmptyList[ItcChartGroup],
+    originalCharts:  NonEmptyList[ItcChartGroup],
     signalToNoiseAt: Option[Wavelength]
   ): GraphResult = {
+    val charts = originalCharts.map { chart =>
+      chart.copy(charts = chart.charts.map { c =>
+        c.copy(series = c.series.map { s =>
+          ItcSeries(s.title,
+                    s.seriesType,
+                    s.data.collect { case (x, y) if !y.isNaN => (x.toDouble, y.toDouble) }
+          )
+        })
+      })
+    }
+
     def maxWavelength(chart: ItcChart, seriesDataType: SeriesDataType): List[Wavelength] =
       chart.series
         .filter(_.seriesType === seriesDataType)
