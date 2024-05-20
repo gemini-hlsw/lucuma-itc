@@ -3,7 +3,9 @@
 
 package lucuma.itc.client
 
+import cats.Eq
 import cats.data.NonEmptyList
+import cats.derived.*
 import cats.syntax.traverse.*
 import io.circe.Encoder
 import lucuma.core.math.SignalToNoise
@@ -16,10 +18,12 @@ case class OptimizedSeriesResult(
   dataY:      List[Double],
   xAxis:      Option[ItcAxis],
   yAxis:      Option[ItcAxis]
-) derives Encoder.AsObject
+) derives Eq,
+      Encoder.AsObject
 
 case class OptimizedChartResult(chartType: ChartType, series: List[OptimizedSeriesResult])
-    derives Encoder.AsObject
+    derives Eq,
+      Encoder.AsObject
 
 case class OptimizedSpectroscopyGraphResult(
   serverVersion:             String,
@@ -30,4 +34,5 @@ case class OptimizedSpectroscopyGraphResult(
   atWavelengthFinalSNRatio:  Option[FinalSN],
   peakSingleSNRatio:         SingleSN,
   atWavelengthSingleSNRatio: Option[SingleSN]
-) derives Encoder.AsObject
+) derives Eq,
+      Encoder.AsObject
