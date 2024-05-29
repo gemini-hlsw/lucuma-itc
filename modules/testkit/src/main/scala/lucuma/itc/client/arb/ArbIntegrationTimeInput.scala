@@ -21,7 +21,7 @@ import org.scalacheck.Arbitrary.arbitrary
 
 trait ArbIntegrationTimeInput {
 
-  import ArbConstraintSet.*
+  import ArbConstraintSet.given
   import ArbEnumerated.given
   import ArbInstrumentMode.given
   import ArbRadialVelocity.given
@@ -41,16 +41,7 @@ trait ArbIntegrationTimeInput {
       rv  <- arbitrary[RadialVelocity]
       cs  <- arbitrary[ConstraintSet]
       im  <- arbitrary[InstrumentMode]
-    } yield SpectroscopyIntegrationTimeInput(
-      w,
-      s2n,
-      sat,
-      sp,
-      b,
-      rv,
-      cs,
-      im
-    )
+    } yield SpectroscopyIntegrationTimeInput(w, s2n, sat, sp, b, rv, cs, im)
 
   given Arbitrary[SpectroscopyIntegrationTimeInput] =
     Arbitrary {
@@ -62,26 +53,24 @@ trait ArbIntegrationTimeInput {
 
   given Cogen[SpectroscopyIntegrationTimeInput] =
     Cogen[
-      (
-        Wavelength,
-        SignalToNoise,
-        Option[Wavelength],
-        SourceProfile,
-        Band,
-        RadialVelocity,
-        ConstraintSet,
-        InstrumentMode
+      (Wavelength,
+       SignalToNoise,
+       Option[Wavelength],
+       SourceProfile,
+       Band,
+       RadialVelocity,
+       ConstraintSet,
+       InstrumentMode
       )
     ].contramap { a =>
-      (
-        a.wavelength,
-        a.signalToNoise,
-        a.signalToNoiseAt,
-        a.sourceProfile,
-        a.band,
-        a.radialVelocity,
-        a.constraints,
-        a.mode
+      (a.wavelength,
+       a.signalToNoise,
+       a.signalToNoiseAt,
+       a.sourceProfile,
+       a.band,
+       a.radialVelocity,
+       a.constraints,
+       a.mode
       )
     }
 
@@ -96,15 +85,7 @@ trait ArbIntegrationTimeInput {
       rv  <- arbitrary[RadialVelocity]
       cs  <- arbitrary[ConstraintSet]
       im  <- arbitrary[InstrumentMode]
-    } yield ImagingIntegrationTimeInput(
-      w,
-      s2n,
-      sp,
-      b,
-      rv,
-      cs,
-      im
-    )
+    } yield ImagingIntegrationTimeInput(w, s2n, sp, b, rv, cs, im)
 
   given Arbitrary[ImagingIntegrationTimeInput] =
     Arbitrary {
@@ -126,14 +107,13 @@ trait ArbIntegrationTimeInput {
         InstrumentMode
       )
     ].contramap { a =>
-      (
-        a.wavelength,
-        a.signalToNoise,
-        a.sourceProfile,
-        a.band,
-        a.radialVelocity,
-        a.constraints,
-        a.mode
+      (a.wavelength,
+       a.signalToNoise,
+       a.sourceProfile,
+       a.band,
+       a.radialVelocity,
+       a.constraints,
+       a.mode
       )
     }
 }

@@ -7,24 +7,24 @@ val catsScalacheckVersion       = "0.3.2"
 val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.7"
 val cirisVersion                = "3.6.0"
-val clueVersion                 = "0.35.0"
+val clueVersion                 = "0.35.2"
 val http4sVersion               = "0.23.27"
 val http4sJdkHttpClientVersion  = "0.9.1"
 val fs2Version                  = "3.10.2"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.97.1"
+val lucumaCoreVersion           = "0.98.0"
 val lucumaRefinedVersion        = "0.1.3"
 val slf4jVersion                = "2.0.13"
 val log4catsVersion             = "2.7.0"
 val monocleVersion              = "3.2.0"
-val munitCatsEffectVersion      = "1.0.7"
+val munitCatsEffectVersion      = "2.0.0"
 val graphQLRoutesVersion        = "0.8.8"
 val refinedVersion              = "0.11.1"
 val grackleVersion              = "0.18.1"
 val natcchezHttp4sVersion       = "0.5.0"
 val natchezVersion              = "0.3.5"
-val munitVersion                = "0.7.29"
-val disciplineMunitVersion      = "1.0.9"
+val munitVersion                = "1.0.0"
+val disciplineMunitVersion      = "2.0.0"
 val gatlingVersion              = "3.11.3"
 val spireVersion                = "0.18.0"
 val redis4CatsVersion           = "1.7.0"
@@ -129,7 +129,7 @@ lazy val service = project
       "dev.profunktor" %% "redis4cats-log4cats"   % redis4CatsVersion,
       "com.lihaoyi"    %% "pprint"                % pprintVersion,
       "io.suzaku"      %% "boopickle"             % boopickleVersion,
-      "org.typelevel"  %% "munit-cats-effect-3"   % munitCatsEffectVersion % Test
+      "org.typelevel"  %% "munit-cats-effect"     % munitCatsEffectVersion % Test
     ),
     buildInfoKeys     := Seq[BuildInfoKey](
       scalaVersion,
@@ -153,23 +153,23 @@ lazy val client = crossProject(JVMPlatform, JSPlatform)
   .settings(
     name := "lucuma-itc-client",
     libraryDependencies ++= Seq(
-      "edu.gemini"    %%% "lucuma-core"         % lucumaCoreVersion,
-      "edu.gemini"    %%% "lucuma-refined"      % lucumaRefinedVersion,
-      "org.typelevel" %%% "cats-core"           % catsVersion,
-      "org.typelevel" %%% "cats-effect"         % catsEffectVersion,
-      "org.http4s"    %%% "http4s-circe"        % http4sVersion,
-      "org.http4s"    %%% "http4s-dsl"          % http4sVersion,
-      "io.circe"      %%% "circe-literal"       % circeVersion,
-      "edu.gemini"    %%% "clue-model"          % clueVersion,
-      "edu.gemini"    %%% "clue-http4s"         % clueVersion,
-      "edu.gemini"    %%% "clue-core"           % clueVersion,
-      "io.circe"      %%% "circe-generic"       % circeVersion,
-      "org.tpolecat"  %%% "natchez-http4s"      % natcchezHttp4sVersion,
-      "org.typelevel" %%% "spire"               % spireVersion,
-      "org.typelevel" %%% "spire-extras"        % spireVersion,
-      "org.typelevel" %%% "kittens"             % kittensVersion,
-      "org.typelevel" %%% "munit-cats-effect-3" % munitCatsEffectVersion % Test,
-      "com.lihaoyi"   %%% "pprint"              % pprintVersion          % Test
+      "edu.gemini"    %%% "lucuma-core"       % lucumaCoreVersion,
+      "edu.gemini"    %%% "lucuma-refined"    % lucumaRefinedVersion,
+      "org.typelevel" %%% "cats-core"         % catsVersion,
+      "org.typelevel" %%% "cats-effect"       % catsEffectVersion,
+      "org.http4s"    %%% "http4s-circe"      % http4sVersion,
+      "org.http4s"    %%% "http4s-dsl"        % http4sVersion,
+      "io.circe"      %%% "circe-literal"     % circeVersion,
+      "edu.gemini"    %%% "clue-model"        % clueVersion,
+      "edu.gemini"    %%% "clue-http4s"       % clueVersion,
+      "edu.gemini"    %%% "clue-core"         % clueVersion,
+      "io.circe"      %%% "circe-generic"     % circeVersion,
+      "org.tpolecat"  %%% "natchez-http4s"    % natcchezHttp4sVersion,
+      "org.typelevel" %%% "spire"             % spireVersion,
+      "org.typelevel" %%% "spire-extras"      % spireVersion,
+      "org.typelevel" %%% "kittens"           % kittensVersion,
+      "org.typelevel" %%% "munit-cats-effect" % munitCatsEffectVersion % Test,
+      "com.lihaoyi"   %%% "pprint"            % pprintVersion          % Test
     )
   )
 
@@ -214,7 +214,7 @@ lazy val tests = project
   .settings(
     name := "lucuma-itc-tests",
     libraryDependencies ++= Seq(
-      "org.typelevel" %%% "munit-cats-effect-3"    % munitCatsEffectVersion     % Test,
+      "org.typelevel" %%% "munit-cats-effect"      % munitCatsEffectVersion     % Test,
       "com.lihaoyi"   %%% "pprint"                 % pprintVersion              % Test,
       "org.http4s"     %% "http4s-jdk-http-client" % http4sJdkHttpClientVersion % Test,
       "org.typelevel" %%% "log4cats-slf4j"         % log4catsVersion            % Test,

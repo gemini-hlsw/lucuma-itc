@@ -8,6 +8,7 @@ import cats.implicits.*
 import com.comcast.ip4s.*
 import lucuma.itc.tests.MockItc
 import munit.CatsEffectSuite
+import munit.catseffect.IOFixture
 import natchez.Trace.Implicits.noop
 import org.http4s.*
 import org.http4s.ember.server.EmberServerBuilder
@@ -37,7 +38,7 @@ trait ClientSuite extends CatsEffectSuite {
         .build
     }
 
-  private val serverFixture: Fixture[Server] =
+  private val serverFixture: IOFixture[Server] =
     ResourceSuiteLocalFixture("server", server)
 
   override def munitFixtures = List(serverFixture)
