@@ -376,7 +376,6 @@ object ItcMapping extends ItcCacheOrRemote with Version {
               tpe = QueryType,
               fieldMappings = List(
                 RootEffect.computeEncodable("versions")((p, env) => versions(environment, redis)),
-                RootEffect.computeEncodable("test")((p, env) => Result("unsupported").pure[F]),
                 RootEffect.computeEncodable("spectroscopyIntegrationTime") { (p, env) =>
                   env
                     .getR[SpectroscopyIntegrationTimeInput]("input")

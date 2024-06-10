@@ -10484,39 +10484,6 @@ input OptimizedSpectroscopyGraphInput {
   significantFigures: SignificantFiguresInput
 }
 
-# Parameters to calculate signal to noise
-input SpectroscopySignalToNoiseInput {
-  # Observing wavelength.
-  wavelength: WavelengthInput!
-
-  # Wavelength at which to measure Signal to Noise
-  signalToNoiseAt: WavelengthInput
-
-  # Exposure time duration
-  exposureTime: NonNegDurationInput!
-
-  # Exposures
-  exposures: PosInt!
-
-  # Spatial profile PointSource/UniformSource/GaussianSource.
-  sourceProfile: SourceProfileInput!
-
-  # Observing Band
-  band: Band!
-
-  # Target radial velocity
-  radialVelocity: RadialVelocityInput!
-
-  # Conditions
-  constraints: ConstraintSetInput!
-
-  # Instrument modes
-  mode: InstrumentModesInput!
-
-  # Significant figures, truncates the amount of significant value
-  significantFigures: SignificantFiguresInput
-}
-
 type IntegrationTime {
   # Exposure time duration
   exposureTime: TimeSpan!
