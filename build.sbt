@@ -7,7 +7,7 @@ val catsScalacheckVersion       = "0.3.2"
 val catsTimeVersion             = "0.3.4"
 val circeVersion                = "0.14.9"
 val cirisVersion                = "3.6.0"
-val clueVersion                 = "0.38.1"
+val clueVersion                 = "0.40.0"
 val http4sVersion               = "0.23.27"
 val http4sJdkHttpClientVersion  = "0.9.1"
 val fs2Version                  = "3.10.2"
@@ -18,10 +18,10 @@ val slf4jVersion                = "2.0.13"
 val log4catsVersion             = "2.7.0"
 val monocleVersion              = "3.2.0"
 val munitCatsEffectVersion      = "2.0.0"
-val graphQLRoutesVersion        = "0.8.12"
+val graphQLRoutesVersion        = "0.8.13"
 val refinedVersion              = "0.11.2"
 val grackleVersion              = "0.20.0"
-val natcchezHttp4sVersion       = "0.5.0"
+val natchezHttp4sVersion        = "0.5.0"
 val natchezVersion              = "0.3.5"
 val munitVersion                = "1.0.0"
 val disciplineMunitVersion      = "2.0.0"
@@ -113,7 +113,7 @@ lazy val service = project
       "edu.gemini"     %% "lucuma-graphql-routes" % graphQLRoutesVersion,
       "org.tpolecat"   %% "natchez-honeycomb"     % natchezVersion,
       "org.tpolecat"   %% "natchez-log"           % natchezVersion,
-      "org.tpolecat"   %% "natchez-http4s"        % natcchezHttp4sVersion,
+      "org.tpolecat"   %% "natchez-http4s"        % natchezHttp4sVersion,
       "co.fs2"         %% "fs2-core"              % fs2Version,
       "edu.gemini"     %% "lucuma-core"           % lucumaCoreVersion,
       "org.typelevel"  %% "cats-core"             % catsVersion,
@@ -164,7 +164,7 @@ lazy val client = crossProject(JVMPlatform, JSPlatform)
       "edu.gemini"    %%% "clue-http4s"       % clueVersion,
       "edu.gemini"    %%% "clue-core"         % clueVersion,
       "io.circe"      %%% "circe-generic"     % circeVersion,
-      "org.tpolecat"  %%% "natchez-http4s"    % natcchezHttp4sVersion,
+      "org.tpolecat"  %%% "natchez-http4s"    % natchezHttp4sVersion,
       "org.typelevel" %%% "spire"             % spireVersion,
       "org.typelevel" %%% "spire-extras"      % spireVersion,
       "org.typelevel" %%% "kittens"           % kittensVersion,
