@@ -3,8 +3,9 @@
 
 package lucuma.itc.service.redis
 
+import _root_.cats.data.Chain
 import boopickle.DefaultBasic.*
-import cats.data.NonEmptyList
+import cats.data.NonEmptyChain
 import eu.timepit.refined.*
 import eu.timepit.refined.api.*
 import lucuma.core.math.SignalToNoise
@@ -37,8 +38,8 @@ given picklerEnumerated[A: Enumerated]: Pickler[A] =
     Enumerated[A].tag(_)
   )
 
-given picklerNonEmptyList[A: Pickler]: Pickler[NonEmptyList[A]] =
-  transformPickler(NonEmptyList.fromListUnsafe[A])(_.toList)
+given picklerNonEmptyList[A: Pickler]: Pickler[NonEmptyChain[A]] =
+  transformPickler(Chain.fromSeq[A].andThen(NonEmptyChain.fromChainUnsafe[A]))(_.toChain.toList)
 
 given Pickler[ItcSeries]      =
   transformPickler(Function.tupled(ItcSeries.apply))(x => (x.title, x.seriesType, x.data))
@@ -66,12 +67,12 @@ given Pickler[Wavelength] =
       .getOrElse(sys.error("cannot unpickle"))
   )(_.toPicometers.value.value)
 
-given Pickler[ItcChart]      = generatePickler
-given Pickler[ItcChartGroup] = generatePickler
-given Pickler[ItcWarning]    = generatePickler
-given Pickler[ItcCcd]        = generatePickler
-given Pickler[FinalSN]       = transformPickler((s: SignalToNoise) => FinalSN(s))(_.value)
-given Pickler[SingleSN]      = transformPickler((s: SignalToNoise) => SingleSN(s))(_.value)
-given Pickler[GraphResult]   = generatePickler
+given Pickler[ItcGraph]               = generatePickler
+given Pickler[ItcGraphGroup]          = generatePickler
+given Pickler[ItcWarning]             = generatePickler
+given Pickler[ItcCcd]                 = generatePickler
+given Pickler[FinalSN]                = transformPickler((s: SignalToNoise) => FinalSN(s))(_.value)
+given Pickler[SingleSN]               = transformPickler((s: SignalToNoise) => SingleSN(s))(_.value)
+given Pickler[TargetGraphsCalcResult] = generatePickler
 
 given Pickler[IntegrationTime] = generatePickler

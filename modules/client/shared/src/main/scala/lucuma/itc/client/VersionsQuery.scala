@@ -7,6 +7,7 @@ import clue.GraphQLOperation
 import io.circe.Decoder
 import io.circe.Encoder
 import io.circe.HCursor
+import lucuma.itc.ItcVersions
 
 object VersionsQuery extends GraphQLOperation[Unit] {
 

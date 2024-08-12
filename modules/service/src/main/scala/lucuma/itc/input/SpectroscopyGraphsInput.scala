@@ -5,41 +5,33 @@ package lucuma.itc.input
 
 import cats.syntax.parallel.*
 import eu.timepit.refined.types.numeric.PosInt
-import lucuma.core.enums.Band
-import lucuma.core.math.RadialVelocity
 import lucuma.core.math.Wavelength
-import lucuma.core.model.SourceProfile
 import lucuma.core.util.TimeSpan
 import lucuma.itc.SignificantFigures
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
-import lucuma.odb.graphql.input.sourceprofile.*
 
-case class OptimizedSpectroscopyGraphInput(
+case class SpectroscopyGraphsInput(
   wavelength:         Wavelength,
   signalToNoiseAt:    Option[Wavelength],
   exposureTime:       TimeSpan,
-  exposures:          PosInt,
-  sourceProfile:      SourceProfile,
-  band:               Band,
-  radialVelocity:     RadialVelocity,
+  exposureCount:      PosInt,
+  asterism:           List[TargetDataInput],
   constraints:        ConstraintSetInput,
   mode:               InstrumentModesInput,
   significantFigures: Option[SignificantFigures]
 )
 
-object OptimizedSpectroscopyGraphInput {
+object SpectroscopyGraphsInput {
 
-  def binding: Matcher[OptimizedSpectroscopyGraphInput] =
+  def binding: Matcher[SpectroscopyGraphsInput] =
     ObjectFieldsBinding.rmap {
       case List(
             WavelengthInput.Binding("wavelength", wavelength),
             WavelengthInput.Binding.Option("signalToNoiseAt", signalToNoiseAt),
             TimeSpanInput.Binding("exposureTime", exposureTime),
-            PosIntBinding("exposures", exposures),
-            SourceProfileInput.CreateBinding("sourceProfile", sourceProfile),
-            BandBinding("band", band),
-            RadialVelocityInput.Binding("radialVelocity", radialVelocity),
+            PosIntBinding("exposureCount", exposureCount),
+            TargetDataInput.binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
             InstrumentModesInput.binding("mode", mode),
             SignificantFiguresInput.binding.Option("significantFigures", significantFigures)
@@ -47,10 +39,8 @@ object OptimizedSpectroscopyGraphInput {
         (wavelength,
          signalToNoiseAt,
          exposureTime,
-         exposures,
-         sourceProfile,
-         band,
-         radialVelocity,
+         exposureCount,
+         asterism,
          constraints,
          mode,
          significantFigures

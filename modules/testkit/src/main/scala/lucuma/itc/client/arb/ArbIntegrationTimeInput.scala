@@ -4,118 +4,83 @@
 package lucuma.itc.client
 package arb
 
-import lucuma.core.enums.Band
-import lucuma.core.math.RadialVelocity
+import cats.data.NonEmptyList
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
-import lucuma.core.math.arb.ArbRadialVelocity
 import lucuma.core.math.arb.ArbSignalToNoise
 import lucuma.core.math.arb.ArbWavelength
 import lucuma.core.model.ConstraintSet
-import lucuma.core.model.SourceProfile
 import lucuma.core.model.arb.ArbConstraintSet
-import lucuma.core.model.arb.ArbSourceProfile
-import lucuma.core.util.arb.ArbEnumerated
 import org.scalacheck.*
 import org.scalacheck.Arbitrary.arbitrary
 
 trait ArbIntegrationTimeInput {
-
   import ArbConstraintSet.given
-  import ArbEnumerated.given
   import ArbInstrumentMode.given
-  import ArbRadialVelocity.given
   import ArbSignalToNoise.given
-  import ArbSourceProfile.given
+  import ArbTargetInput.given
   import ArbWavelength.given
 
-  def genSpectroscopyIntegrationTimeInput(
-    im: InstrumentMode
-  ): Gen[SpectroscopyIntegrationTimeInput] =
-    for {
-      w   <- arbitrary[Wavelength]
-      s2n <- arbitrary[SignalToNoise]
-      sat <- arbitrary[Option[Wavelength]]
-      sp  <- arbitrary[SourceProfile]
-      b   <- arbitrary[Band]
-      rv  <- arbitrary[RadialVelocity]
-      cs  <- arbitrary[ConstraintSet]
-      im  <- arbitrary[InstrumentMode]
-    } yield SpectroscopyIntegrationTimeInput(w, s2n, sat, sp, b, rv, cs, im)
+  given [A: Arbitrary]: Arbitrary[NonEmptyList[A]] =
+    Arbitrary:
+      arbitrary[List[A]].suchThat(_.nonEmpty).map(NonEmptyList.fromListUnsafe)
+
+  given Arbitrary[SpectroscopyIntegrationTimeParameters] =
+    Arbitrary:
+      for
+        w   <- arbitrary[Wavelength]
+        s2n <- arbitrary[SignalToNoise]
+        sat <- arbitrary[Option[Wavelength]]
+        cs  <- arbitrary[ConstraintSet]
+        im  <- arbitrary[InstrumentMode]
+      yield SpectroscopyIntegrationTimeParameters(w, s2n, sat, cs, im)
 
   given Arbitrary[SpectroscopyIntegrationTimeInput] =
-    Arbitrary {
-      for {
-        im <- arbitrary[InstrumentMode]
-        sm <- genSpectroscopyIntegrationTimeInput(im)
-      } yield sm
-    }
+    Arbitrary:
+      for
+        pars <- arbitrary[SpectroscopyIntegrationTimeParameters]
+        ast  <- arbitrary[NonEmptyList[TargetInput]]
+      yield SpectroscopyIntegrationTimeInput(pars, ast)
 
   given Cogen[SpectroscopyIntegrationTimeInput] =
     Cogen[
       (Wavelength,
        SignalToNoise,
        Option[Wavelength],
-       SourceProfile,
-       Band,
-       RadialVelocity,
+       List[TargetInput],
        ConstraintSet,
        InstrumentMode
       )
-    ].contramap { a =>
-      (a.wavelength,
-       a.signalToNoise,
-       a.signalToNoiseAt,
-       a.sourceProfile,
-       a.band,
-       a.radialVelocity,
-       a.constraints,
-       a.mode
-      )
-    }
+    ].contramap: a =>
+      (a.wavelength, a.signalToNoise, a.signalToNoiseAt, a.asterism.toList, a.constraints, a.mode)
 
-  def genImagingIntegrationTimeInput(
-    im: InstrumentMode
-  ): Gen[ImagingIntegrationTimeInput] =
-    for {
-      w   <- arbitrary[Wavelength]
-      s2n <- arbitrary[SignalToNoise]
-      sp  <- arbitrary[SourceProfile]
-      b   <- arbitrary[Band]
-      rv  <- arbitrary[RadialVelocity]
-      cs  <- arbitrary[ConstraintSet]
-      im  <- arbitrary[InstrumentMode]
-    } yield ImagingIntegrationTimeInput(w, s2n, sp, b, rv, cs, im)
+  given Arbitrary[ImagingIntegrationTimeParameters] =
+    Arbitrary:
+      for {
+        w   <- arbitrary[Wavelength]
+        s2n <- arbitrary[SignalToNoise]
+        cs  <- arbitrary[ConstraintSet]
+        im  <- arbitrary[InstrumentMode]
+      } yield ImagingIntegrationTimeParameters(w, s2n, cs, im)
 
   given Arbitrary[ImagingIntegrationTimeInput] =
-    Arbitrary {
-      for {
-        im <- arbitrary[InstrumentMode]
-        sm <- genImagingIntegrationTimeInput(im)
-      } yield sm
-    }
+    Arbitrary:
+      for
+        pars <- arbitrary[ImagingIntegrationTimeParameters]
+        ast  <- arbitrary[NonEmptyList[TargetInput]]
+      yield ImagingIntegrationTimeInput(pars, ast)
 
   given Cogen[ImagingIntegrationTimeInput] =
     Cogen[
       (
         Wavelength,
         SignalToNoise,
-        SourceProfile,
-        Band,
-        RadialVelocity,
+        List[TargetInput],
         ConstraintSet,
         InstrumentMode
       )
-    ].contramap { a =>
-      (a.wavelength,
-       a.signalToNoise,
-       a.sourceProfile,
-       a.band,
-       a.radialVelocity,
-       a.constraints,
-       a.mode
-      )
-    }
+    ].contramap: a =>
+      (a.wavelength, a.signalToNoise, a.asterism.toList, a.constraints, a.mode)
 }
 
 object ArbIntegrationTimeInput extends ArbIntegrationTimeInput

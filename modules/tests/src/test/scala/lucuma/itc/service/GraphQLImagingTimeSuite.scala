@@ -16,56 +16,59 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
               picometers: 530000
             },
             signalToNoise: 600,
-            sourceProfile: {
-              point: {
-                bandNormalized: {
-                  sed: {
-                    stellarLibrary: O5_V
-                  },
-                  brightnesses: [
-                    {
-                      band: SLOAN_I,
-                      value: 9.484,
-                      units: VEGA_MAGNITUDE,
-                      error: 0.01
-                    },
-                    {
-                      band: B,
-                      value: 8.116,
-                      units: VEGA_MAGNITUDE
-                    },
-                    {
-                      band: V,
-                      value: 12.323,
-                      units: VEGA_MAGNITUDE,
-                      error: 0.01
-                    },
-                    {
-                      band: J,
-                      value: 14.442,
-                      units: VEGA_MAGNITUDE,
-                      error: 0.018
-                    },
-                    {
-                      band: H,
-                      value: 9.798,
-                      units: VEGA_MAGNITUDE,
-                      error: 0.029
-                    },
-                    {
-                      band: K,
-                      value: 10.65,
-                      units: VEGA_MAGNITUDE,
-                      error: 0.03
+            asterism: [
+              {
+                sourceProfile: {
+                  point: {
+                    bandNormalized: {
+                      sed: {
+                        stellarLibrary: O5_V
+                      },
+                      brightnesses: [
+                        {
+                          band: SLOAN_I,
+                          value: 9.484,
+                          units: VEGA_MAGNITUDE,
+                          error: 0.01
+                        },
+                        {
+                          band: B,
+                          value: 8.116,
+                          units: VEGA_MAGNITUDE
+                        },
+                        {
+                          band: V,
+                          value: 12.323,
+                          units: VEGA_MAGNITUDE,
+                          error: 0.01
+                        },
+                        {
+                          band: J,
+                          value: 14.442,
+                          units: VEGA_MAGNITUDE,
+                          error: 0.018
+                        },
+                        {
+                          band: H,
+                          value: 9.798,
+                          units: VEGA_MAGNITUDE,
+                          error: 0.029
+                        },
+                        {
+                          band: K,
+                          value: 10.65,
+                          units: VEGA_MAGNITUDE,
+                          error: 0.03
+                        }
+                      ]
                     }
-                  ]
+                  }
+                },
+                radialVelocity: {
+                  metersPerSecond: 7560
                 }
               }
-            },
-            band: V,
-            radialVelocity: {
-              metersPerSecond: 7560
-            },
+            ],
             constraints: {
               imageQuality: TWO_POINT_ZERO,
               cloudExtinction: THREE_POINT_ZERO,
@@ -98,19 +101,21 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
                 }
               }
             }
-            all {
-              exposures
-              exposureTime {
-                seconds
+            brightest {
+              all {
+                exposureCount
+                exposureTime {
+                  seconds
+                }
+                signalToNoise
               }
-              signalToNoise
-            }
-            selected {
-              exposures
-              exposureTime {
-                seconds
+              selected {
+                exposureCount
+                exposureTime {
+                  seconds
+                }
+                signalToNoise
               }
-              signalToNoise
             }
           }
         }
@@ -129,25 +134,27 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
                   "nanometers" : 530.000
                 }
               },
-              "all" : [{
-                "exposures" : 10,
-                "exposureTime" : {
-                  "seconds" : 1.000000
-                },
-                "signalToNoise": 10.000
-              }, {
-                "exposures" : 5,
-                "exposureTime" : {
-                  "seconds" : 2.000000
-                },
-                "signalToNoise": 20.000
-              }],
-              "selected" : {
-                "exposures" : 5,
-                "exposureTime" : {
-                  "seconds" : 2.000000
-                },
-                "signalToNoise": 20.000
+              "brightest" : {
+                "all" : [{
+                  "exposureCount" : 10,
+                  "exposureTime" : {
+                    "seconds" : 1.000000
+                  },
+                  "signalToNoise": 10.000
+                }, {
+                  "exposureCount" : 5,
+                  "exposureTime" : {
+                    "seconds" : 2.000000
+                  },
+                  "signalToNoise": 20.000
+                }],
+                "selected" : {
+                  "exposureCount" : 5,
+                  "exposureTime" : {
+                    "seconds" : 2.000000
+                  },
+                  "signalToNoise": 20.000
+                }
               }
             }
           }

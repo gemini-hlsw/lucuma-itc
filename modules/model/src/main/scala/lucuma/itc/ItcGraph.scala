@@ -3,13 +3,15 @@
 
 package lucuma.itc
 
-import cats.data.NonEmptyList
+import cats.Eq
+import cats.data.NonEmptyChain
+import cats.derived.*
 import cats.syntax.all.*
 import io.circe.Decoder
 import io.circe.Encoder
+import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.Enumerated
-import lucuma.itc.encoders.given
 
 enum SeriesDataType(val tag: String) derives Enumerated:
   case SignalData     extends SeriesDataType("signal_data")
@@ -19,10 +21,10 @@ enum SeriesDataType(val tag: String) derives Enumerated:
   case PixSigData     extends SeriesDataType("pix_sig_data")
   case PixBackData    extends SeriesDataType("pix_back_data")
 
-enum ChartType(val tag: String) derives Enumerated:
-  case SignalChart      extends ChartType("signal_chart")
-  case SignalPixelChart extends ChartType("signal_pixel_chart")
-  case S2NChart         extends ChartType("s2n_chart")
+enum GraphType(val tag: String) derives Enumerated:
+  case SignalGraph      extends GraphType("signal_graph")
+  case SignalPixelGraph extends GraphType("signal_pixel_graph")
+  case S2NGraph         extends GraphType("s2n_graph")
 
 case class ItcAxis(start: Double, end: Double, min: Double, max: Double, count: Int)
     derives Decoder,
@@ -52,26 +54,39 @@ case class ItcSeries private (
 
 object ItcSeries:
   def apply(title: String, seriesType: SeriesDataType, data: List[(Double, Double)]): ItcSeries =
-    ItcSeries(title,
-              seriesType,
-              data,
-              data.map(_._1),
-              data.map(_._2),
-              ItcAxis.calcAxis(data, _._1),
-              ItcAxis.calcAxis(data, _._2)
+    ItcSeries(
+      title,
+      seriesType,
+      data,
+      data.map(_._1),
+      data.map(_._2),
+      ItcAxis.calcAxis(data, _._1),
+      ItcAxis.calcAxis(data, _._2)
     )
 
-case class ItcChart(chartType: ChartType, series: List[ItcSeries]) derives Encoder.AsObject
+case class ItcGraph(graphType: GraphType, series: List[ItcSeries]) derives Eq, Encoder.AsObject
 
-case class ItcChartGroup(charts: NonEmptyList[ItcChart]) derives Encoder.AsObject
+case class ItcGraphGroup(graphs: NonEmptyChain[ItcGraph]) derives Eq, Encoder.AsObject
 
-case class SpectroscopyGraphResult(
-  serverVersion:             String,
-  dataVersion:               String,
-  ccds:                      NonEmptyList[ItcCcd],
-  charts:                    NonEmptyList[ItcChart],
+case class TargetGraphs(
+  ccds:                      NonEmptyChain[ItcCcd],
+  graphData:                 NonEmptyChain[ItcGraph],
   peakFinalSNRatio:          FinalSN,
   atWavelengthFinalSNRatio:  Option[FinalSN],
   peakSingleSNRatio:         SingleSN,
   atWavelengthSingleSNRatio: Option[SingleSN]
-) derives Encoder.AsObject
+) derives Eq,
+      Encoder.AsObject
+
+case class TargetGraphsResult(
+  graphs: TargetGraphs,
+  band:   Band
+) derives Eq,
+      Encoder.AsObject:
+  export graphs.*
+
+case class SpectroscopyGraphsResult(
+  versions:     ItcVersions,
+  targetGraphs: AsterismTargetGraphsOutcomes
+) derives Eq,
+      Encoder.AsObject

@@ -20,8 +20,8 @@ case class FLocalItc[F[_]: Async](itcLocal: LocalItc):
     """This target is too bright for this configuration."""
   val HalfWell  = """The detector well is half filled in (\d*\.?\d*) seconds.""".r
 
-  def calculateCharts(jsonParams: String): F[GraphsRemoteResult] =
-    (F.cede *> F.delay(itcLocal.calculateCharts(jsonParams)).guarantee(F.cede)).flatMap {
+  def calculateGraphs(jsonParams: String): F[GraphsRemoteResult] =
+    (F.cede *> F.delay(itcLocal.calculateGraphs(jsonParams)).guarantee(F.cede)).flatMap {
       case Right(result) => F.pure(result)
       case Left(msg)     =>
         msg match {

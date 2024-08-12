@@ -31,6 +31,7 @@ import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ItcObservationDetails
 import lucuma.itc.search.ObservingMode
+import lucuma.itc.search.TargetData
 import lucuma.itc.search.syntax.*
 import lucuma.refined.*
 
@@ -46,19 +47,21 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
   val baseUrl    = "https://gemini-new-itc.herokuapp.com"
 
   val sourceDefinition = ItcSourceDefinition(
-    SourceProfile.Point(
-      SpectralDefinition.BandNormalized(
-        UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
-        SortedMap(
-          Band.R -> BrightnessValue
-            .unsafeFrom(5)
-            .withUnit[VegaMagnitude]
-            .toMeasureTagged
+    TargetData(
+      SourceProfile.Point(
+        SpectralDefinition.BandNormalized(
+          UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
+          SortedMap(
+            Band.R -> BrightnessValue
+              .unsafeFrom(5)
+              .withUnit[VegaMagnitude]
+              .toMeasureTagged
+          )
         )
-      )
+      ),
+      Redshift(0.03)
     ),
-    Band.R,
-    Redshift(0.03)
+    Band.R
   )
 
   val lsAnalysisMethod  = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
@@ -67,7 +70,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
 
   val obs = ItcObservationDetails(
     calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
-      exposures = 1,
+      exposureCount = 1,
       coadds = None,
       exposureDuration = 1,
       sourceFraction = 1.0,
@@ -284,10 +287,12 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
 
   def bodySED(c: UnnormalizedSED) =
     ItcParameters(
-      sourceDefinition.copy(profile =
-        SourceProfile.unnormalizedSED
-          .modifyOption(_ => c.some)(sourceDefinition.profile)
-          .getOrElse(sourceDefinition.profile)
+      sourceDefinition.copy(
+        target = sourceDefinition.target.copy(
+          sourceProfile = SourceProfile.unnormalizedSED
+            .modifyOption(_ => c.some)(sourceDefinition.sourceProfile)
+            .getOrElse(sourceDefinition.sourceProfile)
+        )
       ),
       obs,
       conditions,
@@ -381,12 +386,12 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
 
   def bodyIntMagUnits(c: BrightnessMeasure[Integrated]) =
     ItcParameters(
-      sourceDefinition.copy(profile =
-        SourceProfile
-          .integratedBrightnessIn(Band.R)
-          .replace(
-            c
-          )(sourceDefinition.profile)
+      sourceDefinition.copy(
+        target = sourceDefinition.target.copy(
+          sourceProfile = SourceProfile
+            .integratedBrightnessIn(Band.R)
+            .replace(c)(sourceDefinition.sourceProfile)
+        )
       ),
       obs,
       conditions,
@@ -414,12 +419,12 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
 
   def bodySurfaceMagUnits(c: BrightnessMeasure[Surface]) =
     ItcParameters(
-      sourceDefinition.copy(profile =
-        SourceProfile.Uniform(
-          SpectralDefinition.BandNormalized(
-            UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
-            SortedMap(
-              Band.R -> c
+      sourceDefinition.copy(
+        target = sourceDefinition.target.copy(
+          sourceProfile = SourceProfile.Uniform(
+            SpectralDefinition.BandNormalized(
+              UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
+              SortedMap(Band.R -> c)
             )
           )
         )
@@ -450,13 +455,13 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
 
   def bodyIntGaussianMagUnits(c: BrightnessMeasure[Integrated]) =
     ItcParameters(
-      sourceDefinition.copy(profile =
-        SourceProfile.Gaussian(
-          Angle.fromDoubleArcseconds(10),
-          SpectralDefinition.BandNormalized(
-            UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
-            SortedMap(
-              Band.R -> c
+      sourceDefinition.copy(
+        target = sourceDefinition.target.copy(
+          sourceProfile = SourceProfile.Gaussian(
+            Angle.fromDoubleArcseconds(10),
+            SpectralDefinition.BandNormalized(
+              UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
+              SortedMap(Band.R -> c)
             )
           )
         )
@@ -487,16 +492,19 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
 
   def bodyPowerLaw(c: Int) =
     ItcParameters(
-      sourceDefinition.copy(profile =
-        SourceProfile.Gaussian(
-          Angle.fromDoubleArcseconds(10),
-          SpectralDefinition.BandNormalized(
-            UnnormalizedSED.PowerLaw(c).some,
-            SortedMap(
-              Band.R -> BrightnessValue
-                .unsafeFrom(5)
-                .withUnit[VegaMagnitude]
-                .toMeasureTagged
+      sourceDefinition.copy(
+        target = sourceDefinition.target.copy(
+          sourceProfile = SourceProfile.Gaussian(
+            Angle.fromDoubleArcseconds(10),
+            SpectralDefinition.BandNormalized(
+              UnnormalizedSED.PowerLaw(c).some,
+              SortedMap(
+                Band.R ->
+                  BrightnessValue
+                    .unsafeFrom(5)
+                    .withUnit[VegaMagnitude]
+                    .toMeasureTagged
+              )
             )
           )
         )
@@ -525,16 +533,19 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
 
   def bodyBlackBody(c: PosInt) =
     ItcParameters(
-      sourceDefinition.copy(profile =
-        SourceProfile.Gaussian(
-          Angle.fromDoubleArcseconds(10),
-          SpectralDefinition.BandNormalized(
-            UnnormalizedSED.BlackBody(c.withUnit[Kelvin]).some,
-            SortedMap(
-              Band.R -> BrightnessValue
-                .unsafeFrom(5)
-                .withUnit[VegaMagnitude]
-                .toMeasureTagged
+      sourceDefinition.copy(
+        target = sourceDefinition.target.copy(
+          sourceProfile = SourceProfile.Gaussian(
+            Angle.fromDoubleArcseconds(10),
+            SpectralDefinition.BandNormalized(
+              UnnormalizedSED.BlackBody(c.withUnit[Kelvin]).some,
+              SortedMap(
+                Band.R ->
+                  BrightnessValue
+                    .unsafeFrom(5)
+                    .withUnit[VegaMagnitude]
+                    .toMeasureTagged
+              )
             )
           )
         )

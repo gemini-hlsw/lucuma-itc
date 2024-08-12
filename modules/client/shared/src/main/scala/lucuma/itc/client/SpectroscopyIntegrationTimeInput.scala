@@ -4,34 +4,29 @@
 package lucuma.itc.client
 
 import cats.Eq
+import cats.data.NonEmptyList
+import cats.derived.*
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
-import lucuma.core.enums.Band
-import lucuma.core.math.RadialVelocity
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.ConstraintSet
-import lucuma.core.model.SourceProfile
 import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
 import lucuma.itc.encoders.given
 
-final case class SpectroscopyIntegrationTimeInput(
+case class SpectroscopyIntegrationTimeParameters(
   wavelength:      Wavelength,
   signalToNoise:   SignalToNoise,
   signalToNoiseAt: Option[Wavelength],
-  sourceProfile:   SourceProfile,
-  band:            Band,
-  radialVelocity:  RadialVelocity,
   constraints:     ConstraintSet,
   mode:            InstrumentMode
-)
+) derives Eq
 
-object SpectroscopyIntegrationTimeInput {
-
-  given Encoder[SpectroscopyIntegrationTimeInput] with
-    def apply(a: SpectroscopyIntegrationTimeInput): Json =
+object SpectroscopyIntegrationTimeParameters {
+  given Encoder[SpectroscopyIntegrationTimeParameters] with
+    def apply(a: SpectroscopyIntegrationTimeParameters): Json =
       Json
         .obj(
           "wavelength"      -> Json.obj("picometers" -> a.wavelength.toPicometers.value.asJson),
@@ -39,29 +34,20 @@ object SpectroscopyIntegrationTimeInput {
           "signalToNoiseAt" -> a.signalToNoiseAt
             .map(w => Json.obj("picometers" -> w.toPicometers.value.asJson))
             .asJson,
-          "sourceProfile"   -> a.sourceProfile.asJson,
-          "band"            -> a.band.asScreamingJson,
-          "radialVelocity"  -> Json.obj(
-            "metersPerSecond" -> RadialVelocity.fromMetersPerSecond
-              .reverseGet(a.radialVelocity)
-              .asJson
-          ),
           "constraints"     -> a.constraints.asJson,
           "mode"            -> a.mode.asJson
         )
         .dropNullValues
+}
 
-  given Eq[SpectroscopyIntegrationTimeInput] =
-    Eq.by { a =>
-      (
-        a.wavelength,
-        a.signalToNoise,
-        a.signalToNoiseAt,
-        a.sourceProfile,
-        a.band,
-        a.radialVelocity,
-        a.constraints,
-        a.mode
-      )
-    }
+case class SpectroscopyIntegrationTimeInput(
+  parameters: SpectroscopyIntegrationTimeParameters,
+  asterism:   NonEmptyList[TargetInput]
+) derives Eq:
+  export parameters.*
+
+object SpectroscopyIntegrationTimeInput {
+  given Encoder[SpectroscopyIntegrationTimeInput] with
+    def apply(a: SpectroscopyIntegrationTimeInput): Json =
+      Json.obj("asterism" -> a.asterism.asJson).deepMerge(a.parameters.asJson)
 }

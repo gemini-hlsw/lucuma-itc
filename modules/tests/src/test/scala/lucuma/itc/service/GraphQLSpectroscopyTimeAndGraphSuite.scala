@@ -11,7 +11,7 @@ class GraphQLSpectroscopyTimeAndGraphSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyIntegrationTimeAndGraph(input: {
+          spectroscopyIntegrationTimeAndGraphs(input: {
             wavelength: {
               nanometers: 60,
             },
@@ -19,28 +19,31 @@ class GraphQLSpectroscopyTimeAndGraphSuite extends GraphQLSuite {
             signalToNoiseAt: {
               nanometers: 60,
             },
-            sourceProfile: {
-              point: {
-                bandNormalized: {
-                  sed: {
-                    stellarLibrary: O5_V
+            asterism: [
+              {
+                sourceProfile: {
+                  point: {
+                    bandNormalized: {
+                      sed: {
+                        stellarLibrary: O5_V
+                      }
+                      brightnesses: [ {
+                        band: R
+                        value: 3
+                        units: ERG_PER_S_PER_CM_SQUARED_PER_A
+                      }, {
+                        band: J
+                        value: 2.1
+                        units: AB_MAGNITUDE
+                      }]
+                    }
                   }
-                  brightnesses: [ {
-                    band: R
-                    value: 3
-                    units: ERG_PER_S_PER_CM_SQUARED_PER_A
-                  }, {
-                    band: J
-                    value: 2.1
-                    units: AB_MAGNITUDE
-                  }]
+                },
+                radialVelocity: {
+                  kilometersPerSecond: 1000
                 }
               }
-            },
-            band: J,
-            radialVelocity: {
-              kilometersPerSecond: 1000
-            },
+            ],
             constraints: {
               imageQuality: POINT_THREE,
               cloudExtinction: POINT_FIVE,
@@ -66,29 +69,39 @@ class GraphQLSpectroscopyTimeAndGraphSuite extends GraphQLSuite {
               xAxis: 4
             }
           }) {
-            exposureTime {
-              seconds
-            }
-            exposures
-            ccds {
-              singleSNRatio
-              totalSNRatio
-              peakPixelFlux
-              wellDepth
-              ampGain
-            }
-            charts {
-              chartType
-              series {
-                title
-                seriesType
-                data
-                xAxis {
-                  start
-                  end
-                  count
+            targetTimesAndGraphs {
+              ... on TargetTimeAndGraphs {
+                integrationTime {
+                  selected {
+                    exposureTime {
+                      seconds
+                    }
+                    exposureCount
+                  }
                 }
-                dataY
+                graphs {
+                  ccds {
+                    singleSNRatio
+                    totalSNRatio
+                    peakPixelFlux
+                    wellDepth
+                    ampGain
+                  }
+                  graphData {
+                    graphType
+                    series {
+                      title
+                      seriesType
+                      data
+                      xAxis {
+                        start
+                        end
+                        count
+                      }
+                      dataY
+                    }
+                  }
+                }
               }
             }
           }
@@ -96,48 +109,58 @@ class GraphQLSpectroscopyTimeAndGraphSuite extends GraphQLSuite {
         """,
       json"""{
           "data": {
-            "spectroscopyIntegrationTimeAndGraph": {
-              "exposures" : 10,
-              "exposureTime" : {
-                "seconds" : 1.000000000
-              },
-              "ccds" : [
+            "spectroscopyIntegrationTimeAndGraphs": {
+              "targetTimesAndGraphs": [
                 {
-                  "singleSNRatio" : 1.0,
-                  "totalSNRatio" : 2.0,
-                  "peakPixelFlux" : 3.0,
-                  "wellDepth" : 4.0,
-                  "ampGain" : 5.0
-                }
-              ],
-              "charts": [
-                {
-                  "chartType": "S2N_CHART",
-                  "series": [
-                    {
-                      "title": "title",
-                      "seriesType": "FINAL_S2_NDATA",
-                      "data": [
-                        [
-                          1.0,
-                          1000.0
-                        ],
-                        [
-                          2.0,
-                          1001.0
-                        ]
-                      ],
-                      "xAxis" : {
-                        "start" : 1.0,
-                        "end" : 2.0,
-                        "count" : 2
-                      },
-                      "dataY": [
-                        1000.0,
-                        1001.0
-                      ]
+                  "integrationTime": {
+                    "selected": {
+                      "exposureCount" : 10,
+                      "exposureTime" : {
+                        "seconds" : 1.000000000
+                      }
                     }
-                  ]
+                  },
+                  "graphs": {
+                    "ccds" : [
+                      {
+                        "singleSNRatio" : 1.0,
+                        "totalSNRatio" : 2.0,
+                        "peakPixelFlux" : 3.0,
+                        "wellDepth" : 4.0,
+                        "ampGain" : 5.0
+                      }
+                    ],
+                    "graphData": [
+                      {
+                        "graphType": "S2N_GRAPH",
+                        "series": [
+                          {
+                            "title": "title",
+                            "seriesType": "FINAL_S2_NDATA",
+                            "data": [
+                              [
+                                1.0,
+                                1000.0
+                              ],
+                              [
+                                2.0,
+                                1001.0
+                              ]
+                            ],
+                            "xAxis" : {
+                              "start" : 1.0,
+                              "end" : 2.0,
+                              "count" : 2
+                            },
+                            "dataY": [
+                              1000.0,
+                              1001.0
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
                 }
               ]
             }

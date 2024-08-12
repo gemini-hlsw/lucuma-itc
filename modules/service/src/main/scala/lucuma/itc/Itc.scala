@@ -3,8 +3,9 @@
 
 package lucuma.itc
 
-import cats.data.NonEmptyList
+import cats.data.NonEmptyChain
 import eu.timepit.refined.types.numeric.PosInt
+import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
@@ -17,31 +18,33 @@ trait Itc[F[_]]:
    * signal-to-noise under the requested conditions.
    */
   def calculateIntegrationTime(
-    targetProfile:   TargetProfile,
+    target:          TargetData,
+    band:            Band,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
-  ): F[NonEmptyList[IntegrationTime]]
+  ): F[NonEmptyChain[IntegrationTime]]
 
   /**
    * Retrieve the graph data for the given mode and exposureTime and exposures
    */
   def calculateGraph(
-    targetProfile:   TargetProfile,
+    target:          TargetData,
+    band:            Band,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     exposureTime:    TimeSpan,
-    exposures:       PosInt,
+    exposureCount:   PosInt,
     signalToNoiseAt: Option[Wavelength]
-  ): F[GraphResult]
+  ): F[TargetGraphsCalcResult]
 
   /**
    * Calculate the signal to noise from graph data for the given mode and exposureTime and amount of
    * exposures at a specific wavelength
    */
   def calculateSignalToNoise(
-    graph:           NonEmptyList[ItcChartGroup],
+    graph:           NonEmptyChain[ItcGraphGroup],
     signalToNoiseAt: Option[Wavelength]
   ): F[SNCalcResult]
 

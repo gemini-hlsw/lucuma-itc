@@ -35,9 +35,9 @@
         "ampGain" : 1.8
       }
     ],
-    "chartGroups" : [
+    "graphGroups" : [
       {
-        "charts" : [
+        "graph" : [
           {
             "series" : [
               {
@@ -24588,8 +24588,8 @@
             },
             "axes" : [],
             "title" : "Signal and SQRT(Background) in one pixel",
-            "chartType" : {
-              "SignalChart" : {
+            "graphType" : {
+              "SignalGraph" : {
                 
               }
             },
@@ -49149,8 +49149,8 @@
             },
             "axes" : [],
             "title" : "Intermediate Single Exp and Final S/N in aperture",
-            "chartType" : {
-              "S2NChart" : {
+            "graphType" : {
+              "S2NGraph" : {
                 
               }
             },

@@ -23,7 +23,7 @@ import java.lang.reflect.Method
  */
 case class LocalItc(classLoader: ClassLoader):
   // We need to keep a single reference to the reflected method
-  private val calculateChartsMethod: Method = classLoader
+  private val calculateGraphsMethod: Method = classLoader
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculateCharts", classOf[String])
 
@@ -46,8 +46,8 @@ case class LocalItc(classLoader: ClassLoader):
    * that may not be compatible. Instead we pass back and forth json encoded version of the params
    * essentially the same as if ITC were a server accepting json and responding json
    */
-  def calculateCharts(jsonParams: String): Either[List[String], GraphsRemoteResult] =
-    val res = calculateChartsMethod
+  def calculateGraphs(jsonParams: String): Either[List[String], GraphsRemoteResult] =
+    val res = calculateGraphsMethod
       .invoke(null, jsonParams) // null as it is a static method
       .asInstanceOf[String]
 

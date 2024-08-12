@@ -9,8 +9,8 @@ import grackle.Query.Environment
 import lucuma.core.math.SignalToNoise
 import lucuma.itc.FinalSN
 import lucuma.itc.ItcCcd
-import lucuma.itc.ItcChart
-import lucuma.itc.ItcChartGroup
+import lucuma.itc.ItcGraph
+import lucuma.itc.ItcGraphGroup
 import lucuma.itc.ItcSeries
 import lucuma.itc.SignificantFigures
 import lucuma.itc.SingleSN
@@ -54,7 +54,7 @@ trait ItcSyntax:
 
 end ItcSyntax
 
-trait ItcChartSyntax:
+trait ItcGraphSyntax:
   extension (series: ItcSeries)
     def adjustSignificantFigures(figures: SignificantFigures): ItcSeries =
       val data: List[(Double, Double)] =
@@ -65,9 +65,9 @@ trait ItcChartSyntax:
         )
       ItcSeries(series.title, series.seriesType, data)
 
-  extension (chart: ItcChart)
-    def adjustSignificantFigures(figures: SignificantFigures): ItcChart =
-      chart.copy(series = chart.series.map(_.adjustSignificantFigures(figures)))
+  extension (graph: ItcGraph)
+    def adjustSignificantFigures(figures: SignificantFigures): ItcGraph =
+      graph.copy(series = graph.series.map(_.adjustSignificantFigures(figures)))
 
   extension (sn: FinalSN)
     @targetName("finalAdjust")
@@ -90,9 +90,9 @@ trait ItcChartSyntax:
             .getOrElse(sn)
         case _       => sn
 
-  extension (group: ItcChartGroup)
-    def adjustSignificantFigures(figures: SignificantFigures): ItcChartGroup =
-      group.copy(charts = group.charts.map(_.adjustSignificantFigures(figures)))
+  extension (group: ItcGraphGroup)
+    def adjustSignificantFigures(figures: SignificantFigures): ItcGraphGroup =
+      group.copy(graphs = group.graphs.map(_.adjustSignificantFigures(figures)))
 
   extension (ccd: ItcCcd)
     def adjustSignificantFigures(figures: SignificantFigures): ItcCcd =
@@ -108,4 +108,4 @@ trait ItcChartSyntax:
         )
       )
 
-object all extends ItcSyntax with ItcChartSyntax
+object all extends ItcSyntax with ItcGraphSyntax
