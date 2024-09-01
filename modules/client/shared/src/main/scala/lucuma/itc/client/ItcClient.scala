@@ -6,9 +6,11 @@ package lucuma.itc.client
 import cats.effect.Async
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
+import clue.ErrorPolicy
 import clue.http4s.Http4sHttpBackend
 import clue.http4s.Http4sHttpClient
 import io.circe.syntax.*
+import lucuma.itc.ItcVersions
 import org.http4s.Uri
 import org.http4s.client.Client
 import org.typelevel.log4cats.Logger
@@ -17,7 +19,6 @@ import org.typelevel.log4cats.Logger
  * Client for calling the ITC on the JVM.
  */
 trait ItcClient[F[_]] {
-
   def spectroscopy(
     input:    SpectroscopyIntegrationTimeInput,
     useCache: Boolean = true
@@ -28,18 +29,17 @@ trait ItcClient[F[_]] {
     useCache: Boolean = true
   ): F[IntegrationTimeResult]
 
-  def optimizedSpectroscopyGraph(
-    input:    OptimizedSpectroscopyGraphInput,
+  def spectroscopyGraphs(
+    input:    SpectroscopyGraphsInput,
     useCache: Boolean = true
-  ): F[OptimizedSpectroscopyGraphResult]
+  ): F[SpectroscopyGraphsResult]
 
-  def spectroscopyIntegrationTimeAndGraph(
-    input:    SpectroscopyIntegrationTimeAndGraphInput,
+  def spectroscopyIntegrationTimeAndGraphs(
+    input:    SpectroscopyIntegrationTimeAndGraphsInput,
     useCache: Boolean = true
-  ): F[SpectroscopyIntegrationTimeAndGraphResult]
+  ): F[SpectroscopyIntegrationTimeAndGraphsResult]
 
   def versions: F[ItcVersions]
-
 }
 
 object ItcClient {
@@ -53,21 +53,22 @@ object ItcClient {
       specCache         <- ItcCache.simple[F, SpectroscopyIntegrationTimeInput, IntegrationTimeResult]
       imgCache          <- ItcCache.simple[F, ImagingIntegrationTimeInput, IntegrationTimeResult]
       graphCache        <-
-        ItcCache.simple[F, OptimizedSpectroscopyGraphInput, OptimizedSpectroscopyGraphResult]
+        ItcCache.simple[F, SpectroscopyGraphsInput, SpectroscopyGraphsResult]
       timeAndGraphCache <-
         ItcCache.simple[F,
-                        SpectroscopyIntegrationTimeAndGraphInput,
-                        SpectroscopyIntegrationTimeAndGraphResult
+                        SpectroscopyIntegrationTimeAndGraphsInput,
+                        SpectroscopyIntegrationTimeAndGraphsResult
         ]
       http              <- Http4sHttpClient.of[F, Unit](uri)(Async[F], Http4sHttpBackend(client), Logger[F])
     } yield new ItcClient[F] {
+
       override def spectroscopy(
         input:    SpectroscopyIntegrationTimeInput,
         useCache: Boolean = true
       ): F[IntegrationTimeResult] = {
 
         val callOut: F[IntegrationTimeResult] =
-          http.request(SpectroscopyIntegrationTime).withInput(input)
+          http.request(SpectroscopyIntegrationTime).withInput(input).map(_.data)
 
         for {
           _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")
@@ -83,7 +84,7 @@ object ItcClient {
       ): F[IntegrationTimeResult] = {
 
         val callOut: F[IntegrationTimeResult] =
-          http.request(ImagingIntegrationTime).withInput(input)
+          http.request(ImagingIntegrationTime).withInput(input).map(_.data)
 
         for {
           _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")
@@ -94,14 +95,14 @@ object ItcClient {
       }
 
       override val versions: F[ItcVersions] =
-        http.request(VersionsQuery)
+        http.request(VersionsQuery)(using ErrorPolicy.RaiseAlways)
 
-      def optimizedSpectroscopyGraph(
-        input:    OptimizedSpectroscopyGraphInput,
+      def spectroscopyGraphs(
+        input:    SpectroscopyGraphsInput,
         useCache: Boolean = true
-      ): F[OptimizedSpectroscopyGraphResult] = {
-        val callOut: F[OptimizedSpectroscopyGraphResult] =
-          http.request(SpectroscopyGraphQuery).withInput(input)
+      ): F[SpectroscopyGraphsResult] = {
+        val callOut: F[SpectroscopyGraphsResult] =
+          http.request(SpectroscopyGraphsQuery).withInput(input).map(_.data)
 
         for {
           _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")
@@ -111,12 +112,12 @@ object ItcClient {
         } yield v
       }
 
-      def spectroscopyIntegrationTimeAndGraph(
-        input:    SpectroscopyIntegrationTimeAndGraphInput,
+      def spectroscopyIntegrationTimeAndGraphs(
+        input:    SpectroscopyIntegrationTimeAndGraphsInput,
         useCache: Boolean = true
-      ): F[SpectroscopyIntegrationTimeAndGraphResult] = {
-        val callOut: F[SpectroscopyIntegrationTimeAndGraphResult] =
-          http.request(SpectroscopyIntegrationTimeAndGraphQuery).withInput(input)
+      ): F[SpectroscopyIntegrationTimeAndGraphsResult] = {
+        val callOut: F[SpectroscopyIntegrationTimeAndGraphsResult] =
+          http.request(SpectroscopyIntegrationTimeAndGraphsQuery).withInput(input).map(_.data)
 
         for {
           _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")

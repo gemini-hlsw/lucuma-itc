@@ -27,7 +27,7 @@ object ItcObservationDetails {
     object SignalToNoise {
 
       case class Imaging(
-        exposures:        Int,
+        exposureCount:    Int,
         coadds:           Option[Int],
         exposureDuration: FiniteDuration,
         sourceFraction:   Double,
@@ -38,7 +38,7 @@ object ItcObservationDetails {
         val encoder: Encoder[Imaging] =
           Encoder.instance { a =>
             Json.obj(
-              "exposures"      -> a.exposures.asJson,
+              "exposures"      -> a.exposureCount.asJson,
               "coadds"         -> a.coadds.asJson,
               "exposureTime"   -> a.exposureDuration.toDoubleSeconds.asJson,
               "sourceFraction" -> a.sourceFraction.asJson,
@@ -48,7 +48,7 @@ object ItcObservationDetails {
       }
 
       case class Spectroscopy(
-        exposures:        Int,
+        exposureCount:    Int,
         coadds:           Option[Int],
         exposureDuration: FiniteDuration,
         sourceFraction:   Double,
@@ -59,7 +59,7 @@ object ItcObservationDetails {
         val encoder: Encoder[Spectroscopy] =
           Encoder.instance { a =>
             Json.obj(
-              "exposures"      -> a.exposures.asJson,
+              "exposures"      -> a.exposureCount.asJson,
               "coadds"         -> a.coadds.asJson,
               "exposureTime"   -> a.exposureDuration.toDoubleSeconds.asJson,
               "sourceFraction" -> a.sourceFraction.asJson,

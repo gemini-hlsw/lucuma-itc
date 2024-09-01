@@ -3,40 +3,63 @@
 
 package lucuma.itc.client
 
+import cats.syntax.either.*
 import clue.GraphQLOperation
 import io.circe.Decoder
 import io.circe.Encoder
 import io.circe.HCursor
 import io.circe.Json
 import io.circe.JsonObject
+import lucuma.itc.AsterismIntegrationTimeOutcomes
+import lucuma.itc.ItcVersions
 import lucuma.itc.client.json.decoders.given
 
 object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
-
   type Data      = IntegrationTimeResult
   type Variables = SpectroscopyIntegrationTimeInput
 
   override val document: String =
     """
+      fragment IntegrationTimeFields on IntegrationTime {
+        exposureTime {
+          microseconds
+        }
+        exposureCount
+        signalToNoise
+      }
+
+      fragment TargetIntegrationTimeFields on TargetIntegrationTime {
+        band
+        all {
+          ...IntegrationTimeFields
+        }
+        index
+        selected {
+          ...IntegrationTimeFields
+        }
+      }
+
+      fragment TargetIntegrationTimeOutcomeFields on TargetIntegrationTimeOutcome {
+        ... on TargetIntegrationTime {
+          ...TargetIntegrationTimeFields
+        }
+        ... on TargetError {
+          errorCode
+          message
+          wellHalfFilledSeconds
+        }
+      }
+
       query Spectroscopy($spec: SpectroscopyIntegrationTimeInput!) {
         spectroscopyIntegrationTime(input: $spec) {
-          serverVersion
-          dataVersion
-          index
-          all {
-            exposures
-            exposureTime {
-              microseconds
-            }
-            signalToNoise
+          versions {
+            serverVersion
+            dataVersion
           }
-          selected {
-            exposures
-            exposureTime {
-              microseconds
-            }
-            signalToNoise
+          targetTimes {
+            ...TargetIntegrationTimeOutcomeFields
           }
+          brightestIndex
         }
       }
     """
@@ -50,35 +73,54 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
 
   override val dataDecoder: Decoder[IntegrationTimeResult] =
     (c: HCursor) => c.downField("spectroscopyIntegrationTime").as[IntegrationTimeResult]
-
 }
 
 object ImagingIntegrationTime extends GraphQLOperation[Unit] {
-
   type Data      = IntegrationTimeResult
   type Variables = ImagingIntegrationTimeInput
 
   override val document: String =
     """
+      fragment IntegrationTimeFields on IntegrationTime {
+        exposureTime {
+          microseconds
+        }
+        exposureCount
+        signalToNoise
+      }
+
+      fragment TargetIntegrationTimeFields on TargetIntegrationTime {
+        band
+        all {
+          ...IntegrationTimeFields
+        }
+        index
+        selected {
+          ...IntegrationTimeFields
+        }
+      }
+
+      fragment TargetIntegrationTimeOutcomeFields on TargetIntegrationTimeOutcome {
+        ... on TargetIntegrationTime {
+          ...TargetIntegrationTimeFields
+        }
+        ... on TargetError {
+          errorCode
+          message
+          wellHalfFilledSeconds
+        }
+      }
+
       query Imaging($spec: ImagingIntegrationTimeInput!) {
         imagingIntegrationTime(input: $spec) {
-          serverVersion
-          dataVersion
-          index
-          all {
-            exposures
-            exposureTime {
-              microseconds
-            }
-            signalToNoise
+          versions {
+            serverVersion
+            dataVersion
           }
-          selected {
-            exposures
-            exposureTime {
-              microseconds
-            }
-            signalToNoise
+          targetTimes {
+            ...TargetIntegrationTimeOutcomeFields
           }
+          brightestIndex
         }
       }
     """
@@ -92,153 +134,232 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
 
   override val dataDecoder: Decoder[IntegrationTimeResult] =
     (c: HCursor) => c.downField("imagingIntegrationTime").as[IntegrationTimeResult]
-
 }
 
-object SpectroscopyGraphQuery
-    extends GraphQLOperation.Typed[Unit,
-                                   OptimizedSpectroscopyGraphInput,
-                                   OptimizedSpectroscopyGraphResult
-    ] {
+object SpectroscopyGraphsQuery extends GraphQLOperation[Unit] {
+  type Data      = SpectroscopyGraphsResult
+  type Variables = SpectroscopyGraphsInput
 
   val document =
     """
-    query($input: OptimizedSpectroscopyGraphInput!) {
-      optimizedSpectroscopyGraph(input: $input) {
-        serverVersion
-        dataVersion
-        peakFinalSNRatio
-        atWavelengthFinalSNRatio
-        peakSingleSNRatio
-        atWavelengthSingleSNRatio
-        ccds {
-          singleSNRatio
-          totalSNRatio
-          peakPixelFlux
-          ampGain
-          maxTotalSNRatio
-          maxSingleSNRatio
-          wavelengthForMaxTotalSNRatio {
-            picometers
+      query($input: SpectroscopyGraphsInput!) {
+        spectroscopyGraphs(input: $input) {
+          versions {
+            serverVersion
+            dataVersion
           }
-          wavelengthForMaxSingleSNRatio {
-            picometers
-          }
-          wellDepth
-          warnings {
-            msg
-          }
-        }
-        charts {
-          chartType
-          series {
-            title
-            seriesType
-            dataY
-            xAxis {
-              start
-              end
-              count
-              min
-              max
+          targetGraphs {
+            ... on TargetGraphsResult {
+              graphs {
+                peakFinalSNRatio
+                atWavelengthFinalSNRatio
+                peakSingleSNRatio
+                atWavelengthSingleSNRatio
+                ccds {
+                  singleSNRatio
+                  totalSNRatio
+                  peakPixelFlux
+                  ampGain
+                  maxTotalSNRatio
+                  maxSingleSNRatio
+                  wavelengthForMaxTotalSNRatio {
+                    picometers
+                  }
+                  wavelengthForMaxSingleSNRatio {
+                    picometers
+                  }
+                  wellDepth
+                  warnings {
+                    msg
+                  }
+                }
+                graphData {
+                  graphType
+                  series {
+                    title
+                    seriesType
+                    dataY
+                    xAxis {
+                      start
+                      end
+                      count
+                      min
+                      max
+                    }
+                    yAxis {
+                      start
+                      end
+                      count
+                      min
+                      max
+                    }
+                  }
+                }
+              }
+              band
             }
-            yAxis {
-              start
-              end
-              count
-              min
-              max
+            ... on TargetError {
+              errorCode
+              message
+              wellHalfFilledSeconds
             }
           }
         }
       }
-    }
   """
 
   override val varEncoder: Encoder.AsObject[Variables] =
-    Encoder.AsObject.instance[OptimizedSpectroscopyGraphInput] { input =>
+    Encoder.AsObject.instance[SpectroscopyGraphsInput] { input =>
       JsonObject(
-        "input" -> Encoder[OptimizedSpectroscopyGraphInput].apply(input)
+        "input" -> Encoder[SpectroscopyGraphsInput].apply(input)
       )
     }
 
-  override val dataDecoder: Decoder[OptimizedSpectroscopyGraphResult] =
-    (c: HCursor) => c.downField("optimizedSpectroscopyGraph").as[OptimizedSpectroscopyGraphResult]
+  override val dataDecoder: Decoder[SpectroscopyGraphsResult] = c =>
+    val result = c.downField("spectroscopyGraphs")
+    for
+      versions     <- result.downField("versions").as[ItcVersions]
+      targetGraphs <- result.downField("targetGraphs").as[AsterismTargetGraphsResultOutcomes]
+    yield SpectroscopyGraphsResult(versions, targetGraphs)
 }
 
-object SpectroscopyIntegrationTimeAndGraphQuery
-    extends GraphQLOperation.Typed[Unit,
-                                   SpectroscopyIntegrationTimeAndGraphInput,
-                                   SpectroscopyIntegrationTimeAndGraphResult
-    ] {
+object SpectroscopyIntegrationTimeAndGraphsQuery extends GraphQLOperation[Unit] {
+  type Data      = SpectroscopyIntegrationTimeAndGraphsResult
+  type Variables = SpectroscopyIntegrationTimeAndGraphsInput
 
   val document =
     """
-    query($input: SpectroscopyIntegrationTimeAndGraphInput!) {
-      spectroscopyIntegrationTimeAndGraph(input: $input) {
-        serverVersion
-        dataVersion
-        peakFinalSNRatio
-        atWavelengthFinalSNRatio
-        peakSingleSNRatio
-        atWavelengthSingleSNRatio
+      fragment IntegrationTimeFields on IntegrationTime {
         exposureTime {
           microseconds
         }
-        exposures
-        ccds {
-          singleSNRatio
-          totalSNRatio
-          peakPixelFlux
-          ampGain
-          maxTotalSNRatio
-          maxSingleSNRatio
-          wavelengthForMaxTotalSNRatio {
-            picometers
-          }
-          wavelengthForMaxSingleSNRatio {
-            picometers
-          }
-          wellDepth
-          warnings {
-            msg
-          }
+        exposureCount
+        signalToNoise
+      }
+
+      fragment TargetIntegrationTimeFields on TargetIntegrationTime {
+        band
+        all {
+          ...IntegrationTimeFields
         }
-        charts {
-          chartType
-          series {
-            title
-            seriesType
-            dataY
-            xAxis {
-              start
-              end
-              count
-              min
-              max
+        index
+        selected {
+          ...IntegrationTimeFields
+        }
+      }
+
+      fragment TargetTimeAndGraphsFields on TargetTimeAndGraphs {
+        integrationTime {
+          ...TargetIntegrationTimeFields
+        }
+        graphs {
+          peakFinalSNRatio
+          atWavelengthFinalSNRatio
+          peakSingleSNRatio
+          atWavelengthSingleSNRatio
+          ccds {
+            singleSNRatio
+            totalSNRatio
+            peakPixelFlux
+            ampGain
+            maxTotalSNRatio
+            maxSingleSNRatio
+            wavelengthForMaxTotalSNRatio {
+              picometers
             }
-            yAxis {
-              start
-              end
-              count
-              min
-              max
+            wavelengthForMaxSingleSNRatio {
+              picometers
+            }
+            wellDepth
+            warnings {
+              msg
+            }
+          }
+          graphData {
+            graphType
+            series {
+              title
+              seriesType
+              dataY
+              xAxis {
+                start
+                end
+                count
+                min
+                max
+              }
+              yAxis {
+                start
+                end
+                count
+                min
+                max
+              }
             }
           }
         }
       }
-    }
+
+      fragment TargetErrorFields on TargetError {
+          errorCode
+          message
+          wellHalfFilledSeconds
+      }
+
+      fragment TargetIntegrationTimeOutcomeFields on TargetIntegrationTimeOutcome {
+        ... on TargetIntegrationTime {
+          ...TargetIntegrationTimeFields
+        }
+        ... on TargetError {
+          ...TargetErrorFields
+        }
+      }
+
+      fragment TargetTimeAndGraphsOutcomeFields on TargetTimeAndGraphsOutcome {
+        ... on TargetTimeAndGraphs {
+          ...TargetTimeAndGraphsFields
+        }
+        ... on TargetError {
+          ...TargetErrorFields
+        }
+      }
+
+      query($input: SpectroscopyIntegrationTimeAndGraphsInput!) {
+        spectroscopyIntegrationTimeAndGraphs(input: $input) {
+          versions {
+            serverVersion
+            dataVersion
+          }
+          targetTimesAndGraphs {
+            ...TargetTimeAndGraphsOutcomeFields
+          }
+          targetTimes {
+            ...TargetIntegrationTimeOutcomeFields
+          }
+          brightestIndex
+        }
+      }
   """
 
   override val varEncoder: Encoder.AsObject[Variables] =
-    Encoder.AsObject.instance[SpectroscopyIntegrationTimeAndGraphInput] { input =>
+    Encoder.AsObject.instance[SpectroscopyIntegrationTimeAndGraphsInput] { input =>
       JsonObject(
-        "input" -> Encoder[SpectroscopyIntegrationTimeAndGraphInput].apply(input)
+        "input" -> Encoder[SpectroscopyIntegrationTimeAndGraphsInput].apply(input)
       )
     }
 
-  override val dataDecoder: Decoder[SpectroscopyIntegrationTimeAndGraphResult] =
-    (c: HCursor) =>
-      c.downField("spectroscopyIntegrationTimeAndGraph")
-        .as[SpectroscopyIntegrationTimeAndGraphResult]
+  override val dataDecoder: Decoder[SpectroscopyIntegrationTimeAndGraphsResult] = c =>
+    val result = c.downField("spectroscopyIntegrationTimeAndGraphs")
+    for
+      versions       <- result.downField("versions").as[ItcVersions]
+      graphsOrTimes  <-
+        result
+          .downField("targetTimesAndGraphs")
+          .as[AsterismTimeAndGraphsResult]
+          .map(_.asRight)
+          .orElse:
+            result.downField("targetTimes").as[AsterismIntegrationTimeOutcomes].map(_.asLeft)
+          .map(AsterismTimesAndGraphsResultOutcomes(_))
+      brightestIndex <- result.downField("brightestIndex").as[Option[Int]]
+    yield SpectroscopyIntegrationTimeAndGraphsResult(versions, graphsOrTimes, brightestIndex)
 }

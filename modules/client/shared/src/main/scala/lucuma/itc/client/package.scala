@@ -5,4 +5,4 @@ package lucuma.itc.client
 
 import clue.ErrorPolicy
 
-given DefaultErrorPolicy: ErrorPolicy.RaiseAlways.type = ErrorPolicy.RaiseAlways
+given DefaultErrorPolicy: ErrorPolicy.RaiseOnNoData.type = ErrorPolicy.RaiseOnNoData

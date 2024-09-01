@@ -4,29 +4,30 @@
 package lucuma.itc.client
 
 import cats.Eq
+import cats.derived.*
 import cats.syntax.all.*
 import io.circe.Decoder
 import io.circe.HCursor
-import lucuma.core.data.Zipper
-import lucuma.core.data.ZipperCodec.given
-import lucuma.itc.IntegrationTime
+import lucuma.itc.AsterismIntegrationTimeOutcomes
+import lucuma.itc.Error
+import lucuma.itc.ItcVersions
+import lucuma.itc.TargetIntegrationTime
+import lucuma.itc.TargetIntegrationTimeOutcome
+import lucuma.itc.client.json.decoders.given
 
-final case class IntegrationTimeResult(
-  versions: ItcVersions,
-  result:   Zipper[IntegrationTime]
-)
+case class IntegrationTimeResult(
+  versions:    ItcVersions,
+  targetTimes: AsterismIntegrationTimeOutcomes
+) derives Eq
 
-object IntegrationTimeResult {
-
+object IntegrationTimeResult:
   given Decoder[IntegrationTimeResult] with
     def apply(c: HCursor): Decoder.Result[IntegrationTimeResult] =
       for {
-        v <- c.as[ItcVersions]
-        z <- c.as[Zipper[IntegrationTime]]
-      } yield IntegrationTimeResult(v, z)
+        v <- c.downField("versions").as[ItcVersions]
+        t <- c.downField("targetTimes").as[AsterismIntegrationTimeOutcomes]
+      } yield IntegrationTimeResult(v, t)
 
   given Eq[IntegrationTimeResult] with
     def eqv(x: IntegrationTimeResult, y: IntegrationTimeResult): Boolean =
-      x.versions === y.versions && x.result === y.result
-
-}
+      x.versions === y.versions && x.targetTimes === y.targetTimes

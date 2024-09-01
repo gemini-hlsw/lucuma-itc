@@ -32,7 +32,7 @@ object SNCalcResult:
       .obj(("resultType", a.resultType.asJson))
       .deepMerge(a match {
         case s @ SNCalcSuccess(_)          => s.asJson
-        case _: NoData                     => Json.Null
+        case NoData()                      => Json.Null
         case w @ WavelengthAtAboveRange(_) => w.asJson
         case w @ WavelengthAtBelowRange(_) => w.asJson
         case _                             => Json.Null

@@ -6394,7 +6394,7 @@ A single ITC call result.
 type ItcResult {
   targetId:      TargetId!
   exposureTime:  TimeSpan!
-  exposures:     NonNegInt!
+  exposureCount: NonNegInt!
   signalToNoise: SignalToNoise!
 }
 
@@ -10215,29 +10215,32 @@ scalar Long
 ##############
 
 type Query {
-  # Given an instrument and a spectroscopyy mode,
-  # return an the integration time and the estimated S/N
+  versions: ItcVersions
+  
+  # Given an instrument and a spectroscopy mode,
+  # return the integration time and the estimated S/N for the given targets.
   spectroscopyIntegrationTime(
     input: SpectroscopyIntegrationTimeInput!
   ): IntegrationTimeCalculationResult!
 
   # Given an instrument and an imaging mode,
-  # return an the integration time and the estimated S/N
+  # return the integration time and the estimated S/N for the given targets.
   imagingIntegrationTime(
     input: ImagingIntegrationTimeInput!
   ): IntegrationTimeCalculationResult!
 
-  # Given an instrument and a mode, return the graph data in an optimized format
-  optimizedSpectroscopyGraph(
-    input: OptimizedSpectroscopyGraphInput!
-  ): OptimizedSpectroscopyGraphResult!
+  # Given an instrument and a mode, return the graph data for the given targets.
+  # Values are rounded to limit the size of the response.
+  spectroscopyGraphs(
+    input: SpectroscopyGraphsInput!
+  ): SpectroscopyGraphsResult!
 
-  # Given an instrument and a mode, return the graph data in an optimized format
-  spectroscopyIntegrationTimeAndGraph(
-    input: SpectroscopyIntegrationTimeAndGraphInput!
-  ): SpectroscopyIntegrationTimeAndGraphResult!
-
-  versions: ItcVersions
+  # Given an instrument and a mode, return the integration time,
+  # estimated S/N and graph data for the given targets.
+  # Graph values are rounded to limit the size of the response.
+  spectroscopyIntegrationTimeAndGraphs(
+    input: SpectroscopyIntegrationTimeAndGraphsInput!
+  ): SpectroscopyTimeAndGraphsResult!
 }
 
 type ObservingModeSpectroscopy {
@@ -10324,7 +10327,6 @@ type GmosSITCParams {
 
   # Gmos South filter
   filter: GmosSouthFilter
-
 }
 
 type GmosNITCParams {
@@ -10363,26 +10365,28 @@ input SpectroscopyIntegrationTimeInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
 
-  # Wavelength at which to measure Signal to Noise
-  signalToNoiseAt: WavelengthInput
-
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!
 
-  # Spatial profile PointSource/UniformSource/GaussianSource.
-  sourceProfile: SourceProfileInput!
+  # Wavelength at which to measure Signal to Noise
+  signalToNoiseAt: WavelengthInput
 
-  # Observing Band
-  band: Band!
-
-  # Target radial velocity
-  radialVelocity: RadialVelocityInput!
+  # Relevant data for targets in asterism.
+  asterism: [TargetInput!]!
 
   # Conditions
   constraints: ConstraintSetInput!
 
   # Instrument modes
   mode: InstrumentModesInput
+}
+
+input TargetInput {
+  # Target spatial profile PointSource/UniformSource/GaussianSource.
+  sourceProfile: SourceProfileInput!
+
+  # Target radial velocity
+  radialVelocity: RadialVelocityInput!
 }
 
 # Configuration alternatives query
@@ -10393,14 +10397,8 @@ input ImagingIntegrationTimeInput {
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!
 
-  # Spatial profile PointSource/UniformSource/GaussianSource.
-  sourceProfile: SourceProfileInput!
-
-  # Observing Band
-  band: Band!
-
-  # Target radial velocity
-  radialVelocity: RadialVelocityInput!
+  # Relevant data for targets in asterism.
+  asterism: [TargetInput!]!
 
   # Conditions
   constraints: ConstraintSetInput!
@@ -10422,24 +10420,21 @@ input SignificantFiguresInput {
 }
 
 # Parameters to retrieve graph data
-input SpectroscopyIntegrationTimeAndGraphInput {
+input SpectroscopyGraphsInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
-
-  # Minimum desired signal-to-noise ratio.
-  signalToNoise: SignalToNoise!
 
   # Wavelength at which to measure Signal to Noise
   signalToNoiseAt: WavelengthInput
 
-  # Spatial profile PointSource/UniformSource/GaussianSource.
-  sourceProfile: SourceProfileInput!
+  # Exposure time duration
+  exposureTime: TimeSpanInput!
 
-  # Observing Band
-  band: Band!
+  # Exposures
+  exposureCount: PosInt!
 
-  # Target radial velocity
-  radialVelocity: RadialVelocityInput!
+  # Relevant data for targets in asterism.
+  asterism: [TargetInput!]!
 
   # Conditions
   constraints: ConstraintSetInput!
@@ -10452,27 +10447,18 @@ input SpectroscopyIntegrationTimeAndGraphInput {
 }
 
 # Parameters to retrieve graph data
-input OptimizedSpectroscopyGraphInput {
+input SpectroscopyIntegrationTimeAndGraphsInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
+
+  # Minimum desired signal-to-noise ratio.
+  signalToNoise: SignalToNoise!
 
   # Wavelength at which to measure Signal to Noise
   signalToNoiseAt: WavelengthInput
 
-  # Exposure time duration
-  exposureTime: TimeSpanInput!
-
-  # Exposures
-  exposures: PosInt!
-
-  # Spatial profile PointSource/UniformSource/GaussianSource.
-  sourceProfile: SourceProfileInput!
-
-  # Observing Band
-  band: Band!
-
-  # Target radial velocity
-  radialVelocity: RadialVelocityInput!
+  # Relevant data for targets in asterism.
+  asterism: [TargetInput!]!
 
   # Conditions
   constraints: ConstraintSetInput!
@@ -10489,31 +10475,50 @@ type IntegrationTime {
   exposureTime: TimeSpan!
 
   # Exposures
-  exposures: PosInt!
+  exposureCount: PosInt!
 
   # Signal/Noise ratio
   signalToNoise: SignalToNoise!
 }
 
 type IntegrationTimeCalculationResult {
-
-  # id of the backend server
-  serverVersion: String
-
-  # token for the itc data version, can be null
-  dataVersion: String
+  # server and data versions
+  versions: ItcVersions!
 
   # queried mode
   mode: ITCObservingMode!
 
-  # ITC results, there maybe one per CCD or a single result
+  # ITC results for each target
+  targetTimes: [TargetIntegrationTimeOutcome!]!
+
+  # Index of the brightest target, unless there are errors
+  brightestIndex: NonNegInt
+
+  # ITC result for brightest target, unless there are errors
+  brightest: TargetIntegrationTime
+}
+
+union TargetIntegrationTimeOutcome = TargetIntegrationTime | TargetError
+
+# ITC results for a target, can be a single result or one per CCD
+type TargetIntegrationTime {
+  # All CCD results for the target
   all: [IntegrationTime!]!
 
-  # Index of the preferred result, it is mode dependent
+  # Index of the preferred CCD result, it is mode dependent
   index: NonNegInt!
 
-  # Preferred result
+  # Preferred CCD result for the target
   selected: IntegrationTime!
+
+  # The band used for the time calculation
+  band: Band!
+}
+
+type TargetError {
+  errorCode: String!
+  message: String!
+  wellHalfFilledSeconds: Float
 }
 
 interface ITCObservingMode {
@@ -10530,7 +10535,6 @@ type ImagingMode implements ITCObservingMode {
 
   # params
   params: InstrumentITCParams!
-
 }
 
 type SpectroscopyMode implements ITCObservingMode {
@@ -10547,7 +10551,7 @@ type SpectroscopyMode implements ITCObservingMode {
   instrument: Instrument
 }
 
-"""Chart data types"""
+"""Graph data types"""
 enum ItcSeriesType {
   SIGNAL_DATA
 
@@ -10562,14 +10566,14 @@ enum ItcSeriesType {
   PIX_BACK_DATA
 }
 
-"""Chart data types"""
-enum ItcChartType {
-  SIGNAL_CHART
+"""Graph data types"""
+enum ItcGraphType {
+  SIGNAL_GRAPH
 
-  S2N_CHART
+  S2N_GRAPH
 }
 
-type ChartAxis {
+type GraphAxis {
   # First value of the axis
   start: Float!
 
@@ -10593,10 +10597,10 @@ type ItcSeries {
   seriesType: ItcSeriesType!
 
   # Values for the x axis
-  xAxis: ChartAxis
+  xAxis: GraphAxis
 
   # Values for the x axis
-  yAxis: ChartAxis
+  yAxis: GraphAxis
 
   # Data series in the form of pairs (x, y)
   data: [[Float!]!]!
@@ -10608,9 +10612,9 @@ type ItcSeries {
   dataY: [Float!]!
 }
 
-type ItcChart {
-  # Data type: alternatives SignalChart, S2NChart
-  chartType: ItcChartType!
+type ItcGraph {
+  # Data type: alternatives SignalGraph, S2NGraph
+  graphType: ItcGraphType!
 
   series: [ItcSeries!]!
 }
@@ -10649,22 +10653,14 @@ type ItcCcd {
 
   # Possible warnings
   warnings: [ItcWarning!]
-
 }
 
-type OptimizedSpectroscopyGraphResult {
-
-  # id of the backend server
-  serverVersion: String!
-
-  # token for the itc data version, can be null
-  dataVersion: String!
-
+type TargetGraphs {
   # Results for each CCD
   ccds: [ItcCcd!]!
 
-  # Chart data
-  charts: [ItcChart!]!
+  # Graph data
+  graphData: [ItcGraph!]!
 
   # Peak SN Ratio
   peakFinalSNRatio: SignalToNoise!
@@ -10679,37 +10675,49 @@ type OptimizedSpectroscopyGraphResult {
   atWavelengthSingleSNRatio: SignalToNoise
 }
 
-type SpectroscopyIntegrationTimeAndGraphResult {
+type TargetGraphsResult {
+  # graphs for the target
+  graphs: TargetGraphs!
 
-  # id of the backend server
-  serverVersion: String!
+  # The band used for the graphs calculation
+  band: Band!
+}
 
-  # token for the itc data version, can be null
-  dataVersion: String!
+type SpectroscopyGraphsResult {
+  # server and data versions
+  versions: ItcVersions!
 
-  # Exposure time duration
-  exposureTime: TimeSpan!
+  # results for each target, in same order as input
+  targetGraphs: [TargetGraphsOutcome!]!
+}
 
-  # Exposures
-  exposures: PosInt!
+union TargetGraphsOutcome = TargetGraphsResult | TargetError
 
-  # Results for each CCD
-  ccds: [ItcCcd!]!
+type SpectroscopyTimeAndGraphsResult {
+  # server and data versions
+  versions: ItcVersions!
 
-  # Chart data
-  charts: [ItcChart!]!
+  # ITC results for each target, in case all targets succeed
+  targetTimesAndGraphs: [TargetTimeAndGraphsOutcome!]
 
-  # Peak SN Ratio
-  peakFinalSNRatio: SignalToNoise!
+  # In case of errors in integration times, we short cirtuit to the results from integration times
+  targetTimes: [TargetIntegrationTimeOutcome!]
 
-  # SN Ratio at the requested wavelength if passed along
-  atWavelengthFinalSNRatio: SignalToNoise
+  # Index of the brightest target
+  brightestIndex: NonNegInt
 
-  # Peak SN Ratio
-  peakSingleSNRatio: SignalToNoise!
+  # ITC result for brightest target
+  brightest: TargetIntegrationTime
+}
 
-  # SN Ratio at the requested wavelength if passed along
-  atWavelengthSingleSNRatio: SignalToNoise
+union TargetTimeAndGraphsOutcome = TargetTimeAndGraphs | TargetError
+
+type TargetTimeAndGraphs {
+  # Results for the integration time
+  integrationTime: TargetIntegrationTime!
+
+  # Results for the graphs
+  graphs: TargetGraphs!
 }
 
 """Calculation result types"""

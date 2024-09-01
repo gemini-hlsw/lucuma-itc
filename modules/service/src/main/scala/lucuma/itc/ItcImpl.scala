@@ -5,7 +5,7 @@ package lucuma.itc
 
 import algebra.instances.all.given
 import cats.*
-import cats.data.NonEmptyList
+import cats.data.NonEmptyChain
 import cats.syntax.all.*
 import coulomb.*
 import coulomb.policy.spire.standard.given
@@ -16,13 +16,14 @@ import eu.timepit.refined.refineV
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
+import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.legacy.ExposureTimeRemoteResult
 import lucuma.itc.legacy.FLocalItc
 import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.TargetProfile
+import lucuma.itc.search.TargetData
 import lucuma.refined.*
 import natchez.Trace
 import org.typelevel.log4cats.Logger
@@ -32,12 +33,12 @@ import scala.math.*
 
 trait SignalToNoiseCalculation[F[_]: Applicative] { this: Itc[F] =>
   def calculateSignalToNoise(
-    graph:           NonEmptyList[ItcChartGroup],
+    graph:           NonEmptyChain[ItcGraphGroup],
     signalToNoiseAt: Option[Wavelength]
   ): F[SNCalcResult] =
     (for {
-      s2nChart     <- graph.flatMap(_.charts).find(_.chartType === ChartType.S2NChart)
-      finalS2NData <- s2nChart.series
+      s2nGraph     <- graph.flatMap(_.graphs).find(_.graphType === GraphType.S2NGraph)
+      finalS2NData <- s2nGraph.series
                         .filter(_.seriesType === SeriesDataType.FinalS2NData)
                         .map(_.data)
                         .flatten
@@ -83,7 +84,7 @@ trait SignalToNoiseCalculation[F[_]: Applicative] { this: Itc[F] =>
 
 /** An ITC implementation that calls the OCS2 ITC server remotely. */
 object ItcImpl {
-  opaque type NumberOfExposures = Int
+  opaque type ExposureCount = Int
 
   def build[F[_]: MonadThrow: Logger: Trace](itcLocal: FLocalItc[F]): Itc[F] =
     new Itc[F] with SignalToNoiseCalculation[F] {
@@ -91,52 +92,58 @@ object ItcImpl {
       val T = Trace[F]
 
       def calculateIntegrationTime(
-        targetProfile:   TargetProfile,
+        target:          TargetData,
+        band:            Band,
         observingMode:   ObservingMode,
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
-      ): F[NonEmptyList[IntegrationTime]] =
+      ): F[NonEmptyChain[IntegrationTime]] =
         T.span("calculate-exposure-time"):
           observingMode match
-            case _: ObservingMode.SpectroscopyMode =>
+            case ObservingMode.SpectroscopyMode(_, _, _) =>
               signalToNoiseAt match
                 case None     =>
-                  spectroscopy(targetProfile, observingMode, constraints, signalToNoise, none)
+                  spectroscopy(target, band, observingMode, constraints, signalToNoise, none)
                 case Some(at) =>
-                  spectroscopySNAt(targetProfile, observingMode, constraints, signalToNoise, at)
-            case _: ObservingMode.ImagingMode      =>
-              imaging(targetProfile, observingMode, constraints, signalToNoise)
+                  spectroscopySNAt(target, band, observingMode, constraints, signalToNoise, at)
+            case ObservingMode.ImagingMode.GmosNorth(_, _, _) |
+                ObservingMode.ImagingMode.GmosSouth(_, _, _) =>
+              imaging(target, band, observingMode, constraints, signalToNoise)
 
       def calculateGraph(
-        targetProfile:   TargetProfile,
+        target:          TargetData,
+        band:            Band,
         observingMode:   ObservingMode,
         constraints:     ItcObservingConditions,
         exposureTime:    TimeSpan,
-        exposures:       PosInt,
+        exposureCount:   PosInt,
         signalToNoiseAt: Option[Wavelength]
-      ): F[GraphResult] =
+      ): F[TargetGraphsCalcResult] =
         observingMode match
-          case _: ObservingMode.SpectroscopyMode =>
+          case ObservingMode.SpectroscopyMode(_, _, _) =>
             spectroscopyGraph(
-              targetProfile,
+              target,
+              band,
               observingMode,
               constraints,
               exposureTime.toMilliseconds.withUnit[Millisecond].toUnit[Second],
-              exposures.value,
+              exposureCount.value,
               signalToNoiseAt
             )
-          case _: ObservingMode.ImagingMode      =>
+          case ObservingMode.ImagingMode.GmosNorth(_, _, _) |
+              ObservingMode.ImagingMode.GmosSouth(_, _, _) =>
             MonadThrow[F].raiseError(
               new IllegalArgumentException("Imaging mode not supported for graph calculation")
             )
 
       private def itc(
-        targetProfile:    TargetProfile,
+        target:           TargetData,
+        band:             Band,
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
         exposureDuration: Quantity[BigDecimal, Second],
-        exposures:        Int,
+        exposureCount:    Int,
         level:            NonNegInt
       ): F[legacy.GraphsRemoteResult] =
         import lucuma.itc.legacy.given
@@ -144,24 +151,27 @@ object ItcImpl {
 
         T.span("legacy-itc-query") {
           val request =
-            spectroscopyParams(targetProfile,
-                               observingMode,
-                               exposureDuration.value.toDouble.seconds,
-                               constraints,
-                               exposures
+            spectroscopyParams(
+              target,
+              band,
+              observingMode,
+              exposureDuration.value.toDouble.seconds,
+              constraints,
+              exposureCount
             ).asJson
 
           for {
             _ <- T.put("itc.query" -> request.spaces2)
             _ <- T.put("itc.exposureDuration" -> exposureDuration.value.toInt)
-            _ <- T.put("itc.exposures" -> exposures)
+            _ <- T.put("itc.exposures" -> exposureCount)
             _ <- T.put("itc.level" -> level.value)
-            r <- itcLocal.calculateCharts(request.noSpaces)
+            r <- itcLocal.calculateGraphs(request.noSpaces)
           } yield r
         }
 
       private def itcWithSNAt(
-        targetProfile: TargetProfile,
+        target:        TargetData,
+        band:          Band,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         sigma:         SignalToNoise,
@@ -172,11 +182,13 @@ object ItcImpl {
 
         T.span("legacy-itc-query") {
           val request =
-            spectroscopyWithSNAtParams(targetProfile,
-                                       observingMode,
-                                       constraints,
-                                       sigma,
-                                       wavelength
+            spectroscopyWithSNAtParams(
+              target,
+              band,
+              observingMode,
+              constraints,
+              sigma,
+              wavelength
             ).asJson
 
           for {
@@ -188,54 +200,58 @@ object ItcImpl {
         }
 
       private def itcGraph(
-        targetProfile:    TargetProfile,
+        target:           TargetData,
+        band:             Band,
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
         exposureDuration: Quantity[BigDecimal, Second],
-        exposures:        Long
+        exposureCount:    Long
       ): F[legacy.GraphsRemoteResult] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
         T.span("legacy-itc-query") {
           val json =
-            spectroscopyParams(targetProfile,
-                               observingMode,
-                               exposureDuration.value.toDouble.seconds,
-                               constraints,
-                               exposures.toInt
+            spectroscopyParams(
+              target,
+              band,
+              observingMode,
+              exposureDuration.value.toDouble.seconds,
+              constraints,
+              exposureCount.toInt
             ).asJson
           for {
             _ <- T.put("itc.query" -> json.spaces2)
             _ <- T.put("itc.exposureDuration" -> exposureDuration.value.toInt)
-            _ <- T.put("itc.exposures" -> exposures.toInt)
-            r <- itcLocal.calculateCharts(json.noSpaces)
+            _ <- T.put("itc.exposures" -> exposureCount.toInt)
+            r <- itcLocal.calculateGraphs(json.noSpaces)
           } yield r
         }
 
       private def spectroscopyGraph(
-        targetProfile:    TargetProfile,
+        target:           TargetData,
+        band:             Band,
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
         exposureDuration: Quantity[BigDecimal, Second],
-        exposures:        Long,
+        exposureCount:    Long,
         signalToNoiseAt:  Option[Wavelength]
-      ): F[GraphResult] =
-        itcGraph(targetProfile, observingMode, constraints, exposureDuration, exposures).map { r =>
-          GraphResult.fromLegacy(r.ccds, r.groups, signalToNoiseAt)
-        }
+      ): F[TargetGraphsCalcResult] =
+        itcGraph(target, band, observingMode, constraints, exposureDuration, exposureCount).map:
+          r => TargetGraphsCalcResult.fromLegacy(r.ccds, r.groups, signalToNoiseAt)
 
       /**
        * Compute the exposure time and number of exposures required to achieve the desired
        * signal-to-noise under the requested conditions. Only for spectroscopy modes
        */
       private def spectroscopy(
-        targetProfile:   TargetProfile,
+        target:          TargetData,
+        band:            Band,
         observingMode:   ObservingMode,
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Option[Wavelength]
-      ): F[NonEmptyList[IntegrationTime]] = {
+      ): F[NonEmptyChain[IntegrationTime]] = {
         val startExpTime      = BigDecimal(1200.0).withUnit[Second]
         val numberOfExposures = 1
         val requestedSN       = signalToNoise
@@ -243,7 +259,7 @@ object ItcImpl {
 
         // This loops should be necessary only a few times but put a circuit breaker just in case
         def itcStep(
-          nExp:       NumberOfExposures,
+          nExp:       ExposureCount,
           oldNExp:    Int,
           expTime:    Quantity[BigDecimal, Second],
           oldExpTime: Quantity[BigDecimal, Second],
@@ -274,25 +290,28 @@ object ItcImpl {
                 counter.value < MaxIterations &&
                 newExpTime < (pow(2, 63) - 1)
               ) {
-                itc(targetProfile,
-                    observingMode,
-                    constraints,
-                    newExpTime.withUnit[Second],
-                    newNExp.toInt,
-                    next
+                itc(
+                  target,
+                  band,
+                  observingMode,
+                  constraints,
+                  newExpTime.withUnit[Second],
+                  newNExp.toInt,
+                  next
                 )
                   .flatMap { s =>
                     L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *>
                       calculateSignalToNoise(s.groups, signalToNoiseAt).flatMap {
                         case SNCalcResult.SNCalcSuccess(snr) =>
-                          itcStep(newNExp.toInt,
-                                  nExp,
-                                  newExpTime.withUnit[Second],
-                                  expTime,
-                                  snr,
-                                  maxTime,
-                                  s,
-                                  next
+                          itcStep(
+                            newNExp.toInt,
+                            nExp,
+                            newExpTime.withUnit[Second],
+                            expTime,
+                            snr,
+                            maxTime,
+                            s,
+                            next
                           )
                         case r                               =>
                           MonadThrow[F].raiseError(CalculationError(r.toString))
@@ -317,25 +336,28 @@ object ItcImpl {
         end itcStep
 
         L.info(s"Desired S/N $signalToNoise") *>
-          L.info(s"Target brightness ${targetProfile} at band ${targetProfile.band}") *>
+          L.info(s"Target brightness $target at band $band") *>
           T.span("itc.calctime.spectroscopy") {
 
-            itc(targetProfile,
-                observingMode,
-                constraints,
-                startExpTime,
-                numberOfExposures,
-                1.refined
+            itc(
+              target,
+              band,
+              observingMode,
+              constraints,
+              startExpTime,
+              numberOfExposures,
+              1.refined
             )
               .flatMap { r =>
-                val halfWellTime = r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime.value
+                val wellHalfFilledSeconds =
+                  r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime.value
                 L.info(
-                  s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} halfWellTime: $halfWellTime"
+                  s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} wellHalfFilledSeconds: $wellHalfFilledSeconds"
                 ) *> {
-                  if (halfWellTime < 1.0) {
-                    MonadThrow[F].raiseError(SourceTooBright(halfWellTime))
+                  if (wellHalfFilledSeconds < 1.0) {
+                    MonadThrow[F].raiseError(SourceTooBright(wellHalfFilledSeconds))
                   } else {
-                    val maxTime = startExpTime.value.min(halfWellTime)
+                    val maxTime = startExpTime.value.min(wellHalfFilledSeconds)
                     calculateSignalToNoise(r.groups, signalToNoiseAt)
                       .flatMap {
                         // degenerate case where the ITC cannot compute a S/N
@@ -373,34 +395,43 @@ object ItcImpl {
                 }
 
               }
-              .map(NonEmptyList.one)
+              .map(NonEmptyChain.one)
           }
 
       }
 
       /**
        * Compute the exposure time and number of exposures required to achieve the desired
-       * signal-to-noise under the requested conditions. Only for spectroscopy modes
+       * signal-to-noise under the requested conditions. Only for spectroscopy modes.
        */
       private def spectroscopySNAt(
-        targetProfile:   TargetProfile,
+        target:          TargetData,
+        band:            Band,
         observingMode:   ObservingMode,
         constraints:     ItcObservingConditions,
         signalToNoise:   SignalToNoise,
         signalToNoiseAt: Wavelength
-      ): F[NonEmptyList[IntegrationTime]] =
+      ): F[NonEmptyChain[IntegrationTime]] =
         for {
           _ <- L.info(s"Desired S/N $signalToNoise")
-          _ <- L.info(s"Target ${targetProfile} at band ${targetProfile.band}")
+          _ <- L.info(s"Target $target at band $band")
           r <-
             T.span("itc.calctime.spectroscopy-exp-time-at") {
-              itcWithSNAt(targetProfile, observingMode, constraints, signalToNoise, signalToNoiseAt)
+              itcWithSNAt(
+                target,
+                band,
+                observingMode,
+                constraints,
+                signalToNoise,
+                signalToNoiseAt
+              )
             }
           t <- calculationResults(r)
         } yield t
 
       private def imagingLegacy(
-        targetProfile: TargetProfile,
+        target:        TargetData,
+        band:          Band,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         sigma:         SignalToNoise
@@ -410,7 +441,7 @@ object ItcImpl {
 
         T.span("legacy-itc-query") {
           val request =
-            imagingParams(targetProfile, observingMode, constraints, sigma).asJson
+            imagingParams(target, band, observingMode, constraints, sigma).asJson
 
           for {
             _ <- T.put("itc.query" -> request.spaces2)
@@ -422,11 +453,11 @@ object ItcImpl {
 
       private def calculationResults(
         r: ExposureTimeRemoteResult
-      ): F[NonEmptyList[IntegrationTime]] =
+      ): F[NonEmptyChain[IntegrationTime]] =
         r.exposureCalculation.traverse(r =>
           TimeSpan
             .fromSeconds(r.exposureTime)
-            .map(expTime => IntegrationTime(expTime, r.exposures, r.signalToNoise).pure[F])
+            .map(expTime => IntegrationTime(expTime, r.exposureCount, r.signalToNoise).pure[F])
             .getOrElse {
               MonadThrow[F].raiseError(
                 CalculationError(
@@ -441,16 +472,17 @@ object ItcImpl {
        * signal-to-noise under the requested conditions. Only for spectroscopy modes
        */
       private def imaging(
-        targetProfile: TargetProfile,
+        target:        TargetData,
+        band:          Band,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         signalToNoise: SignalToNoise
-      ): F[NonEmptyList[IntegrationTime]] =
+      ): F[NonEmptyChain[IntegrationTime]] =
         for {
           _ <- L.info(s"Desired S/N $signalToNoise")
-          _ <- L.info(s"Target ${targetProfile} at band ${targetProfile.band}")
+          _ <- L.info(s"Target $target  at band $band")
           r <- T.span("itc.calctime.spectroscopy-exp-time-at") {
-                 imagingLegacy(targetProfile, observingMode, constraints, signalToNoise)
+                 imagingLegacy(target, band, observingMode, constraints, signalToNoise)
                }
           t <- calculationResults(r)
         } yield t

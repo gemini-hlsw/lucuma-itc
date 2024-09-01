@@ -3,20 +3,23 @@
 
 package lucuma.itc
 
-import io.circe.*
+import cats.syntax.all.*
+import io.circe.Encoder
+import io.circe.Json
 import io.circe.syntax.*
-import lucuma.core.data.Zipper
-import lucuma.core.data.ZipperCodec.given
-import lucuma.core.syntax.string.*
 import lucuma.itc.search.ObservingMode
 
 sealed trait IntegrationTimeError extends RuntimeException {
   def message: String
 }
 
-case class SourceTooBright(halfWellTime: BigDecimal) extends IntegrationTimeError
+object IntegrationTimeError {
+  def unapply(e: IntegrationTimeError): Option[String] = Some(e.message)
+}
+
+case class SourceTooBright(wellHalfFilledSeconds: BigDecimal) extends IntegrationTimeError
     derives Encoder.AsObject {
-  val message: String = f"Source too bright, well half filled in $halfWellTime%.2f seconds"
+  val message: String = f"Source too bright, well half filled in $wellHalfFilledSeconds%.2f seconds"
 }
 
 /** Generic calculation error */
@@ -30,19 +33,18 @@ object CalculationError {
 }
 
 case class IntegrationTimeCalculationResult(
-  serverVersion: String,
-  dataVersion:   String,
-  mode:          ObservingMode,
-  results:       Zipper[IntegrationTime]
+  versions:    ItcVersions,
+  mode:        ObservingMode,
+  targetTimes: AsterismIntegrationTimeOutcomes
 )
 
 object IntegrationTimeCalculationResult:
-  given Encoder[IntegrationTimeCalculationResult] =
-    r =>
-      Json
-        .obj(
-          "serverVersion" -> r.serverVersion.asJson,
-          "dataVersion"   -> r.dataVersion.asJson,
-          "mode"          -> r.mode.asJson
-        )
-        .deepMerge(r.results.asJson)
+  given Encoder[IntegrationTimeCalculationResult] = r =>
+    Json
+      .obj(
+        "versions"       -> r.versions.asJson,
+        "mode"           -> r.mode.asJson,
+        "targetTimes"    -> r.targetTimes.asJson,
+        "brightestIndex" -> r.targetTimes.brightestIndex.asJson,
+        "brightest"      -> r.targetTimes.brightest.asJson
+      )

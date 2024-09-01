@@ -3,50 +3,53 @@
 
 package lucuma.itc.tests
 
-import cats.data.NonEmptyList
+import cats.data.NonEmptyChain
 import cats.effect.IO
 import cats.syntax.applicative.*
 import eu.timepit.refined.types.numeric.PosInt
+import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.*
-import lucuma.itc.ChartType
+import lucuma.itc.GraphType
 import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcCcd
-import lucuma.itc.ItcChart
-import lucuma.itc.ItcChartGroup
+import lucuma.itc.ItcGraph
+import lucuma.itc.ItcGraphGroup
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
 import lucuma.itc.SignalToNoiseCalculation
 import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.TargetProfile
+import lucuma.itc.search.TargetData
 import lucuma.refined.*
 
 object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
   override def calculateIntegrationTime(
-    targetProfile:   TargetProfile,
+    target:          TargetData,
+    band:            Band,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[NonEmptyList[IntegrationTime]] =
-    NonEmptyList
+  ): IO[NonEmptyChain[IntegrationTime]] =
+    NonEmptyChain
       .of(IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get))
       .pure[IO]
 
   override def calculateGraph(
-    targetProfile:   TargetProfile,
+    target:          TargetData,
+    band:            Band,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     exposureTime:    TimeSpan,
-    exposures:       PosInt,
+    exposureCount:   PosInt,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[GraphResult] =
-    GraphResult(
-      NonEmptyList.of(
+  ): IO[TargetGraphsCalcResult] =
+    TargetGraphsCalcResult(
+      NonEmptyChain.of(
         ItcCcd(1,
                1,
                2,
@@ -59,11 +62,11 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
                Nil
         )
       ),
-      NonEmptyList.of(
-        ItcChartGroup(
-          NonEmptyList.of(
-            ItcChart(
-              ChartType.S2NChart,
+      NonEmptyChain.of(
+        ItcGraphGroup(
+          NonEmptyChain.of(
+            ItcGraph(
+              GraphType.S2NGraph,
               List(
                 ItcSeries("title", SeriesDataType.FinalS2NData, List((1.0, 1000.0), (2.0, 1001.0)))
               )
@@ -81,13 +84,14 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
   override def calculateIntegrationTime(
-    targetProfile:   TargetProfile,
+    target:          TargetData,
+    band:            Band,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[NonEmptyList[IntegrationTime]] =
-    NonEmptyList
+  ): IO[NonEmptyChain[IntegrationTime]] =
+    NonEmptyChain
       .of(
         IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get),
         IntegrationTime(TimeSpan.fromSeconds(2).get, 5.refined, SignalToNoise.fromInt(20).get)
@@ -95,15 +99,16 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
       .pure[IO]
 
   override def calculateGraph(
-    targetProfile:   TargetProfile,
+    target:          TargetData,
+    band:            Band,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     exposureTime:    TimeSpan,
-    exposures:       PosInt,
+    exposureCount:   PosInt,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[GraphResult] =
-    GraphResult(
-      NonEmptyList.of(
+  ): IO[TargetGraphsCalcResult] =
+    TargetGraphsCalcResult(
+      NonEmptyChain.of(
         ItcCcd(1,
                1,
                2,
@@ -116,11 +121,11 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
                Nil
         )
       ),
-      NonEmptyList.of(
-        ItcChartGroup(
-          NonEmptyList.of(
-            ItcChart(
-              ChartType.S2NChart,
+      NonEmptyChain.of(
+        ItcGraphGroup(
+          NonEmptyChain.of(
+            ItcGraph(
+              GraphType.S2NGraph,
               List(
                 ItcSeries("title", SeriesDataType.FinalS2NData, List((1.0, 1000.0), (2.0, 1001.0)))
               )
@@ -138,24 +143,26 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
   override def calculateIntegrationTime(
-    targetProfile:   TargetProfile,
+    target:          TargetData,
+    band:            Band,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     signalToNoise:   SignalToNoise,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[NonEmptyList[IntegrationTime]] =
+  ): IO[NonEmptyChain[IntegrationTime]] =
     IO.raiseError(CalculationError("A calculation error"))
 
   override def calculateGraph(
-    targetProfile:   TargetProfile,
+    target:          TargetData,
+    band:            Band,
     observingMode:   ObservingMode,
     constraints:     ItcObservingConditions,
     exposureTime:    TimeSpan,
-    exposures:       PosInt,
+    exposureCount:   PosInt,
     signalToNoiseAt: Option[Wavelength]
-  ): IO[GraphResult] =
-    GraphResult(
-      NonEmptyList.of(
+  ): IO[TargetGraphsCalcResult] =
+    TargetGraphsCalcResult(
+      NonEmptyChain.of(
         ItcCcd(1,
                1,
                2,
@@ -168,11 +175,11 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
                Nil
         )
       ),
-      NonEmptyList.of(
-        ItcChartGroup(
-          NonEmptyList.of(
-            ItcChart(
-              ChartType.S2NChart,
+      NonEmptyChain.of(
+        ItcGraphGroup(
+          NonEmptyChain.of(
+            ItcGraph(
+              GraphType.S2NGraph,
               List(
                 ItcSeries("title", SeriesDataType.FinalS2NData, List((1.0, 1000.0), (2.0, 1001.0)))
               )

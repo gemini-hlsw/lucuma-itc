@@ -3,15 +3,15 @@
 
 package lucuma.itc.legacy
 
-import cats.data.NonEmptyList
+import cats.data.NonEmptyChain
 import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.math.SignalToNoise
-import lucuma.itc.ItcChartGroup
+import lucuma.itc.ItcGraphGroup
 
 case class GraphsRemoteResult(
-  ccds:   NonEmptyList[ItcRemoteCcd],
-  groups: NonEmptyList[ItcChartGroup]
+  ccds:   NonEmptyChain[ItcRemoteCcd],
+  groups: NonEmptyChain[ItcGraphGroup]
 ) {
   val maxTotalSNRatio: Double = ccds.map(_.totalSNRatio).maximum
   val maxWellDepth: Double    = ccds.map(_.wellDepth).maximum
@@ -20,8 +20,8 @@ case class GraphsRemoteResult(
 
 case class ExposureCalculation(
   exposureTime:  Double,
-  exposures:     PosInt,
+  exposureCount: PosInt,
   signalToNoise: SignalToNoise
 )
 
-case class ExposureTimeRemoteResult(exposureCalculation: NonEmptyList[ExposureCalculation])
+case class ExposureTimeRemoteResult(exposureCalculation: NonEmptyChain[ExposureCalculation])

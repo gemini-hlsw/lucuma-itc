@@ -12,7 +12,7 @@ import lucuma.core.model.SourceProfile
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.search.ItcObservationDetails
 import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.TargetProfile
+import lucuma.itc.search.TargetData
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -23,19 +23,10 @@ enum ItcWavefrontSensor(val ocs2Tag: String):
 case class ItcTelescopeDetails(wfs: ItcWavefrontSensor)
 
 case class ItcSourceDefinition(
-  profile:  SourceProfile,
-  normBand: Band,
-  redshift: Redshift
-)
-
-object ItcSourceDefinition:
-
-  def fromTargetProfile(p: TargetProfile): ItcSourceDefinition =
-    ItcSourceDefinition(
-      p.sourceProfile,
-      p.band,
-      p.redshift
-    )
+  target: TargetData,
+  band:   Band
+):
+  export target.*
 
 case class ItcParameters(
   source:      ItcSourceDefinition,
@@ -53,17 +44,18 @@ object ItcInstrumentDetails:
 
 /** Convert model types into OCS2 ITC-compatible types for a spectroscopy request. */
 def spectroscopyParams(
-  targetProfile:    TargetProfile,
+  target:           TargetData,
+  band:             Band,
   observingMode:    ObservingMode,
   exposureDuration: FiniteDuration,
   conditions:       ItcObservingConditions,
-  exposures:        Int
+  exposureCount:    Int
 ): ItcParameters =
   ItcParameters(
-    source = ItcSourceDefinition.fromTargetProfile(targetProfile),
+    source = ItcSourceDefinition(target, band),
     observation = ItcObservationDetails(
       calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
-        exposures = exposures,
+        exposureCount = exposureCount,
         coadds = None,
         exposureDuration = exposureDuration,
         sourceFraction = 1.0,
@@ -79,14 +71,15 @@ def spectroscopyParams(
   )
 
 def spectroscopyWithSNAtParams(
-  targetProfile: TargetProfile,
+  target:        TargetData,
+  band:          Band,
   observingMode: ObservingMode,
   conditions:    ItcObservingConditions,
   sigma:         SignalToNoise,
   wavelength:    Wavelength
 ): ItcParameters =
   ItcParameters(
-    source = ItcSourceDefinition.fromTargetProfile(targetProfile),
+    source = ItcSourceDefinition(target, band),
     observation = ItcObservationDetails(
       calculationMethod =
         ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
@@ -106,13 +99,14 @@ def spectroscopyWithSNAtParams(
   )
 
 def imagingParams(
-  targetProfile: TargetProfile,
+  target:        TargetData,
+  band:          Band,
   observingMode: ObservingMode,
   conditions:    ItcObservingConditions,
   sigma:         SignalToNoise
 ): ItcParameters =
   ItcParameters(
-    source = ItcSourceDefinition.fromTargetProfile(targetProfile),
+    source = ItcSourceDefinition(target, band),
     observation = ItcObservationDetails(
       calculationMethod = ItcObservationDetails.CalculationMethod.IntegrationTime.ImagingExp(
         sigma = sigma.toBigDecimal.toDouble,

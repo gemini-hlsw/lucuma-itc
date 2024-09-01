@@ -1,43 +1,44 @@
 import NativePackagerHelper._
 
+val boopickleVersion            = "1.5.0"
+val catsVersion                 = "2.12.0"
 val catsEffectVersion           = "3.5.4"
 val catsTestkitScalaTestVersion = "2.1.5"
-val catsVersion                 = "2.12.0"
-val catsScalacheckVersion       = "0.3.2"
 val catsTimeVersion             = "0.3.4"
+val catsScalacheckVersion       = "0.3.2"
 val circeVersion                = "0.14.9"
 val cirisVersion                = "3.6.0"
 val clueVersion                 = "0.40.0"
+val disciplineMunitVersion      = "2.0.0"
+val fs2Version                  = "3.11.0"
+val gatlingVersion              = "3.11.5"
+val grackleVersion              = "0.20.0"
+val graphQLRoutesVersion        = "0.8.13"
 val http4sVersion               = "0.23.27"
 val http4sJdkHttpClientVersion  = "0.9.1"
-val fs2Version                  = "3.11.0"
 val kindProjectorVersion        = "0.13.2"
-val lucumaCoreVersion           = "0.103.1"
-val lucumaRefinedVersion        = "0.1.3"
-val slf4jVersion                = "2.0.16"
-val log4catsVersion             = "2.7.0"
-val monocleVersion              = "3.3.0"
-val munitCatsEffectVersion      = "2.0.0"
-val graphQLRoutesVersion        = "0.8.13"
-val refinedVersion              = "0.11.2"
-val grackleVersion              = "0.20.0"
-val natchezHttp4sVersion        = "0.6.0"
-val natchezVersion              = "0.3.6"
-val munitVersion                = "1.0.1"
-val disciplineMunitVersion      = "2.0.0"
-val gatlingVersion              = "3.11.5"
-val spireVersion                = "0.18.0"
-val redis4CatsVersion           = "1.7.0"
-val pprintVersion               = "0.9.0"
 val kittensVersion              = "3.4.0"
-val boopickleVersion            = "1.5.0"
+val log4catsVersion             = "2.7.0"
+val lucumaCoreVersion           = "0.104.0"
+val lucumaRefinedVersion        = "0.1.3"
+val monocleVersion              = "3.3.0"
+val munitVersion                = "1.0.1"
+val munitCatsEffectVersion      = "2.0.0"
+val natchezVersion              = "0.3.6"
+val natchezHttp4sVersion        = "0.6.0"
+val pprintVersion               = "0.9.0"
+val redis4CatsVersion           = "1.7.0"
+val refinedVersion              = "0.11.2"
+val slf4jVersion                = "2.0.16"
+val spireVersion                = "0.18.0"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / scalaVersion        := "3.4.3"
-ThisBuild / crossScalaVersions  := Seq("3.4.3")
-ThisBuild / tlBaseVersion       := "0.21"
+ThisBuild / scalaVersion        := "3.5.0"
+ThisBuild / crossScalaVersions  := Seq("3.5.0")
+ThisBuild / tlBaseVersion       := "0.22"
 ThisBuild / tlCiReleaseBranches := Seq("master")
+ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
