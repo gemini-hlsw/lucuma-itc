@@ -5,6 +5,7 @@ package lucuma.itc.search
 
 import cats.Hash
 import cats.derived.*
+import cats.syntax.all.*
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.enums.*
@@ -16,7 +17,6 @@ import lucuma.itc.GmosNSpectroscopyParams
 import lucuma.itc.GmosSImagingParams
 import lucuma.itc.GmosSSpectroscopyParams
 import lucuma.itc.encoders.given
-import lucuma.itc.search.ItcObservationDetails.AnalysisMethod
 import lucuma.itc.search.hashes.given
 import lucuma.itc.search.syntax.*
 import spire.math.Interval
@@ -58,6 +58,9 @@ object ObservingMode {
       case gn: GmosNorth => gn.asJson
       case gs: GmosSouth => gs.asJson
     }
+
+    def unapply(spectroscopyMode: SpectroscopyMode): (Wavelength, Rational, Interval[Wavelength]) =
+      (spectroscopyMode.λ, spectroscopyMode.resolution, spectroscopyMode.coverage)
 
     sealed trait GmosSpectroscopy extends SpectroscopyMode derives Hash {
       def isIfu: Boolean

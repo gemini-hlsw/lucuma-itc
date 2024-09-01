@@ -3,35 +3,45 @@
 
 package lucuma.itc.input
 
-import cats.syntax.parallel.*
-import lucuma.core.enums.Band
-import lucuma.core.math.RadialVelocity
+import cats.syntax.all.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
-import lucuma.core.model.SourceProfile
 import lucuma.itc.SignificantFigures
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
-import lucuma.odb.graphql.input.sourceprofile.*
 
 sealed trait SpectroscopyTimeInput {
-  val wavelength: Wavelength
-  val signalToNoiseAt: Option[Wavelength]
-  val signalToNoise: SignalToNoise
-  val sourceProfile: SourceProfile
-  val band: Band
-  val radialVelocity: RadialVelocity
-  val constraints: ConstraintSetInput
-  val mode: InstrumentModesInput
+  def wavelength: Wavelength
+  def signalToNoise: SignalToNoise
+  def signalToNoiseAt: Option[Wavelength]
+  def asterism: List[TargetDataInput]
+  def constraints: ConstraintSetInput
+  def mode: InstrumentModesInput
 }
+
+object SpectroscopyTimeInput:
+  def unapply(arg: SpectroscopyTimeInput): (
+    Wavelength,
+    SignalToNoise,
+    Option[Wavelength],
+    List[TargetDataInput],
+    ConstraintSetInput,
+    InstrumentModesInput
+  ) =
+    (
+      arg.wavelength,
+      arg.signalToNoise,
+      arg.signalToNoiseAt,
+      arg.asterism,
+      arg.constraints,
+      arg.mode
+    )
 
 case class SpectroscopyIntegrationTimeInput(
   wavelength:      Wavelength,
-  signalToNoiseAt: Option[Wavelength],
   signalToNoise:   SignalToNoise,
-  sourceProfile:   SourceProfile,
-  band:            Band,
-  radialVelocity:  RadialVelocity,
+  signalToNoiseAt: Option[Wavelength],
+  asterism:        List[TargetDataInput],
   constraints:     ConstraintSetInput,
   mode:            InstrumentModesInput
 ) extends SpectroscopyTimeInput
@@ -42,50 +52,38 @@ object SpectroscopyIntegrationTimeInput {
     ObjectFieldsBinding.rmap {
       case List(
             WavelengthInput.Binding("wavelength", wavelength),
-            WavelengthInput.Binding.Option("signalToNoiseAt", signalToNoiseAt),
             SignalToNoiseBinding("signalToNoise", signalToNoise),
-            SourceProfileInput.CreateBinding("sourceProfile", sourceProfile),
-            BandBinding("band", band),
-            RadialVelocityInput.Binding("radialVelocity", radialVelocity),
+            WavelengthInput.Binding.Option("signalToNoiseAt", signalToNoiseAt),
+            TargetDataInput.binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
             InstrumentModesInput.binding("mode", mode)
           ) =>
-        (wavelength,
-         signalToNoiseAt,
-         signalToNoise,
-         sourceProfile,
-         band,
-         radialVelocity,
-         constraints,
-         mode
-        ).parMapN(apply)
+        (wavelength, signalToNoise, signalToNoiseAt, asterism, constraints, mode).parMapN(
+          apply
+        )
     }
 
 }
 
-case class SpectroscopyIntegrationTimeAndGraphInput(
+case class SpectroscopyIntegrationTimeAndGraphsInput(
   wavelength:         Wavelength,
   signalToNoise:      SignalToNoise,
   signalToNoiseAt:    Option[Wavelength],
-  sourceProfile:      SourceProfile,
-  band:               Band,
-  radialVelocity:     RadialVelocity,
+  asterism:           List[TargetDataInput],
   constraints:        ConstraintSetInput,
   mode:               InstrumentModesInput,
   significantFigures: Option[SignificantFigures]
 ) extends SpectroscopyTimeInput
 
-object SpectroscopyIntegrationTimeAndGraphInput {
+object SpectroscopyIntegrationTimeAndGraphsInput {
 
-  def binding: Matcher[SpectroscopyIntegrationTimeAndGraphInput] =
+  def binding: Matcher[SpectroscopyIntegrationTimeAndGraphsInput] =
     ObjectFieldsBinding.rmap {
       case List(
             WavelengthInput.Binding("wavelength", wavelength),
             SignalToNoiseBinding("signalToNoise", signalToNoise),
             WavelengthInput.Binding.Option("signalToNoiseAt", signalToNoiseAt),
-            SourceProfileInput.CreateBinding("sourceProfile", sourceProfile),
-            BandBinding("band", band),
-            RadialVelocityInput.Binding("radialVelocity", radialVelocity),
+            TargetDataInput.binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
             InstrumentModesInput.binding("mode", mode),
             SignificantFiguresInput.binding.Option("significantFigures", significantFigures)
@@ -93,9 +91,7 @@ object SpectroscopyIntegrationTimeAndGraphInput {
         (wavelength,
          signalToNoise,
          signalToNoiseAt,
-         sourceProfile,
-         band,
-         radialVelocity,
+         asterism,
          constraints,
          mode,
          significantFigures

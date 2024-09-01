@@ -6,6 +6,7 @@ package lucuma.itc.client
 import cats.effect.*
 import cats.implicits.*
 import com.comcast.ip4s.*
+import lucuma.itc.ItcVersions
 import lucuma.itc.tests.MockItc
 import munit.CatsEffectSuite
 import munit.catseffect.IOFixture
@@ -70,12 +71,12 @@ trait ClientSuite extends CatsEffectSuite {
         .assertEquals(expected)
     }
 
-  def optimizedSpectroscopyGraph(
-    in:       OptimizedSpectroscopyGraphInput,
-    expected: Either[String, OptimizedSpectroscopyGraphResult]
+  def spectroscopyGraphs(
+    in:       SpectroscopyGraphsInput,
+    expected: Either[String, SpectroscopyGraphsResult]
   ): IO[Unit] =
     itcClient.flatMap {
-      _.optimizedSpectroscopyGraph(in).attempt
+      _.spectroscopyGraphs(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
     }

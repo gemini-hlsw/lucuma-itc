@@ -15,29 +15,32 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
             wavelength: {
               nanometers: 60,
             },
-            radialVelocity: {
-              kilometersPerSecond: 1000
-            },
             signalToNoise: 2,
-            sourceProfile: {
-              point: {
-                bandNormalized: {
-                  sed: {
-                    stellarLibrary: O5_V
+            asterism: [
+              {
+                sourceProfile: {
+                  point: {
+                    bandNormalized: {
+                      sed: {
+                        stellarLibrary: O5_V
+                      }
+                      brightnesses: [ {
+                        band: R
+                        value: 3
+                        units: ERG_PER_S_PER_CM_SQUARED_PER_A
+                      }, {
+                        band: J
+                        value: 2.1
+                        units: AB_MAGNITUDE
+                      }]
+                    }
                   }
-                  brightnesses: [ {
-                    band: R
-                    value: 3
-                    units: ERG_PER_S_PER_CM_SQUARED_PER_A
-                  }, {
-                    band: J
-                    value: 2.1
-                    units: AB_MAGNITUDE
-                  }]
+                },
+                radialVelocity: {
+                  kilometersPerSecond: 1000
                 }
               }
-            },
-            band: J,
+            ],
             constraints: {
               imageQuality: POINT_THREE,
               cloudExtinction: POINT_FIVE,
@@ -74,10 +77,12 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
                 }
               }
             }
-            selected {
-              exposures
-              exposureTime {
-                seconds
+            brightest {
+              selected {
+                exposureCount
+                exposureTime {
+                  seconds
+                }
               }
             }
           }
@@ -86,9 +91,31 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
       json"""
         {
           "errors": [{
-            "message" : "A calculation error"
+            "message": "A calculation error",
+            "extensions": {
+              "targetIndex": 0,
+              "error": {
+                "wellHalfFilledSeconds": null,
+                "errorCode": "GENERAL",
+                "message": "A calculation error"
+              }
+            }
           }],
-          "data": null
+          "data": {
+            "spectroscopyIntegrationTime" : {
+              "mode" : {
+                "instrument" : "GMOS_NORTH",
+                "resolution" : 970,
+                "params" : {
+                  "grating" : "B1200_G5301"
+                },
+                "wavelength" : {
+                  "nanometers" : 60.000
+                }
+              },
+              "brightest" : null
+            }
+          }
         }
         """
     )

@@ -3,7 +3,7 @@
 
 package lucuma.itc.legacy
 
-import cats.data.NonEmptyList
+import cats.data.NonEmptyChain
 import cats.syntax.all.*
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.refineV
@@ -20,9 +20,9 @@ import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.core.syntax.string.*
-import lucuma.itc.ChartType
-import lucuma.itc.ItcChart
-import lucuma.itc.ItcChartGroup
+import lucuma.itc.GraphType
+import lucuma.itc.ItcGraph
+import lucuma.itc.ItcGraphGroup
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
@@ -205,13 +205,13 @@ private given Encoder[ItcTelescopeDetails] = (a: ItcTelescopeDetails) =>
 private given Encoder[SourceProfile] = (a: SourceProfile) =>
   import SourceProfile._
   a match {
-    case _: Point    =>
+    case Point(_)          =>
       Json.obj("PointSource" -> Json.obj())
-    case _: Uniform  => Json.obj("UniformSource" -> Json.obj())
-    case g: Gaussian =>
+    case Uniform(_)        => Json.obj("UniformSource" -> Json.obj())
+    case Gaussian(fwhm, _) =>
       Json.obj(
         "GaussianSource" -> Json.obj(
-          "fwhm" -> Angle.signedDecimalArcseconds.get(g.fwhm).asJson
+          "fwhm" -> Angle.signedDecimalArcseconds.get(fwhm).asJson
         )
       )
   }
@@ -252,22 +252,22 @@ private given Encoder[Redshift] =
   Encoder.forProduct1("z")(_.z)
 
 given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
-  val source = s.profile match {
-    case _: SourceProfile.Point    =>
+  val source = s.sourceProfile match {
+    case SourceProfile.Point(_)          =>
       Json.obj("PointSource" -> Json.obj())
-    case _: SourceProfile.Uniform  => Json.obj("UniformSource" -> Json.obj())
-    case g: SourceProfile.Gaussian =>
+    case SourceProfile.Uniform(_)        => Json.obj("UniformSource" -> Json.obj())
+    case SourceProfile.Gaussian(fwhm, _) =>
       Json.obj(
         "GaussianSource" -> Json.obj(
-          "fwhm" -> Angle.signedDecimalArcseconds.get(g.fwhm).asJson
+          "fwhm" -> Angle.signedDecimalArcseconds.get(fwhm).asJson
         )
       )
   }
 
-  val units: Json = s.profile match {
+  val units: Json = s.sourceProfile match {
     case SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses))
-        if brightnesses.contains(s.normBand) =>
-      brightnesses.get(s.normBand).map(_.units.serialized) match {
+        if brightnesses.contains(s.band) =>
+      brightnesses.get(s.band).map(_.units.serialized) match {
         case Some("VEGA_MAGNITUDE")                  => Json.obj("MagnitudeSystem" -> Json.fromString("Vega"))
         case Some("AB_MAGNITUDE")                    => Json.obj("MagnitudeSystem" -> Json.fromString("AB"))
         case Some("JANSKY")                          => Json.obj("MagnitudeSystem" -> Json.fromString("Jy"))
@@ -298,8 +298,8 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
     //       Json.Null
     //   }
     case SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses))
-        if brightnesses.contains(s.normBand) =>
-      brightnesses.get(s.normBand).map(_.units.serialized) match {
+        if brightnesses.contains(s.band) =>
+      brightnesses.get(s.band).map(_.units.serialized) match {
         case Some("VEGA_MAG_PER_ARCSEC_SQUARED")                        =>
           Json.obj("SurfaceBrightness" -> Json.fromString("Vega mag/arcsec²"))
         case Some("AB_MAG_PER_ARCSEC_SQUARED")                          =>
@@ -316,8 +316,8 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
           Json.Null
       }
     case SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses))
-        if brightnesses.contains(s.normBand) =>
-      brightnesses.get(s.normBand).map(_.units.serialized) match {
+        if brightnesses.contains(s.band) =>
+      brightnesses.get(s.band).map(_.units.serialized) match {
         case Some("VEGA_MAGNITUDE")                  => Json.obj("MagnitudeSystem" -> Json.fromString("Vega"))
         case Some("AB_MAGNITUDE")                    => Json.obj("MagnitudeSystem" -> Json.fromString("AB"))
         case Some("JANSKY")                          => Json.obj("MagnitudeSystem" -> Json.fromString("Jy"))
@@ -335,30 +335,30 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
     case _ => Json.Null
   }
 
-  val value: Json = s.profile match {
+  val value: Json = s.sourceProfile match {
     case SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses))
-        if brightnesses.contains(s.normBand) =>
+        if brightnesses.contains(s.band) =>
       brightnesses
-        .get(s.normBand)
+        .get(s.band)
         .map(_.value)
         .asJson
     case SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses))
-        if brightnesses.contains(s.normBand) =>
+        if brightnesses.contains(s.band) =>
       brightnesses
-        .get(s.normBand)
+        .get(s.band)
         .map(_.value)
         .asJson
     case SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses))
-        if brightnesses.contains(s.normBand) =>
+        if brightnesses.contains(s.band) =>
       brightnesses
-        .get(s.normBand)
+        .get(s.band)
         .map(_.value)
         .asJson
     // FIXME: Handle emission line
     case _ => Json.Null
   }
 
-  val distribution = s.profile match {
+  val distribution = s.sourceProfile match {
     case SourceProfile.Point(SpectralDefinition.BandNormalized(sed, _))       =>
       sed.asJson
     // FIXME support emmision lines
@@ -372,12 +372,13 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
     case _                                                                    => Json.Null
   }
 
-  Json.obj("profile"      -> source,
-           "normBand"     -> s.normBand.asJson,
-           "norm"         -> value,
-           "redshift"     -> s.redshift.asJson,
-           "units"        -> units,
-           "distribution" -> distribution
+  Json.obj(
+    "profile"      -> source,
+    "normBand"     -> s.band.asJson,
+    "norm"         -> value,
+    "redshift"     -> s.redshift.asJson,
+    "units"        -> units,
+    "distribution" -> distribution
   )
 
 given Encoder[ItcParameters] =
@@ -391,12 +392,19 @@ private given Decoder[SeriesDataType] = (c: HCursor) =>
     }
   }
 
-private given Decoder[ChartType] = (c: HCursor) =>
+private given Decoder[GraphType] = (c: HCursor) =>
+  val byLegacyKey: Map[String, GraphType] = Map(
+    "SignalChart"      -> GraphType.SignalGraph,
+    "SignalPixelChart" -> GraphType.SignalPixelGraph,
+    "S2NChart"         -> GraphType.S2NGraph
+  )
+
   Decoder.decodeJsonObject(c).flatMap { str =>
-    val key = str.keys.headOption.orEmpty
-    Try(ChartType.valueOf(key)).toEither.leftMap { _ =>
-      DecodingFailure(s"no enum value matched for $key", List(CursorOp.Field(key)))
-    }
+    val key: String = str.keys.headOption.orEmpty
+    byLegacyKey
+      .get(key)
+      .toRight:
+        DecodingFailure(s"no enum value matched for $key", List(CursorOp.Field(key)))
   }
 
 private given Decoder[ItcSeries] = (c: HCursor) =>
@@ -412,24 +420,24 @@ private given Decoder[ItcSeries] = (c: HCursor) =>
                }
   yield ItcSeries(title, dt, data)
 
-given Decoder[ItcChart] = (c: HCursor) =>
+given Decoder[ItcGraph] = (c: HCursor) =>
   for
     series <- c.downField("series").as[List[ItcSeries]]
-    d      <- c.downField("chartType").as[ChartType]
-  yield ItcChart(d, series)
+    d      <- c.downField("chartType").as[GraphType]
+  yield ItcGraph(d, series)
 
-given Decoder[ItcChartGroup] = (c: HCursor) =>
-  c.downField("charts").as[NonEmptyList[ItcChart]].map(ItcChartGroup.apply)
+given Decoder[ItcGraphGroup] = (c: HCursor) =>
+  c.downField("charts").as[NonEmptyChain[ItcGraph]].map(ItcGraphGroup.apply)
 
 given Decoder[GraphsRemoteResult] = (c: HCursor) =>
   for
-    charts <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
+    graphs <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
                 .downField("chartGroups")
-                .as[NonEmptyList[ItcChartGroup]]
+                .as[NonEmptyChain[ItcGraphGroup]]
     ccd    <- (c.downField("ItcSpectroscopyResult") |+| c.downField("ItcImagingResult"))
                 .downField("ccds")
-                .as[NonEmptyList[ItcRemoteCcd]]
-  yield GraphsRemoteResult(ccd, charts)
+                .as[NonEmptyChain[ItcRemoteCcd]]
+  yield GraphsRemoteResult(ccd, graphs)
 
 given Decoder[ExposureCalculation] = (c: HCursor) =>
   for
@@ -454,11 +462,11 @@ given Decoder[ExposureTimeRemoteResult] = (c: HCursor) =>
     c.downField("ItcSpectroscopyResult")
       .downField("exposureCalculation")
       .as[ExposureCalculation]
-      .map(c => ExposureTimeRemoteResult(NonEmptyList.one(c)))
+      .map(c => ExposureTimeRemoteResult(NonEmptyChain.one(c)))
 
   val img: Decoder.Result[ExposureTimeRemoteResult] =
     c.downField("ItcImagingResult")
       .downField("exposureCalculation")
-      .as[NonEmptyList[ExposureCalculation]]
+      .as[NonEmptyChain[ExposureCalculation]]
       .map(c => ExposureTimeRemoteResult(c))
   spec.orElse(img)

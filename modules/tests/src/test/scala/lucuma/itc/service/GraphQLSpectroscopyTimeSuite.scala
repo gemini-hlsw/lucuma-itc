@@ -20,29 +20,32 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            radialVelocity: {
-              kilometersPerSecond: 1000
-            },
             signalToNoise: 2,
-            sourceProfile: {
-              point: {
-                bandNormalized: {
-                  sed: {
-                    stellarLibrary: O5_V
+            asterism: [
+              {
+                sourceProfile: {
+                  point: {
+                    bandNormalized: {
+                      sed: {
+                        stellarLibrary: O5_V
+                      }
+                      brightnesses: [ {
+                        band: R
+                        value: 3
+                        units: ERG_PER_S_PER_CM_SQUARED_PER_A
+                      }, {
+                        band: J
+                        value: 2.1
+                        units: AB_MAGNITUDE
+                      }]
+                    }
                   }
-                  brightnesses: [ {
-                    band: R
-                    value: 3
-                    units: ERG_PER_S_PER_CM_SQUARED_PER_A
-                  }, {
-                    band: J
-                    value: 2.1
-                    units: AB_MAGNITUDE
-                  }]
+                },
+                radialVelocity: {
+                  kilometersPerSecond: 1000
                 }
               }
-            },
-            band: J,
+            ],
             constraints: {
               imageQuality: POINT_THREE,
               cloudExtinction: POINT_FIVE,
@@ -79,11 +82,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                 }
               }
             }
-            selected {
-              exposures
-              exposureTime {
-                seconds
+            brightest {
+              selected {
+                exposureCount
+                exposureTime {
+                  seconds
+                }
               }
+              band
             }
           }
         }
@@ -102,11 +108,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   "nanometers" : 60.000
                 }
               },
-              "selected" : {
-                "exposures" : 10,
-                "exposureTime" : {
-                  "seconds" : 1.000000
-                }
+              "brightest": {
+                "selected" : {
+                  "exposureCount" : 10,
+                  "exposureTime" : {
+                    "seconds" : 1.000000
+                  }
+                },
+                "band": "R"
               }
             }
           }
@@ -123,30 +132,33 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            radialVelocity: {
-              kilometersPerSecond: 1000
-            },
             signalToNoise: 2,
-            sourceProfile: {
-              point: {
-                bandNormalized: {
-                  sed: {
-                    planet: JUPITER
+            asterism: [
+              {
+                sourceProfile: {
+                  point: {
+                    bandNormalized: {
+                      sed: {
+                        planet: JUPITER
+                      }
+                      brightnesses: [ {
+                        band: R
+                        value: 3
+                        units: ERG_PER_S_PER_CM_SQUARED_PER_A
+                        error: 0.2
+                      }, {
+                        band: J
+                        value: 2.1
+                        units: AB_MAGNITUDE
+                      }]
+                    }
                   }
-                  brightnesses: [ {
-                    band: R
-                    value: 3
-                    units: ERG_PER_S_PER_CM_SQUARED_PER_A
-                    error: 0.2
-                  }, {
-                    band: J
-                    value: 2.1
-                    units: AB_MAGNITUDE
-                  }]
+                },
+                radialVelocity: {
+                  kilometersPerSecond: 1000
                 }
               }
-            },
-            band: J,
+            ],
             constraints: {
               imageQuality: POINT_THREE,
               cloudExtinction: POINT_FIVE,
@@ -183,12 +195,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   }
                 }
               }
-              selected {
-                  exposures
+              brightest {
+                selected {
+                  exposureCount
                   exposureTime {
                     seconds
                   }
                 }
+              }
           }
         }
         """,
@@ -206,10 +220,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     "nanometers" : 60.000
                   }
                 },
-                "selected" : {
-                  "exposures" : 10,
-                  "exposureTime" : {
-                    "seconds" : 1.000000
+                "brightest": {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
+                    }
                   }
                 }
               }
@@ -231,28 +247,31 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               "nanometers" : "600"
             },
             "signalToNoise" : 2,
-            "sourceProfile": {
-              "uniform": {
-                "bandNormalized": {
-                  "sed": {
-                    "stellarLibrary": "O5_V"
-                  },
-                  "brightnesses": [ {
-                    "band": "R",
-                    "value": "3",
-                    "units": "VEGA_MAG_PER_ARCSEC_SQUARED"
-                  }, {
-                    "band": "K",
-                    "value": "2.1",
-                    "units": "W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED"
-                  }]
+            "asterism": [
+              {
+                "sourceProfile": {
+                  "uniform": {
+                    "bandNormalized": {
+                      "sed": {
+                        "stellarLibrary": "O5_V"
+                      },
+                      "brightnesses": [ {
+                        "band": "R",
+                        "value": "3",
+                        "units": "VEGA_MAG_PER_ARCSEC_SQUARED"
+                      }, {
+                        "band": "K",
+                        "value": "2.1",
+                        "units": "W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED"
+                      }]
+                    }
+                  }
+                },
+                "radialVelocity": {
+                  "metersPerSecond": 1000
                 }
               }
-            },
-            "band": "J",
-            "radialVelocity": {
-              "metersPerSecond": 1000
-            },
+            ],
             "constraints" : {
               "imageQuality" : "POINT_EIGHT",
               "cloudExtinction" : "POINT_FIVE",
@@ -282,9 +301,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyIntegrationTime" :
               {
-                    "mode" : {
-                      "instrument" : "GMOS_NORTH"
-                    }
+                "mode" : {
+                  "instrument" : "GMOS_NORTH"
+                }
               }
           }
         }
@@ -300,11 +319,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       sb <- Enumerated[SkyBackground].all
     } yield ItcObservingConditions(iq, ce, wv, sb, 2)
 
-  val conditions = ItcObservingConditions(ImageQuality.PointEight,
-                                          CloudExtinction.OnePointFive,
-                                          WaterVapor.Median,
-                                          SkyBackground.Bright,
-                                          2
+  val conditions = ItcObservingConditions(
+    ImageQuality.PointEight,
+    CloudExtinction.OnePointFive,
+    WaterVapor.Median,
+    SkyBackground.Bright,
+    2
   )
 
   test("iterate over conditions") {
@@ -316,29 +336,32 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            radialVelocity: {
-              centimetersPerSecond: 1000
-            },
             signalToNoise: 2,
-            sourceProfile: {
-              uniform: {
-                bandNormalized: {
-                  sed: {
-                    powerLaw: 3.0
-                  },
-                  brightnesses: [ {
-                    band: R,
-                    value: 3,
-                    units: VEGA_MAG_PER_ARCSEC_SQUARED
-                  }, {
-                    band: K,
-                    value: 2.1,
-                    units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
-                  }]
+            asterism: [
+              {
+                sourceProfile: {
+                  uniform: {
+                    bandNormalized: {
+                      sed: {
+                        powerLaw: 3.0
+                      },
+                      brightnesses: [ {
+                        band: R,
+                        value: 3,
+                        units: VEGA_MAG_PER_ARCSEC_SQUARED
+                      }, {
+                        band: K,
+                        value: 2.1,
+                        units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
+                      }]
+                    }
+                  }
+                },
+                radialVelocity: {
+                  centimetersPerSecond: 1000
                 }
               }
-            },
-            band: K
+            ],
             constraints: {
               imageQuality: ${c.iq.tag.toScreamingSnakeCase},
               cloudExtinction: ${c.cc.tag.toScreamingSnakeCase},
@@ -375,11 +398,13 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                selected {
-                  exposures
-                  exposureTime {
-                    seconds
-                  }
+                brightest {
+                  selected {
+                    exposureCount
+                    exposureTime {
+                      seconds
+                    }
+                }
               }
           }
         }
@@ -389,22 +414,24 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyIntegrationTime" :
               {
-                    "mode" : {
-                      "instrument" : "GMOS_NORTH",
-                      "resolution" : 970,
-                      "params": {
-                        "grating": "B1200_G5301"
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.000
-                      }
-                    },
-                    "selected" : {
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1.000000
-                      }
+                "mode" : {
+                  "instrument" : "GMOS_NORTH",
+                  "resolution" : 970,
+                  "params": {
+                    "grating": "B1200_G5301"
+                  },
+                  "wavelength" : {
+                    "nanometers" : 60.000
+                  }
+                },
+                "brightest": {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
                     }
+                  }
+                }
               }
           }
         }
@@ -421,29 +448,32 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            radialVelocity: {
-              metersPerSecond: 1000
-            },
             signalToNoise: 2,
-            sourceProfile: {
-              uniform: {
-                bandNormalized: {
-                  sed: {
-                    blackBodyTempK: 100
-                  },
-                  brightnesses: [ {
-                    band: R,
-                    value: 3,
-                    units: VEGA_MAG_PER_ARCSEC_SQUARED
-                  }, {
-                    band: K,
-                    value: 2.1,
-                    units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
-                  }]
+            asterism: [
+              {
+                sourceProfile: {
+                  uniform: {
+                    bandNormalized: {
+                      sed: {
+                        blackBodyTempK: 100
+                      },
+                      brightnesses: [ {
+                        band: R,
+                        value: 3,
+                        units: VEGA_MAG_PER_ARCSEC_SQUARED
+                      }, {
+                        band: K,
+                        value: 2.1,
+                        units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
+                      }]
+                    }
+                  }
+                },
+                radialVelocity: {
+                  metersPerSecond: 1000
                 }
               }
-            },
-            band: K
+            ],
             constraints: {
               imageQuality: POINT_THREE,
               cloudExtinction: POINT_FIVE,
@@ -466,26 +496,28 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               }
             }
           }) {
-                mode {
-                  ... on SpectroscopyMode {
-                    instrument
-                    resolution
-                    params {
-                      ... on GmosNITCParams {
-                        grating
-                      }
-                    }
-                    wavelength {
-                      nanometers
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  resolution
+                  params {
+                    ... on GmosNITCParams {
+                      grating
                     }
                   }
+                  wavelength {
+                    nanometers
+                  }
                 }
+              }
+              brightest {
                 selected {
-                  exposures
+                  exposureCount
                   exposureTime {
                     seconds
                   }
                 }
+              }
           }
         }
         """,
@@ -511,29 +543,32 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            radialVelocity: {
-              centimetersPerSecond: 1000
-            },
             signalToNoise: 2,
-            sourceProfile: {
-              uniform: {
-                bandNormalized: {
-                  sed: {
-                    blackBodyTempK: 100
-                  },
-                  brightnesses: [ {
-                    band: R,
-                    value: 3,
-                    units: VEGA_MAG_PER_ARCSEC_SQUARED
-                  }, {
-                    band: K,
-                    value: 2.1,
-                    units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
-                  }]
+            asterism: [
+              {
+                sourceProfile: {
+                  uniform: {
+                    bandNormalized: {
+                      sed: {
+                        blackBodyTempK: 100
+                      },
+                      brightnesses: [ {
+                        band: R,
+                        value: 3,
+                        units: VEGA_MAG_PER_ARCSEC_SQUARED
+                      }, {
+                        band: K,
+                        value: 2.1,
+                        units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
+                      }]
+                    }
+                  }
+                },
+                radialVelocity: {
+                  centimetersPerSecond: 1000
                 }
               }
-            },
-            band: K
+            ],
             constraints: {
               imageQuality: POINT_THREE,
               cloudExtinction: POINT_FIVE,
@@ -569,10 +604,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                selected {
-                  exposures
-                  exposureTime {
-                    seconds
+                brightest {
+                  selected {
+                    exposureCount
+                    exposureTime {
+                      seconds
+                    }
                   }
                 }
           }
@@ -583,21 +620,23 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyIntegrationTime" :
               {
-                    "mode" : {
-                      "instrument" : "GMOS_NORTH",
-                      "params": {
-                        "grating": ${d.tag.toScreamingSnakeCase}
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.00
-                      }
-                    },
-                    "selected" : {
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1
-                      }
+                "mode" : {
+                  "instrument" : "GMOS_NORTH",
+                  "params": {
+                    "grating": ${d.tag.toScreamingSnakeCase}
+                  },
+                  "wavelength" : {
+                    "nanometers" : 60.000
+                  }
+                },
+                "brightest": {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1
                     }
+                  }
+                }
               }
           }
         }
@@ -615,34 +654,37 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            radialVelocity: {
-              centimetersPerSecond: 1000
-            },
             signalToNoise: 2,
-            sourceProfile: {
-              gaussian: {
-                fwhm: {
-                  microarcseconds: 100
-                }
-                spectralDefinition: {
-                  bandNormalized: {
-                    sed: {
-                      blackBodyTempK: 100
-                    },
-                    brightnesses: [ {
-                      band: R,
-                      value: 3,
-                      units: VEGA_MAGNITUDE
-                    }, {
-                      band: K,
-                      value: 2.1,
-                      units: JANSKY
-                    }]
+            asterism: [
+              {
+                sourceProfile: {
+                  gaussian: {
+                    fwhm: {
+                      microarcseconds: 100
+                    }
+                    spectralDefinition: {
+                      bandNormalized: {
+                        sed: {
+                          blackBodyTempK: 100
+                        },
+                        brightnesses: [ {
+                          band: R,
+                          value: 3,
+                          units: VEGA_MAGNITUDE
+                        }, {
+                          band: K,
+                          value: 2.1,
+                          units: JANSKY
+                        }]
+                      }
+                    }
                   }
+                },
+                radialVelocity: {
+                  centimetersPerSecond: 1000
                 }
               }
-            },
-            band: K
+            ],
             constraints: {
               imageQuality: POINT_THREE,
               cloudExtinction: POINT_FIVE,
@@ -678,10 +720,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                selected {
-                  exposures
-                  exposureTime {
-                    seconds
+                brightest {
+                  selected {
+                    exposureCount
+                    exposureTime {
+                      seconds
+                    }
                   }
                 }
           }
@@ -692,22 +736,24 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyIntegrationTime" :
               {
-                    "mode" : {
-                      "instrument" : "GMOS_SOUTH",
-                      "params": {
-                        "grating": ${d.tag.toScreamingSnakeCase}
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.00
-                      }
-                    },
-                    "selected" : {
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1
-                      }
+                "mode" : {
+                  "instrument" : "GMOS_SOUTH",
+                  "params": {
+                    "grating": ${d.tag.toScreamingSnakeCase}
+                  },
+                  "wavelength" : {
+                    "nanometers" : 60.00
+                  }
+                },
+                "brightest": {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1
                     }
                   }
+                }
+              }
           }
         }
         """
@@ -724,34 +770,37 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               wavelength: {
                 nanometers: 60,
               },
-              radialVelocity: {
-                centimetersPerSecond: 1000
-              },
               signalToNoise: 2,
-              sourceProfile: {
-                gaussian: {
-                  fwhm: {
-                    microarcseconds: 100
-                  }
-                  spectralDefinition: {
-                    bandNormalized: {
-                      sed: {
-                        blackBodyTempK: 100
-                      },
-                      brightnesses: [ {
-                        band: R,
-                        value: 3,
-                        units: VEGA_MAGNITUDE
-                      }, {
-                        band: K,
-                        value: 2.1,
-                        units: JANSKY
-                      }]
+              asterism: [
+                {
+                  sourceProfile: {
+                    gaussian: {
+                      fwhm: {
+                        microarcseconds: 100
+                      }
+                      spectralDefinition: {
+                        bandNormalized: {
+                          sed: {
+                            blackBodyTempK: 100
+                          },
+                          brightnesses: [ {
+                            band: R,
+                            value: 3,
+                            units: VEGA_MAGNITUDE
+                          }, {
+                            band: K,
+                            value: 2.1,
+                            units: JANSKY
+                          }]
+                        }
+                      }
                     }
+                  },
+                  radialVelocity: {
+                    centimetersPerSecond: 1000
                   }
                 }
-              },
-              band: AP
+              ],
               constraints: {
                 imageQuality: POINT_THREE,
                 cloudExtinction: POINT_FIVE,
@@ -789,41 +838,45 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                       }
                     }
                   }
-                  selected {
-                    exposures
-                    exposureTime {
-                      seconds
+                  brightest {
+                    selected {
+                      exposureCount
+                      exposureTime {
+                        seconds
+                      }
                     }
                   }
             }
           }
       """,
         json"""
-      {
-        "data": {
-          "spectroscopyIntegrationTime" :
-            {
-                  "mode" : {
-                    "instrument" : "GMOS_NORTH",
-                    "params": {
-                      "fpu": {
-                        "builtin": ${d.tag.toScreamingSnakeCase}
-                      }
-                    },
-                    "wavelength" : {
-                      "nanometers" : 60.00
+        {
+          "data": {
+            "spectroscopyIntegrationTime" :
+              {
+                "mode" : {
+                  "instrument" : "GMOS_NORTH",
+                  "params": {
+                    "fpu": {
+                      "builtin": ${d.tag.toScreamingSnakeCase}
                     }
                   },
+                  "wavelength" : {
+                    "nanometers" : 60.00
+                  }
+                },
+                "brightest": {
                   "selected" : {
-                    "exposures" : 10,
+                    "exposureCount" : 10,
                     "exposureTime" : {
                       "seconds" : 1.000000
                     }
                   }
                 }
+              }
+          }
         }
-      }
-      """
+        """
       )
     }
   }
@@ -837,29 +890,32 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            radialVelocity: {
-              centimetersPerSecond: 1000
-            },
             signalToNoise: 2,
-            sourceProfile: {
-              uniform: {
-                bandNormalized: {
-                  sed: {
-                    blackBodyTempK: 100
-                  },
-                  brightnesses: [ {
-                    band: R,
-                    value: 3,
-                    units: VEGA_MAG_PER_ARCSEC_SQUARED
-                  }, {
-                    band: K,
-                    value: 2.1,
-                    units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
-                  }]
+            asterism: [
+              {
+                sourceProfile: {
+                  uniform: {
+                    bandNormalized: {
+                      sed: {
+                        blackBodyTempK: 100
+                      },
+                      brightnesses: [ {
+                        band: R,
+                        value: 3,
+                        units: VEGA_MAG_PER_ARCSEC_SQUARED
+                      }, {
+                        band: K,
+                        value: 2.1,
+                        units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
+                      } ]
+                    }
+                  }
+                },
+                radialVelocity: {
+                  centimetersPerSecond: 1000
                 }
               }
-            },
-            band: K
+            ],
             constraints: {
               imageQuality: POINT_THREE,
               cloudExtinction: POINT_FIVE,
@@ -897,13 +953,15 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                selected {
-                  exposures
-                  exposureTime {
-                    seconds
+                brightest {
+                  selected {
+                    exposureCount
+                    exposureTime {
+                      seconds
+                    }
                   }
                 }
-          }
+            }
         }
         """,
         json"""
@@ -911,24 +969,26 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyIntegrationTime" :
               {
-                    "mode" : {
-                      "instrument" : "GMOS_SOUTH",
-                      "params": {
-                        "fpu": {
-                          "builtin": ${d.tag.toScreamingSnakeCase}
-                        }
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.00
-                      }
-                    },
-                    "selected" : {
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1.000000
-                      }
+                "mode" : {
+                  "instrument" : "GMOS_SOUTH",
+                  "params": {
+                    "fpu": {
+                      "builtin": ${d.tag.toScreamingSnakeCase}
+                    }
+                  },
+                  "wavelength" : {
+                    "nanometers" : 60.00
+                  }
+                },
+                "brightest": {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
                     }
                   }
+                }
+              }
           }
         }
         """
@@ -945,29 +1005,32 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            radialVelocity: {
-              centimetersPerSecond: 1000
-            },
             signalToNoise: 2,
-            sourceProfile: {
-              uniform: {
-                bandNormalized: {
-                  sed: {
-                    blackBodyTempK: 100
-                  },
-                  brightnesses: [ {
-                    band: R,
-                    value: 3,
-                    units: VEGA_MAG_PER_ARCSEC_SQUARED
-                  }, {
-                    band: K,
-                    value: 2.1,
-                    units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
-                  }]
+            asterism: [
+              {
+                sourceProfile: {
+                  uniform: {
+                    bandNormalized: {
+                      sed: {
+                        blackBodyTempK: 100
+                      },
+                      brightnesses: [ {
+                        band: R,
+                        value: 3,
+                        units: VEGA_MAG_PER_ARCSEC_SQUARED
+                      }, {
+                        band: K,
+                        value: 2.1,
+                        units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
+                      }]
+                    }
+                  }
+                },
+                radialVelocity: {
+                  centimetersPerSecond: 1000
                 }
               }
-            },
-            band: K
+            ],
             constraints: {
               imageQuality: POINT_THREE,
               cloudExtinction: POINT_FIVE,
@@ -1003,11 +1066,13 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                selected {
-                    exposures
-                    exposureTime {
-                      seconds
-                    }
+                brightest {
+                  selected {
+                      exposureCount
+                      exposureTime {
+                        seconds
+                      }
+                  }
                 }
           }
         }
@@ -1017,22 +1082,24 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyIntegrationTime" :
               {
-                    "mode" : {
-                      "instrument" : "GMOS_NORTH",
-                      "params": {
-                        "filter": ${d.tag.toScreamingSnakeCase}
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.000
-                      }
-                    },
-                    "selected" : {
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1.000000
-                      }
+                "mode" : {
+                  "instrument" : "GMOS_NORTH",
+                  "params": {
+                    "filter": ${d.tag.toScreamingSnakeCase}
+                  },
+                  "wavelength" : {
+                    "nanometers" : 60.000
+                  }
+                },
+                "brightest": {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
                     }
                   }
+                }
+              }
           }
         }
         """
@@ -1049,29 +1116,32 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             wavelength: {
               nanometers: 60,
             },
-            radialVelocity: {
-              centimetersPerSecond: 1000
-            },
             signalToNoise: 2,
-            sourceProfile: {
-              uniform: {
-                bandNormalized: {
-                  sed: {
-                    blackBodyTempK: 100
-                  },
-                  brightnesses: [ {
-                    band: R,
-                    value: 3,
-                    units: VEGA_MAG_PER_ARCSEC_SQUARED
-                  }, {
-                    band: K,
-                    value: 2.1,
-                    units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
-                  }]
+            asterism: [
+              {
+                sourceProfile: {
+                  uniform: {
+                    bandNormalized: {
+                      sed: {
+                        blackBodyTempK: 100
+                      },
+                      brightnesses: [ {
+                        band: R,
+                        value: 3,
+                        units: VEGA_MAG_PER_ARCSEC_SQUARED
+                      }, {
+                        band: K,
+                        value: 2.1,
+                        units: W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED
+                      }]
+                    }
+                  }
+                },
+                radialVelocity: {
+                  centimetersPerSecond: 1000
                 }
               }
-            },
-            band: K
+            ],
             constraints: {
               imageQuality: POINT_THREE,
               cloudExtinction: POINT_FIVE,
@@ -1107,11 +1177,13 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
-                selected {
-                    exposures
-                    exposureTime {
-                      seconds
-                    }
+                brightest {
+                  selected {
+                      exposureCount
+                      exposureTime {
+                        seconds
+                      }
+                  }
                 }
           }
         }
@@ -1121,26 +1193,174 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
           "data": {
             "spectroscopyIntegrationTime" :
               {
-                    "mode" : {
-                      "instrument" : "GMOS_SOUTH",
-                      "params": {
-                        "filter": ${d.tag.toScreamingSnakeCase}
-                      },
-                      "wavelength" : {
-                        "nanometers" : 60.000
-                      }
-                    },
-                    "selected" : {
-                      "exposures" : 10,
-                      "exposureTime" : {
-                        "seconds" : 1.000000
-                      }
+                "mode" : {
+                  "instrument" : "GMOS_SOUTH",
+                  "params": {
+                    "filter": ${d.tag.toScreamingSnakeCase}
+                  },
+                  "wavelength" : {
+                    "nanometers" : 60.000
+                  }
+                },
+                "brightest": {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
                     }
+                  }
+                }
               }
           }
         }
         """
       )
     }
+  }
+
+  test("multiple targets") {
+    query(
+      """
+        query {
+          spectroscopyIntegrationTime(input: {
+            wavelength: {
+              nanometers: 600,
+            },
+            signalToNoise: 2,
+            asterism: [
+              {
+                sourceProfile: {
+                  point: {
+                    bandNormalized: {
+                      sed: {
+                        stellarLibrary: O5_V
+                      }
+                      brightnesses: [ {
+                        band: R
+                        value: 3
+                        units: ERG_PER_S_PER_CM_SQUARED_PER_A
+                      }, {
+                        band: J
+                        value: 2.1
+                        units: AB_MAGNITUDE
+                      }]
+                    }
+                  }
+                },
+                radialVelocity: {
+                  kilometersPerSecond: 1000
+                }
+              },
+              {
+                sourceProfile: {
+                  point: {
+                    bandNormalized: {
+                      sed: {
+                        stellarLibrary: O5_V
+                      }
+                      brightnesses: [ {
+                        band: J
+                        value: 5.1
+                        units: AB_MAGNITUDE
+                      }]
+                    }
+                  }
+                },
+                radialVelocity: {
+                  kilometersPerSecond: 1000
+                }
+              }              
+            ],
+            constraints: {
+              imageQuality: POINT_THREE,
+              cloudExtinction: POINT_FIVE,
+              skyBackground: DARK,
+              waterVapor: DRY,
+              elevationRange: {
+                airMass: {
+                  min: 1,
+                  max: 2
+                }
+              }
+            },
+            mode: {
+              gmosNSpectroscopy: {
+                filter: GG455,
+                fpu: {
+                  builtin: LONG_SLIT_0_25
+                },
+                grating: B1200_G5301
+              }
+            }
+          }) {
+            mode {
+              ... on SpectroscopyMode {
+                instrument
+                resolution
+                params {
+                  ... on GmosNITCParams {
+                    grating
+                  }
+                }
+                wavelength {
+                  nanometers
+                }
+              }
+            }
+            targetTimes {
+              ...on TargetIntegrationTime {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
+                }
+                band
+              }
+            }
+            brightestIndex
+          }
+        }
+        """,
+      json"""
+        {
+          "data": {
+            "spectroscopyIntegrationTime" : {
+              "mode" : {
+                "instrument" : "GMOS_NORTH",
+                "resolution" : 9703,
+                "params": {
+                  "grating": "B1200_G5301"
+                },
+                "wavelength" : {
+                  "nanometers" : 600.000
+                }
+              },
+              "targetTimes": [
+                {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
+                    }
+                  },
+                  "band": "R"
+                },
+                {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
+                    }
+                  },
+                  "band": "J"
+                }
+              ],
+              "brightestIndex": 0
+            }
+          }
+        }
+        """
+    )
   }
 }

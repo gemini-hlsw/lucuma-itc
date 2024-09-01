@@ -9,22 +9,21 @@ import io.circe.Error
 import io.circe.parser.decode
 import io.circe.syntax.*
 
-class ItcChartSuite extends munit.FunSuite {
+class ItcGraphSuite extends munit.FunSuite {
   import lucuma.itc.legacy.given
   import lucuma.itc.legacy.*
 
-  val source      = scala.io.Source.fromInputStream(getClass.getResourceAsStream("/charts.json"))
+  val source      = scala.io.Source.fromInputStream(getClass.getResourceAsStream("/graphs.json"))
   val expected    = source.mkString
-  val chartPprint = pprint.copy(
+  val graphPprint = pprint.copy(
     additionalHandlers = { case value: ItcSeries =>
       pprint.Tree.Literal(ItcSeries(value.title, value.seriesType, value.data.take(2)).toString)
     }
   )
   test("decode response") {
-    chartPprint.pprintln(decode[GraphsRemoteResult](expected))
     assertEquals(
       2.asRight,
-      decode[GraphsRemoteResult](expected).map(_.groups.flatMap(_.charts).length)
+      decode[GraphsRemoteResult](expected).map(_.groups.flatMap(_.graphs).length)
     )
   }
 

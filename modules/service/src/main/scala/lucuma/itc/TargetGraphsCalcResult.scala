@@ -3,93 +3,90 @@
 
 package lucuma.itc
 
-import cats.data.NonEmptyList
+import cats.data.Chain
+import cats.data.NonEmptyChain
 import cats.syntax.all.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.itc.legacy.ItcRemoteCcd
 
-case class GraphResult(
-  ccds:                      NonEmptyList[ItcCcd],
-  charts:                    NonEmptyList[ItcChartGroup],
+case class TargetGraphsCalcResult(
+  ccds:                      NonEmptyChain[ItcCcd],
+  data:                      NonEmptyChain[ItcGraphGroup],
   peakFinalSNRatio:          FinalSN,
   atWavelengthFinalSNRatio:  Option[FinalSN],
   peakSingleSNRatio:         SingleSN,
   atWavelengthSingleSNRatio: Option[SingleSN]
 )
 
-object GraphResult:
+object TargetGraphsCalcResult:
   def fromLegacy(
-    ccds:            NonEmptyList[ItcRemoteCcd],
-    originalCharts:  NonEmptyList[ItcChartGroup],
+    ccds:            NonEmptyChain[ItcRemoteCcd],
+    originalGraphs:  NonEmptyChain[ItcGraphGroup],
     signalToNoiseAt: Option[Wavelength]
-  ): GraphResult = {
-    val charts = originalCharts.map { chart =>
-      chart.copy(charts = chart.charts.map { c =>
-        c.copy(series = c.series.map { s =>
-          ItcSeries(s.title,
-                    s.seriesType,
-                    s.data.collect { case (x, y) if !y.isNaN => (x.toDouble, y.toDouble) }
-          )
-        })
-      })
-    }
+  ): TargetGraphsCalcResult = {
+    val graphs: NonEmptyChain[ItcGraphGroup] =
+      originalGraphs.map: graph =>
+        graph.copy(graphs = graph.graphs.map: c =>
+          c.copy(series = c.series.map: s =>
+            ItcSeries(
+              s.title,
+              s.seriesType,
+              s.data.collect { case (x, y) if !y.isNaN => (x.toDouble, y.toDouble) }
+            )))
 
-    def maxWavelength(chart: ItcChart, seriesDataType: SeriesDataType): List[Wavelength] =
-      chart.series
+    def maxWavelength(graph: ItcGraph, seriesDataType: SeriesDataType): List[Wavelength] =
+      graph.series
         .filter(_.seriesType === seriesDataType)
         .zip(ccds.toList)
-        .map { case (sn, _) =>
+        .map: (sn, _) =>
           sn.data
             .maxByOption(_._2)
             .map(_._1)
             .flatMap(d => Wavelength.intPicometers.getOption((d * 1000).toInt))
-        }
         .flattenOption
 
-    def valueAt(chart: ItcChart, seriesDataType: SeriesDataType): Option[SignalToNoise] =
-      chart.series
+    def valueAt(graph: ItcGraph, seriesDataType: SeriesDataType): Option[SignalToNoise] =
+      graph.series
         .filter(_.seriesType === seriesDataType)
         .zip(ccds.toList)
-        .map { case (sn, _) =>
+        .map: (sn, _) =>
           signalToNoiseAt
             .flatMap(at => sn.data.find(_._1 >= at.toNanometers.value.value))
             .map(_._2)
-        }
         .flattenOption
         .headOption
         .flatMap(v => SignalToNoise.FromBigDecimalRounding.getOption(v))
 
-    def maxValue(chart: ItcChart, seriesDataType: SeriesDataType): List[Double] =
-      chart.series
+    def maxValue(graph: ItcGraph, seriesDataType: SeriesDataType): List[Double] =
+      graph.series
         .filter(_.seriesType === seriesDataType)
         .zip(ccds.toList)
-        .map { case (sn, _) =>
+        .map: (sn, _) =>
           sn.data
             .maxByOption(_._2)
             .map(_._2)
-        }
         .flattenOption
 
     // Calculate the wavelengths at where the peaks happen
-    val calculatedCCDs =
-      charts
-        .flatMap(_.charts)
-        .filter(_.chartType === ChartType.S2NChart)
-        .flatMap { chart =>
-          val maxFinalAt  = maxWavelength(chart, SeriesDataType.FinalS2NData)
-          val maxSignalAt = maxWavelength(chart, SeriesDataType.SingleS2NData)
-          val maxFinal    = maxValue(chart, SeriesDataType.FinalS2NData)
-          val maxSignal   = maxValue(chart, SeriesDataType.SingleS2NData)
+    val calculatedCCDs: Chain[ItcCcd] =
+      graphs
+        .flatMap(_.graphs)
+        .filter(_.graphType === GraphType.S2NGraph)
+        .flatMap: graph =>
+          val maxFinalAt  = maxWavelength(graph, SeriesDataType.FinalS2NData)
+          val maxSignalAt = maxWavelength(graph, SeriesDataType.SingleS2NData)
+          val maxFinal    = maxValue(graph, SeriesDataType.FinalS2NData)
+          val maxSignal   = maxValue(graph, SeriesDataType.SingleS2NData)
 
           ccds.zipWithIndex
-            .map { (ccd, i) =>
+            .map: (ccd, i) =>
               val finalWV        = maxFinalAt.lift(i)
               val singleWV       = maxSignalAt.lift(i)
               val maxFinalValue  = maxFinal.lift(i)
               val maxSingleValue = maxSignal.lift(i)
 
-              (finalWV, singleWV, maxSingleValue, maxFinalValue).mapN {
+              (finalWV, singleWV, maxSingleValue, maxFinalValue).mapN:
                 (maxFinalAt, maxSingleAt, maxSingleValue, maxFinalValue) =>
                   ItcCcd(ccd.singleSNRatio,
                          maxSingleValue,
@@ -102,25 +99,29 @@ object GraphResult:
                          ccd.ampGain,
                          ccd.warnings
                   )
-              }
-            }
-            .toList
+            .toChain
             .flattenOption
-        }
 
-    val maxTotalSNRatio   = calculatedCCDs.map(_.maxTotalSNRatio).max
-    val peakFinalSNRatio  = SignalToNoise.FromBigDecimalRounding
+    val maxTotalSNRatio: Double          =
+      calculatedCCDs
+        .map(_.maxTotalSNRatio)
+        .maximumOption
+        .getOrElse(throw UpstreamException(List("CCD List is empty")))
+    val peakFinalSNRatio: SignalToNoise  = SignalToNoise.FromBigDecimalRounding
       .getOption(maxTotalSNRatio)
       .getOrElse(throw UpstreamException(List("Peak Total SN is not a number")))
-    val maxSingleSNRatio  = calculatedCCDs.map(_.maxSingleSNRatio).max
-    val peakSingleSNRatio = SignalToNoise.FromBigDecimalRounding
+    val maxSingleSNRatio: Double         = calculatedCCDs
+      .map(_.maxSingleSNRatio)
+      .maximumOption
+      .getOrElse(throw UpstreamException(List("CCD List is empty")))
+    val peakSingleSNRatio: SignalToNoise = SignalToNoise.FromBigDecimalRounding
       .getOption(maxSingleSNRatio)
       .getOrElse(throw UpstreamException(List("Peak Single SN is not a number")))
 
     def wvAtRatio(seriesType: SeriesDataType) =
-      charts
-        .flatMap(_.charts)
-        .filter(_.chartType === ChartType.S2NChart)
+      graphs
+        .flatMap(_.graphs)
+        .filter(_.graphType === GraphType.S2NGraph)
         .map(c => valueAt(c, seriesType))
         .collect { case Some(v) => v }
         .headOption
@@ -128,10 +129,10 @@ object GraphResult:
     val wvAtFinalRatio  = wvAtRatio(SeriesDataType.FinalS2NData)
     val wvAtSingleRatio = wvAtRatio(SeriesDataType.SingleS2NData)
 
-    assert(calculatedCCDs.length === ccds.length)
-    GraphResult(
-      NonEmptyList.fromListUnsafe(calculatedCCDs),
-      charts,
+    assert(calculatedCCDs.length === ccds.length.toInt)
+    TargetGraphsCalcResult(
+      NonEmptyChain.fromChainUnsafe(calculatedCCDs),
+      graphs,
       FinalSN(peakFinalSNRatio),
       wvAtFinalRatio.map(FinalSN.apply(_)),
       SingleSN(peakSingleSNRatio),
