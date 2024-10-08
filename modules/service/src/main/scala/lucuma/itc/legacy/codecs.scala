@@ -442,31 +442,35 @@ given Decoder[GraphsRemoteResult] = (c: HCursor) =>
 given Decoder[ExposureCalculation] = (c: HCursor) =>
   for
     time  <- c.downField("exposureTime").as[Double]
-    count <- c
-               .downField("exposures")
-               .as[Int]
-               .flatMap(refineV[Positive](_).leftMap(e => DecodingFailure(e, List.empty)))
+    count <-
+      c
+        .downField("exposures")
+        .as[Int]
+        .flatMap:
+          refineV[Positive](_).leftMap(e => DecodingFailure(e, c.downField("exposures").history))
     sn    <-
       c
         .downField("signalToNoise")
         .as[BigDecimal]
-        .flatMap(s =>
+        .flatMap: s =>
           SignalToNoise.FromBigDecimalRounding
             .getOption(s)
-            .toRight(DecodingFailure(s"Invalid s/n value $s", Nil))
-        )
+            .toRight(DecodingFailure(s"Invalid s/n value $s", c.downField("signalToNoise").history))
   yield ExposureCalculation(time, count, sn)
 
 given Decoder[ExposureTimeRemoteResult] = (c: HCursor) =>
-  val spec: Decoder.Result[ExposureTimeRemoteResult] =
+  val spec: Option[Decoder.Result[ExposureTimeRemoteResult]] =
     c.downField("ItcSpectroscopyResult")
       .downField("exposureCalculation")
-      .as[ExposureCalculation]
-      .map(c => ExposureTimeRemoteResult(NonEmptyChain.one(c)))
+      .success
+      .map:
+        _.as[ExposureCalculation]
+          .map(c => ExposureTimeRemoteResult(NonEmptyChain.one(c)))
 
   val img: Decoder.Result[ExposureTimeRemoteResult] =
     c.downField("ItcImagingResult")
       .downField("exposureCalculation")
       .as[NonEmptyChain[ExposureCalculation]]
       .map(c => ExposureTimeRemoteResult(c))
-  spec.orElse(img)
+
+  spec.getOrElse(img)
