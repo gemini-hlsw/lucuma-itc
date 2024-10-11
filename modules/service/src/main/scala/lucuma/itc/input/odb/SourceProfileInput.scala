@@ -77,9 +77,9 @@ object SourceProfileInput {
             Result(sp => sp.gaussian.toOption.fold(Result(c))(e))
 
           // If the user provides a full definition then we will replace the source profile
-          case (Some(Ior.Left(p)), None, None)    => Result(_ => Result(Point(p)))
-          case (None, Some(Ior.Left(u)), None)    => Result(_ => Result(Uniform(u)))
-          case (None, None, Some(Ior.Left(g)))    => Result(_ => Result(g))
+          case (Some(Ior.Left(p)), None, None) => Result(_ => Result(Point(p)))
+          case (None, Some(Ior.Left(u)), None) => Result(_ => Result(Uniform(u)))
+          case (None, None, Some(Ior.Left(g))) => Result(_ => Result(g))
 
           // Otherwise we will try to apply an edit, which may fail.
           case (Some(Ior.Right(f)), None, None) =>

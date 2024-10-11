@@ -41,8 +41,7 @@ object SNCalcResult:
 
   case class SNCalcSuccess(
     signalToNoise: SignalToNoise
-  ) extends SNCalcResult
-      derives Encoder.AsObject {
+  ) extends SNCalcResult derives Encoder.AsObject {
     val resultType = SNResultType.Success
   }
 

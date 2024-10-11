@@ -25,7 +25,7 @@ sealed trait Nullable[+A] extends Product with Serializable {
   def map[B](f:          A => B): Nullable[B]           = fold(Null, Absent, a => NonNull(f(a)))
   def flatMap[B](f:      A => Nullable[B]): Nullable[B] = fold(Null, Absent, f)
   def orElse[B >: A](nb: Nullable[B]): Nullable[B]      = fold(nb, nb, NonNull(_))
-  def toOption: Option[A] = fold(None, None, Some(_))
+  def toOption: Option[A]                               = fold(None, None, Some(_))
 
   def toOptionOption: Option[Option[A]] =
     fold(Some(None), None, a => Some(Some(a)))
@@ -49,10 +49,10 @@ object Nullable {
 
   implicit val NullableInstances: Monad[Nullable] & SemigroupK[Nullable] =
     new Monad[Nullable] with SemigroupK[Nullable] {
-      override def map[A, B](fa: Nullable[A])(fab: A => B): Nullable[B]           = fa.map(fab)
-      def flatMap[A, B](fa:      Nullable[A])(f:   A => Nullable[B]): Nullable[B] = fa.flatMap(f)
-      def pure[A](x:             A): Nullable[A] = NonNull(x)
-      def combineK[A](x:         Nullable[A], y:   Nullable[A]): Nullable[A]      = x.orElse(y)
+      override def map[A, B](fa: Nullable[A])(fab: A => B): Nullable[B]              = fa.map(fab)
+      def flatMap[A, B](fa:      Nullable[A])(f:   A => Nullable[B]): Nullable[B]    = fa.flatMap(f)
+      def pure[A](x:             A): Nullable[A]                                     = NonNull(x)
+      def combineK[A](x:         Nullable[A], y:   Nullable[A]): Nullable[A]         = x.orElse(y)
       @tailrec def tailRecM[A, B](a: A)(f: A => Nullable[Either[A, B]]): Nullable[B] =
         f(a) match {
           case Absent                => Absent
