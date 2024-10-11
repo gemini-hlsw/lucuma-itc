@@ -6,20 +6,21 @@ val catsEffectVersion           = "3.5.4"
 val catsTestkitScalaTestVersion = "2.1.5"
 val catsTimeVersion             = "0.3.4"
 val catsScalacheckVersion       = "0.3.2"
-val circeVersion                = "0.14.9"
+val circeVersion                = "0.14.10"
+val circeRefinedVersion         = "0.15.1"
 val cirisVersion                = "3.6.0"
 val clueVersion                 = "0.40.0"
 val disciplineMunitVersion      = "2.0.0"
 val fs2Version                  = "3.11.0"
 val gatlingVersion              = "3.12.0"
-val grackleVersion              = "0.20.0"
-val graphQLRoutesVersion        = "0.8.13"
+val grackleVersion              = "0.21.0"
+val graphQLRoutesVersion        = "0.8.14"
 val http4sVersion               = "0.23.28"
 val http4sJdkHttpClientVersion  = "0.9.1"
 val kindProjectorVersion        = "0.13.2"
 val kittensVersion              = "3.4.0"
 val log4catsVersion             = "2.7.0"
-val lucumaCoreVersion           = "0.105.0"
+val lucumaCoreVersion           = "0.105.1"
 val lucumaRefinedVersion        = "0.1.3"
 val monocleVersion              = "3.3.0"
 val munitVersion                = "1.0.2"
@@ -79,7 +80,7 @@ lazy val model = crossProject(JVMPlatform, JSPlatform)
     name := "lucuma-itc",
     libraryDependencies ++= Seq(
       "io.circe"      %%% "circe-generic" % circeVersion,
-      "io.circe"      %%% "circe-refined" % circeVersion,
+      "io.circe"      %%% "circe-refined" % circeRefinedVersion,
       "org.typelevel" %%% "cats-core"     % catsVersion,
       "edu.gemini"    %%% "lucuma-core"   % lucumaCoreVersion,
       "eu.timepit"    %%% "refined"       % refinedVersion,
