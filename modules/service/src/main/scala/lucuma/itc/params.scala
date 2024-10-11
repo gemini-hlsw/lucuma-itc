@@ -19,15 +19,13 @@ case class GmosNSpectroscopyParams(
   grating: GmosNorthGrating,
   fpu:     GmosNorthFpuParam,
   filter:  Option[GmosNorthFilter]
-) extends SpectroscopyParams
-    derives Encoder.AsObject
+) extends SpectroscopyParams derives Encoder.AsObject
 
 case class GmosSSpectroscopyParams(
   grating: GmosSouthGrating,
   fpu:     GmosSouthFpuParam,
   filter:  Option[GmosSouthFilter]
-) extends SpectroscopyParams
-    derives Encoder.AsObject
+) extends SpectroscopyParams derives Encoder.AsObject
 
 sealed trait ImagingParams
 

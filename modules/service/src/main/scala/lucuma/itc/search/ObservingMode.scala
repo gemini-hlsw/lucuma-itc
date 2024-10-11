@@ -84,8 +84,7 @@ object ObservingMode {
       filter:    Option[GmosNorthFilter],
       ccdMode:   Option[GmosCcdMode],
       roi:       Option[GmosRoi]
-    ) extends GmosSpectroscopy
-        derives Hash {
+    ) extends GmosSpectroscopy derives Hash {
       val isIfu = fpu.isIfu
 
       val instrument: Instrument =
@@ -116,8 +115,7 @@ object ObservingMode {
       filter:    Option[GmosSouthFilter],
       ccdMode:   Option[GmosCcdMode],
       roi:       Option[GmosRoi]
-    ) extends GmosSpectroscopy
-        derives Hash {
+    ) extends GmosSpectroscopy derives Hash {
       val isIfu = fpu.isIfu
 
       val instrument: Instrument =

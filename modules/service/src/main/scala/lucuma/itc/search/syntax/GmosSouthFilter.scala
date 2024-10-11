@@ -33,15 +33,15 @@ extension (self: GmosSouthFilter)
       // ri -- not in OCS3 … need to add
 
       // Narrow Band Imaging Filters
-      case HeII   => cov(464000, 472000)
-      case HeIIC  => cov(474000, 482000)
-      case OIII   => cov(496500, 501500)
-      case OIIIC  => cov(509000, 519000)
-      case Ha     => cov(654000, 661000)
-      case HaC    => cov(659000, 665000)
-      case SII    => cov(669400, 673700)
-      case OVIC   => cov(676100, 680900)
-      case OVI    => cov(681600, 686500)
+      case HeII  => cov(464000, 472000)
+      case HeIIC => cov(474000, 482000)
+      case OIII  => cov(496500, 501500)
+      case OIIIC => cov(509000, 519000)
+      case Ha    => cov(654000, 661000)
+      case HaC   => cov(659000, 665000)
+      case SII   => cov(669400, 673700)
+      case OVIC  => cov(676100, 680900)
+      case OVI   => cov(681600, 686500)
 
       // Spectroscopy Blocking Filters
       case GG455 => cov(460000)
