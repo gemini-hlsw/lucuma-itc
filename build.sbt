@@ -35,8 +35,8 @@ val spireVersion                = "0.18.0"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / scalaVersion        := "3.5.1"
-ThisBuild / crossScalaVersions  := Seq("3.5.1")
+ThisBuild / scalaVersion        := "3.5.2"
+ThisBuild / crossScalaVersions  := Seq("3.5.2")
 ThisBuild / tlBaseVersion       := "0.22"
 ThisBuild / tlCiReleaseBranches := Seq("master")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
