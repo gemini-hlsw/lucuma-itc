@@ -102,9 +102,12 @@ lazy val service = project
   .dependsOn(model.jvm)
   .settings(commonSettings)
   .settings(
-    name              := "lucuma-itc-service",
+    name                  := "lucuma-itc-service",
     scalacOptions -= "-Vtype-diffs",
-    reStart / envVars := Map(
+    reStart / javaOptions := Seq("-Dcats.effect.stackTracing=DISABLED",
+                                 "-Dcats.effect.tracing.mode=none"
+    ),
+    reStart / envVars     := Map(
       "ITC_URL"        -> "https://itc-server-exp.herokuapp.com/",
       "REDISCLOUD_URL" -> "redis://localhost"
     ),
@@ -133,7 +136,7 @@ lazy val service = project
       "io.suzaku"      %% "boopickle"             % boopickleVersion,
       "org.typelevel"  %% "munit-cats-effect"     % munitCatsEffectVersion % Test
     ),
-    buildInfoKeys     := Seq[BuildInfoKey](
+    buildInfoKeys         := Seq[BuildInfoKey](
       scalaVersion,
       sbtVersion,
       git.gitHeadCommit,
