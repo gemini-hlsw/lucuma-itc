@@ -48,7 +48,6 @@ trait ItcCacheOrRemote extends Version:
     val hash        = Hash[A].hash(a)
     val redisKeyStr = s"$prefix:$hash"
     val redisKey    = redisKeyStr.getBytes(KeyCharset)
-    val redisKey2   = s"$redisKeyStr 1".getBytes(KeyCharset)
     val L           = Logger[F]
 
     Trace[F].span("redis-cache-read") {
@@ -56,7 +55,7 @@ trait ItcCacheOrRemote extends Version:
         _         <- Trace[F].put("redis.key" -> redisKeyStr)
         _         <- L.debug(s"Read key $redisKeyStr")
         fromRedis <- redis
-                       .get(redisKey2)
+                       .get(redisKey)
                        .handleErrorWith(e => L.error(e)(s"Error reading $redisKey") *> none.pure[F])
         decoded   <-
           fromRedis

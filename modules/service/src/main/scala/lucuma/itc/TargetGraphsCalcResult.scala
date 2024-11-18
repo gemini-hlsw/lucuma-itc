@@ -35,18 +35,23 @@ object TargetGraphsCalcResult:
               s.data.collect { case (x, y) if !y.isNaN => (x.toDouble, y.toDouble) }
             )))
 
-    def maxWavelength(graph: ItcGraph, seriesDataType: SeriesDataType): List[Wavelength] =
+    // Find the wavelength that gives the maximum value for the given series data type
+    // It returns one value per ccd, returns a pair of wavelength and value
+    def wavelengthAtMaxSN(
+      graph:          ItcGraph,
+      seriesDataType: SeriesDataType
+    ): List[(Wavelength, Double)] =
       graph.series
         .filter(_.seriesType === seriesDataType)
         .zip(ccds.toList)
         .map: (sn, _) =>
           sn.data
+            .filter(_._1 > 0)
             .maxByOption(_._2)
-            .map(_._1)
-            .flatMap(d => Wavelength.intPicometers.getOption((d * 1000).toInt))
+            .flatMap((w, s) => Wavelength.intPicometers.getOption((w * 1000).toInt).tupleRight(s))
         .flattenOption
 
-    def valueAt(graph: ItcGraph, seriesDataType: SeriesDataType): Option[SignalToNoise] =
+    def signalToNoiseAtWv(graph: ItcGraph, seriesDataType: SeriesDataType): Option[SignalToNoise] =
       graph.series
         .filter(_.seriesType === seriesDataType)
         .zip(ccds.toList)
@@ -58,33 +63,25 @@ object TargetGraphsCalcResult:
         .headOption
         .flatMap(v => SignalToNoise.FromBigDecimalRounding.getOption(v))
 
-    def maxValue(graph: ItcGraph, seriesDataType: SeriesDataType): List[Double] =
-      graph.series
-        .filter(_.seriesType === seriesDataType)
-        .zip(ccds.toList)
-        .map: (sn, _) =>
-          sn.data
-            .maxByOption(_._2)
-            .map(_._2)
-        .flattenOption
-
     // Calculate the wavelengths at where the peaks happen
     val calculatedCCDs: Chain[ItcCcd] =
       graphs
         .flatMap(_.graphs)
         .filter(_.graphType === GraphType.S2NGraph)
         .flatMap: graph =>
-          val maxFinalAt  = maxWavelength(graph, SeriesDataType.FinalS2NData)
-          val maxSignalAt = maxWavelength(graph, SeriesDataType.SingleS2NData)
-          val maxFinal    = maxValue(graph, SeriesDataType.FinalS2NData)
-          val maxSignal   = maxValue(graph, SeriesDataType.SingleS2NData)
+          val finalSN     = wavelengthAtMaxSN(graph, SeriesDataType.FinalS2NData)
+          val maxWVFinal  = finalSN.map(_._1)
+          val maxSNFinal  = finalSN.map(_._2)
+          val singleSN    = wavelengthAtMaxSN(graph, SeriesDataType.SingleS2NData)
+          val maxWVSingle = singleSN.map(_._1)
+          val maxSNSingle = singleSN.map(_._2)
 
           ccds.zipWithIndex
             .map: (ccd, i) =>
-              val finalWV        = maxFinalAt.lift(i)
-              val singleWV       = maxSignalAt.lift(i)
-              val maxFinalValue  = maxFinal.lift(i)
-              val maxSingleValue = maxSignal.lift(i)
+              val finalWV        = maxWVFinal.lift(i)
+              val singleWV       = maxWVSingle.lift(i)
+              val maxFinalValue  = maxSNFinal.lift(i)
+              val maxSingleValue = maxSNSingle.lift(i)
 
               (finalWV, singleWV, maxSingleValue, maxFinalValue).mapN:
                 (maxFinalAt, maxSingleAt, maxSingleValue, maxFinalValue) =>
@@ -122,7 +119,7 @@ object TargetGraphsCalcResult:
       graphs
         .flatMap(_.graphs)
         .filter(_.graphType === GraphType.S2NGraph)
-        .map(c => valueAt(c, seriesType))
+        .map(c => signalToNoiseAtWv(c, seriesType))
         .collect { case Some(v) => v }
         .headOption
 
