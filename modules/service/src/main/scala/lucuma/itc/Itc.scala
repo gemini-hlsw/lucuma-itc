@@ -18,25 +18,23 @@ trait Itc[F[_]]:
    * signal-to-noise under the requested conditions.
    */
   def calculateIntegrationTime(
-    target:          TargetData,
-    band:            Band,
-    observingMode:   ObservingMode,
-    constraints:     ItcObservingConditions,
-    signalToNoise:   SignalToNoise,
-    signalToNoiseAt: Option[Wavelength]
+    target:        TargetData,
+    band:          Band,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    signalToNoise: SignalToNoise
   ): F[NonEmptyChain[IntegrationTime]]
 
   /**
    * Retrieve the graph data for the given mode and exposureTime and exposures
    */
   def calculateGraph(
-    target:          TargetData,
-    band:            Band,
-    observingMode:   ObservingMode,
-    constraints:     ItcObservingConditions,
-    exposureTime:    TimeSpan,
-    exposureCount:   PosInt,
-    signalToNoiseAt: Option[Wavelength]
+    target:        TargetData,
+    band:          Band,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: PosInt
   ): F[TargetGraphsCalcResult]
 
   /**
@@ -44,10 +42,8 @@ trait Itc[F[_]]:
    * exposures at a specific wavelength
    */
   def calculateSignalToNoise(
-    graph:           NonEmptyChain[ItcGraphGroup],
-    signalToNoiseAt: Option[Wavelength]
+    graph: NonEmptyChain[ItcGraphGroup]
   ): F[SNCalcResult]
 
 object Itc:
-
   def apply[F[_]](using ev: Itc[F]): ev.type = ev

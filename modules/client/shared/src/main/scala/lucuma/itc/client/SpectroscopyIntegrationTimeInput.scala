@@ -17,11 +17,10 @@ import lucuma.itc.client.json.syntax.*
 import lucuma.itc.encoders.given
 
 case class SpectroscopyIntegrationTimeParameters(
-  wavelength:      Wavelength,
-  signalToNoise:   SignalToNoise,
-  signalToNoiseAt: Option[Wavelength],
-  constraints:     ConstraintSet,
-  mode:            InstrumentMode
+  wavelength:    Wavelength,
+  signalToNoise: SignalToNoise,
+  constraints:   ConstraintSet,
+  mode:          InstrumentMode
 ) derives Eq
 
 object SpectroscopyIntegrationTimeParameters {
@@ -29,13 +28,10 @@ object SpectroscopyIntegrationTimeParameters {
     def apply(a: SpectroscopyIntegrationTimeParameters): Json =
       Json
         .obj(
-          "wavelength"      -> Json.obj("picometers" -> a.wavelength.toPicometers.value.asJson),
-          "signalToNoise"   -> a.signalToNoise.asJson,
-          "signalToNoiseAt" -> a.signalToNoiseAt
-            .map(w => Json.obj("picometers" -> w.toPicometers.value.asJson))
-            .asJson,
-          "constraints"     -> a.constraints.asJson,
-          "mode"            -> a.mode.asJson
+          "wavelength"    -> Json.obj("picometers" -> a.wavelength.toPicometers.value.asJson),
+          "signalToNoise" -> a.signalToNoise.asJson,
+          "constraints"   -> a.constraints.asJson,
+          "mode"          -> a.mode.asJson
         )
         .dropNullValues
 }

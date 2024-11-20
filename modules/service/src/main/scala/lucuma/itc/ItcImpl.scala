@@ -52,21 +52,20 @@ trait SignalToNoiseCalculation[F[_]: Applicative] { this: Itc[F] =>
             SNCalcResult.SNCalcSuccess(sn)
           }
 
-      val sorted           = finalS2NData.sortBy(_._1)
-      val sn: SNCalcResult = signalToNoiseAt
+      val sorted: List[(Double, Double)] = finalS2NData.sortBy(_._1)
+      val sn: SNCalcResult               = signalToNoiseAt
         .fold(resultFromDouble(sorted.maxBy(_._2)._2)) { w =>
-          val nanos = Wavelength.decimalNanometers.reverseGet(w).doubleValue
+          val nanos: Double = Wavelength.decimalNanometers.reverseGet(w).doubleValue
           if (nanos < sorted.head._1) SNCalcResult.WavelengthAtBelowRange(w)
           else if (nanos > sorted.last._1) SNCalcResult.WavelengthAtAboveRange(w)
           else
-            val sortedList = sorted.toList
-            val index      = sortedList.indexWhere(_._1 >= nanos)
-            sortedList.lift(index).fold(SNCalcResult.NoData()) { secondPoint =>
+            val index: Int = sorted.indexWhere(_._1 >= nanos)
+            sorted.lift(index).fold(SNCalcResult.NoData()) { secondPoint =>
               val (w2, s2) = secondPoint
               if (w2 === nanos) {
                 resultFromDouble(s2)
               } else {
-                sortedList.lift(index - 1) match
+                sorted.lift(index - 1) match
                   case Some((w1, s1)) =>
                     // Linear interpolation
                     val sn = (s1 * (w2 - nanos) + s2 * (nanos - w1)) / (w2 - w1)
@@ -170,35 +169,35 @@ object ItcImpl {
           } yield r
         }
 
-      private def itcWithSNAt(
-        target:        TargetData,
-        band:          Band,
-        observingMode: ObservingMode,
-        constraints:   ItcObservingConditions,
-        sigma:         SignalToNoise,
-        wavelength:    Wavelength
-      ): F[legacy.ExposureTimeRemoteResult] =
-        import lucuma.itc.legacy.given
-        import lucuma.itc.legacy.*
+      // private def itcWithSNAt(
+      //   target:        TargetData,
+      //   band:          Band,
+      //   observingMode: ObservingMode,
+      //   constraints:   ItcObservingConditions,
+      //   sigma:         SignalToNoise,
+      //   wavelength:    Wavelength
+      // ): F[legacy.ExposureTimeRemoteResult] =
+      //   import lucuma.itc.legacy.given
+      //   import lucuma.itc.legacy.*
 
-        T.span("legacy-itc-query") {
-          val request =
-            spectroscopyWithSNAtParams(
-              target,
-              band,
-              observingMode,
-              constraints,
-              sigma,
-              wavelength
-            ).asJson
+      //   T.span("legacy-itc-query") {
+      //     val request =
+      //       spectroscopyWithSNAtParams(
+      //         target,
+      //         band,
+      //         observingMode,
+      //         constraints,
+      //         sigma,
+      //         wavelength
+      //       ).asJson
 
-          for {
-            _ <- T.put("itc.query" -> request.spaces2)
-            _ <- T.put("itc.sigma" -> sigma.toBigDecimal.toDouble)
-            _ <- L.info(request.noSpaces) // Request to the legacy itc
-            a <- itcLocal.calculateExposureTime(request.noSpaces)
-          } yield a
-        }
+      //     for {
+      //       _ <- T.put("itc.query" -> request.spaces2)
+      //       _ <- T.put("itc.sigma" -> sigma.toBigDecimal.toDouble)
+      //       _ <- L.info(request.noSpaces) // Request to the legacy itc
+      //       a <- itcLocal.calculateExposureTime(request.noSpaces)
+      //     } yield a
+      // }
 
       private def spectroscopyGraph(
         target:           TargetData,

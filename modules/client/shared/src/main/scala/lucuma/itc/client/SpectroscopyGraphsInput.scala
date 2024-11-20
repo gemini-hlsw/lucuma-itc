@@ -21,7 +21,6 @@ import lucuma.itc.encoders.given
 
 case class SpectroscopyGraphParameters(
   wavelength:         Wavelength,
-  signalToNoiseAt:    Option[Wavelength],
   exposureTime:       TimeSpan,
   exposureCount:      PosInt,
   constraints:        ConstraintSet,
@@ -41,9 +40,6 @@ object SpectroscopyGraphsInput {
   given Encoder.AsObject[SpectroscopyGraphsInput] = a =>
     JsonObject(
       "wavelength"         -> Json.obj("picometers" -> a.wavelength.toPicometers.value.asJson),
-      "signalToNoiseAt"    -> a.signalToNoiseAt
-        .map(w => Json.obj("picometers" -> w.toPicometers.value.asJson))
-        .asJson,
       "exposureTime"       -> Json.obj("microseconds" -> a.exposureTime.asJson),
       "exposureCount"      -> a.exposureCount.value.asJson,
       "asterism"           -> a.asterism.asJson,

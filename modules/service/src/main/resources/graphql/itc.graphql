@@ -10368,9 +10368,6 @@ input SpectroscopyIntegrationTimeInput {
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!
 
-  # Wavelength at which to measure Signal to Noise
-  signalToNoiseAt: WavelengthInput
-
   # Relevant data for targets in asterism.
   asterism: [TargetInput!]!
 
@@ -10424,9 +10421,6 @@ input SpectroscopyGraphsInput {
   # Observing wavelength.
   wavelength: WavelengthInput!
 
-  # Wavelength at which to measure Signal to Noise
-  signalToNoiseAt: WavelengthInput
-
   # Exposure time duration
   exposureTime: TimeSpanInput!
 
@@ -10453,9 +10447,6 @@ input SpectroscopyIntegrationTimeAndGraphsInput {
 
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!
-
-  # Wavelength at which to measure Signal to Noise
-  signalToNoiseAt: WavelengthInput
 
   # Relevant data for targets in asterism.
   asterism: [TargetInput!]!
