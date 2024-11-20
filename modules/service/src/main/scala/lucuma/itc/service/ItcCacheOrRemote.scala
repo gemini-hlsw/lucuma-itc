@@ -83,8 +83,8 @@ trait ItcCacheOrRemote extends Version:
         request.specMode,
         request.constraints,
         request.expTime,
-        request.exp,
-        request.signalToNoiseAt
+        request.exp
+        // request.signalToNoiseAt
       )
       .map((_, band))
 
@@ -104,13 +104,13 @@ trait ItcCacheOrRemote extends Version:
   ): F[(NonEmptyChain[IntegrationTime], Band)] =
     val band: Band = calcRequest.target.bandFor(calcRequest.wavelength)
     itc
-      .calculateIntegrationTime(
+      .calculateExposureTime(
         calcRequest.target,
         band,
         calcRequest.specMode,
         calcRequest.constraints,
-        calcRequest.signalToNoise,
-        calcRequest.signalToNoiseAt
+        calcRequest.signalToNoise
+        // calcRequest.signalToNoiseAt
       )
       .map((_, band))
 
@@ -133,13 +133,12 @@ trait ItcCacheOrRemote extends Version:
   ): F[(NonEmptyChain[IntegrationTime], Band)] =
     val band: Band = calcRequest.target.bandFor(calcRequest.wavelength)
     itc
-      .calculateIntegrationTime(
+      .calculateExposureTime(
         calcRequest.target,
         band,
         calcRequest.imagingMode,
         calcRequest.constraints,
-        calcRequest.signalToNoise,
-        none
+        calcRequest.signalToNoise
       )
       .map((_, band))
 

@@ -24,12 +24,12 @@ import lucuma.itc.search.TargetData
 import lucuma.itc.search.hashes.given
 
 case class GraphParameters(
-  wavelength:      Wavelength,
-  specMode:        ObservingMode.SpectroscopyMode,
-  constraints:     ItcObservingConditions,
-  expTime:         TimeSpan,
-  exp:             PosInt,
-  signalToNoiseAt: Option[Wavelength]
+  wavelength:  Wavelength,
+  specMode:    ObservingMode.SpectroscopyMode,
+  constraints: ItcObservingConditions,
+  expTime:     TimeSpan,
+  exp:         PosInt
+  // signalToNoiseAt: Option[Wavelength]
 ) derives Hash
 
 case class TargetGraphRequest(
@@ -53,7 +53,6 @@ object AsterismGraphRequest:
   def fromInput(input: SpectroscopyGraphsInput): Result[AsterismGraphRequest] = {
     val SpectroscopyGraphsInput(
       wavelength,
-      signalToNoiseAt,
       exposureTime,
       exposureCount,
       asterism,
@@ -92,8 +91,7 @@ object AsterismGraphRequest:
           mode,
           conditions,
           exposureTime,
-          exposureCount,
-          signalToNoiseAt
+          exposureCount
         ),
         figures
       )

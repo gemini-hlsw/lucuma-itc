@@ -43,7 +43,7 @@ object ItcInstrumentDetails:
     apply(mode)
 
 /** Convert model types into OCS2 ITC-compatible types for a spectroscopy request. */
-def spectroscopyParams(
+def spectroscopyGraphParams(
   target:           TargetData,
   band:             Band,
   observingMode:    ObservingMode,
@@ -70,13 +70,12 @@ def spectroscopyParams(
     instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
   )
 
-def spectroscopyWithSNAtParams(
+def spectroscopyExposureTimeParams(
   target:        TargetData,
   band:          Band,
-  observingMode: ObservingMode,
+  observingMode: ObservingMode.SpectroscopyMode,
   conditions:    ItcObservingConditions,
-  sigma:         SignalToNoise,
-  wavelength:    Wavelength
+  sigma:         SignalToNoise
 ): ItcParameters =
   ItcParameters(
     source = ItcSourceDefinition(target, band),
@@ -85,7 +84,7 @@ def spectroscopyWithSNAtParams(
         ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
           sigma = sigma.toBigDecimal.toDouble,
           coadds = None,
-          wavelength = wavelength,
+          wavelength = observingMode.λ,
           sourceFraction = 1.0,
           ditherOffset = Angle.Angle0
         ),

@@ -21,9 +21,9 @@ case class TargetGraphsCalcResult(
 
 object TargetGraphsCalcResult:
   def fromLegacy(
-    ccds:            NonEmptyChain[ItcRemoteCcd],
-    originalGraphs:  NonEmptyChain[ItcGraphGroup],
-    signalToNoiseAt: Option[Wavelength]
+    ccds:           NonEmptyChain[ItcRemoteCcd],
+    originalGraphs: NonEmptyChain[ItcGraphGroup],
+    wavelength:     Wavelength
   ): TargetGraphsCalcResult = {
     val graphs: NonEmptyChain[ItcGraphGroup] =
       originalGraphs.map: graph =>
@@ -56,8 +56,8 @@ object TargetGraphsCalcResult:
         .filter(_.seriesType === seriesDataType)
         .zip(ccds.toList)
         .map: (sn, _) =>
-          signalToNoiseAt
-            .flatMap(at => sn.data.find(_._1 >= at.toNanometers.value.value))
+          sn.data
+            .find(_._1 >= wavelength.toNanometers.value.value)
             .map(_._2)
         .flattenOption
         .headOption
@@ -85,16 +85,17 @@ object TargetGraphsCalcResult:
 
               (finalWV, singleWV, maxSingleValue, maxFinalValue).mapN:
                 (maxFinalAt, maxSingleAt, maxSingleValue, maxFinalValue) =>
-                  ItcCcd(ccd.singleSNRatio,
-                         maxSingleValue,
-                         ccd.totalSNRatio,
-                         maxFinalValue,
-                         maxFinalAt,
-                         maxSingleAt,
-                         ccd.peakPixelFlux,
-                         ccd.wellDepth,
-                         ccd.ampGain,
-                         ccd.warnings
+                  ItcCcd(
+                    ccd.singleSNRatio,
+                    maxSingleValue,
+                    ccd.totalSNRatio,
+                    maxFinalValue,
+                    maxFinalAt,
+                    maxSingleAt,
+                    ccd.peakPixelFlux,
+                    ccd.wellDepth,
+                    ccd.ampGain,
+                    ccd.warnings
                   )
             .toChain
             .flattenOption
@@ -115,7 +116,7 @@ object TargetGraphsCalcResult:
       .getOption(maxSingleSNRatio)
       .getOrElse(throw UpstreamException(List("Peak Single SN is not a number")))
 
-    def wvAtRatio(seriesType: SeriesDataType) =
+    def wvAtRatio(seriesType: SeriesDataType): Option[SignalToNoise] =
       graphs
         .flatMap(_.graphs)
         .filter(_.graphType === GraphType.S2NGraph)
@@ -123,8 +124,8 @@ object TargetGraphsCalcResult:
         .collect { case Some(v) => v }
         .headOption
 
-    val wvAtFinalRatio  = wvAtRatio(SeriesDataType.FinalS2NData)
-    val wvAtSingleRatio = wvAtRatio(SeriesDataType.SingleS2NData)
+    val wvAtFinalRatio: Option[SignalToNoise]  = wvAtRatio(SeriesDataType.FinalS2NData)
+    val wvAtSingleRatio: Option[SignalToNoise] = wvAtRatio(SeriesDataType.SingleS2NData)
 
     assert(calculatedCCDs.length === ccds.length.toInt)
     TargetGraphsCalcResult(

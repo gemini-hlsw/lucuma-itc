@@ -213,8 +213,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
         asterismRequest.specMode,
         asterismRequest.constraints,
         expTime,
-        expCount,
-        asterismRequest.signalToNoiseAt
+        expCount
       ),
       figures
     )

@@ -9,7 +9,6 @@ import cats.data.NonEmptyList
 import cats.syntax.either.*
 import cats.syntax.option.*
 import eu.timepit.refined.types.numeric.PosInt
-import io.circe.syntax.*
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
 import lucuma.core.enums.CloudExtinction
@@ -53,7 +52,6 @@ import lucuma.itc.SeriesDataType
 import lucuma.itc.SingleSN
 import lucuma.itc.TargetIntegrationTime
 import lucuma.itc.TargetIntegrationTimeOutcome
-import lucuma.itc.client.json.encoders.given
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
 import lucuma.refined.*
 
@@ -105,22 +103,22 @@ class WiringSuite extends ClientSuite {
     )
   }
 
-  test("SignalToNoiseAt null is removed") {
-    WiringSuite.SpectroscopyInput.asJson.asObject
-      .exists(!_.contains("signalToNoiseAt"))
-  }
+  // test("SignalToNoiseAt null is removed") {
+  //   WiringSuite.SpectroscopyInput.asJson.asObject
+  //     .exists(!_.contains("signalToNoiseAt"))
+  // }
 
-  test("SignalToNoiseAt non-null is included") {
-    WiringSuite.SpectroscopyInput
-      .copy(parameters =
-        WiringSuite.SpectroscopyInput.parameters.copy(signalToNoiseAt = Wavelength.Min.some)
-      )
-      .asJson
-      .asObject
-      .flatMap(_.apply("signalToNoiseAt"))
-      .map(_.spaces2)
-      .contains(Wavelength.Min.asJson)
-  }
+  // test("SignalToNoiseAt non-null is included") {
+  //   WiringSuite.SpectroscopyInput
+  //     .copy(parameters =
+  //       WiringSuite.SpectroscopyInput.parameters.copy(signalToNoiseAt = Wavelength.Min.some)
+  //     )
+  //     .asJson
+  //     .asObject
+  //     .flatMap(_.apply("signalToNoiseAt"))
+  //     .map(_.spaces2)
+  //     .contains(Wavelength.Min.asJson)
+  // }
 
   test("ItcClient spectroscopy graph wiring and sanity check") {
     spectroscopyGraphs(
@@ -182,7 +180,6 @@ object WiringSuite {
       SpectroscopyIntegrationTimeParameters(
         Wavelength.Min,
         SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
-        Option.empty[Wavelength],
         ConstraintSet(
           ImageQuality.PointOne,
           CloudExtinction.PointOne,
@@ -262,7 +259,6 @@ object WiringSuite {
     SpectroscopyGraphsInput(
       SpectroscopyGraphParameters(
         Wavelength.Min,
-        Wavelength.fromIntMicrometers(1),
         TimeSpan.fromSeconds(1).get,
         PosInt.unsafeFrom(5),
         ConstraintSet(

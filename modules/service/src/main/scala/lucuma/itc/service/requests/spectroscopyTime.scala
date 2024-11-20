@@ -21,11 +21,11 @@ import lucuma.itc.search.TargetData
 import lucuma.itc.search.hashes.given
 
 case class SpectroscopyTimeParameters(
-  wavelength:      Wavelength,
-  specMode:        ObservingMode.SpectroscopyMode,
-  constraints:     ItcObservingConditions,
-  signalToNoise:   SignalToNoise,
-  signalToNoiseAt: Option[Wavelength]
+  wavelength:    Wavelength,
+  specMode:      ObservingMode.SpectroscopyMode,
+  constraints:   ItcObservingConditions,
+  signalToNoise: SignalToNoise
+  // signalToNoiseAt: Option[Wavelength]
 ) derives Hash
 
 case class TargetSpectroscopyTimeRequest(
@@ -46,14 +46,7 @@ case class AsterismSpectroscopyTimeRequest(
 
 object AsterismSpectroscopyTimeRequest:
   def fromInput(input: SpectroscopyTimeInput): Result[AsterismSpectroscopyTimeRequest] = {
-    val SpectroscopyTimeInput(
-      wavelength,
-      signalToNoise,
-      signalToNoiseAt,
-      asterism,
-      constraints,
-      mode
-    ) =
+    val SpectroscopyTimeInput(wavelength, signalToNoise, asterism, constraints, mode) =
       input
 
     val asterismResult: Result[NonEmptyChain[TargetData]] =
@@ -79,6 +72,6 @@ object AsterismSpectroscopyTimeRequest:
     (asterismResult, modeResult, conditionsResult).parMapN: (asterism, mode, conditions) =>
       AsterismSpectroscopyTimeRequest(
         asterism,
-        SpectroscopyTimeParameters(wavelength, mode, conditions, signalToNoise, signalToNoiseAt)
+        SpectroscopyTimeParameters(wavelength, mode, conditions, signalToNoise)
       )
   }

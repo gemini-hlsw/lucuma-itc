@@ -16,9 +16,6 @@ class GraphQLSpectroscopyTimeAndGraphSuite extends GraphQLSuite {
               nanometers: 60,
             },
             signalToNoise: 2,
-            signalToNoiseAt: {
-              nanometers: 60,
-            },
             asterism: [
               {
                 sourceProfile: {
