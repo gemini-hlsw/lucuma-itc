@@ -27,7 +27,7 @@ import lucuma.refined.*
 
 object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
-  override def calculateExposureTime(
+  override def calculateIntegrationTime(
     target:        TargetData,
     band:          Band,
     observingMode: ObservingMode,
@@ -81,7 +81,7 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
 object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
-  override def calculateExposureTime(
+  override def calculateIntegrationTime(
     target:        TargetData,
     band:          Band,
     observingMode: ObservingMode,
@@ -139,7 +139,7 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
 object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
-  override def calculateExposureTime(
+  override def calculateIntegrationTime(
     target:        TargetData,
     band:          Band,
     observingMode: ObservingMode,

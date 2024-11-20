@@ -104,7 +104,7 @@ trait ItcCacheOrRemote extends Version:
   ): F[(NonEmptyChain[IntegrationTime], Band)] =
     val band: Band = calcRequest.target.bandFor(calcRequest.wavelength)
     itc
-      .calculateExposureTime(
+      .calculateIntegrationTime(
         calcRequest.target,
         band,
         calcRequest.specMode,
@@ -133,7 +133,7 @@ trait ItcCacheOrRemote extends Version:
   ): F[(NonEmptyChain[IntegrationTime], Band)] =
     val band: Band = calcRequest.target.bandFor(calcRequest.wavelength)
     itc
-      .calculateExposureTime(
+      .calculateIntegrationTime(
         calcRequest.target,
         band,
         calcRequest.imagingMode,

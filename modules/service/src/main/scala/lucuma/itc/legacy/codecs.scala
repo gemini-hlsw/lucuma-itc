@@ -463,19 +463,19 @@ given Decoder[ExposureCalculation] = (c: HCursor) =>
           refineV[Positive](_).leftMap(e => DecodingFailure(e, c.downField("exposures").history))
   yield ExposureCalculation(time, count, sn)
 
-given Decoder[ExposureTimeRemoteResult] = (c: HCursor) =>
-  val spec: Option[Decoder.Result[ExposureTimeRemoteResult]] =
+given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
+  val spec: Option[Decoder.Result[IntegrationTimeRemoteResult]] =
     c.downField("ItcSpectroscopyResult")
       .downField("exposureCalculation")
       .success
       .map:
         _.as[ExposureCalculation]
-          .map(c => ExposureTimeRemoteResult(NonEmptyChain.one(c)))
+          .map(c => IntegrationTimeRemoteResult(NonEmptyChain.one(c)))
 
-  val img: Decoder.Result[ExposureTimeRemoteResult] =
+  val img: Decoder.Result[IntegrationTimeRemoteResult] =
     c.downField("ItcImagingResult")
       .downField("exposureCalculation")
       .as[NonEmptyChain[ExposureCalculation]]
-      .map(c => ExposureTimeRemoteResult(c))
+      .map(c => IntegrationTimeRemoteResult(c))
 
   spec.getOrElse(img)

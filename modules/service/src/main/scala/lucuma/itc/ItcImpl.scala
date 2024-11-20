@@ -17,7 +17,7 @@ import io.circe.syntax.*
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.TimeSpan
-import lucuma.itc.legacy.ExposureTimeRemoteResult
+import lucuma.itc.legacy.IntegrationTimeRemoteResult
 import lucuma.itc.legacy.FLocalItc
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetData
@@ -87,7 +87,7 @@ object ItcImpl {
       val L = Logger[F]
       val T = Trace[F]
 
-      def calculateExposureTime(
+      def calculateIntegrationTime(
         target:        TargetData,
         band:          Band,
         observingMode: ObservingMode,
@@ -97,7 +97,7 @@ object ItcImpl {
         T.span("calculate-exposure-time"):
           observingMode match
             case s @ ObservingMode.SpectroscopyMode(_, _, _) =>
-              spectroscopyExposureTime(target, band, s, constraints, signalToNoise)
+              spectroscopyIntegrationTime(target, band, s, constraints, signalToNoise)
             case i @ (
                   ObservingMode.ImagingMode.GmosNorth(_, _, _) |
                   ObservingMode.ImagingMode.GmosSouth(_, _, _)
@@ -160,13 +160,13 @@ object ItcImpl {
           yield r
         }
 
-      private def itcExposureTime(
+      private def itcIntegrationTime(
         target:        TargetData,
         band:          Band,
         observingMode: ObservingMode.SpectroscopyMode,
         constraints:   ItcObservingConditions,
         sigma:         SignalToNoise
-      ): F[legacy.ExposureTimeRemoteResult] =
+      ): F[legacy.IntegrationTimeRemoteResult] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
@@ -184,7 +184,7 @@ object ItcImpl {
             _ <- T.put("itc.query" -> request.spaces2)
             _ <- T.put("itc.sigma" -> sigma.toBigDecimal.toDouble)
             _ <- L.info(request.noSpaces) // Request to the legacy itc
-            a <- itcLocal.calculateExposureTime(request.noSpaces)
+            a <- itcLocal.calculateIntegrationTime(request.noSpaces)
           yield a
         }
 
@@ -364,7 +364,7 @@ object ItcImpl {
        * Compute the exposure time and number of exposures required to achieve the desired
        * signal-to-noise under the requested conditions. Only for spectroscopy modes.
        */
-      private def spectroscopyExposureTime(
+      private def spectroscopyIntegrationTime(
         target:        TargetData,
         band:          Band,
         observingMode: ObservingMode.SpectroscopyMode,
@@ -377,7 +377,7 @@ object ItcImpl {
           _ <- L.info(s"Target $target at band $band")
           r <-
             T.span("itc.calctime.spectroscopy-exp-time-at") {
-              itcExposureTime(
+              itcIntegrationTime(
                 target,
                 band,
                 observingMode,
@@ -395,7 +395,7 @@ object ItcImpl {
         observingMode: ObservingMode.ImagingMode,
         constraints:   ItcObservingConditions,
         sigma:         SignalToNoise
-      ): F[legacy.ExposureTimeRemoteResult] =
+      ): F[legacy.IntegrationTimeRemoteResult] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
@@ -407,12 +407,12 @@ object ItcImpl {
             _ <- T.put("itc.query" -> request.spaces2)
             _ <- T.put("itc.sigma" -> sigma.toBigDecimal.toDouble)
             _ <- L.info(request.noSpaces)
-            r <- itcLocal.calculateExposureTime(request.noSpaces)
+            r <- itcLocal.calculateIntegrationTime(request.noSpaces)
           yield r
         }
 
       private def calculationResults(
-        r: ExposureTimeRemoteResult
+        r: IntegrationTimeRemoteResult
       ): F[NonEmptyChain[IntegrationTime]] =
         r.exposureCalculation.traverse(r =>
           TimeSpan

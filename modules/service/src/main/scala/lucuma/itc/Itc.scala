@@ -16,7 +16,7 @@ trait Itc[F[_]]:
    * Compute the exposure time and number of exposures required to achieve the desired
    * signal-to-noise under the requested conditions.
    */
-  def calculateExposureTime(
+  def calculateIntegrationTime(
     target:        TargetData,
     band:          Band,
     observingMode: ObservingMode,
