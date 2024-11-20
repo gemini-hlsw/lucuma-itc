@@ -14,6 +14,7 @@ import coulomb.units.si.*
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.refineV
 import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.numeric.NonNegative
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.enums.Band
@@ -103,8 +104,8 @@ object ItcImpl {
           observingMode match
             case ObservingMode.SpectroscopyMode(_, _, _) =>
               signalToNoiseAt match
-                case None     =>
-                  spectroscopy(target, band, observingMode, constraints, signalToNoise, none)
+                // case None     =>
+                //   spectroscopy(target, band, observingMode, constraints, signalToNoise, none)
                 case Some(at) =>
                   spectroscopySNAt(target, band, observingMode, constraints, signalToNoise, at)
             case ObservingMode.ImagingMode.GmosNorth(_, _, _) |
@@ -137,14 +138,14 @@ object ItcImpl {
               new IllegalArgumentException("Imaging mode not supported for graph calculation")
             )
 
-      private def itc(
+      private def itcGraph(
         target:           TargetData,
         band:             Band,
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
         exposureDuration: Quantity[BigDecimal, Second],
         exposureCount:    Int,
-        level:            NonNegInt
+        level:            Option[NonNegInt] = none
       ): F[legacy.GraphsRemoteResult] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
@@ -164,7 +165,7 @@ object ItcImpl {
             _ <- T.put("itc.query" -> request.spaces2)
             _ <- T.put("itc.exposureDuration" -> exposureDuration.value.toInt)
             _ <- T.put("itc.exposures" -> exposureCount)
-            _ <- T.put("itc.level" -> level.value)
+            _ <- T.put("itc.level" -> level.map(_.value).orEmpty)
             r <- itcLocal.calculateGraphs(request.noSpaces)
           } yield r
         }
@@ -199,206 +200,178 @@ object ItcImpl {
           } yield a
         }
 
-      private def itcGraph(
-        target:           TargetData,
-        band:             Band,
-        observingMode:    ObservingMode,
-        constraints:      ItcObservingConditions,
-        exposureDuration: Quantity[BigDecimal, Second],
-        exposureCount:    Long
-      ): F[legacy.GraphsRemoteResult] =
-        import lucuma.itc.legacy.given
-        import lucuma.itc.legacy.*
-
-        T.span("legacy-itc-query") {
-          val json =
-            spectroscopyParams(
-              target,
-              band,
-              observingMode,
-              exposureDuration.value.toDouble.seconds,
-              constraints,
-              exposureCount.toInt
-            ).asJson
-          for {
-            _ <- T.put("itc.query" -> json.spaces2)
-            _ <- T.put("itc.exposureDuration" -> exposureDuration.value.toInt)
-            _ <- T.put("itc.exposures" -> exposureCount.toInt)
-            r <- itcLocal.calculateGraphs(json.noSpaces)
-          } yield r
-        }
-
       private def spectroscopyGraph(
         target:           TargetData,
         band:             Band,
         observingMode:    ObservingMode,
         constraints:      ItcObservingConditions,
         exposureDuration: Quantity[BigDecimal, Second],
-        exposureCount:    Long,
+        exposureCount:    Int,
         signalToNoiseAt:  Option[Wavelength]
       ): F[TargetGraphsCalcResult] =
         itcGraph(target, band, observingMode, constraints, exposureDuration, exposureCount).map:
           r => TargetGraphsCalcResult.fromLegacy(r.ccds, r.groups, signalToNoiseAt)
 
-      /**
-       * Compute the exposure time and number of exposures required to achieve the desired
-       * signal-to-noise under the requested conditions. Only for spectroscopy modes
-       */
-      private def spectroscopy(
-        target:          TargetData,
-        band:            Band,
-        observingMode:   ObservingMode,
-        constraints:     ItcObservingConditions,
-        signalToNoise:   SignalToNoise,
-        signalToNoiseAt: Option[Wavelength]
-      ): F[NonEmptyChain[IntegrationTime]] = {
-        val startExpTime      = BigDecimal(1200.0).withUnit[Second]
-        val numberOfExposures = 1
-        val requestedSN       = signalToNoise
-        val MaxIterations     = 10
+      // /**
+      //  * Compute the exposure time and number of exposures required to achieve the desired
+      //  * signal-to-noise under the requested conditions. Only for spectroscopy modes
+      //  */
+      // private def spectroscopy(
+      //   target:          TargetData,
+      //   band:            Band,
+      //   observingMode:   ObservingMode,
+      //   constraints:     ItcObservingConditions,
+      //   signalToNoise:   SignalToNoise,
+      //   signalToNoiseAt: Option[Wavelength]
+      // ): F[NonEmptyChain[IntegrationTime]] = {
+      //   val startExpTime      = BigDecimal(1200.0).withUnit[Second]
+      //   val numberOfExposures = 1
+      //   val requestedSN       = signalToNoise
+      //   val MaxIterations     = 10
 
-        // This loops should be necessary only a few times but put a circuit breaker just in case
-        def itcStep(
-          nExp:       ExposureCount,
-          oldNExp:    Int,
-          expTime:    Quantity[BigDecimal, Second],
-          oldExpTime: Quantity[BigDecimal, Second],
-          snr:        SignalToNoise,
-          maxTime:    Quantity[BigDecimal, Second],
-          s:          legacy.GraphsRemoteResult,
-          counter:    NonNegInt
-        ): F[IntegrationTime] =
-          val totalTime: Quantity[BigDecimal, Second] =
-            if (snr === SignalToNoise.Min) TimeSpan.Max.toSeconds.withUnit[Second]
-            else
-              expTime * nExp
-                .withUnit[1] * pow(requestedSN.toBigDecimal.toDouble / snr.toBigDecimal.toDouble, 2)
-                .withUnit[1]
+      //   // This loops should be necessary only a few times but put a circuit breaker just in case
+      //   def itcStep(
+      //     nExp:       ExposureCount,
+      //     oldNExp:    Int,
+      //     expTime:    Quantity[BigDecimal, Second],
+      //     oldExpTime: Quantity[BigDecimal, Second],
+      //     snr:        SignalToNoise,
+      //     maxTime:    Quantity[BigDecimal, Second],
+      //     s:          legacy.GraphsRemoteResult,
+      //     counter:    NonNegInt
+      //   ): F[IntegrationTime] =
+      //     val totalTime: Quantity[BigDecimal, Second] =
+      //       if (snr === SignalToNoise.Min) TimeSpan.Max.toSeconds.withUnit[Second]
+      //       else
+      //         expTime * nExp
+      //           .withUnit[1] * pow(requestedSN.toBigDecimal.toDouble / snr.toBigDecimal.toDouble, 2)
+      //           .withUnit[1]
 
-          val newNExp: BigDecimal = spire.math.ceil((totalTime / maxTime).value)
+      //     val newNExp: BigDecimal = spire.math.ceil((totalTime / maxTime).value)
 
-          val newExpTime: BigDecimal =
-            spire.math.ceil((totalTime / newNExp.withUnit[1]).value)
+      //     val newExpTime: BigDecimal =
+      //       spire.math.ceil((totalTime / newNExp.withUnit[1]).value)
 
-          val next = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
-          L.info(s"Total time: $totalTime maxTime: $maxTime") *>
-            L.info(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
-              if (
-                nExp != oldNExp ||
-                ((expTime - oldExpTime) > 1.withUnit[Second] || (oldExpTime - expTime) > 1
-                  .withUnit[Second]) &&
-                counter.value < MaxIterations &&
-                newExpTime < (pow(2, 63) - 1)
-              ) {
-                itc(
-                  target,
-                  band,
-                  observingMode,
-                  constraints,
-                  newExpTime.withUnit[Second],
-                  newNExp.toInt,
-                  next
-                )
-                  .flatMap { s =>
-                    L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *>
-                      calculateSignalToNoise(s.groups, signalToNoiseAt).flatMap {
-                        case SNCalcResult.SNCalcSuccess(snr) =>
-                          itcStep(
-                            newNExp.toInt,
-                            nExp,
-                            newExpTime.withUnit[Second],
-                            expTime,
-                            snr,
-                            maxTime,
-                            s,
-                            next
-                          )
-                        case r                               =>
-                          MonadThrow[F].raiseError(CalculationError(r.toString))
-                      }
-                  }
-              } else {
-                (SignalToNoise.FromBigDecimalRounding.getOption(s.maxTotalSNRatio),
-                 TimeSpan.fromSeconds(newExpTime),
-                 refineV[Positive](newNExp.toInt).toOption
-                ) match {
-                  case (Some(sn), Some(expTime), Some(count)) =>
-                    IntegrationTime(expTime, count, sn).pure[F]
-                  case _                                      =>
-                    MonadThrow[F].raiseError(
-                      CalculationError(
-                        "Negative signal to noise or exposure count"
-                      )
-                    )
-                }
-              }
-            }
-        end itcStep
+      //     val next = NonNegInt.from(counter.value + 1).getOrElse(sys.error("Should not happen"))
+      //     L.info(s"Total time: $totalTime maxTime: $maxTime") *>
+      //       L.info(s"Exp time :$newExpTime s/Num exp $newNExp/iteration $counter") *> {
+      //         if (
+      //           nExp != oldNExp ||
+      //           ((expTime - oldExpTime) > 1.withUnit[Second] || (oldExpTime - expTime) > 1
+      //             .withUnit[Second]) &&
+      //           counter.value < MaxIterations &&
+      //           newExpTime < (pow(2, 63) - 1)
+      //         ) {
+      //           itcGraph(
+      //             target,
+      //             band,
+      //             observingMode,
+      //             constraints,
+      //             newExpTime.withUnit[Second],
+      //             newNExp.toInt,
+      //             next.some
+      //           )
+      //             .flatMap { s =>
+      //               L.debug(s"-> S/N: ${s.maxTotalSNRatio}") *>
+      //                 calculateSignalToNoise(s.groups, signalToNoiseAt).flatMap {
+      //                   case SNCalcResult.SNCalcSuccess(snr) =>
+      //                     itcStep(
+      //                       newNExp.toInt,
+      //                       nExp,
+      //                       newExpTime.withUnit[Second],
+      //                       expTime,
+      //                       snr,
+      //                       maxTime,
+      //                       s,
+      //                       next
+      //                     )
+      //                   case r                               =>
+      //                     MonadThrow[F].raiseError(CalculationError(r.toString))
+      //                 }
+      //             }
+      //         } else {
+      //           (SignalToNoise.FromBigDecimalRounding.getOption(s.maxTotalSNRatio),
+      //            TimeSpan.fromSeconds(newExpTime),
+      //            refineV[Positive](newNExp.toInt).toOption
+      //           ) match {
+      //             case (Some(sn), Some(expTime), Some(count)) =>
+      //               IntegrationTime(expTime, count, sn).pure[F]
+      //             case _                                      =>
+      //               MonadThrow[F].raiseError(
+      //                 CalculationError(
+      //                   "Negative signal to noise or exposure count"
+      //                 )
+      //               )
+      //           }
+      //         }
+      //       }
+      //   end itcStep
 
-        L.info(s"Desired S/N $signalToNoise") *>
-          L.info(s"Target brightness $target at band $band") *>
-          T.span("itc.calctime.spectroscopy") {
+      //   L.info(s"Desired S/N $signalToNoise") *>
+      //     L.info(s"Target brightness $target at band $band") *>
+      //     T.span("itc.calctime.spectroscopy") {
 
-            itc(
-              target,
-              band,
-              observingMode,
-              constraints,
-              startExpTime,
-              numberOfExposures,
-              1.refined
-            )
-              .flatMap { r =>
-                val wellHalfFilledSeconds =
-                  r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime.value
-                L.info(
-                  s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} wellHalfFilledSeconds: $wellHalfFilledSeconds"
-                ) *> {
-                  if (wellHalfFilledSeconds < 1.0) {
-                    MonadThrow[F].raiseError(SourceTooBright(wellHalfFilledSeconds))
-                  } else {
-                    val maxTime = startExpTime.value.min(wellHalfFilledSeconds)
-                    calculateSignalToNoise(r.groups, signalToNoiseAt)
-                      .flatMap {
-                        // degenerate case where the ITC cannot compute a S/N
-                        case SNCalcResult.SNCalcSuccess(snr) if snr.toBigDecimal <= 0.0 =>
-                          MonadThrow[F].raiseError(
-                            CalculationError("No signal can be achieved")
-                          )
-                        case SNCalcResult.SNCalcSuccess(snr)                            =>
-                          itcStep(numberOfExposures,
-                                  0,
-                                  startExpTime,
-                                  BigDecimal(0).withUnit[Second],
-                                  snr,
-                                  maxTime.withUnit[Second],
-                                  r,
-                                  0.refined
-                          )
-                        case SNCalcResult.WavelengthAtAboveRange(w)                     =>
-                          MonadThrow[F].raiseError(
-                            CalculationError(
-                              f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm above range"
-                            )
-                          )
-                        case SNCalcResult.WavelengthAtBelowRange(w)                     =>
-                          MonadThrow[F].raiseError(
-                            CalculationError(
-                              f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm below range"
-                            )
-                          )
-                        case r                                                          =>
-                          MonadThrow[F].raiseError(CalculationError(r.toString))
-                      }
+      //       itcGraph(
+      //         target,
+      //         band,
+      //         observingMode,
+      //         constraints,
+      //         startExpTime,
+      //         numberOfExposures,
+      //         1.refined[NonNegative].some
+      //       )
+      //         .flatMap { r =>
+      //           val wellHalfFilledSeconds =
+      //             r.maxWellDepth / 2 / r.maxPeakPixelFlux * startExpTime.value
+      //           L.info(
+      //             s"Results CCD wellDepth: ${r.maxWellDepth}, peakPixelFlux: ${r.maxPeakPixelFlux}, totalSNRatio: ${r.maxTotalSNRatio} wellHalfFilledSeconds: $wellHalfFilledSeconds"
+      //           ) *> {
+      //             if (wellHalfFilledSeconds < 1.0) {
+      //               MonadThrow[F].raiseError(SourceTooBright(wellHalfFilledSeconds))
+      //             } else {
+      //               val maxTime = startExpTime.value.min(wellHalfFilledSeconds)
+      //               calculateSignalToNoise(r.groups, signalToNoiseAt)
+      //                 .flatMap {
+      //                   // degenerate case where the ITC cannot compute a S/N
+      //                   case SNCalcResult.SNCalcSuccess(snr) if snr.toBigDecimal <= 0.0 =>
+      //                     MonadThrow[F].raiseError(
+      //                       CalculationError("No signal can be achieved")
+      //                     )
+      //                   case SNCalcResult.SNCalcSuccess(snr)                            =>
+      //                     itcStep(
+      //                       numberOfExposures,
+      //                       0,
+      //                       startExpTime,
+      //                       BigDecimal(0).withUnit[Second],
+      //                       snr,
+      //                       maxTime.withUnit[Second],
+      //                       r,
+      //                       0.refined
+      //                     )
+      //                   case SNCalcResult.WavelengthAtAboveRange(w)                     =>
+      //                     MonadThrow[F].raiseError(
+      //                       CalculationError(
+      //                         f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm above range"
+      //                       )
+      //                     )
+      //                   case SNCalcResult.WavelengthAtBelowRange(w)                     =>
+      //                     MonadThrow[F].raiseError(
+      //                       CalculationError(
+      //                         f"S/N at ${Wavelength.decimalNanometers.reverseGet(w)}%.0f nm below range"
+      //                       )
+      //                     )
+      //                   case r                                                          =>
+      //                     MonadThrow[F].raiseError(CalculationError(r.toString))
+      //                 }
 
-                  }
-                }
+      //             }
+      //           }
 
-              }
-              .map(NonEmptyChain.one)
-          }
+      //         }
+      //         .map(NonEmptyChain.one)
+      //     }
 
-      }
+      // }
 
       /**
        * Compute the exposure time and number of exposures required to achieve the desired
