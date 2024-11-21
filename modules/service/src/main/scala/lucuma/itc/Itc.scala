@@ -7,6 +7,7 @@ import cats.data.NonEmptyChain
 import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.search.*
 
@@ -18,6 +19,7 @@ trait Itc[F[_]]:
    */
   def calculateIntegrationTime(
     target:        TargetData,
+    atWavelength:  Wavelength,
     band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
@@ -29,6 +31,7 @@ trait Itc[F[_]]:
    */
   def calculateGraph(
     target:        TargetData,
+    atWavelength:  Wavelength,
     band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,

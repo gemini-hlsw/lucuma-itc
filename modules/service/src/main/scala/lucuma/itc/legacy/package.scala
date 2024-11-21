@@ -72,6 +72,7 @@ def spectroscopyGraphParams(
 
 def spectroscopyExposureTimeParams(
   target:        TargetData,
+  atWavelength:  Wavelength,
   band:          Band,
   observingMode: ObservingMode.SpectroscopyMode,
   conditions:    ItcObservingConditions,
@@ -84,7 +85,7 @@ def spectroscopyExposureTimeParams(
         ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
           sigma = sigma.toBigDecimal.toDouble,
           coadds = None,
-          wavelength = observingMode.λ,
+          wavelength = atWavelength,
           sourceFraction = 1.0,
           ditherOffset = Angle.Angle0
         ),

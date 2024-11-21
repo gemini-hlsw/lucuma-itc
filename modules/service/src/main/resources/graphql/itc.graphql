@@ -10266,6 +10266,9 @@ type ItcVersions {
 }
 
 input GmosSSpectroscopyInput {
+  # Center of the configuration spectrum
+  centralWavelength: Wavelength
+
   # Gmos South disperser
   grating: GmosSouthGrating!
 
@@ -10291,6 +10294,9 @@ input GmosSImagingInput {
 }
 
 input GmosNSpectroscopyInput {
+  # Center of the configuration spectrum
+  centralWavelength: Wavelength
+
   # Gmos North disperser
   grating: GmosNorthGrating!
 
@@ -10363,7 +10369,7 @@ input InstrumentModesInput {
 # Configuration alternatives query
 input SpectroscopyIntegrationTimeInput {
   # Observing wavelength.
-  wavelength: WavelengthInput!
+  atWavelength: WavelengthInput!
 
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!
@@ -10389,7 +10395,7 @@ input TargetInput {
 # Configuration alternatives query
 input ImagingIntegrationTimeInput {
   # Observing wavelength.
-  wavelength: WavelengthInput!
+  atWavelength: WavelengthInput!
 
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!
@@ -10419,7 +10425,7 @@ input SignificantFiguresInput {
 # Parameters to retrieve graph data
 input SpectroscopyGraphsInput {
   # Observing wavelength.
-  wavelength: WavelengthInput!
+  atWavelength: WavelengthInput!
 
   # Exposure time duration
   exposureTime: TimeSpanInput!
@@ -10443,7 +10449,7 @@ input SpectroscopyGraphsInput {
 # Parameters to retrieve graph data
 input SpectroscopyIntegrationTimeAndGraphsInput {
   # Observing wavelength.
-  wavelength: WavelengthInput!
+  atWavelength: WavelengthInput!
 
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!

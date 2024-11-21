@@ -10,7 +10,7 @@ import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 
 case class ImagingIntegrationTimeInput(
-  wavelength:    Wavelength,
+  atWavelength:  Wavelength,
   signalToNoise: SignalToNoise,
   asterism:      List[TargetDataInput],
   constraints:   ConstraintSetInput,

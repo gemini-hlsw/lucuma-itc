@@ -12,7 +12,7 @@ import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 
 case class SpectroscopyGraphsInput(
-  wavelength:         Wavelength,
+  atWavelength:       Wavelength,
   exposureTime:       TimeSpan,
   exposureCount:      PosInt,
   asterism:           List[TargetDataInput],
@@ -26,7 +26,7 @@ object SpectroscopyGraphsInput {
   def binding: Matcher[SpectroscopyGraphsInput] =
     ObjectFieldsBinding.rmap {
       case List(
-            WavelengthInput.Binding("wavelength", wavelength),
+            WavelengthInput.Binding("atWavelength", wavelength),
             TimeSpanInput.Binding("exposureTime", exposureTime),
             PosIntBinding("exposureCount", exposureCount),
             TargetDataInput.binding.List("asterism", asterism),

@@ -16,6 +16,7 @@ import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.legacy.IntegrationTimeRemoteResult
 import lucuma.itc.legacy.FLocalItc
@@ -89,23 +90,25 @@ object ItcImpl {
 
       def calculateIntegrationTime(
         target:        TargetData,
+        atWavelength:  Wavelength,
         band:          Band,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         signalToNoise: SignalToNoise
       ): F[NonEmptyChain[IntegrationTime]] =
-        T.span("calculate-exposure-time"):
+        T.span("calculate-integration-time"):
           observingMode match
             case s @ ObservingMode.SpectroscopyMode(_, _, _) =>
-              spectroscopyIntegrationTime(target, band, s, constraints, signalToNoise)
+              spectroscopyIntegrationTime(target, atWavelength, band, s, constraints, signalToNoise)
             case i @ (
-                  ObservingMode.ImagingMode.GmosNorth(_, _, _) |
-                  ObservingMode.ImagingMode.GmosSouth(_, _, _)
+                  ObservingMode.ImagingMode.GmosNorth(_, _) |
+                  ObservingMode.ImagingMode.GmosSouth(_, _)
                 ) =>
               imaging(target, band, i, constraints, signalToNoise)
 
       def calculateGraph(
         target:        TargetData,
+        atWavelength:  Wavelength,
         band:          Band,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
@@ -116,14 +119,15 @@ object ItcImpl {
           case s @ ObservingMode.SpectroscopyMode(_, _, _) =>
             spectroscopyGraph(
               target,
+              atWavelength,
               band,
               s,
               constraints,
               exposureTime.toMilliseconds.withUnit[Millisecond].toUnit[Second],
               exposureCount.value
             )
-          case ObservingMode.ImagingMode.GmosNorth(_, _, _) |
-              ObservingMode.ImagingMode.GmosSouth(_, _, _) =>
+          case ObservingMode.ImagingMode.GmosNorth(_, _) |
+              ObservingMode.ImagingMode.GmosSouth(_, _) =>
             MonadThrow[F].raiseError(
               new IllegalArgumentException("Imaging mode not supported for graph calculation")
             )
@@ -162,6 +166,7 @@ object ItcImpl {
 
       private def itcIntegrationTime(
         target:        TargetData,
+        atWavelength:  Wavelength,
         band:          Band,
         observingMode: ObservingMode.SpectroscopyMode,
         constraints:   ItcObservingConditions,
@@ -174,6 +179,7 @@ object ItcImpl {
           val request: Json =
             spectroscopyExposureTimeParams(
               target,
+              atWavelength,
               band,
               observingMode,
               constraints,
@@ -190,6 +196,7 @@ object ItcImpl {
 
       private def spectroscopyGraph(
         target:           TargetData,
+        atWavelength:     Wavelength,
         band:             Band,
         observingMode:    ObservingMode.SpectroscopyMode,
         constraints:      ItcObservingConditions,
@@ -197,7 +204,7 @@ object ItcImpl {
         exposureCount:    Int
       ): F[TargetGraphsCalcResult] =
         itcGraph(target, band, observingMode, constraints, exposureDuration, exposureCount).map:
-          r => TargetGraphsCalcResult.fromLegacy(r.ccds, r.groups, observingMode.λ)
+          r => TargetGraphsCalcResult.fromLegacy(r.ccds, r.groups, atWavelength)
 
       // /**
       //  * Compute the exposure time and number of exposures required to achieve the desired
@@ -366,6 +373,7 @@ object ItcImpl {
        */
       private def spectroscopyIntegrationTime(
         target:        TargetData,
+        atWavelength:  Wavelength,
         band:          Band,
         observingMode: ObservingMode.SpectroscopyMode,
         constraints:   ItcObservingConditions,
@@ -376,14 +384,14 @@ object ItcImpl {
           _ <- L.info(s"Desired S/N $signalToNoise")
           _ <- L.info(s"Target $target at band $band")
           r <-
-            T.span("itc.calctime.spectroscopy-exp-time-at") {
+            T.span("itc.calctime.spectroscopy-integration-time") {
               itcIntegrationTime(
                 target,
+                atWavelength,
                 band,
                 observingMode,
                 constraints,
                 signalToNoise
-                // signalToNoiseAt
               )
             }
           t <- calculationResults(r)

@@ -21,11 +21,10 @@ import lucuma.itc.search.TargetData
 import lucuma.itc.search.hashes.given
 
 case class SpectroscopyTimeParameters(
-  wavelength:    Wavelength,
+  atWavelength:  Wavelength,
   specMode:      ObservingMode.SpectroscopyMode,
   constraints:   ItcObservingConditions,
   signalToNoise: SignalToNoise
-  // signalToNoiseAt: Option[Wavelength]
 ) derives Hash
 
 case class TargetSpectroscopyTimeRequest(
@@ -54,15 +53,29 @@ object AsterismSpectroscopyTimeRequest:
 
     val modeResult: Result[ObservingMode.SpectroscopyMode] =
       mode match
-        case GmosNSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode, roi) =>
+        case GmosNSpectroscopyInput(
+              centralWavelength,
+              grating,
+              GmosFpuMask.Builtin(fpu),
+              filter,
+              ccdMode,
+              roi
+            ) =>
           Result.success:
             ObservingMode.SpectroscopyMode
-              .GmosNorth(wavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode, roi)
-        case GmosSSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode, roi) =>
+              .GmosNorth(centralWavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode, roi)
+        case GmosSSpectroscopyInput(
+              centralWavelength,
+              grating,
+              GmosFpuMask.Builtin(fpu),
+              filter,
+              ccdMode,
+              roi
+            ) =>
           Result.success:
             ObservingMode.SpectroscopyMode
-              .GmosSouth(wavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode, roi)
-        case _                                                                               =>
+              .GmosSouth(centralWavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode, roi)
+        case _ =>
           Result.failure("Invalid spectroscopy mode")
 
     val conditionsResult: Result[ItcObservingConditions] =

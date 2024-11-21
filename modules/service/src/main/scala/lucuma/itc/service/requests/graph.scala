@@ -24,12 +24,11 @@ import lucuma.itc.search.TargetData
 import lucuma.itc.search.hashes.given
 
 case class GraphParameters(
-  wavelength:  Wavelength,
-  specMode:    ObservingMode.SpectroscopyMode,
-  constraints: ItcObservingConditions,
-  expTime:     TimeSpan,
-  exp:         PosInt
-  // signalToNoiseAt: Option[Wavelength]
+  atWavelength: Wavelength,
+  specMode:     ObservingMode.SpectroscopyMode,
+  constraints:  ItcObservingConditions,
+  expTime:      TimeSpan,
+  exp:          PosInt
 ) derives Hash
 
 case class TargetGraphRequest(
@@ -52,7 +51,7 @@ case class AsterismGraphRequest(
 object AsterismGraphRequest:
   def fromInput(input: SpectroscopyGraphsInput): Result[AsterismGraphRequest] = {
     val SpectroscopyGraphsInput(
-      wavelength,
+      atWavelength,
       exposureTime,
       exposureCount,
       asterism,
@@ -65,17 +64,31 @@ object AsterismGraphRequest:
       targetInputsToData(asterism)
 
     val modeResult: Result[ObservingMode.SpectroscopyMode] = mode match {
-      case GmosNSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode, roi) =>
+      case GmosNSpectroscopyInput(
+            centralWavelength,
+            grating,
+            GmosFpuMask.Builtin(fpu),
+            filter,
+            ccdMode,
+            roi
+          ) =>
         Result(
           ObservingMode.SpectroscopyMode
-            .GmosNorth(wavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode, roi)
+            .GmosNorth(centralWavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode, roi)
         )
-      case GmosSSpectroscopyInput(grating, GmosFpuMask.Builtin(fpu), filter, ccdMode, roi) =>
+      case GmosSSpectroscopyInput(
+            centralWavelength,
+            grating,
+            GmosFpuMask.Builtin(fpu),
+            filter,
+            ccdMode,
+            roi
+          ) =>
         Result(
           ObservingMode.SpectroscopyMode
-            .GmosSouth(wavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode, roi)
+            .GmosSouth(centralWavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode, roi)
         )
-      case _                                                                               =>
+      case _ =>
         Result.failure("Invalid spectroscopy mode")
     }
 
@@ -87,7 +100,7 @@ object AsterismGraphRequest:
       AsterismGraphRequest(
         asterism,
         GraphParameters(
-          wavelength,
+          atWavelength,
           mode,
           conditions,
           exposureTime,

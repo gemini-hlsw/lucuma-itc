@@ -11,7 +11,7 @@ import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 
 sealed trait SpectroscopyTimeInput {
-  def wavelength: Wavelength
+  def atWavelength: Wavelength
   def signalToNoise: SignalToNoise
   def asterism: List[TargetDataInput]
   def constraints: ConstraintSetInput
@@ -22,10 +22,10 @@ object SpectroscopyTimeInput:
   def unapply(
     arg: SpectroscopyTimeInput
   ): (Wavelength, SignalToNoise, List[TargetDataInput], ConstraintSetInput, InstrumentModesInput) =
-    (arg.wavelength, arg.signalToNoise, arg.asterism, arg.constraints, arg.mode)
+    (arg.atWavelength, arg.signalToNoise, arg.asterism, arg.constraints, arg.mode)
 
 case class SpectroscopyIntegrationTimeInput(
-  wavelength:    Wavelength,
+  atWavelength:  Wavelength,
   signalToNoise: SignalToNoise,
   asterism:      List[TargetDataInput],
   constraints:   ConstraintSetInput,
@@ -37,7 +37,7 @@ object SpectroscopyIntegrationTimeInput {
   def binding: Matcher[SpectroscopyIntegrationTimeInput] =
     ObjectFieldsBinding.rmap {
       case List(
-            WavelengthInput.Binding("wavelength", wavelength),
+            WavelengthInput.Binding("atWavelength", wavelength),
             SignalToNoiseBinding("signalToNoise", signalToNoise),
             TargetDataInput.binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
@@ -49,7 +49,7 @@ object SpectroscopyIntegrationTimeInput {
 }
 
 case class SpectroscopyIntegrationTimeAndGraphsInput(
-  wavelength:         Wavelength,
+  atWavelength:       Wavelength,
   signalToNoise:      SignalToNoise,
   asterism:           List[TargetDataInput],
   constraints:        ConstraintSetInput,
@@ -62,7 +62,7 @@ object SpectroscopyIntegrationTimeAndGraphsInput {
   def binding: Matcher[SpectroscopyIntegrationTimeAndGraphsInput] =
     ObjectFieldsBinding.rmap {
       case List(
-            WavelengthInput.Binding("wavelength", wavelength),
+            WavelengthInput.Binding("atWavelength", wavelength),
             SignalToNoiseBinding("signalToNoise", signalToNoise),
             TargetDataInput.binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),

@@ -66,7 +66,7 @@ private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.
       Json.obj(
         // Translate observing mode to OCS2 style
         "centralWavelength" -> Json.fromString(
-          s"${Wavelength.decimalNanometers.reverseGet(a.λ)} nm"
+          s"${Wavelength.decimalNanometers.reverseGet(a.centralWavelength)} nm"
         ),
         "filter"            -> Json.obj(
           "FilterNorth" -> a.filter.fold[Json](Json.fromString("NONE"))(r =>
@@ -97,25 +97,22 @@ private val encodeGmosNorthImaging: Encoder[ObservingMode.ImagingMode.GmosNorth]
     def apply(a: ObservingMode.ImagingMode.GmosNorth): Json =
       Json.obj(
         // Translate observing mode to OCS2 style
-        "centralWavelength" -> Json.fromString(
-          s"${Wavelength.decimalNanometers.reverseGet(a.λ)} nm"
-        ),
-        "filter"            -> Json.obj(
+        "filter"          -> Json.obj(
           "FilterNorth" ->
             Json.fromString(a.filter.ocs2Tag)
         ),
-        "grating"           -> Json.obj("DisperserNorth" -> "MIRROR".asJson),
-        "fpMask"            -> Json.obj("FPUnitNorth" -> "FPU_NONE".asJson),
-        "spectralBinning"   -> Json.fromInt(a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.Two).count),
-        "site"              -> Json.fromString("GN"),
-        "ccdType"           -> Json.fromString("HAMAMATSU"),
-        "ampReadMode"       -> Json.fromString(
+        "grating"         -> Json.obj("DisperserNorth" -> "MIRROR".asJson),
+        "fpMask"          -> Json.obj("FPUnitNorth" -> "FPU_NONE".asJson),
+        "spectralBinning" -> Json.fromInt(a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.Two).count),
+        "site"            -> Json.fromString("GN"),
+        "ccdType"         -> Json.fromString("HAMAMATSU"),
+        "ampReadMode"     -> Json.fromString(
           a.ccdMode.map(_.ampReadMode).getOrElse(GmosAmpReadMode.Fast).tag.toUpperCase
         ),
-        "builtinROI"        -> Json.fromString("FULL_FRAME"),
-        "spatialBinning"    -> Json.fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.Two).count),
-        "customSlitWidth"   -> Json.Null,
-        "ampGain"           -> Json.fromString(
+        "builtinROI"      -> Json.fromString("FULL_FRAME"),
+        "spatialBinning"  -> Json.fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.Two).count),
+        "customSlitWidth" -> Json.Null,
+        "ampGain"         -> Json.fromString(
           a.ccdMode.map(_.ampGain).getOrElse(GmosAmpGain.Low).tag.toUpperCase
         )
       )
@@ -127,7 +124,7 @@ private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.
       Json.obj(
         // Translate observing mode to OCS2 style
         "centralWavelength" -> Json.fromString(
-          s"${Wavelength.decimalNanometers.reverseGet(a.λ)} nm"
+          s"${Wavelength.decimalNanometers.reverseGet(a.centralWavelength)} nm"
         ),
         "filter"            -> Json.obj(
           "FilterSouth" -> a.filter.fold[Json](Json.fromString("NONE"))(r =>
@@ -158,25 +155,22 @@ private val encodeGmosSouthImaging: Encoder[ObservingMode.ImagingMode.GmosSouth]
     def apply(a: ObservingMode.ImagingMode.GmosSouth): Json =
       Json.obj(
         // Translate observing mode to OCS2 style
-        "centralWavelength" -> Json.fromString(
-          s"${Wavelength.decimalNanometers.reverseGet(a.λ)} nm"
-        ),
-        "filter"            -> Json.obj(
+        "filter"          -> Json.obj(
           "FilterSouth" ->
             Json.fromString(a.filter.ocs2Tag)
         ),
-        "grating"           -> Json.obj("DisperserSouth" -> "MIRROR".asJson),
-        "fpMask"            -> Json.obj("FPUnitSouth" -> "FPU_NONE".asJson),
-        "spectralBinning"   -> Json.fromInt(a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.Two).count),
-        "site"              -> Json.fromString("GS"),
-        "ccdType"           -> Json.fromString("HAMAMATSU"),
-        "ampReadMode"       -> Json.fromString(
+        "grating"         -> Json.obj("DisperserSouth" -> "MIRROR".asJson),
+        "fpMask"          -> Json.obj("FPUnitSouth" -> "FPU_NONE".asJson),
+        "spectralBinning" -> Json.fromInt(a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.Two).count),
+        "site"            -> Json.fromString("GS"),
+        "ccdType"         -> Json.fromString("HAMAMATSU"),
+        "ampReadMode"     -> Json.fromString(
           a.ccdMode.map(_.ampReadMode).getOrElse(GmosAmpReadMode.Fast).tag.toUpperCase
         ),
-        "builtinROI"        -> Json.fromString("FULL_FRAME"),
-        "spatialBinning"    -> Json.fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.Two).count),
-        "customSlitWidth"   -> Json.Null,
-        "ampGain"           -> Json.fromString(
+        "builtinROI"      -> Json.fromString("FULL_FRAME"),
+        "spatialBinning"  -> Json.fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.Two).count),
+        "customSlitWidth" -> Json.Null,
+        "ampGain"         -> Json.fromString(
           a.ccdMode.map(_.ampGain).getOrElse(GmosAmpGain.Low).tag.toUpperCase
         )
       )

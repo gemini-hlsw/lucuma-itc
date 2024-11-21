@@ -23,7 +23,7 @@ object TargetGraphsCalcResult:
   def fromLegacy(
     ccds:           NonEmptyChain[ItcRemoteCcd],
     originalGraphs: NonEmptyChain[ItcGraphGroup],
-    wavelength:     Wavelength
+    atWavelength:   Wavelength
   ): TargetGraphsCalcResult = {
     val graphs: NonEmptyChain[ItcGraphGroup] =
       originalGraphs.map: graph =>
@@ -57,7 +57,7 @@ object TargetGraphsCalcResult:
         .zip(ccds.toList)
         .map: (sn, _) =>
           sn.data
-            .find(_._1 >= wavelength.toNanometers.value.value)
+            .find(_._1 >= atWavelength.toNanometers.value.value)
             .map(_._2)
         .flattenOption
         .headOption

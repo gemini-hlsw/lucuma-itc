@@ -29,6 +29,7 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
   override def calculateIntegrationTime(
     target:        TargetData,
+    atWavelength:  Wavelength,
     band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
@@ -40,6 +41,7 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
   override def calculateGraph(
     target:        TargetData,
+    atWavelength:  Wavelength,
     band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
@@ -48,16 +50,17 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(
-        ItcCcd(1,
-               1,
-               2,
-               2,
-               Wavelength.fromIntNanometers(1001).get,
-               Wavelength.fromIntNanometers(1001).get,
-               3,
-               4,
-               5,
-               Nil
+        ItcCcd(
+          1,
+          1,
+          2,
+          2,
+          Wavelength.fromIntNanometers(1001).get,
+          Wavelength.fromIntNanometers(1001).get,
+          3,
+          4,
+          5,
+          Nil
         )
       ),
       NonEmptyChain.of(
@@ -83,6 +86,7 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
   override def calculateIntegrationTime(
     target:        TargetData,
+    atWavelength:  Wavelength,
     band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
@@ -97,6 +101,7 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
   override def calculateGraph(
     target:        TargetData,
+    atWavelength:  Wavelength,
     band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
@@ -141,6 +146,7 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
   override def calculateIntegrationTime(
     target:        TargetData,
+    atWavelength:  Wavelength,
     band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
@@ -150,6 +156,7 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
 
   override def calculateGraph(
     target:        TargetData,
+    atWavelength:  Wavelength,
     band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
