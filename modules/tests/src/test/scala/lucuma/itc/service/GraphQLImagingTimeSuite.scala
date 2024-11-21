@@ -12,7 +12,7 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
       """
         query {
           imagingIntegrationTime(input: {
-            wavelength: {
+            atWavelength: {
               picometers: 530000
             },
             signalToNoise: 600,
@@ -96,9 +96,6 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
                     filter
                   }
                 }
-                wavelength {
-                  nanometers
-                }
               }
             }
             brightest {
@@ -129,9 +126,6 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
                 "instrument" : "GMOS_NORTH",
                 "params": {
                   "filter": "G_PRIME"
-                },
-                "wavelength" : {
-                  "nanometers" : 530.000
                 }
               },
               "brightest" : {

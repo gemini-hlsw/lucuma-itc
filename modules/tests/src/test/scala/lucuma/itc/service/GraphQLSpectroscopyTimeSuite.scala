@@ -17,7 +17,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       """
         query {
           spectroscopyIntegrationTime(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 60,
             },
             signalToNoise: 2,
@@ -60,6 +60,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
+                centralWavelength {
+                  nanometers: 60
+                },
                 filter: GG455,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -77,7 +80,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     grating
                   }
                 }
-                wavelength {
+                centralWavelength {
                   nanometers
                 }
               }
@@ -104,7 +107,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                 "params": {
                   "grating": "B1200_G5301"
                 },
-                "wavelength" : {
+                "centralWavelength" : {
                   "nanometers" : 60.000
                 }
               },
@@ -129,7 +132,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       """
         query {
           spectroscopyIntegrationTime(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 60,
             },
             signalToNoise: 2,
@@ -173,6 +176,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosSSpectroscopy: {
+                centralWavelength {
+                  nanometers: 60
+                },
                 filter: RG610,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -216,7 +222,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   "params": {
                     "grating": "B1200_G5321"
                   },
-                  "wavelength" : {
+                  "centralWavelength" : {
                     "nanometers" : 60.000
                   }
                 },
@@ -243,7 +249,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       """
         {
           "spectroscopy" : {
-            "wavelength" : {
+            "atWavelength" : {
               "nanometers" : "600"
             },
             "signalToNoise" : 2,
@@ -286,6 +292,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             "mode": {
               "gmosNSpectroscopy": {
+                "centralWavelength": {
+                  "nanometers": "600"
+                },
                 "filter": "G_PRIME",
                 "fpu": {
                   "builtin": "LONG_SLIT_0_25"
@@ -333,7 +342,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
         query {
           spectroscopyIntegrationTime(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 60,
             },
             signalToNoise: 2,
@@ -376,6 +385,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
+                centralWavelength {
+                  nanometers: 60
+                },
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -420,7 +432,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   "params": {
                     "grating": "B1200_G5301"
                   },
-                  "wavelength" : {
+                  "centralWavelength" : {
                     "nanometers" : 60.000
                   }
                 },
@@ -445,7 +457,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       """
         query {
           spectroscopyIntegrationTime(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 60,
             },
             signalToNoise: 2,
@@ -488,6 +500,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
+                centralWavelength {
+                  nanometers: 60
+                },
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -505,7 +520,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                       grating
                     }
                   }
-                  wavelength {
+                  centralWavelength {
                     nanometers
                   }
                 }
@@ -540,7 +555,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
         query {
           spectroscopyIntegrationTime(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 60,
             },
             signalToNoise: 2,
@@ -583,6 +598,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
+                centralWavelength {
+                  nanometers: 60
+                },
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -599,7 +617,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         grating
                       }
                     }
-                    wavelength {
+                    centralWavelength {
                       nanometers
                     }
                   }
@@ -625,7 +643,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   "params": {
                     "grating": ${d.tag.toScreamingSnakeCase}
                   },
-                  "wavelength" : {
+                  "centralWavelength" : {
                     "nanometers" : 60.000
                   }
                 },
@@ -651,7 +669,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
         query {
           spectroscopyIntegrationTime(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 60,
             },
             signalToNoise: 2,
@@ -699,6 +717,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosSSpectroscopy: {
+                centralWavelength {
+                  nanometers: 60
+                },
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -715,7 +736,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         grating
                       }
                     }
-                    wavelength {
+                    centralWavelength {
                       nanometers
                     }
                   }
@@ -741,7 +762,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   "params": {
                     "grating": ${d.tag.toScreamingSnakeCase}
                   },
-                  "wavelength" : {
+                  "centralWavelength" : {
                     "nanometers" : 60.00
                   }
                 },
@@ -767,7 +788,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
           query {
             spectroscopyIntegrationTime(input: {
-              wavelength: {
+              atWavelength: {
                 nanometers: 60,
               },
               signalToNoise: 2,
@@ -815,6 +836,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               },
               mode: {
                 gmosNSpectroscopy: {
+                  centralWavelength {
+                    nanometers: 60,
+                  },
                   filter: G_PRIME,
                   fpu: {
                     builtin: ${d.tag.toScreamingSnakeCase}
@@ -833,7 +857,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                           }
                         }
                       }
-                      wavelength {
+                      centralWavelength {
                         nanometers
                       }
                     }
@@ -861,7 +885,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                       "builtin": ${d.tag.toScreamingSnakeCase}
                     }
                   },
-                  "wavelength" : {
+                  "centralWavelength" : {
                     "nanometers" : 60.00
                   }
                 },
@@ -887,7 +911,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
         query {
           spectroscopyIntegrationTime(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 60,
             },
             signalToNoise: 2,
@@ -930,6 +954,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosSSpectroscopy: {
+                centralWavelength {
+                  nanometers: 60,
+                },
                 filter: G_PRIME,
                 fpu: {
                   builtin: ${d.tag.toScreamingSnakeCase}
@@ -948,7 +975,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         }
                       }
                     }
-                    wavelength {
+                    centralWavelength {
                       nanometers
                     }
                   }
@@ -976,7 +1003,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                       "builtin": ${d.tag.toScreamingSnakeCase}
                     }
                   },
-                  "wavelength" : {
+                  "centralWavelength" : {
                     "nanometers" : 60.00
                   }
                 },
@@ -1002,7 +1029,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
         query {
           spectroscopyIntegrationTime(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 60,
             },
             signalToNoise: 2,
@@ -1045,6 +1072,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
+                centralWavelength {
+                  nanometers: 60,
+                },
                 filter: ${d.tag.toScreamingSnakeCase}
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -1061,7 +1091,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         filter
                       }
                     }
-                    wavelength {
+                    centralWavelength {
                       nanometers
                     }
                   }
@@ -1087,7 +1117,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   "params": {
                     "filter": ${d.tag.toScreamingSnakeCase}
                   },
-                  "wavelength" : {
+                  "centralWavelength" : {
                     "nanometers" : 60.000
                   }
                 },
@@ -1113,7 +1143,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
         query {
           spectroscopyIntegrationTime(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 60,
             },
             signalToNoise: 2,
@@ -1156,6 +1186,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosSSpectroscopy: {
+                centralWavelength {
+                  nanometers: 60,
+                },
                 filter: ${d.tag.toScreamingSnakeCase}
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -1172,7 +1205,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         filter
                       }
                     }
-                    wavelength {
+                    centralWavelength {
                       nanometers
                     }
                   }
@@ -1198,7 +1231,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   "params": {
                     "filter": ${d.tag.toScreamingSnakeCase}
                   },
-                  "wavelength" : {
+                  "centralWavelength" : {
                     "nanometers" : 60.000
                   }
                 },
@@ -1223,7 +1256,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       """
         query {
           spectroscopyIntegrationTime(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 600,
             },
             signalToNoise: 2,
@@ -1285,6 +1318,9 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
+                centralWavelength: {
+                  nanometers: 600
+                },
                 filter: GG455,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -1302,7 +1338,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     grating
                   }
                 }
-                wavelength {
+                centralWavelength {
                   nanometers
                 }
               }
@@ -1332,7 +1368,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                 "params": {
                   "grating": "B1200_G5301"
                 },
-                "wavelength" : {
+                "centralWavelength" : {
                   "nanometers" : 600.000
                 }
               },

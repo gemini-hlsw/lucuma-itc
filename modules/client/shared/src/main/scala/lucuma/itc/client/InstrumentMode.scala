@@ -7,6 +7,7 @@ import cats.Eq
 import cats.syntax.either.*
 import cats.syntax.eq.*
 import cats.syntax.functor.*
+import cats.derived.*
 import io.circe.Decoder
 import io.circe.DecodingFailure
 import io.circe.Encoder
@@ -30,7 +31,7 @@ sealed trait InstrumentMode
 
 object InstrumentMode {
 
-  final case class GmosNorthSpectroscopy(
+  case class GmosNorthSpectroscopy(
     centralWavelength: Wavelength,
     grating:           GmosNorthGrating,
     filter:            Option[GmosNorthFilter],
@@ -38,6 +39,7 @@ object InstrumentMode {
     ccdMode:           Option[GmosCcdMode],
     roi:               Option[GmosRoi]
   ) extends InstrumentMode
+      derives Eq
 
   object GmosNorthSpectroscopy {
 
@@ -64,15 +66,9 @@ object InstrumentMode {
           r  <- c.downField("roi").as[Option[GmosRoi]]
         yield GmosNorthSpectroscopy(cw, g, f, u, d, r)
 
-    given Eq[GmosNorthSpectroscopy] with
-      def eqv(x: GmosNorthSpectroscopy, y: GmosNorthSpectroscopy): Boolean =
-        (x.grating === y.grating) &&
-          (x.filter === y.filter) &&
-          (x.fpu === y.fpu)
-
   }
 
-  final case class GmosSouthSpectroscopy(
+  case class GmosSouthSpectroscopy(
     centralWavelength: Wavelength,
     grating:           GmosSouthGrating,
     filter:            Option[GmosSouthFilter],
@@ -80,6 +76,7 @@ object InstrumentMode {
     ccdMode:           Option[GmosCcdMode],
     roi:               Option[GmosRoi]
   ) extends InstrumentMode
+      derives Eq
 
   object GmosSouthSpectroscopy {
 
@@ -105,13 +102,6 @@ object InstrumentMode {
           d  <- c.downField("ccdMode").as[Option[GmosCcdMode]]
           r  <- c.downField("roi").as[Option[GmosRoi]]
         yield GmosSouthSpectroscopy(cw, g, f, u, d, r)
-
-    given Eq[GmosSouthSpectroscopy] with
-      def eqv(x: GmosSouthSpectroscopy, y: GmosSouthSpectroscopy): Boolean =
-        (x.grating === y.grating) &&
-          (x.filter === y.filter) &&
-          (x.fpu === y.fpu)
-
   }
 
   given Encoder[InstrumentMode] with
@@ -121,8 +111,10 @@ object InstrumentMode {
           Json.obj("gmosNSpectroscopy" -> a.asJson)
         case a @ GmosSouthSpectroscopy(_, _, _, _, _, _) =>
           Json.obj("gmosSSpectroscopy" -> a.asJson)
-        case a @ GmosNorthImaging(_, _)                  => Json.obj("gmosNImaging" -> a.asJson)
-        case a @ GmosSouthImaging(_, _)                  => Json.obj("gmosSImaging" -> a.asJson)
+        case a @ GmosNorthImaging(_, _)                  =>
+          Json.obj("gmosNImaging" -> a.asJson)
+        case a @ GmosSouthImaging(_, _)                  =>
+          Json.obj("gmosSImaging" -> a.asJson)
       }
 
   given Decoder[InstrumentMode] with
@@ -150,10 +142,11 @@ object InstrumentMode {
         case (x0: GmosSouthImaging, y0: GmosSouthImaging)           => x0 === y0
         case _                                                      => false
 
-  final case class GmosNorthImaging(
+  case class GmosNorthImaging(
     filter:  GmosNorthFilter,
     ccdMode: Option[GmosCcdMode]
   ) extends InstrumentMode
+      derives Eq
 
   object GmosNorthImaging {
 
@@ -170,17 +163,13 @@ object InstrumentMode {
           f <- c.downField("filter").as[GmosNorthFilter]
           c <- c.downField("ccdMode").as[Option[GmosCcdMode]]
         yield GmosNorthImaging(f, c)
-
-    given Eq[GmosNorthImaging] with
-      def eqv(x: GmosNorthImaging, y: GmosNorthImaging): Boolean =
-        x.filter === y.filter
-
   }
 
-  final case class GmosSouthImaging(
+  case class GmosSouthImaging(
     filter:  GmosSouthFilter,
     ccdMode: Option[GmosCcdMode]
   ) extends InstrumentMode
+      derives Eq
 
   object GmosSouthImaging {
 
@@ -197,11 +186,6 @@ object InstrumentMode {
           f <- c.downField("filter").as[GmosSouthFilter]
           c <- c.downField("ccdMode").as[Option[GmosCcdMode]]
         yield GmosSouthImaging(f, c)
-
-    given Eq[GmosSouthImaging] with
-      def eqv(x: GmosSouthImaging, y: GmosSouthImaging): Boolean =
-        x.filter === y.filter
-
   }
 
   val gmosNorthSpectroscopy: Prism[InstrumentMode, GmosNorthSpectroscopy] =

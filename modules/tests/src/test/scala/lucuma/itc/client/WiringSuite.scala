@@ -188,6 +188,7 @@ object WiringSuite {
           AirMass.Default
         ),
         InstrumentMode.GmosNorthSpectroscopy(
+          Wavelength.Min,
           GmosNorthGrating.B1200_G5301,
           GmosNorthFilter.GPrime.some,
           GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
@@ -233,7 +234,8 @@ object WiringSuite {
           AirMass.Default
         ),
         InstrumentMode.GmosNorthImaging(
-          GmosNorthFilter.GPrime
+          GmosNorthFilter.GPrime,
+          none
         )
       ),
       NonEmptyList.of(
@@ -269,6 +271,7 @@ object WiringSuite {
           AirMass.Default
         ),
         InstrumentMode.GmosNorthSpectroscopy(
+          Wavelength.Min,
           GmosNorthGrating.B1200_G5301,
           GmosNorthFilter.GPrime.some,
           GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),

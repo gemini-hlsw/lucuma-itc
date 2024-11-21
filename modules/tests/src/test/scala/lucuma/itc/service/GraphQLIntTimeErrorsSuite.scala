@@ -12,7 +12,7 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
       """
         query {
           spectroscopyIntegrationTime(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 60,
             },
             signalToNoise: 2,
@@ -55,6 +55,9 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
             },
             mode: {
               gmosNSpectroscopy: {
+                centralWavelength: {
+                  nanometers: 60
+                },
                 filter: GG455,
                 fpu: {
                   builtin: LONG_SLIT_0_25
@@ -72,7 +75,7 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
                     grating
                   }
                 }
-                wavelength {
+                centralWavelength {
                   nanometers
                 }
               }
@@ -109,7 +112,7 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
                 "params" : {
                   "grating" : "B1200_G5301"
                 },
-                "wavelength" : {
+                "centralWavelength" : {
                   "nanometers" : 60.000
                 }
               },

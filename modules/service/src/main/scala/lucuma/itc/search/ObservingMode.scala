@@ -106,7 +106,7 @@ object ObservingMode {
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
           ("resolution", Json.fromInt(a.resolution.toInt)),
           ("params", GmosNSpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
-          ("wavelength", a.centralWavelength.asJson)
+          ("centralWavelength", a.centralWavelength.asJson)
         )
 
     case class GmosSouth(
@@ -138,7 +138,7 @@ object ObservingMode {
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
           ("resolution", Json.fromInt(a.resolution.toInt)),
           ("params", GmosSSpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
-          ("wavelength", a.centralWavelength.asJson)
+          ("centralWavelength", a.centralWavelength.asJson)
         )
 
   }

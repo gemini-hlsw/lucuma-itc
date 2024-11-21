@@ -10525,7 +10525,7 @@ interface ITCObservingMode {
 
 type ImagingMode implements ITCObservingMode {
   # Wavelength in appropriate units
-  wavelength: Wavelength!
+  centralWavelength: Wavelength!
 
   # instrument
   instrument: Instrument
@@ -10536,7 +10536,7 @@ type ImagingMode implements ITCObservingMode {
 
 type SpectroscopyMode implements ITCObservingMode {
   # Wavelength in appropriate units
-  wavelength: Wavelength!
+  centralWavelength: Wavelength!
 
   # Resolution
   resolution: BigDecimal!
