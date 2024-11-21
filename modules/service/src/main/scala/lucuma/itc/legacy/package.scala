@@ -75,7 +75,8 @@ def spectroscopyExposureTimeParams(
   band:          Band,
   observingMode: ObservingMode.SpectroscopyMode,
   conditions:    ItcObservingConditions,
-  sigma:         SignalToNoise
+  sigma:         SignalToNoise,
+  wavelength:    Wavelength
 ): ItcParameters =
   ItcParameters(
     source = ItcSourceDefinition(target, band),
@@ -84,7 +85,7 @@ def spectroscopyExposureTimeParams(
         ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
           sigma = sigma.toBigDecimal.toDouble,
           coadds = None,
-          wavelength = observingMode.λ,
+          wavelength = wavelength,
           sourceFraction = 1.0,
           ditherOffset = Angle.Angle0
         ),

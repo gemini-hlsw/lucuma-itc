@@ -83,7 +83,8 @@ trait ItcCacheOrRemote extends Version:
         request.specMode,
         request.constraints,
         request.expTime,
-        request.exp
+        request.exp,
+        request.wavelength
         // request.signalToNoiseAt
       )
       .map((_, band))
@@ -109,7 +110,8 @@ trait ItcCacheOrRemote extends Version:
         band,
         calcRequest.specMode,
         calcRequest.constraints,
-        calcRequest.signalToNoise
+        calcRequest.signalToNoise,
+        calcRequest.wavelength
         // calcRequest.signalToNoiseAt
       )
       .map((_, band))
@@ -138,7 +140,8 @@ trait ItcCacheOrRemote extends Version:
         band,
         calcRequest.imagingMode,
         calcRequest.constraints,
-        calcRequest.signalToNoise
+        calcRequest.signalToNoise,
+        calcRequest.wavelength
       )
       .map((_, band))
 

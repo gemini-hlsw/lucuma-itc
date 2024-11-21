@@ -16,6 +16,7 @@ import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.legacy.IntegrationTimeRemoteResult
 import lucuma.itc.legacy.FLocalItc
@@ -92,12 +93,13 @@ object ItcImpl {
         band:          Band,
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
-        signalToNoise: SignalToNoise
+        signalToNoise: SignalToNoise,
+        wavelength:    Wavelength
       ): F[NonEmptyChain[IntegrationTime]] =
-        T.span("calculate-exposure-time"):
+        T.span("calculate-integration-time"):
           observingMode match
             case s @ ObservingMode.SpectroscopyMode(_, _, _) =>
-              spectroscopyIntegrationTime(target, band, s, constraints, signalToNoise)
+              spectroscopyIntegrationTime(target, band, s, constraints, signalToNoise, wavelength)
             case i @ (
                   ObservingMode.ImagingMode.GmosNorth(_, _, _) |
                   ObservingMode.ImagingMode.GmosSouth(_, _, _)
@@ -110,7 +112,8 @@ object ItcImpl {
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         exposureTime:  TimeSpan,
-        exposureCount: PosInt
+        exposureCount: PosInt,
+        wavelength:    Wavelength
       ): F[TargetGraphsCalcResult] =
         observingMode match
           case s @ ObservingMode.SpectroscopyMode(_, _, _) =>
@@ -120,7 +123,8 @@ object ItcImpl {
               s,
               constraints,
               exposureTime.toMilliseconds.withUnit[Millisecond].toUnit[Second],
-              exposureCount.value
+              exposureCount.value,
+              wavelength
             )
           case ObservingMode.ImagingMode.GmosNorth(_, _, _) |
               ObservingMode.ImagingMode.GmosSouth(_, _, _) =>
@@ -165,7 +169,8 @@ object ItcImpl {
         band:          Band,
         observingMode: ObservingMode.SpectroscopyMode,
         constraints:   ItcObservingConditions,
-        sigma:         SignalToNoise
+        sigma:         SignalToNoise,
+        wavelength:    Wavelength
       ): F[legacy.IntegrationTimeRemoteResult] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
@@ -177,7 +182,8 @@ object ItcImpl {
               band,
               observingMode,
               constraints,
-              sigma
+              sigma,
+              wavelength
             ).asJson
 
           for
@@ -194,10 +200,11 @@ object ItcImpl {
         observingMode:    ObservingMode.SpectroscopyMode,
         constraints:      ItcObservingConditions,
         exposureDuration: Quantity[BigDecimal, Second],
-        exposureCount:    Int
+        exposureCount:    Int,
+        wavelength:       Wavelength
       ): F[TargetGraphsCalcResult] =
         itcGraph(target, band, observingMode, constraints, exposureDuration, exposureCount).map:
-          r => TargetGraphsCalcResult.fromLegacy(r.ccds, r.groups, observingMode.λ)
+          r => TargetGraphsCalcResult.fromLegacy(r.ccds, r.groups, wavelength)
 
       // /**
       //  * Compute the exposure time and number of exposures required to achieve the desired
@@ -369,21 +376,22 @@ object ItcImpl {
         band:          Band,
         observingMode: ObservingMode.SpectroscopyMode,
         constraints:   ItcObservingConditions,
-        signalToNoise: SignalToNoise
+        signalToNoise: SignalToNoise,
+        wavelength:    Wavelength
         // signalToNoiseAt: Wavelength
       ): F[NonEmptyChain[IntegrationTime]] =
         for {
           _ <- L.info(s"Desired S/N $signalToNoise")
           _ <- L.info(s"Target $target at band $band")
           r <-
-            T.span("itc.calctime.spectroscopy-exp-time-at") {
+            T.span("itc.calctime.spectroscopy-integration-time") {
               itcIntegrationTime(
                 target,
                 band,
                 observingMode,
                 constraints,
-                signalToNoise
-                // signalToNoiseAt
+                signalToNoise,
+                wavelength
               )
             }
           t <- calculationResults(r)
