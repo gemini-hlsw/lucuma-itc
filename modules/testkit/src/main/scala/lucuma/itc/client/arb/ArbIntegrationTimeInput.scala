@@ -45,7 +45,7 @@ trait ArbIntegrationTimeInput {
     Cogen[
       (Wavelength, SignalToNoise, List[TargetInput], ConstraintSet, InstrumentMode)
     ].contramap: a =>
-      (a.wavelength, a.signalToNoise, a.asterism.toList, a.constraints, a.mode)
+      (a.atWavelength, a.signalToNoise, a.asterism.toList, a.constraints, a.mode)
 
   given Arbitrary[ImagingIntegrationTimeParameters] =
     Arbitrary:
@@ -73,7 +73,7 @@ trait ArbIntegrationTimeInput {
         InstrumentMode
       )
     ].contramap: a =>
-      (a.wavelength, a.signalToNoise, a.asterism.toList, a.constraints, a.mode)
+      (a.atWavelength, a.signalToNoise, a.asterism.toList, a.constraints, a.mode)
 }
 
 object ArbIntegrationTimeInput extends ArbIntegrationTimeInput
