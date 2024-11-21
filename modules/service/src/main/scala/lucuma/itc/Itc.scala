@@ -7,7 +7,6 @@ import cats.data.NonEmptyChain
 import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
-import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.search.*
 
@@ -22,8 +21,7 @@ trait Itc[F[_]]:
     band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
-    signalToNoise: SignalToNoise,
-    wavelength:    Wavelength
+    signalToNoise: SignalToNoise
   ): F[NonEmptyChain[IntegrationTime]]
 
   /**
@@ -35,8 +33,7 @@ trait Itc[F[_]]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: PosInt,
-    wavelength:    Wavelength
+    exposureCount: PosInt
   ): F[TargetGraphsCalcResult]
 
   // /**

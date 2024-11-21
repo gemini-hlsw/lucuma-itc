@@ -32,8 +32,7 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
-    signalToNoise: SignalToNoise,
-    wavelength:    Wavelength
+    signalToNoise: SignalToNoise
   ): IO[NonEmptyChain[IntegrationTime]] =
     NonEmptyChain
       .of(IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get))
@@ -45,8 +44,7 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: PosInt,
-    wavelength:    Wavelength
+    exposureCount: PosInt
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(
@@ -88,8 +86,7 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
-    signalToNoise: SignalToNoise,
-    wavelength:    Wavelength
+    signalToNoise: SignalToNoise
   ): IO[NonEmptyChain[IntegrationTime]] =
     NonEmptyChain
       .of(
@@ -104,8 +101,7 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: PosInt,
-    wavelength:    Wavelength
+    exposureCount: PosInt
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(
@@ -148,8 +144,7 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
-    signalToNoise: SignalToNoise,
-    wavelength:    Wavelength
+    signalToNoise: SignalToNoise
   ): IO[NonEmptyChain[IntegrationTime]] =
     IO.raiseError(CalculationError("A calculation error"))
 
@@ -159,8 +154,7 @@ object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: PosInt,
-    wavelength:    Wavelength
+    exposureCount: PosInt
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(
