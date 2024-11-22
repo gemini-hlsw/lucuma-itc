@@ -20,12 +20,11 @@ import lucuma.itc.ItcGraphGroup
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
-import lucuma.itc.SignalToNoiseCalculation
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetData
 import lucuma.refined.*
 
-object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
+object MockItc extends Itc[IO]:
 
   override def calculateIntegrationTime(
     target:        TargetData,
@@ -82,7 +81,7 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     )
       .pure[IO]
 
-object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
+object MockImagingItc extends Itc[IO]:
 
   override def calculateIntegrationTime(
     target:        TargetData,
@@ -142,7 +141,7 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     )
       .pure[IO]
 
-object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
+object FailingMockItc extends Itc[IO]:
 
   override def calculateIntegrationTime(
     target:        TargetData,
