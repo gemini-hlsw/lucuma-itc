@@ -262,21 +262,12 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
   }
 
   val units: Json = (s.bandOrLine, s.sourceProfile) match {
-    case (Left(band), SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses)))
-        if brightnesses.contains(band) =>
-      brightnesses.get(band).map(_.units.serialized) match {
-        case Some("VEGA_MAGNITUDE")                  => Json.obj("MagnitudeSystem" -> Json.fromString("Vega"))
-        case Some("AB_MAGNITUDE")                    => Json.obj("MagnitudeSystem" -> Json.fromString("AB"))
-        case Some("JANSKY")                          => Json.obj("MagnitudeSystem" -> Json.fromString("Jy"))
-        case Some("W_PER_M_SQUARED_PER_UM")          =>
-          Json.obj("MagnitudeSystem" -> Json.fromString("W/m²/µm"))
-        case Some("ERG_PER_S_PER_CM_SQUARED_PER_A")  =>
-          Json.obj("MagnitudeSystem" -> Json.fromString("erg/s/cm²/Å"))
-        case Some("ERG_PER_S_PER_CM_SQUARED_PER_HZ") =>
-          Json.obj("MagnitudeSystem" -> Json.fromString("erg/s/cm²/Hz"))
-        case _                                       =>
-          Json.Null
-      }
+    case (Left(band), SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses)))   =>
+      brightnesses
+        .get(band)
+        .map: b =>
+          Json.obj("MagnitudeSystem" -> b.units.abbv.stripSuffix(" mag").asJson)
+        .getOrElse(Json.Null)
     // FIXME Support emision lines
     // case SourceProfile.Point(SpectralDefinition.EmissionLines(_, brightnesses)) =>
     //   Json.Null
@@ -294,42 +285,23 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
     //     case _                                       =>
     //       Json.Null
     //   }(
-    case (Left(band), SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses)))
-        if brightnesses.contains(band) =>
-      brightnesses.get(band).map(_.units.serialized) match {
-        case Some("VEGA_MAG_PER_ARCSEC_SQUARED")                        =>
-          Json.obj("SurfaceBrightness" -> Json.fromString("Vega mag/arcsec²"))
-        case Some("AB_MAG_PER_ARCSEC_SQUARED")                          =>
-          Json.obj("SurfaceBrightness" -> Json.fromString("AB mag/arcsec²"))
-        case Some("JY_PER_ARCSEC_SQUARED")                              =>
-          Json.obj("SurfaceBrightness" -> Json.fromString("Jy/arcsec²"))
-        case Some("W_PER_M_SQUARED_PER_UM_PER_ARCSEC_SQUARED")          =>
-          Json.obj("SurfaceBrightness" -> Json.fromString("W/m²/µm/arcsec²"))
-        case Some("ERG_PER_S_PER_CM_SQUARED_PER_A_PER_ARCSEC_SQUARED")  =>
-          Json.obj("SurfaceBrightness" -> Json.fromString("erg/s/cm²/Å/arcsec²"))
-        case Some("ERG_PER_S_PER_CM_SQUARED_PER_HZ_PER_ARCSEC_SQUARED") =>
-          Json.obj("SurfaceBrightness" -> Json.fromString("erg/s/cm²/Hz/arcsec²"))
-        case _                                                          =>
-          Json.Null
-      }
-    case (Left(band), SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses)))
-        if brightnesses.contains(band) =>
-      brightnesses.get(band).map(_.units.serialized) match {
-        case Some("VEGA_MAGNITUDE")                  => Json.obj("MagnitudeSystem" -> Json.fromString("Vega"))
-        case Some("AB_MAGNITUDE")                    => Json.obj("MagnitudeSystem" -> Json.fromString("AB"))
-        case Some("JANSKY")                          => Json.obj("MagnitudeSystem" -> Json.fromString("Jy"))
-        case Some("W_PER_M_SQUARED_PER_UM")          =>
-          Json.obj("MagnitudeSystem" -> Json.fromString("W/m²/µm"))
-        case Some("ERG_PER_S_PER_CM_SQUARED_PER_A")  =>
-          Json.obj("MagnitudeSystem" -> Json.fromString("erg/s/cm²/Å"))
-        case Some("ERG_PER_S_PER_CM_SQUARED_PER_HZ") =>
-          Json.obj("MagnitudeSystem" -> Json.fromString("erg/s/cm²/Hz"))
-        case _                                       =>
-          Json.Null
-      }
+    case (Left(band), SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses))) =>
+      brightnesses
+        .get(band)
+        .map: b =>
+          Json.obj("SurfaceBrightness" -> b.units.abbv.asJson)
+        .getOrElse(Json.Null)
+    case (Left(band),
+          SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses))
+        ) =>
+      brightnesses
+        .get(band)
+        .map: b =>
+          Json.obj("MagnitudeSystem" -> b.units.abbv.stripSuffix(" mag").asJson)
+        .getOrElse(Json.Null)
 
     // FIXME Support emision lines
-    case _ => Json.Null
+    case _                                                                                       => Json.Null
   }
 
   val value: Json = (s.bandOrLine, s.sourceProfile) match {
