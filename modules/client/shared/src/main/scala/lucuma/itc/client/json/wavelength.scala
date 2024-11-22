@@ -27,24 +27,39 @@ object wavelength {
       Decoder.instance { c =>
         def fromDecimal(field: String, fmt: Format[BigDecimal, A]): Decoder.Result[A] =
           c.downField(field).as[BigDecimal].flatMap { bd =>
-            fmt.getOption(bd).toRight(DecodingFailure(s"Invalid $field $name value: $bd", c.history))
+            fmt
+              .getOption(bd)
+              .toRight(DecodingFailure(s"Invalid $field $name value: $bd", c.history))
           }
 
-        c.downField("picometers").as[Int].flatMap { pm =>
-          pmPrism
-            .getOption(pm)
-            .toRight(DecodingFailure(s"Invalid $name picometers value: $pm", c.history))
-        } orElse
-        fromDecimal("angstroms", aFormat) orElse
-        fromDecimal("nanometers", nmFormat) orElse
-        fromDecimal("micrometers", µmFormat)
+        c.downField("picometers")
+          .as[Int]
+          .flatMap { pm =>
+            pmPrism
+              .getOption(pm)
+              .toRight(DecodingFailure(s"Invalid $name picometers value: $pm", c.history))
+          }
+          .orElse(fromDecimal("angstroms", aFormat))
+          .orElse(fromDecimal("nanometers", nmFormat))
+          .orElse(fromDecimal("micrometers", µmFormat))
       }
 
     given Decoder[Wavelength] =
-      wavelengthDecoder("wavelength", Wavelength.intPicometers, Wavelength.decimalAngstroms, Wavelength.decimalNanometers, Wavelength.decimalMicrometers)
+      wavelengthDecoder("wavelength",
+                        Wavelength.intPicometers,
+                        Wavelength.decimalAngstroms,
+                        Wavelength.decimalNanometers,
+                        Wavelength.decimalMicrometers
+      )
 
     given Decoder[WavelengthDither] =
-      wavelengthDecoder("wavelength dither", WavelengthDither.intPicometers, WavelengthDither.decimalAngstroms, WavelengthDither.decimalNanometers, WavelengthDither.decimalMicrometers)
+      wavelengthDecoder(
+        "wavelength dither",
+        WavelengthDither.intPicometers,
+        WavelengthDither.decimalAngstroms,
+        WavelengthDither.decimalNanometers,
+        WavelengthDither.decimalMicrometers
+      )
 
   }
 
@@ -62,15 +77,23 @@ object wavelength {
           "picometers"  -> pmPrism.reverseGet(a).asJson,
           "angstroms"   -> aFormat.reverseGet(a).asJson,
           "nanometers"  -> nmFormat.reverseGet(a).asJson,
-          "micrometers" -> µmFormat.reverseGet(a).asJson,
+          "micrometers" -> µmFormat.reverseGet(a).asJson
         )
       }
 
     given Encoder_Wavelength: Encoder[Wavelength] =
-      wavelengthEncoder(Wavelength.intPicometers, Wavelength.decimalAngstroms, Wavelength.decimalNanometers, Wavelength.decimalMicrometers)
+      wavelengthEncoder(Wavelength.intPicometers,
+                        Wavelength.decimalAngstroms,
+                        Wavelength.decimalNanometers,
+                        Wavelength.decimalMicrometers
+      )
 
     given Encoder_WavelengthDither: Encoder[WavelengthDither] =
-      wavelengthEncoder(WavelengthDither.intPicometers, WavelengthDither.decimalAngstroms, WavelengthDither.decimalNanometers, WavelengthDither.decimalMicrometers)
+      wavelengthEncoder(WavelengthDither.intPicometers,
+                        WavelengthDither.decimalAngstroms,
+                        WavelengthDither.decimalNanometers,
+                        WavelengthDither.decimalMicrometers
+      )
   }
 
   object query extends QueryCodec
@@ -79,14 +102,14 @@ object wavelength {
     given Encoder_Wavelength: Encoder[Wavelength] =
       Encoder.instance { (w: Wavelength) =>
         Json.obj(
-          "picometers"  -> w.toPicometers.value.value.asJson
+          "picometers" -> w.toPicometers.value.value.asJson
         )
       }
 
     given Encoder_WavelengthDither: Encoder[WavelengthDither] =
       Encoder.instance { (w: WavelengthDither) =>
         Json.obj(
-          "picometers"  -> w.toPicometers.value.asJson
+          "picometers" -> w.toPicometers.value.asJson
         )
       }
   }
@@ -94,4 +117,3 @@ object wavelength {
   object transport extends TransportCodec
 
 }
-

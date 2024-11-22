@@ -38,8 +38,7 @@ object InstrumentMode {
     fpu:               GmosFpu.North,
     ccdMode:           Option[GmosCcdMode],
     roi:               Option[GmosRoi]
-  ) extends InstrumentMode
-      derives Eq
+  ) extends InstrumentMode derives Eq
 
   object GmosNorthSpectroscopy {
 
@@ -75,8 +74,7 @@ object InstrumentMode {
     fpu:               GmosFpu.South,
     ccdMode:           Option[GmosCcdMode],
     roi:               Option[GmosRoi]
-  ) extends InstrumentMode
-      derives Eq
+  ) extends InstrumentMode derives Eq
 
   object GmosSouthSpectroscopy {
 
@@ -145,8 +143,7 @@ object InstrumentMode {
   case class GmosNorthImaging(
     filter:  GmosNorthFilter,
     ccdMode: Option[GmosCcdMode]
-  ) extends InstrumentMode
-      derives Eq
+  ) extends InstrumentMode derives Eq
 
   object GmosNorthImaging {
 
@@ -168,8 +165,7 @@ object InstrumentMode {
   case class GmosSouthImaging(
     filter:  GmosSouthFilter,
     ccdMode: Option[GmosCcdMode]
-  ) extends InstrumentMode
-      derives Eq
+  ) extends InstrumentMode derives Eq
 
   object GmosSouthImaging {
 
