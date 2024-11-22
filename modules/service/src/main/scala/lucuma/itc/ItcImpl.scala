@@ -5,7 +5,6 @@ package lucuma.itc
 
 import algebra.instances.all.given
 import cats.*
-import cats.data.NonEmptyChain
 import cats.syntax.all.*
 import coulomb.*
 import coulomb.policy.spire.standard.given
@@ -15,6 +14,7 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.Json
 import io.circe.syntax.*
+import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
@@ -28,7 +28,6 @@ import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.*
 import scala.math.*
-import lucuma.core.data.Zipper
 
 /** An ITC implementation that calls the OCS2 ITC server remotely. */
 object ItcImpl {
@@ -79,7 +78,7 @@ object ItcImpl {
             MonadThrow[F].raiseError:
               new IllegalArgumentException("Imaging mode not supported for graph calculation")
 
-      private def itcGraph(
+      private def spectroscopyGraph(
         target:           TargetData,
         atWavelength:     Wavelength,
         observingMode:    ObservingMode,
@@ -87,7 +86,7 @@ object ItcImpl {
         exposureDuration: Quantity[BigDecimal, Second],
         exposureCount:    Int,
         level:            Option[NonNegInt] = none
-      ): F[legacy.GraphsRemoteResult] =
+      ): F[TargetGraphsCalcResult] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
@@ -108,7 +107,7 @@ object ItcImpl {
             _ <- T.put("itc.exposures" -> exposureCount)
             _ <- T.put("itc.level" -> level.map(_.value).orEmpty)
             r <- itcLocal.calculateGraphs(request.noSpaces)
-          yield r
+          yield TargetGraphsCalcResult.fromLegacy(r.ccds, r.groups, atWavelength, bandOrLine)
         }
 
       private def itcIntegrationTime(
@@ -139,18 +138,6 @@ object ItcImpl {
             r <- convertIntegrationTimeRemoteResult(a, bandOrLine)
           yield r
         }
-
-      private def spectroscopyGraph(
-        target:           TargetData,
-        atWavelength:     Wavelength,
-        observingMode:    ObservingMode.SpectroscopyMode,
-        constraints:      ItcObservingConditions,
-        exposureDuration: Quantity[BigDecimal, Second],
-        exposureCount:    Int
-      ): F[TargetGraphsCalcResult] =
-        itcGraph(target, atWavelength, observingMode, constraints, exposureDuration, exposureCount)
-          .map: r =>
-            TargetGraphsCalcResult.fromLegacy(r.ccds, r.groups, atWavelength)
 
       /**
        * Compute the exposure time and number of exposures required to achieve the desired

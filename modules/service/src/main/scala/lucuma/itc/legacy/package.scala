@@ -42,7 +42,7 @@ object ItcInstrumentDetails:
   def fromObservingMode(mode: ObservingMode): ItcInstrumentDetails =
     apply(mode)
 
-private def sourceDefinition(
+private def buildSourceDefinition(
   target:       TargetData,
   atWavelength: Wavelength
 ): (ItcSourceDefinition, Either[Band, Wavelength]) =
@@ -59,7 +59,7 @@ def spectroscopyGraphParams(
   exposureCount:    Int
 ): (ItcParameters, Either[Band, Wavelength]) = // Bubble up the selected band or line
   val (sourceDefinition, bandOrLine): (ItcSourceDefinition, Either[Band, Wavelength]) =
-    sourceDefinition(target, atWavelength)
+    buildSourceDefinition(target, atWavelength)
   val parameters: ItcParameters                                                       =
     ItcParameters(
       source = sourceDefinition,
@@ -89,7 +89,7 @@ def spectroscopyExposureTimeParams(
   sigma:         SignalToNoise
 ): (ItcParameters, Either[Band, Wavelength]) = // Bubble up the selected band or line
   val (sourceDefinition, bandOrLine): (ItcSourceDefinition, Either[Band, Wavelength]) =
-    sourceDefinition(target, atWavelength)
+    buildSourceDefinition(target, atWavelength)
   val parameters: ItcParameters                                                       =
     ItcParameters(
       source = sourceDefinition,
@@ -120,7 +120,7 @@ def imagingParams(
   sigma:         SignalToNoise
 ): (ItcParameters, Either[Band, Wavelength]) = // Bubble up the selected band or line
   val (sourceDefinition, bandOrLine): (ItcSourceDefinition, Either[Band, Wavelength]) =
-    sourceDefinition(target, atWavelength)
+    buildSourceDefinition(target, atWavelength)
   val parameters: ItcParameters                                                       =
     ItcParameters(
       source = sourceDefinition,

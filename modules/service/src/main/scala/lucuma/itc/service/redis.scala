@@ -8,6 +8,7 @@ import boopickle.DefaultBasic.*
 import cats.data.NonEmptyChain
 import eu.timepit.refined.*
 import eu.timepit.refined.api.*
+import lucuma.core.data.Zipper
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.Enumerated
@@ -67,12 +68,17 @@ given Pickler[Wavelength] =
       .getOrElse(sys.error("cannot unpickle"))
   )(_.toPicometers.value.value)
 
-given Pickler[ItcGraph]               = generatePickler
-given Pickler[ItcGraphGroup]          = generatePickler
-given Pickler[ItcWarning]             = generatePickler
-given Pickler[ItcCcd]                 = generatePickler
-given Pickler[FinalSN]                = transformPickler((s: SignalToNoise) => FinalSN(s))(_.value)
-given Pickler[SingleSN]               = transformPickler((s: SignalToNoise) => SingleSN(s))(_.value)
-given Pickler[TargetGraphsCalcResult] = generatePickler
-
-given Pickler[IntegrationTime] = generatePickler
+given Pickler[ItcGraph]                = generatePickler
+given Pickler[ItcGraphGroup]           = generatePickler
+given Pickler[ItcWarning]              = generatePickler
+given Pickler[ItcCcd]                  = generatePickler
+given Pickler[FinalSN]                 = transformPickler((s: SignalToNoise) => FinalSN(s))(_.value)
+given Pickler[SingleSN]                = transformPickler((s: SignalToNoise) => SingleSN(s))(_.value)
+given Pickler[TargetGraphsCalcResult]  = generatePickler
+given Pickler[IntegrationTime]         = generatePickler
+given Pickler[Zipper[IntegrationTime]] =
+  transformPickler[
+    Zipper[IntegrationTime],
+    (List[IntegrationTime], IntegrationTime, List[IntegrationTime])
+  ]((l, a, r) => Zipper(l, a, r))(z => (z.lefts, z.focus, z.rights))
+given Pickler[TargetIntegrationTime]   = generatePickler

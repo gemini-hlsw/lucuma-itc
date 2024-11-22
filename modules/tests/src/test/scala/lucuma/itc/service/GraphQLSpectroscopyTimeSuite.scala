@@ -1292,7 +1292,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         stellarLibrary: O5_V
                       }
                       brightnesses: [ {
-                        band: J
+                        band: R
                         value: 5.1
                         units: AB_MAGNITUDE
                       }]
@@ -1389,7 +1389,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                       "seconds" : 1.000000
                     }
                   },
-                  "band": "J"
+                  "band": "R"
                 }
               ],
               "brightestIndex": 0

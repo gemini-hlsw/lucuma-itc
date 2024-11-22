@@ -3,9 +3,7 @@
 
 package lucuma.itc
 
-import cats.data.NonEmptyChain
 import eu.timepit.refined.types.numeric.PosInt
-import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan

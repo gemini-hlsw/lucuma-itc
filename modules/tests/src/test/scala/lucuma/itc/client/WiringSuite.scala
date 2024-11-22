@@ -78,7 +78,7 @@ class WiringSuite extends ClientSuite {
             TargetIntegrationTimeOutcome:
               TargetIntegrationTime(
                 Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R
+                Band.R.asLeft
               ).asRight
       ).asRight
     )
@@ -97,7 +97,7 @@ class WiringSuite extends ClientSuite {
             TargetIntegrationTimeOutcome:
               TargetIntegrationTime(
                 Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R
+                Band.R.asLeft
               ).asRight
       ).asRight
     )
@@ -117,16 +117,17 @@ class WiringSuite extends ClientSuite {
               TargetGraphsResult(
                 TargetGraphs(
                   NonEmptyChain.of(
-                    ItcCcd(1,
-                           1,
-                           2,
-                           2,
-                           Wavelength.fromIntNanometers(1001).get,
-                           Wavelength.fromIntNanometers(1001).get,
-                           3,
-                           4,
-                           5,
-                           Nil
+                    ItcCcd(
+                      1,
+                      1,
+                      2,
+                      2,
+                      Wavelength.fromIntNanometers(1001).get,
+                      Wavelength.fromIntNanometers(1001).get,
+                      3,
+                      4,
+                      5,
+                      Nil
                     )
                   ),
                   NonEmptyChain.of(

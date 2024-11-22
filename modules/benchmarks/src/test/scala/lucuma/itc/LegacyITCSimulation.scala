@@ -61,7 +61,7 @@ class LegacyITCSimulation extends GatlingHttpFunSpec {
       ),
       Redshift(0.03)
     ),
-    Band.R
+    Band.R.asLeft
   )
 
   val lsAnalysisMethod  = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)

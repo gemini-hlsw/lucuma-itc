@@ -6,6 +6,7 @@ package lucuma.itc
 import cats.data.Chain
 import cats.data.NonEmptyChain
 import cats.syntax.all.*
+import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.itc.legacy.ItcRemoteCcd
@@ -16,14 +17,16 @@ case class TargetGraphsCalcResult(
   peakFinalSNRatio:          FinalSN,
   atWavelengthFinalSNRatio:  Option[FinalSN],
   peakSingleSNRatio:         SingleSN,
-  atWavelengthSingleSNRatio: Option[SingleSN]
+  atWavelengthSingleSNRatio: Option[SingleSN],
+  bandOrLine:                Either[Band, Wavelength]
 )
 
 object TargetGraphsCalcResult:
   def fromLegacy(
     ccds:           NonEmptyChain[ItcRemoteCcd],
     originalGraphs: NonEmptyChain[ItcGraphGroup],
-    atWavelength:   Wavelength
+    atWavelength:   Wavelength,
+    bandOrLine:     Either[Band, Wavelength]
   ): TargetGraphsCalcResult = {
     val graphs: NonEmptyChain[ItcGraphGroup] =
       originalGraphs.map: graph =>
@@ -134,6 +137,7 @@ object TargetGraphsCalcResult:
       FinalSN(peakFinalSNRatio),
       wvAtFinalRatio.map(FinalSN.apply(_)),
       SingleSN(peakSingleSNRatio),
-      wvAtSingleRatio.map(SingleSN.apply(_))
+      wvAtSingleRatio.map(SingleSN.apply(_)),
+      bandOrLine
     )
   }

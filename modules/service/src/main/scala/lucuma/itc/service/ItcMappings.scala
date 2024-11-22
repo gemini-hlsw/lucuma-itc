@@ -86,9 +86,9 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetSpectroscopyTimeRequest) =>
         specTimeFromCacheOrRemote(targetRequest)(itc, redis).attempt
-          .map: (result: Either[Throwable, (NonEmptyChain[IntegrationTime], Band)]) =>
+          .map: (result: Either[Throwable, TargetIntegrationTime]) =>
             TargetIntegrationTimeOutcome:
-              result.bimap(buildError, buildTargetIntegrationTime)
+              result.leftMap(buildError)
       .map: (targetOutcomes: NonEmptyChain[TargetIntegrationTimeOutcome]) =>
         IntegrationTimeCalculationResult(
           ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
@@ -109,10 +109,10 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetImagingTimeRequest) =>
         imgTimeFromCacheOrRemote(targetRequest)(itc, redis).attempt
-          .map: (result: Either[Throwable, (NonEmptyChain[IntegrationTime], Band)]) =>
+          .map: (result: Either[Throwable, TargetIntegrationTime]) =>
             TargetIntegrationTimeOutcome:
               result
-                .bimap(buildError, buildTargetIntegrationTime)
+                .leftMap(buildError)
                 .map: (integrationTime: TargetIntegrationTime) =>
                   asterismRequest.imagingMode match
                     case ObservingMode.ImagingMode.GmosNorth(_, _) |
@@ -131,8 +131,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           .error(t)(s"Error calculating imaging integration time for input: $asterismRequest")
 
   private def buildTargetGraphsResult(significantFigures: Option[SignificantFigures])(
-    graphResult: TargetGraphsCalcResult,
-    band:        Band
+    graphResult: TargetGraphsCalcResult
   ): TargetGraphsResult = {
     val graphs: NonEmptyChain[ItcGraphGroup] =
       significantFigures.fold(graphResult.data): v =>
@@ -167,7 +166,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
         peakSingleSNRatio,
         atWvSingleSNRatio
       ),
-      band
+      graphResult.bandOrLine
     )
   }
 
@@ -179,7 +178,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetGraphRequest) =>
         graphFromCacheOrRemote(targetRequest)(itc, redis).attempt
-          .map: (result: Either[Throwable, (TargetGraphsCalcResult, Band)]) =>
+          .map: (result: Either[Throwable, TargetGraphsCalcResult]) =>
             TargetGraphsOutcome:
               result.bimap(buildError, buildTargetGraphsResult(asterismRequest.significantFigures))
       .map: (targetGraphs: NonEmptyChain[TargetGraphsOutcome]) =>

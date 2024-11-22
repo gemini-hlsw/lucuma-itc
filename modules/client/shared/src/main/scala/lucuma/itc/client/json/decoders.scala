@@ -72,9 +72,13 @@ object decoders:
 
   given Decoder[TargetIntegrationTime] = c =>
     for
-      band  <- c.downField("band").as[Band]
-      times <- c.as[Zipper[IntegrationTime]]
-    yield TargetIntegrationTime(times, band)
+      bandOrLine <-
+        c.downField("band")
+          .as[Band]
+          .map(_.asLeft)
+          .orElse(c.downField("line").as[Wavelength].map(_.asRight))
+      times      <- c.as[Zipper[IntegrationTime]]
+    yield TargetIntegrationTime(times, bandOrLine)
 
   given Decoder[ItcCcd]    = deriveDecoder[ItcCcd]
   given Decoder[ItcSeries] = deriveDecoder[ItcSeries]
