@@ -103,23 +103,6 @@ class WiringSuite extends ClientSuite {
     )
   }
 
-  // test("SignalToNoiseAt null is removed") {
-  //   WiringSuite.SpectroscopyInput.asJson.asObject
-  //     .exists(!_.contains("signalToNoiseAt"))
-  // }
-
-  // test("SignalToNoiseAt non-null is included") {
-  //   WiringSuite.SpectroscopyInput
-  //     .copy(parameters =
-  //       WiringSuite.SpectroscopyInput.parameters.copy(signalToNoiseAt = Wavelength.Min.some)
-  //     )
-  //     .asJson
-  //     .asObject
-  //     .flatMap(_.apply("signalToNoiseAt"))
-  //     .map(_.spaces2)
-  //     .contains(Wavelength.Min.asJson)
-  // }
-
   test("ItcClient spectroscopy graph wiring and sanity check") {
     spectroscopyGraphs(
       WiringSuite.GraphInput,

@@ -39,13 +39,5 @@ trait Itc[F[_]]:
     exposureCount: PosInt
   ): F[TargetGraphsCalcResult]
 
-  // /**
-  //  * Calculate the signal to noise from graph data for the given mode and exposureTime and amount of
-  //  * exposures at a specific wavelength
-  //  */
-  // def calculateSignalToNoise(
-  //   graph: NonEmptyChain[ItcGraphGroup]
-  // ): F[SNCalcResult]
-
 object Itc:
   def apply[F[_]](using ev: Itc[F]): ev.type = ev

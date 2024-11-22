@@ -111,7 +111,6 @@ trait ItcCacheOrRemote extends Version:
         calcRequest.specMode,
         calcRequest.constraints,
         calcRequest.signalToNoise
-        // calcRequest.signalToNoiseAt
       )
       .map((_, band))
 
