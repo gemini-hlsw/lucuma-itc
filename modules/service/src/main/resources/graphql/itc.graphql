@@ -10267,7 +10267,7 @@ type ItcVersions {
 
 input GmosSSpectroscopyInput {
   # Center of the configuration spectrum
-  centralWavelength: Wavelength
+  centralWavelength: WavelengthInput!
 
   # Gmos South disperser
   grating: GmosSouthGrating!
@@ -10295,7 +10295,7 @@ input GmosSImagingInput {
 
 input GmosNSpectroscopyInput {
   # Center of the configuration spectrum
-  centralWavelength: Wavelength
+  centralWavelength: WavelengthInput!
 
   # Gmos North disperser
   grating: GmosNorthGrating!
@@ -10381,7 +10381,7 @@ input SpectroscopyIntegrationTimeInput {
   constraints: ConstraintSetInput!
 
   # Instrument modes
-  mode: InstrumentModesInput
+  mode: InstrumentModesInput!
 }
 
 input TargetInput {
@@ -10407,7 +10407,7 @@ input ImagingIntegrationTimeInput {
   constraints: ConstraintSetInput!
 
   # Instrument modes
-  mode: InstrumentModesInput
+  mode: InstrumentModesInput!
 }
 
 # Params for significant figures on each axis
@@ -10520,15 +10520,15 @@ type TargetError {
 
 interface ITCObservingMode {
   # instrument
-  instrument: Instrument
+  instrument: Instrument!
 }
 
 type ImagingMode implements ITCObservingMode {
   # Wavelength in appropriate units
-  centralWavelength: Wavelength!
+  # centralWavelength: Wavelength!
 
   # instrument
-  instrument: Instrument
+  instrument: Instrument!
 
   # params
   params: InstrumentITCParams!
@@ -10545,7 +10545,7 @@ type SpectroscopyMode implements ITCObservingMode {
   params: InstrumentITCParams!
 
   # instrument
-  instrument: Instrument
+  instrument: Instrument!
 }
 
 """Graph data types"""

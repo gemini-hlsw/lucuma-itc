@@ -143,9 +143,7 @@ object ObservingMode {
 
   }
 
-  sealed trait ImagingMode extends ObservingMode derives Hash {
-    // def λ: Wavelength
-  }
+  sealed trait ImagingMode extends ObservingMode derives Hash
 
   object ImagingMode {
     given Encoder[ObservingMode.ImagingMode] = Encoder.instance {
@@ -162,10 +160,10 @@ object ObservingMode {
     }
 
     case class GmosNorth(
-      // λ:       Wavelength,
       filter:  GmosNorthFilter,
       ccdMode: Option[GmosCcdMode]
     ) extends GmosImaging {
+      val centralWavelength: Wavelength = Wavelength.Min // Ignored for imaging
 
       val instrument: Instrument =
         Instrument.GmosNorth
@@ -177,14 +175,14 @@ object ObservingMode {
         Json.obj(
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
           ("params", GmosNImagingParams(a.filter).asJson)
-          // ("wavelength", a.λ.asJson)
         )
 
     case class GmosSouth(
-      // λ:       Wavelength,
       filter:  GmosSouthFilter,
       ccdMode: Option[GmosCcdMode]
     ) extends GmosImaging {
+      val centralWavelength: Wavelength = Wavelength.Min // Ignored for imaging
+
       val instrument: Instrument =
         Instrument.GmosSouth
     }
@@ -194,7 +192,6 @@ object ObservingMode {
         Json.obj(
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
           ("params", GmosSImagingParams(a.filter).asJson)
-          // ("wavelength", a.λ.asJson)
         )
   }
 

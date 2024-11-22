@@ -97,22 +97,25 @@ private val encodeGmosNorthImaging: Encoder[ObservingMode.ImagingMode.GmosNorth]
     def apply(a: ObservingMode.ImagingMode.GmosNorth): Json =
       Json.obj(
         // Translate observing mode to OCS2 style
-        "filter"          -> Json.obj(
+        "centralWavelength" -> Json.fromString(
+          s"${Wavelength.decimalNanometers.reverseGet(a.centralWavelength)} nm"
+        ),
+        "filter"            -> Json.obj(
           "FilterNorth" ->
             Json.fromString(a.filter.ocs2Tag)
         ),
-        "grating"         -> Json.obj("DisperserNorth" -> "MIRROR".asJson),
-        "fpMask"          -> Json.obj("FPUnitNorth" -> "FPU_NONE".asJson),
-        "spectralBinning" -> Json.fromInt(a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.Two).count),
-        "site"            -> Json.fromString("GN"),
-        "ccdType"         -> Json.fromString("HAMAMATSU"),
-        "ampReadMode"     -> Json.fromString(
+        "grating"           -> Json.obj("DisperserNorth" -> "MIRROR".asJson),
+        "fpMask"            -> Json.obj("FPUnitNorth" -> "FPU_NONE".asJson),
+        "spectralBinning"   -> Json.fromInt(a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.Two).count),
+        "site"              -> Json.fromString("GN"),
+        "ccdType"           -> Json.fromString("HAMAMATSU"),
+        "ampReadMode"       -> Json.fromString(
           a.ccdMode.map(_.ampReadMode).getOrElse(GmosAmpReadMode.Fast).tag.toUpperCase
         ),
-        "builtinROI"      -> Json.fromString("FULL_FRAME"),
-        "spatialBinning"  -> Json.fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.Two).count),
-        "customSlitWidth" -> Json.Null,
-        "ampGain"         -> Json.fromString(
+        "builtinROI"        -> Json.fromString("FULL_FRAME"),
+        "spatialBinning"    -> Json.fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.Two).count),
+        "customSlitWidth"   -> Json.Null,
+        "ampGain"           -> Json.fromString(
           a.ccdMode.map(_.ampGain).getOrElse(GmosAmpGain.Low).tag.toUpperCase
         )
       )
