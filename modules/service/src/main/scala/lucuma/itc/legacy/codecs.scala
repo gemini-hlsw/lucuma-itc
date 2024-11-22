@@ -13,6 +13,7 @@ import io.circe.refined.*
 import io.circe.syntax.*
 import lucuma.core.enums.*
 import lucuma.core.math.Angle
+import lucuma.core.math.BrightnessUnits.*
 import lucuma.core.math.Redshift
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
@@ -60,14 +61,16 @@ given Encoder[ItcObservingConditions] =
     )
   }
 
+given Encoder[Wavelength] = w =>
+  Json.fromString:
+    s"${Wavelength.decimalNanometers.reverseGet(w)} nm"
+
 private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.GmosNorth] =
   new Encoder[ObservingMode.SpectroscopyMode.GmosNorth] {
     def apply(a: ObservingMode.SpectroscopyMode.GmosNorth): Json =
       Json.obj(
         // Translate observing mode to OCS2 style
-        "centralWavelength" -> Json.fromString(
-          s"${Wavelength.decimalNanometers.reverseGet(a.centralWavelength)} nm"
-        ),
+        "centralWavelength" -> a.centralWavelength.asJson,
         "filter"            -> Json.obj(
           "FilterNorth" -> a.filter.fold[Json](Json.fromString("NONE"))(r =>
             Json.fromString(r.ocs2Tag)
@@ -97,9 +100,7 @@ private val encodeGmosNorthImaging: Encoder[ObservingMode.ImagingMode.GmosNorth]
     def apply(a: ObservingMode.ImagingMode.GmosNorth): Json =
       Json.obj(
         // Translate observing mode to OCS2 style
-        "centralWavelength" -> Json.fromString(
-          s"${Wavelength.decimalNanometers.reverseGet(a.centralWavelength)} nm"
-        ),
+        "centralWavelength" -> a.centralWavelength.asJson,
         "filter"            -> Json.obj(
           "FilterNorth" ->
             Json.fromString(a.filter.ocs2Tag)
@@ -126,9 +127,7 @@ private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.
     def apply(a: ObservingMode.SpectroscopyMode.GmosSouth): Json =
       Json.obj(
         // Translate observing mode to OCS2 style
-        "centralWavelength" -> Json.fromString(
-          s"${Wavelength.decimalNanometers.reverseGet(a.centralWavelength)} nm"
-        ),
+        "centralWavelength" -> a.centralWavelength.asJson,
         "filter"            -> Json.obj(
           "FilterSouth" -> a.filter.fold[Json](Json.fromString("NONE"))(r =>
             Json.fromString(r.ocs2Tag)
@@ -214,8 +213,8 @@ private given Encoder[SourceProfile] = (a: SourceProfile) =>
   }
 
 private given Encoder[UnnormalizedSED] = (a: UnnormalizedSED) =>
-  import UnnormalizedSED._
-  a match {
+  import UnnormalizedSED.*
+  a match
     case BlackBody(t)       =>
       Json.obj(
         "BlackBody" -> Json.obj(
@@ -240,7 +239,6 @@ private given Encoder[UnnormalizedSED] = (a: UnnormalizedSED) =>
       Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
     case _                  => // TODO UserDefined
       Json.obj("Library" -> Json.Null)
-  }
 
 private given Encoder[Band] =
   Encoder[String].contramap(_.shortName)
@@ -248,8 +246,21 @@ private given Encoder[Band] =
 private given Encoder[Redshift] =
   Encoder.forProduct1("z")(_.z)
 
+private def encodeEmissionLine[T](
+  wavelength:           Wavelength,
+  lineWidth:            LineWidthQuantity,
+  lineflux:             LineFluxMeasure[T],
+  fluxDensityContinuum: FluxDensityContinuumMeasure[T]
+): Json =
+  Json.obj(
+    "wavelength" -> wavelength.asJson,
+    "width"      -> lineWidth.show.asJson,
+    "flux"       -> lineflux.toExactQuantity.show.asJson,
+    "continuum"  -> fluxDensityContinuum.toExactQuantity.show.asJson
+  )
+
 given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
-  val source = s.sourceProfile match {
+  val source: Json = s.sourceProfile match
     case SourceProfile.Point(_)          =>
       Json.obj("PointSource" -> Json.obj())
     case SourceProfile.Uniform(_)        => Json.obj("UniformSource" -> Json.obj())
@@ -259,32 +270,14 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
           "fwhm" -> Angle.signedDecimalArcseconds.get(fwhm).asJson
         )
       )
-  }
 
-  val units: Json = (s.bandOrLine, s.sourceProfile) match {
+  val units: Json = (s.bandOrLine, s.sourceProfile) match
     case (Left(band), SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses)))   =>
       brightnesses
         .get(band)
         .map: b =>
           Json.obj("MagnitudeSystem" -> b.units.abbv.stripSuffix(" mag").asJson)
         .getOrElse(Json.Null)
-    // FIXME Support emision lines
-    // case SourceProfile.Point(SpectralDefinition.EmissionLines(_, brightnesses)) =>
-    //   Json.Null
-    //     if brightnesses.contains(s.normBand) =>
-    //   brightnesses.get(s.normBand).map(_.units.serialized) match {
-    //     case Some("VEGA_MAGNITUDE")                  => Json.obj("MagnitudeSystem" -> Json.fromString("Vega"))
-    //     case Some("AB_MAGNITUDE")                    => Json.obj("MagnitudeSystem" -> Json.fromString("AB"))
-    //     case Some("JANSKY")                          => Json.obj("MagnitudeSystem" -> Json.fromString("Jy"))
-    //     case Some("W_PER_M_SQUARED_PER_UM")          =>
-    //       Json.obj("MagnitudeSystem" -> Json.fromString("W/m²/µm"))
-    //     case Some("ERG_PER_S_PER_CM_SQUARED_PER_A")  =>
-    //       Json.obj("MagnitudeSystem" -> Json.fromString("erg/s/cm²/Å"))
-    //     case Some("ERG_PER_S_PER_CM_SQUARED_PER_HZ") =>
-    //       Json.obj("MagnitudeSystem" -> Json.fromString("erg/s/cm²/Hz"))
-    //     case _                                       =>
-    //       Json.Null
-    //   }(
     case (Left(band), SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses))) =>
       brightnesses
         .get(band)
@@ -299,12 +292,10 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
         .map: b =>
           Json.obj("MagnitudeSystem" -> b.units.abbv.stripSuffix(" mag").asJson)
         .getOrElse(Json.Null)
+    case _                                                                                       =>
+      Json.Null
 
-    // FIXME Support emision lines
-    case _                                                                                       => Json.Null
-  }
-
-  val value: Json = (s.bandOrLine, s.sourceProfile) match {
+  val value: Json = (s.bandOrLine, s.sourceProfile) match
     case (Left(band), SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses)))   =>
       brightnesses
         .get(band)
@@ -322,24 +313,41 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
         .get(band)
         .map(_.value)
         .asJson
-    // FIXME: Handle emission line
-    case _                                                                                       => Json.Null
-  }
+    case _                                                                                       =>
+      Json.Null
 
-  // EMISSION LINES GO HERE... ARE BAND PARAMS IGNORED IN THAT CASE???
-  val distribution = s.sourceProfile match {
-    case SourceProfile.Point(SpectralDefinition.BandNormalized(sed, _))       =>
+  val distribution: Json = (s.bandOrLine, s.sourceProfile) match
+    case (Left(band), SourceProfile.Point(SpectralDefinition.BandNormalized(sed, _)))       =>
       sed.asJson
-    // FIXME support emmision lines
-    // case SourceProfile.Point(SpectralDefinition.EmissionLines(sed, _))        =>
-    //   Json.Null
-    case SourceProfile.Uniform(SpectralDefinition.BandNormalized(sed, _))     =>
+    case (Right(wavelength),
+          SourceProfile.Point(SpectralDefinition.EmissionLines(lines, fluxDensityContinuum))
+        ) =>
+      lines
+        .get(wavelength)
+        .map: line =>
+          encodeEmissionLine(wavelength, line.lineWidth, line.lineFlux, fluxDensityContinuum)
+        .getOrElse(Json.Null)
+    case (Left(band), SourceProfile.Uniform(SpectralDefinition.BandNormalized(sed, _)))     =>
       sed.asJson
-    case SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(sed, _)) =>
+    case (Right(wavelength),
+          SourceProfile.Uniform(SpectralDefinition.EmissionLines(lines, fluxDensityContinuum))
+        ) =>
+      lines
+        .get(wavelength)
+        .map: line =>
+          encodeEmissionLine(wavelength, line.lineWidth, line.lineFlux, fluxDensityContinuum)
+        .getOrElse(Json.Null)
+    case (Left(band), SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(sed, _))) =>
       sed.asJson
-    // FIXME: Handle emission line
-    case _                                                                    => Json.Null
-  }
+    case (Right(wavelength),
+          SourceProfile.Gaussian(_, SpectralDefinition.EmissionLines(lines, fluxDensityContinuum))
+        ) =>
+      lines
+        .get(wavelength)
+        .map: line =>
+          encodeEmissionLine(wavelength, line.lineWidth, line.lineFlux, fluxDensityContinuum)
+        .getOrElse(Json.Null)
+    case _                                                                                  => Json.Null
 
   Json.obj(
     "profile"      -> source,
