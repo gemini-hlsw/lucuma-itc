@@ -10366,7 +10366,7 @@ input InstrumentModesInput {
   gmosSImaging: GmosSImagingInput
 }
 
-# Configuration alternatives query
+# Params for spectroscopy integration time calculation
 input SpectroscopyIntegrationTimeInput {
   # Observing wavelength.
   atWavelength: WavelengthInput!
@@ -10392,7 +10392,7 @@ input TargetInput {
   radialVelocity: RadialVelocityInput!
 }
 
-# Configuration alternatives query
+# Params for imaging integration time calculation
 input ImagingIntegrationTimeInput {
   # Observing wavelength.
   atWavelength: WavelengthInput!
@@ -10422,7 +10422,7 @@ input SignificantFiguresInput {
   ccd: PosInt
 }
 
-# Parameters to retrieve graph data
+# Params for spectroscopy graphs calculation
 input SpectroscopyGraphsInput {
   # Observing wavelength.
   atWavelength: WavelengthInput!
