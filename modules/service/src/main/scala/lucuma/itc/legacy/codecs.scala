@@ -305,26 +305,25 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
   }
 
   val value: Json = (s.bandOrLine, s.sourceProfile) match {
-    case (Left(band), SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses)))
-        if brightnesses.contains(band) =>
+    case (Left(band), SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses)))   =>
       brightnesses
         .get(band)
         .map(_.value)
         .asJson
-    case (Left(band), SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses)))
-        if brightnesses.contains(band) =>
+    case (Left(band), SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses))) =>
       brightnesses
         .get(band)
         .map(_.value)
         .asJson
-    case (Left(band), SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses)))
-        if brightnesses.contains(band) =>
+    case (Left(band),
+          SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses))
+        ) =>
       brightnesses
         .get(band)
         .map(_.value)
         .asJson
     // FIXME: Handle emission line
-    case _ => Json.Null
+    case _                                                                                       => Json.Null
   }
 
   // EMISSION LINES GO HERE... ARE BAND PARAMS IGNORED IN THAT CASE???

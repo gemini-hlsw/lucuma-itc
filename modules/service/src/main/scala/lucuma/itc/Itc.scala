@@ -26,7 +26,7 @@ trait Itc[F[_]]:
   /**
    * Retrieve the graph data for the given mode and exposureTime and exposures
    */
-  def calculateGraph(
+  def calculateGraphs(
     target:        TargetData,
     atWavelength:  Wavelength,
     observingMode: ObservingMode,

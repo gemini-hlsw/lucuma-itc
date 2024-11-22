@@ -70,11 +70,11 @@ trait ItcCacheOrRemote extends Version:
     }
   }
 
-  private def requestGraph[F[_]: Functor](itc: Itc[F])(
+  private def requestGraphs[F[_]: Functor](itc: Itc[F])(
     request: TargetGraphRequest
   ): F[TargetGraphsCalcResult] =
     itc
-      .calculateGraph(
+      .calculateGraphs(
         request.target,
         request.atWavelength,
         request.specMode,
@@ -86,13 +86,13 @@ trait ItcCacheOrRemote extends Version:
   /**
    * Request a graph
    */
-  def graphFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
+  def graphsFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
     request: TargetGraphRequest
   )(
     itc:     Itc[F],
     redis:   StringCommands[F, Array[Byte], Array[Byte]]
   ): F[TargetGraphsCalcResult] =
-    cacheOrRemote(request, requestGraph(itc))("itc:graph:spec", redis)
+    cacheOrRemote(request, requestGraphs(itc))("itc:graph:spec", redis)
 
   private def requestSpecTimeCalc[F[_]: Functor](itc: Itc[F])(
     calcRequest: TargetSpectroscopyTimeRequest

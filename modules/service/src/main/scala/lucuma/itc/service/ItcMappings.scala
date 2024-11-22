@@ -177,7 +177,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   )(asterismRequest: AsterismGraphRequest): F[Result[SpectroscopyGraphsResult]] =
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetGraphRequest) =>
-        graphFromCacheOrRemote(targetRequest)(itc, redis).attempt
+        graphsFromCacheOrRemote(targetRequest)(itc, redis).attempt
           .map: (result: Either[Throwable, TargetGraphsCalcResult]) =>
             TargetGraphsOutcome:
               result.bimap(buildError, buildTargetGraphsResult(asterismRequest.significantFigures))
@@ -188,7 +188,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
         ).toResult
       .onError: t =>
         Logger[F]
-          .error(t)(s"Error calculating spectroscopy graph for input: $asterismRequest")
+          .error(t)(s"Error calculating spectroscopy graphs for input: $asterismRequest")
 
   private def buildAsterismGraphRequest(
     asterismRequest: AsterismSpectroscopyTimeRequest,

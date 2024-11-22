@@ -42,7 +42,7 @@ object MockItc extends Itc[IO]:
       Band.R.asLeft
     ).pure[IO]
 
-  override def calculateGraph(
+  override def calculateGraphs(
     target:        TargetData,
     atWavelength:  Wavelength,
     observingMode: ObservingMode,
@@ -102,7 +102,7 @@ object MockImagingItc extends Itc[IO]:
       Band.R.asLeft
     ).pure[IO]
 
-  override def calculateGraph(
+  override def calculateGraphs(
     target:        TargetData,
     atWavelength:  Wavelength,
     observingMode: ObservingMode,
@@ -156,7 +156,7 @@ object FailingMockItc extends Itc[IO]:
   ): IO[TargetIntegrationTime] =
     IO.raiseError(CalculationError("A calculation error"))
 
-  override def calculateGraph(
+  override def calculateGraphs(
     target:        TargetData,
     atWavelength:  Wavelength,
     observingMode: ObservingMode,
