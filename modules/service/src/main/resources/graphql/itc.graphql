@@ -10524,9 +10524,6 @@ interface ITCObservingMode {
 }
 
 type ImagingMode implements ITCObservingMode {
-  # Wavelength in appropriate units
-  # centralWavelength: Wavelength!
-
   # instrument
   instrument: Instrument!
 
