@@ -52,7 +52,7 @@ private def sourceDefinition(
 /** Convert model types into OCS2 ITC-compatible types for a spectroscopy request. */
 def spectroscopyGraphParams(
   target:           TargetData,
-  band:             Band,
+  atWavelength:     Wavelength,
   observingMode:    ObservingMode,
   exposureDuration: FiniteDuration,
   conditions:       ItcObservingConditions,
@@ -114,7 +114,7 @@ def spectroscopyExposureTimeParams(
 
 def imagingParams(
   target:        TargetData,
-  band:          Band,
+  atWavelength:  Wavelength,
   observingMode: ObservingMode,
   conditions:    ItcObservingConditions,
   sigma:         SignalToNoise
