@@ -48,7 +48,7 @@ object ObservingMode {
   }
 
   sealed trait SpectroscopyMode extends ObservingMode derives Hash {
-    def λ: Wavelength
+    def centralWavelength: Wavelength
     def resolution: Rational
     def coverage: Interval[Wavelength]
   }
@@ -60,7 +60,7 @@ object ObservingMode {
     }
 
     def unapply(spectroscopyMode: SpectroscopyMode): (Wavelength, Rational, Interval[Wavelength]) =
-      (spectroscopyMode.λ, spectroscopyMode.resolution, spectroscopyMode.coverage)
+      (spectroscopyMode.centralWavelength, spectroscopyMode.resolution, spectroscopyMode.coverage)
 
     sealed trait GmosSpectroscopy extends SpectroscopyMode derives Hash {
       def isIfu: Boolean
@@ -78,12 +78,12 @@ object ObservingMode {
     }
 
     case class GmosNorth(
-      λ:         Wavelength,
-      disperser: GmosNorthGrating,
-      fpu:       GmosNorthFpuParam,
-      filter:    Option[GmosNorthFilter],
-      ccdMode:   Option[GmosCcdMode],
-      roi:       Option[GmosRoi]
+      centralWavelength: Wavelength,
+      disperser:         GmosNorthGrating,
+      fpu:               GmosNorthFpuParam,
+      filter:            Option[GmosNorthFilter],
+      ccdMode:           Option[GmosCcdMode],
+      roi:               Option[GmosRoi]
     ) extends GmosSpectroscopy derives Hash {
       val isIfu = fpu.isIfu
 
@@ -91,11 +91,11 @@ object ObservingMode {
         Instrument.GmosNorth
 
       def resolution: Rational =
-        disperser.resolution(λ, fpu.effectiveSlitWidth)
+        disperser.resolution(centralWavelength, fpu.effectiveSlitWidth)
 
       def coverage: Interval[Wavelength] =
-        filter.foldLeft(disperser.simultaneousCoverage.centeredAt(λ).toInterval)((a, b) =>
-          a.intersect(b.coverageGN)
+        filter.foldLeft(disperser.simultaneousCoverage.centeredAt(centralWavelength).toInterval)(
+          (a, b) => a.intersect(b.coverageGN)
         )
     }
 
@@ -105,16 +105,16 @@ object ObservingMode {
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
           ("resolution", Json.fromInt(a.resolution.toInt)),
           ("params", GmosNSpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
-          ("wavelength", a.λ.asJson)
+          ("centralWavelength", a.centralWavelength.asJson)
         )
 
     case class GmosSouth(
-      λ:         Wavelength,
-      disperser: GmosSouthGrating,
-      fpu:       GmosSouthFpuParam,
-      filter:    Option[GmosSouthFilter],
-      ccdMode:   Option[GmosCcdMode],
-      roi:       Option[GmosRoi]
+      centralWavelength: Wavelength,
+      disperser:         GmosSouthGrating,
+      fpu:               GmosSouthFpuParam,
+      filter:            Option[GmosSouthFilter],
+      ccdMode:           Option[GmosCcdMode],
+      roi:               Option[GmosRoi]
     ) extends GmosSpectroscopy derives Hash {
       val isIfu = fpu.isIfu
 
@@ -122,11 +122,11 @@ object ObservingMode {
         Instrument.GmosSouth
 
       def resolution: Rational =
-        disperser.resolution(λ, fpu.effectiveSlitWidth)
+        disperser.resolution(centralWavelength, fpu.effectiveSlitWidth)
 
       def coverage: Interval[Wavelength] =
-        filter.foldLeft(disperser.simultaneousCoverage.centeredAt(λ).toInterval)((a, b) =>
-          a.intersect(b.coverageGS)
+        filter.foldLeft(disperser.simultaneousCoverage.centeredAt(centralWavelength).toInterval)(
+          (a, b) => a.intersect(b.coverageGS)
         )
     }
 
@@ -136,14 +136,12 @@ object ObservingMode {
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
           ("resolution", Json.fromInt(a.resolution.toInt)),
           ("params", GmosSSpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
-          ("wavelength", a.λ.asJson)
+          ("centralWavelength", a.centralWavelength.asJson)
         )
 
   }
 
-  sealed trait ImagingMode extends ObservingMode derives Hash {
-    def λ: Wavelength
-  }
+  sealed trait ImagingMode extends ObservingMode derives Hash
 
   object ImagingMode {
     given Encoder[ObservingMode.ImagingMode] = Encoder.instance {
@@ -160,10 +158,10 @@ object ObservingMode {
     }
 
     case class GmosNorth(
-      λ:       Wavelength,
       filter:  GmosNorthFilter,
       ccdMode: Option[GmosCcdMode]
     ) extends GmosImaging {
+      val centralWavelength: Wavelength = Wavelength.Min // Ignored for imaging
 
       val instrument: Instrument =
         Instrument.GmosNorth
@@ -174,15 +172,15 @@ object ObservingMode {
       given Encoder[GmosNorth] = a =>
         Json.obj(
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-          ("params", GmosNImagingParams(a.filter).asJson),
-          ("wavelength", a.λ.asJson)
+          ("params", GmosNImagingParams(a.filter).asJson)
         )
 
     case class GmosSouth(
-      λ:       Wavelength,
       filter:  GmosSouthFilter,
       ccdMode: Option[GmosCcdMode]
     ) extends GmosImaging {
+      val centralWavelength: Wavelength = Wavelength.Min // Ignored for imaging
+
       val instrument: Instrument =
         Instrument.GmosSouth
     }
@@ -191,8 +189,7 @@ object ObservingMode {
       given Encoder[GmosSouth] = a =>
         Json.obj(
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-          ("params", GmosSImagingParams(a.filter).asJson),
-          ("wavelength", a.λ.asJson)
+          ("params", GmosSImagingParams(a.filter).asJson)
         )
   }
 

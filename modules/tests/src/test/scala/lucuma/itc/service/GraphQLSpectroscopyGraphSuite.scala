@@ -12,7 +12,7 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
       """
         query {
           spectroscopyGraphs(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 60,
             },
             exposureTime: {
@@ -58,6 +58,9 @@ class GraphQLSpectroscopyGraphSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
+                centralWavelength: {
+                  nanometers: 60
+                },
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25

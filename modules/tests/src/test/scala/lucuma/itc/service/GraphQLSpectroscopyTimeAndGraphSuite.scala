@@ -12,13 +12,10 @@ class GraphQLSpectroscopyTimeAndGraphSuite extends GraphQLSuite {
       """
         query {
           spectroscopyIntegrationTimeAndGraphs(input: {
-            wavelength: {
+            atWavelength: {
               nanometers: 60,
             },
             signalToNoise: 2,
-            signalToNoiseAt: {
-              nanometers: 60,
-            },
             asterism: [
               {
                 sourceProfile: {
@@ -58,6 +55,9 @@ class GraphQLSpectroscopyTimeAndGraphSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
+                centralWavelength: {
+                  nanometers: 60
+                },
                 filter: G_PRIME,
                 fpu: {
                   builtin: LONG_SLIT_0_25

@@ -20,9 +20,8 @@ import lucuma.itc.client.json.syntax.*
 import lucuma.itc.encoders.given
 
 case class SpectroscopyIntegrationTimeAndGraphsParameters(
-  wavelength:         Wavelength,
+  atWavelength:       Wavelength,
   signalToNoise:      SignalToNoise,
-  signalToNoiseAt:    Option[Wavelength],
   constraints:        ConstraintSet,
   mode:               InstrumentMode,
   significantFigures: Option[SignificantFiguresInput]
@@ -31,11 +30,8 @@ case class SpectroscopyIntegrationTimeAndGraphsParameters(
 object SpectroscopyIntegrationTimeAndGraphsParameters {
   given Encoder.AsObject[SpectroscopyIntegrationTimeAndGraphsParameters] = a =>
     JsonObject(
-      "wavelength"         -> Json.obj("picometers" -> a.wavelength.toPicometers.value.asJson),
+      "atWavelength"       -> Json.obj("picometers" -> a.atWavelength.toPicometers.value.asJson),
       "signalToNoise"      -> a.signalToNoise.asJson,
-      "signalToNoiseAt"    -> a.signalToNoiseAt
-        .map(w => Json.obj("picometers" -> w.toPicometers.value.asJson))
-        .asJson,
       "constraints"        -> a.constraints.asJson,
       "mode"               -> a.mode.asJson,
       "significantFigures" -> a.significantFigures.asJson

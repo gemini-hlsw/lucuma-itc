@@ -75,16 +75,16 @@ trait ItcCacheOrRemote extends Version:
   private def requestGraph[F[_]: Functor](itc: Itc[F])(
     request: TargetGraphRequest
   ): F[(TargetGraphsCalcResult, Band)] =
-    val band: Band = request.target.bandFor(request.wavelength)
+    val band: Band = request.target.bandFor(request.atWavelength)
     itc
       .calculateGraph(
         request.target,
+        request.atWavelength,
         band,
         request.specMode,
         request.constraints,
         request.expTime,
-        request.exp,
-        request.signalToNoiseAt
+        request.exp
       )
       .map((_, band))
 
@@ -102,15 +102,15 @@ trait ItcCacheOrRemote extends Version:
   private def requestSpecTimeCalc[F[_]: Functor](itc: Itc[F])(
     calcRequest: TargetSpectroscopyTimeRequest
   ): F[(NonEmptyChain[IntegrationTime], Band)] =
-    val band: Band = calcRequest.target.bandFor(calcRequest.wavelength)
+    val band: Band = calcRequest.target.bandFor(calcRequest.atWavelength)
     itc
       .calculateIntegrationTime(
         calcRequest.target,
+        calcRequest.atWavelength,
         band,
         calcRequest.specMode,
         calcRequest.constraints,
-        calcRequest.signalToNoise,
-        calcRequest.signalToNoiseAt
+        calcRequest.signalToNoise
       )
       .map((_, band))
 
@@ -131,15 +131,15 @@ trait ItcCacheOrRemote extends Version:
   private def requestImgTimeCalc[F[_]: Functor](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest
   ): F[(NonEmptyChain[IntegrationTime], Band)] =
-    val band: Band = calcRequest.target.bandFor(calcRequest.wavelength)
+    val band: Band = calcRequest.target.bandFor(calcRequest.atWavelength)
     itc
       .calculateIntegrationTime(
         calcRequest.target,
+        calcRequest.atWavelength,
         band,
         calcRequest.imagingMode,
         calcRequest.constraints,
-        calcRequest.signalToNoise,
-        none
+        calcRequest.signalToNoise
       )
       .map((_, band))
 

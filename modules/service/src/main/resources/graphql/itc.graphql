@@ -10266,6 +10266,9 @@ type ItcVersions {
 }
 
 input GmosSSpectroscopyInput {
+  # Center of the configuration spectrum
+  centralWavelength: WavelengthInput!
+
   # Gmos South disperser
   grating: GmosSouthGrating!
 
@@ -10291,6 +10294,9 @@ input GmosSImagingInput {
 }
 
 input GmosNSpectroscopyInput {
+  # Center of the configuration spectrum
+  centralWavelength: WavelengthInput!
+
   # Gmos North disperser
   grating: GmosNorthGrating!
 
@@ -10360,16 +10366,13 @@ input InstrumentModesInput {
   gmosSImaging: GmosSImagingInput
 }
 
-# Configuration alternatives query
+# Params for spectroscopy integration time calculation
 input SpectroscopyIntegrationTimeInput {
   # Observing wavelength.
-  wavelength: WavelengthInput!
+  atWavelength: WavelengthInput!
 
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!
-
-  # Wavelength at which to measure Signal to Noise
-  signalToNoiseAt: WavelengthInput
 
   # Relevant data for targets in asterism.
   asterism: [TargetInput!]!
@@ -10378,7 +10381,7 @@ input SpectroscopyIntegrationTimeInput {
   constraints: ConstraintSetInput!
 
   # Instrument modes
-  mode: InstrumentModesInput
+  mode: InstrumentModesInput!
 }
 
 input TargetInput {
@@ -10389,10 +10392,10 @@ input TargetInput {
   radialVelocity: RadialVelocityInput!
 }
 
-# Configuration alternatives query
+# Params for imaging integration time calculation
 input ImagingIntegrationTimeInput {
   # Observing wavelength.
-  wavelength: WavelengthInput!
+  atWavelength: WavelengthInput!
 
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!
@@ -10404,7 +10407,7 @@ input ImagingIntegrationTimeInput {
   constraints: ConstraintSetInput!
 
   # Instrument modes
-  mode: InstrumentModesInput
+  mode: InstrumentModesInput!
 }
 
 # Params for significant figures on each axis
@@ -10419,13 +10422,10 @@ input SignificantFiguresInput {
   ccd: PosInt
 }
 
-# Parameters to retrieve graph data
+# Params for spectroscopy graphs calculation
 input SpectroscopyGraphsInput {
   # Observing wavelength.
-  wavelength: WavelengthInput!
-
-  # Wavelength at which to measure Signal to Noise
-  signalToNoiseAt: WavelengthInput
+  atWavelength: WavelengthInput!
 
   # Exposure time duration
   exposureTime: TimeSpanInput!
@@ -10449,13 +10449,10 @@ input SpectroscopyGraphsInput {
 # Parameters to retrieve graph data
 input SpectroscopyIntegrationTimeAndGraphsInput {
   # Observing wavelength.
-  wavelength: WavelengthInput!
+  atWavelength: WavelengthInput!
 
   # Minimum desired signal-to-noise ratio.
   signalToNoise: SignalToNoise!
-
-  # Wavelength at which to measure Signal to Noise
-  signalToNoiseAt: WavelengthInput
 
   # Relevant data for targets in asterism.
   asterism: [TargetInput!]!
@@ -10523,15 +10520,12 @@ type TargetError {
 
 interface ITCObservingMode {
   # instrument
-  instrument: Instrument
+  instrument: Instrument!
 }
 
 type ImagingMode implements ITCObservingMode {
-  # Wavelength in appropriate units
-  wavelength: Wavelength!
-
   # instrument
-  instrument: Instrument
+  instrument: Instrument!
 
   # params
   params: InstrumentITCParams!
@@ -10539,7 +10533,7 @@ type ImagingMode implements ITCObservingMode {
 
 type SpectroscopyMode implements ITCObservingMode {
   # Wavelength in appropriate units
-  wavelength: Wavelength!
+  centralWavelength: Wavelength!
 
   # Resolution
   resolution: BigDecimal!
@@ -10548,7 +10542,7 @@ type SpectroscopyMode implements ITCObservingMode {
   params: InstrumentITCParams!
 
   # instrument
-  instrument: Instrument
+  instrument: Instrument!
 }
 
 """Graph data types"""

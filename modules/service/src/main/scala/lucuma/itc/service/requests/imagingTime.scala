@@ -18,7 +18,7 @@ import lucuma.itc.search.TargetData
 import lucuma.itc.search.hashes.given
 
 case class ImagingTimeParameters(
-  wavelength:    Wavelength,
+  atWavelength:  Wavelength,
   imagingMode:   ObservingMode.ImagingMode,
   constraints:   ItcObservingConditions,
   signalToNoise: SignalToNoise
@@ -43,7 +43,7 @@ case class AsterismImagingTimeRequest(
 object AsterismImagingTimeRequest:
   def fromInput(input: ImagingIntegrationTimeInput): Result[AsterismImagingTimeRequest] = {
     val ImagingIntegrationTimeInput(
-      wavelength,
+      atWavelength,
       signalToNoise,
       asterism,
       constraints,
@@ -57,10 +57,10 @@ object AsterismImagingTimeRequest:
       mode match
         case GmosNImagingInput(filter, ccdMode) =>
           Result.success:
-            ObservingMode.ImagingMode.GmosNorth(wavelength, filter, ccdMode)
+            ObservingMode.ImagingMode.GmosNorth(filter, ccdMode)
         case GmosSImagingInput(filter, ccdMode) =>
           Result.success:
-            ObservingMode.ImagingMode.GmosSouth(wavelength, filter, ccdMode)
+            ObservingMode.ImagingMode.GmosSouth(filter, ccdMode)
         case _                                  =>
           Result.failure("Invalid imaging mode")
 
@@ -71,6 +71,6 @@ object AsterismImagingTimeRequest:
     (asterismResult, modeResult, conditionsResult).parMapN: (asterism, mode, conditions) =>
       AsterismImagingTimeRequest(
         asterism,
-        ImagingTimeParameters(wavelength, mode, conditions, signalToNoise)
+        ImagingTimeParameters(atWavelength, mode, conditions, signalToNoise)
       )
   }

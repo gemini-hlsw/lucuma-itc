@@ -9,6 +9,8 @@ import lucuma.core.enums.GmosNorthGrating
 import lucuma.core.enums.GmosRoi
 import lucuma.core.enums.GmosSouthFilter
 import lucuma.core.enums.GmosSouthGrating
+import lucuma.core.math.Wavelength
+import lucuma.core.math.arb.ArbWavelength
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.model.sequence.gmos.arb.ArbGmosCcdMode
 import lucuma.core.util.arb.ArbEnumerated
@@ -16,10 +18,10 @@ import org.scalacheck.*
 import org.scalacheck.Arbitrary.arbitrary
 
 trait ArbInstrumentMode {
-
   import ArbEnumerated.given
   import ArbGmosFpu.given
   import ArbGmosCcdMode.given
+  import ArbWavelength.given
 
   import InstrumentMode.GmosNorthSpectroscopy
   import InstrumentMode.GmosSouthSpectroscopy
@@ -29,23 +31,26 @@ trait ArbInstrumentMode {
   given Arbitrary[GmosNorthSpectroscopy] =
     Arbitrary {
       for {
-        g <- arbitrary[GmosNorthGrating]
-        f <- arbitrary[Option[GmosNorthFilter]]
-        u <- arbitrary[GmosFpu.North]
-        c <- arbitrary[Option[GmosCcdMode]]
-        r <- arbitrary[Option[GmosRoi]]
-      } yield GmosNorthSpectroscopy(g, f, u, c, r)
+        cw <- arbitrary[Wavelength]
+        g  <- arbitrary[GmosNorthGrating]
+        f  <- arbitrary[Option[GmosNorthFilter]]
+        u  <- arbitrary[GmosFpu.North]
+        c  <- arbitrary[Option[GmosCcdMode]]
+        r  <- arbitrary[Option[GmosRoi]]
+      } yield GmosNorthSpectroscopy(cw, g, f, u, c, r)
     }
 
   given Cogen[GmosNorthSpectroscopy] =
     Cogen[
       (
+        Wavelength,
         GmosNorthGrating,
         Option[GmosNorthFilter],
         GmosFpu.North
       )
     ].contramap { a =>
       (
+        a.centralWavelength,
         a.grating,
         a.filter,
         a.fpu
@@ -55,23 +60,26 @@ trait ArbInstrumentMode {
   given Arbitrary[GmosSouthSpectroscopy] =
     Arbitrary {
       for {
-        g <- arbitrary[GmosSouthGrating]
-        f <- arbitrary[Option[GmosSouthFilter]]
-        u <- arbitrary[GmosFpu.South]
-        c <- arbitrary[Option[GmosCcdMode]]
-        r <- arbitrary[Option[GmosRoi]]
-      } yield GmosSouthSpectroscopy(g, f, u, c, r)
+        cw <- arbitrary[Wavelength]
+        g  <- arbitrary[GmosSouthGrating]
+        f  <- arbitrary[Option[GmosSouthFilter]]
+        u  <- arbitrary[GmosFpu.South]
+        c  <- arbitrary[Option[GmosCcdMode]]
+        r  <- arbitrary[Option[GmosRoi]]
+      } yield GmosSouthSpectroscopy(cw, g, f, u, c, r)
     }
 
   given Cogen[GmosSouthSpectroscopy] =
     Cogen[
       (
+        Wavelength,
         GmosSouthGrating,
         Option[GmosSouthFilter],
         GmosFpu.South
       )
     ].contramap { a =>
       (
+        a.centralWavelength,
         a.grating,
         a.filter,
         a.fpu
@@ -82,21 +90,23 @@ trait ArbInstrumentMode {
     Arbitrary {
       for {
         f <- arbitrary[GmosNorthFilter]
-      } yield GmosNorthImaging(f)
+        c <- arbitrary[Option[GmosCcdMode]]
+      } yield GmosNorthImaging(f, c)
     }
 
   given Cogen[GmosNorthImaging] =
-    Cogen[GmosNorthFilter].contramap(_.filter)
+    Cogen[(GmosNorthFilter, Option[GmosCcdMode])].contramap(a => (a.filter, a.ccdMode))
 
   given Arbitrary[GmosSouthImaging] =
     Arbitrary {
       for {
         f <- arbitrary[GmosSouthFilter]
-      } yield GmosSouthImaging(f)
+        c <- arbitrary[Option[GmosCcdMode]]
+      } yield GmosSouthImaging(f, c)
     }
 
   given Cogen[GmosSouthImaging] =
-    Cogen[GmosSouthFilter].contramap(_.filter)
+    Cogen[(GmosSouthFilter, Option[GmosCcdMode])].contramap(a => (a.filter, a.ccdMode))
 
   given Arbitrary[InstrumentMode] =
     Arbitrary {

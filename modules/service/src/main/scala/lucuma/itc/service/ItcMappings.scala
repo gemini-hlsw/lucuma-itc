@@ -121,8 +121,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                 .bimap(buildError, buildTargetIntegrationTime)
                 .map: (integrationTime: TargetIntegrationTime) =>
                   asterismRequest.imagingMode match
-                    case ObservingMode.ImagingMode.GmosNorth(_, _, _) |
-                        ObservingMode.ImagingMode.GmosSouth(_, _, _) =>
+                    case ObservingMode.ImagingMode.GmosNorth(_, _) |
+                        ObservingMode.ImagingMode.GmosSouth(_, _) =>
                       integrationTime
                         .focusIndex(1) // For gmos focus on the second CCD
                         .getOrElse(integrationTime)
@@ -209,12 +209,11 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     AsterismGraphRequest(
       asterismRequest.asterism,
       GraphParameters(
-        asterismRequest.wavelength,
+        asterismRequest.atWavelength,
         asterismRequest.specMode,
         asterismRequest.constraints,
         expTime,
-        expCount,
-        asterismRequest.signalToNoiseAt
+        expCount
       ),
       figures
     )

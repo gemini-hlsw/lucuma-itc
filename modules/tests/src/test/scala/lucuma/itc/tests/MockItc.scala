@@ -20,46 +20,46 @@ import lucuma.itc.ItcGraphGroup
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
-import lucuma.itc.SignalToNoiseCalculation
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetData
 import lucuma.refined.*
 
-object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
+object MockItc extends Itc[IO]:
 
   override def calculateIntegrationTime(
-    target:          TargetData,
-    band:            Band,
-    observingMode:   ObservingMode,
-    constraints:     ItcObservingConditions,
-    signalToNoise:   SignalToNoise,
-    signalToNoiseAt: Option[Wavelength]
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    band:          Band,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    signalToNoise: SignalToNoise
   ): IO[NonEmptyChain[IntegrationTime]] =
     NonEmptyChain
       .of(IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get))
       .pure[IO]
 
   override def calculateGraph(
-    target:          TargetData,
-    band:            Band,
-    observingMode:   ObservingMode,
-    constraints:     ItcObservingConditions,
-    exposureTime:    TimeSpan,
-    exposureCount:   PosInt,
-    signalToNoiseAt: Option[Wavelength]
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    band:          Band,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: PosInt
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(
-        ItcCcd(1,
-               1,
-               2,
-               2,
-               Wavelength.fromIntNanometers(1001).get,
-               Wavelength.fromIntNanometers(1001).get,
-               3,
-               4,
-               5,
-               Nil
+        ItcCcd(
+          1,
+          1,
+          2,
+          2,
+          Wavelength.fromIntNanometers(1001).get,
+          Wavelength.fromIntNanometers(1001).get,
+          3,
+          4,
+          5,
+          Nil
         )
       ),
       NonEmptyChain.of(
@@ -81,15 +81,15 @@ object MockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     )
       .pure[IO]
 
-object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
+object MockImagingItc extends Itc[IO]:
 
   override def calculateIntegrationTime(
-    target:          TargetData,
-    band:            Band,
-    observingMode:   ObservingMode,
-    constraints:     ItcObservingConditions,
-    signalToNoise:   SignalToNoise,
-    signalToNoiseAt: Option[Wavelength]
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    band:          Band,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    signalToNoise: SignalToNoise
   ): IO[NonEmptyChain[IntegrationTime]] =
     NonEmptyChain
       .of(
@@ -99,26 +99,27 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
       .pure[IO]
 
   override def calculateGraph(
-    target:          TargetData,
-    band:            Band,
-    observingMode:   ObservingMode,
-    constraints:     ItcObservingConditions,
-    exposureTime:    TimeSpan,
-    exposureCount:   PosInt,
-    signalToNoiseAt: Option[Wavelength]
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    band:          Band,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: PosInt
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(
-        ItcCcd(1,
-               1,
-               2,
-               2,
-               Wavelength.fromIntNanometers(1001).get,
-               Wavelength.fromIntNanometers(1001).get,
-               3,
-               4,
-               5,
-               Nil
+        ItcCcd(
+          1,
+          1,
+          2,
+          2,
+          Wavelength.fromIntNanometers(1001).get,
+          Wavelength.fromIntNanometers(1001).get,
+          3,
+          4,
+          5,
+          Nil
         )
       ),
       NonEmptyChain.of(
@@ -140,39 +141,40 @@ object MockImagingItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
     )
       .pure[IO]
 
-object FailingMockItc extends Itc[IO] with SignalToNoiseCalculation[IO]:
+object FailingMockItc extends Itc[IO]:
 
   override def calculateIntegrationTime(
-    target:          TargetData,
-    band:            Band,
-    observingMode:   ObservingMode,
-    constraints:     ItcObservingConditions,
-    signalToNoise:   SignalToNoise,
-    signalToNoiseAt: Option[Wavelength]
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    band:          Band,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    signalToNoise: SignalToNoise
   ): IO[NonEmptyChain[IntegrationTime]] =
     IO.raiseError(CalculationError("A calculation error"))
 
   override def calculateGraph(
-    target:          TargetData,
-    band:            Band,
-    observingMode:   ObservingMode,
-    constraints:     ItcObservingConditions,
-    exposureTime:    TimeSpan,
-    exposureCount:   PosInt,
-    signalToNoiseAt: Option[Wavelength]
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    band:          Band,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: PosInt
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(
-        ItcCcd(1,
-               1,
-               2,
-               2,
-               Wavelength.fromIntNanometers(1001).get,
-               Wavelength.fromIntNanometers(1001).get,
-               3,
-               4,
-               5,
-               Nil
+        ItcCcd(
+          1,
+          1,
+          2,
+          2,
+          Wavelength.fromIntNanometers(1001).get,
+          Wavelength.fromIntNanometers(1001).get,
+          3,
+          4,
+          5,
+          Nil
         )
       ),
       NonEmptyChain.of(

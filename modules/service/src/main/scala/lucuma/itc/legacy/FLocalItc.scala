@@ -30,8 +30,8 @@ case class FLocalItc[F[_]: Async](itcLocal: LocalItc):
         }
     }
 
-  def calculateExposureTime(jsonParams: String): F[ExposureTimeRemoteResult] =
-    (F.cede *> F.delay(itcLocal.calculateExposureTime(jsonParams)).guarantee(F.cede)).flatMap {
+  def calculateIntegrationTime(jsonParams: String): F[IntegrationTimeRemoteResult] =
+    (F.cede *> F.delay(itcLocal.calculateIntegrationTime(jsonParams)).guarantee(F.cede)).flatMap {
       case Right(result) => F.pure(result)
       case Left(msg)     =>
         msg match {

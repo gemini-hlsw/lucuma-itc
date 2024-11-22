@@ -17,7 +17,7 @@ import lucuma.itc.client.json.syntax.*
 import lucuma.itc.encoders.given
 
 case class ImagingIntegrationTimeParameters(
-  wavelength:    Wavelength,
+  atWavelength:  Wavelength,
   signalToNoise: SignalToNoise,
   constraints:   ConstraintSet,
   mode:          InstrumentMode
@@ -28,7 +28,7 @@ object ImagingIntegrationTimeParameters {
     def apply(a: ImagingIntegrationTimeParameters): Json =
       Json
         .obj(
-          "wavelength"    -> Json.obj("picometers" -> a.wavelength.toPicometers.value.asJson),
+          "atWavelength"  -> Json.obj("picometers" -> a.atWavelength.toPicometers.value.asJson),
           "signalToNoise" -> a.signalToNoise.asJson,
           "constraints"   -> a.constraints.asJson,
           "mode"          -> a.mode.asJson

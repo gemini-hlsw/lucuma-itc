@@ -30,10 +30,9 @@ trait ArbIntegrationTimeInput {
       for
         w   <- arbitrary[Wavelength]
         s2n <- arbitrary[SignalToNoise]
-        sat <- arbitrary[Option[Wavelength]]
         cs  <- arbitrary[ConstraintSet]
         im  <- arbitrary[InstrumentMode]
-      yield SpectroscopyIntegrationTimeParameters(w, s2n, sat, cs, im)
+      yield SpectroscopyIntegrationTimeParameters(w, s2n, cs, im)
 
   given Arbitrary[SpectroscopyIntegrationTimeInput] =
     Arbitrary:
@@ -44,15 +43,9 @@ trait ArbIntegrationTimeInput {
 
   given Cogen[SpectroscopyIntegrationTimeInput] =
     Cogen[
-      (Wavelength,
-       SignalToNoise,
-       Option[Wavelength],
-       List[TargetInput],
-       ConstraintSet,
-       InstrumentMode
-      )
+      (Wavelength, SignalToNoise, List[TargetInput], ConstraintSet, InstrumentMode)
     ].contramap: a =>
-      (a.wavelength, a.signalToNoise, a.signalToNoiseAt, a.asterism.toList, a.constraints, a.mode)
+      (a.atWavelength, a.signalToNoise, a.asterism.toList, a.constraints, a.mode)
 
   given Arbitrary[ImagingIntegrationTimeParameters] =
     Arbitrary:
@@ -80,7 +73,7 @@ trait ArbIntegrationTimeInput {
         InstrumentMode
       )
     ].contramap: a =>
-      (a.wavelength, a.signalToNoise, a.asterism.toList, a.constraints, a.mode)
+      (a.atWavelength, a.signalToNoise, a.asterism.toList, a.constraints, a.mode)
 }
 
 object ArbIntegrationTimeInput extends ArbIntegrationTimeInput

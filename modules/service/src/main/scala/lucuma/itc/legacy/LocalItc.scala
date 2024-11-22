@@ -66,14 +66,16 @@ case class LocalItc(classLoader: ClassLoader):
   /**
    * This method does a call to the method ItcCalculation.calculate via reflection.
    */
-  def calculateExposureTime(jsonParams: String): Either[List[String], ExposureTimeRemoteResult] =
+  def calculateIntegrationTime(
+    jsonParams: String
+  ): Either[List[String], IntegrationTimeRemoteResult] =
     val res = calculateExposureTimeMethod
       .invoke(null, jsonParams) // null as it is a static method
       .asInstanceOf[String]
 
     res match
       case LegacyRight(result)    =>
-        decode[legacy.ExposureTimeRemoteResult](result).leftMap { e =>
+        decode[legacy.IntegrationTimeRemoteResult](result).leftMap { e =>
           List(e.getMessage())
         }
       case LegacyLeft(result)     =>

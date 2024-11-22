@@ -9,7 +9,6 @@ import cats.data.NonEmptyList
 import cats.syntax.either.*
 import cats.syntax.option.*
 import eu.timepit.refined.types.numeric.PosInt
-import io.circe.syntax.*
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
 import lucuma.core.enums.CloudExtinction
@@ -53,7 +52,6 @@ import lucuma.itc.SeriesDataType
 import lucuma.itc.SingleSN
 import lucuma.itc.TargetIntegrationTime
 import lucuma.itc.TargetIntegrationTimeOutcome
-import lucuma.itc.client.json.encoders.given
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
 import lucuma.refined.*
 
@@ -103,23 +101,6 @@ class WiringSuite extends ClientSuite {
               ).asRight
       ).asRight
     )
-  }
-
-  test("SignalToNoiseAt null is removed") {
-    WiringSuite.SpectroscopyInput.asJson.asObject
-      .exists(!_.contains("signalToNoiseAt"))
-  }
-
-  test("SignalToNoiseAt non-null is included") {
-    WiringSuite.SpectroscopyInput
-      .copy(parameters =
-        WiringSuite.SpectroscopyInput.parameters.copy(signalToNoiseAt = Wavelength.Min.some)
-      )
-      .asJson
-      .asObject
-      .flatMap(_.apply("signalToNoiseAt"))
-      .map(_.spaces2)
-      .contains(Wavelength.Min.asJson)
   }
 
   test("ItcClient spectroscopy graph wiring and sanity check") {
@@ -182,7 +163,6 @@ object WiringSuite {
       SpectroscopyIntegrationTimeParameters(
         Wavelength.Min,
         SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
-        Option.empty[Wavelength],
         ConstraintSet(
           ImageQuality.PointOne,
           CloudExtinction.PointOne,
@@ -191,6 +171,7 @@ object WiringSuite {
           AirMass.Default
         ),
         InstrumentMode.GmosNorthSpectroscopy(
+          Wavelength.Min,
           GmosNorthGrating.B1200_G5301,
           GmosNorthFilter.GPrime.some,
           GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
@@ -236,7 +217,8 @@ object WiringSuite {
           AirMass.Default
         ),
         InstrumentMode.GmosNorthImaging(
-          GmosNorthFilter.GPrime
+          GmosNorthFilter.GPrime,
+          none
         )
       ),
       NonEmptyList.of(
@@ -262,7 +244,6 @@ object WiringSuite {
     SpectroscopyGraphsInput(
       SpectroscopyGraphParameters(
         Wavelength.Min,
-        Wavelength.fromIntMicrometers(1),
         TimeSpan.fromSeconds(1).get,
         PosInt.unsafeFrom(5),
         ConstraintSet(
@@ -273,6 +254,7 @@ object WiringSuite {
           AirMass.Default
         ),
         InstrumentMode.GmosNorthSpectroscopy(
+          Wavelength.Min,
           GmosNorthGrating.B1200_G5301,
           GmosNorthFilter.GPrime.some,
           GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
