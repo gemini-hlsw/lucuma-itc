@@ -13,13 +13,14 @@ import coulomb.syntax.*
 import coulomb.units.si.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosInt
+import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
-import lucuma.itc.legacy.IntegrationTimeRemoteResult
 import lucuma.itc.legacy.FLocalItc
+import lucuma.itc.legacy.IntegrationTimeRemoteResult
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetData
 import natchez.Trace
@@ -27,7 +28,6 @@ import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.*
 import scala.math.*
-import io.circe.Json
 
 trait SignalToNoiseCalculation[F[_]: Applicative] { this: Itc[F] =>
   // def calculateSignalToNoise(

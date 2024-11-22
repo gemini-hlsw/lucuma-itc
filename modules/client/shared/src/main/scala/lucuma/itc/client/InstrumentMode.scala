@@ -4,10 +4,10 @@
 package lucuma.itc.client
 
 import cats.Eq
+import cats.derived.*
 import cats.syntax.either.*
 import cats.syntax.eq.*
 import cats.syntax.functor.*
-import cats.derived.*
 import io.circe.Decoder
 import io.circe.DecodingFailure
 import io.circe.Encoder

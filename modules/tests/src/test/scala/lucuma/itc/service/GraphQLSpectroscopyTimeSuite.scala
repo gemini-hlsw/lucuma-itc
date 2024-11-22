@@ -60,7 +60,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
-                centralWavelength {
+                centralWavelength: {
                   nanometers: 60
                 },
                 filter: GG455,
@@ -176,7 +176,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosSSpectroscopy: {
-                centralWavelength {
+                centralWavelength: {
                   nanometers: 60
                 },
                 filter: RG610,
@@ -196,7 +196,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                       grating
                     }
                   }
-                  wavelength {
+                  centralWavelength {
                     nanometers
                   }
                 }
@@ -385,7 +385,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
-                centralWavelength {
+                centralWavelength: {
                   nanometers: 60
                 },
                 filter: G_PRIME,
@@ -405,7 +405,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                         grating
                       }
                     }
-                    wavelength {
+                    centralWavelength {
                       nanometers
                     }
                   }
@@ -500,7 +500,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
-                centralWavelength {
+                centralWavelength: {
                   nanometers: 60
                 },
                 filter: G_PRIME,
@@ -598,7 +598,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
-                centralWavelength {
+                centralWavelength: {
                   nanometers: 60
                 },
                 filter: G_PRIME,
@@ -717,7 +717,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosSSpectroscopy: {
-                centralWavelength {
+                centralWavelength: {
                   nanometers: 60
                 },
                 filter: G_PRIME,
@@ -836,7 +836,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               },
               mode: {
                 gmosNSpectroscopy: {
-                  centralWavelength {
+                  centralWavelength: {
                     nanometers: 60,
                   },
                   filter: G_PRIME,
@@ -954,7 +954,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosSSpectroscopy: {
-                centralWavelength {
+                centralWavelength: {
                   nanometers: 60,
                 },
                 filter: G_PRIME,
@@ -1072,7 +1072,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosNSpectroscopy: {
-                centralWavelength {
+                centralWavelength: {
                   nanometers: 60,
                 },
                 filter: ${d.tag.toScreamingSnakeCase}
@@ -1186,7 +1186,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
             },
             mode: {
               gmosSSpectroscopy: {
-                centralWavelength {
+                centralWavelength: {
                   nanometers: 60,
                 },
                 filter: ${d.tag.toScreamingSnakeCase}
