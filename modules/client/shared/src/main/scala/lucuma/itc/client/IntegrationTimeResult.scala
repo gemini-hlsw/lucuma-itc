@@ -11,8 +11,6 @@ import io.circe.HCursor
 import lucuma.itc.AsterismIntegrationTimeOutcomes
 import lucuma.itc.Error
 import lucuma.itc.ItcVersions
-import lucuma.itc.TargetIntegrationTime
-import lucuma.itc.TargetIntegrationTimeOutcome
 import lucuma.itc.client.json.decoders.given
 
 case class IntegrationTimeResult(

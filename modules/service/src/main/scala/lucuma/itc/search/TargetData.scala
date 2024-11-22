@@ -15,8 +15,10 @@ case class TargetData(
   sourceProfile: SourceProfile,
   redshift:      Redshift
 ) derives Hash:
-  def bandFor(wavelength: Wavelength): Band =
+  def bandOrLine(atWavelength: Wavelength): Either[Band, Wavelength] =
     sourceProfile
-      .nearestBand(wavelength)
-      .map(_._1)
-      .getOrElse(throw new RuntimeException("No brightness measures provided for target."))
+      .nearestBand(atWavelength)
+      .toLeft:
+        sourceProfile
+          .nearestLine(atWavelength)
+          .getOrElse(throw new RuntimeException("No brightness measures provided for target."))

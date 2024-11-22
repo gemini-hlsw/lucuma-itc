@@ -261,10 +261,10 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
       )
   }
 
-  val units: Json = s.sourceProfile match {
-    case SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses))
-        if brightnesses.contains(s.band) =>
-      brightnesses.get(s.band).map(_.units.serialized) match {
+  val units: Json = (s.bandOrLine, s.sourceProfile) match {
+    case (Left(band), SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses)))
+        if brightnesses.contains(band) =>
+      brightnesses.get(band).map(_.units.serialized) match {
         case Some("VEGA_MAGNITUDE")                  => Json.obj("MagnitudeSystem" -> Json.fromString("Vega"))
         case Some("AB_MAGNITUDE")                    => Json.obj("MagnitudeSystem" -> Json.fromString("AB"))
         case Some("JANSKY")                          => Json.obj("MagnitudeSystem" -> Json.fromString("Jy"))
@@ -293,10 +293,10 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
     //       Json.obj("MagnitudeSystem" -> Json.fromString("erg/s/cm²/Hz"))
     //     case _                                       =>
     //       Json.Null
-    //   }
-    case SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses))
-        if brightnesses.contains(s.band) =>
-      brightnesses.get(s.band).map(_.units.serialized) match {
+    //   }(
+    case (Left(band), SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses)))
+        if brightnesses.contains(band) =>
+      brightnesses.get(band).map(_.units.serialized) match {
         case Some("VEGA_MAG_PER_ARCSEC_SQUARED")                        =>
           Json.obj("SurfaceBrightness" -> Json.fromString("Vega mag/arcsec²"))
         case Some("AB_MAG_PER_ARCSEC_SQUARED")                          =>
@@ -312,9 +312,9 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
         case _                                                          =>
           Json.Null
       }
-    case SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses))
-        if brightnesses.contains(s.band) =>
-      brightnesses.get(s.band).map(_.units.serialized) match {
+    case (Left(band), SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses)))
+        if brightnesses.contains(band) =>
+      brightnesses.get(band).map(_.units.serialized) match {
         case Some("VEGA_MAGNITUDE")                  => Json.obj("MagnitudeSystem" -> Json.fromString("Vega"))
         case Some("AB_MAGNITUDE")                    => Json.obj("MagnitudeSystem" -> Json.fromString("AB"))
         case Some("JANSKY")                          => Json.obj("MagnitudeSystem" -> Json.fromString("Jy"))
@@ -332,29 +332,30 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
     case _ => Json.Null
   }
 
-  val value: Json = s.sourceProfile match {
-    case SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses))
-        if brightnesses.contains(s.band) =>
+  val value: Json = (s.bandOrLine, s.sourceProfile) match {
+    case (Left(band), SourceProfile.Point(SpectralDefinition.BandNormalized(_, brightnesses)))
+        if brightnesses.contains(band) =>
       brightnesses
-        .get(s.band)
+        .get(band)
         .map(_.value)
         .asJson
-    case SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses))
-        if brightnesses.contains(s.band) =>
+    case (Left(band), SourceProfile.Uniform(SpectralDefinition.BandNormalized(_, brightnesses)))
+        if brightnesses.contains(band) =>
       brightnesses
-        .get(s.band)
+        .get(band)
         .map(_.value)
         .asJson
-    case SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses))
-        if brightnesses.contains(s.band) =>
+    case (Left(band), SourceProfile.Gaussian(_, SpectralDefinition.BandNormalized(_, brightnesses)))
+        if brightnesses.contains(band) =>
       brightnesses
-        .get(s.band)
+        .get(band)
         .map(_.value)
         .asJson
     // FIXME: Handle emission line
     case _ => Json.Null
   }
 
+  // EMISSION LINES GO HERE... ARE BAND PARAMS IGNORED IN THAT CASE???
   val distribution = s.sourceProfile match {
     case SourceProfile.Point(SpectralDefinition.BandNormalized(sed, _))       =>
       sed.asJson
@@ -371,7 +372,7 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
 
   Json.obj(
     "profile"      -> source,
-    "normBand"     -> s.band.asJson,
+    "normBand"     -> s.bandOrLine.fold(_.asJson, _ => Json.Null),
     "norm"         -> value,
     "redshift"     -> s.redshift.asJson,
     "units"        -> units,

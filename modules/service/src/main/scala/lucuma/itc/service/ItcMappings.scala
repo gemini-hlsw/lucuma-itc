@@ -63,12 +63,6 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     case IntegrationTimeError(msg) => Error.General(msg)
     case t                         => Error.General(s"Error calculating ITC: ${t.getMessage}")
 
-  private def buildTargetIntegrationTime(
-    ccdTimes: NonEmptyChain[IntegrationTime],
-    band:     Band
-  ): TargetIntegrationTime =
-    TargetIntegrationTime(Zipper.of(ccdTimes.head, ccdTimes.tail.toList*), band)
-
   private def errorToProblem(error: Error, targetIndex: Int): Problem =
     Problem(error.message, extensions = ErrorExtension(targetIndex, error).asJsonObject.some)
 

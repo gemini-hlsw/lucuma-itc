@@ -10508,8 +10508,11 @@ type TargetIntegrationTime {
   # Preferred CCD result for the target
   selected: IntegrationTime!
 
-  # The band used for the time calculation
-  band: Band!
+  # The band used for the time calculation, in case of a BandNormalized SED
+  band: Band
+
+  # The emission line used for the time calculation, in case of an EmissionLines SED
+  emissionLine: Wavelength
 }
 
 type TargetError {
@@ -10673,8 +10676,11 @@ type TargetGraphsResult {
   # graphs for the target
   graphs: TargetGraphs!
 
-  # The band used for the graphs calculation
-  band: Band!
+  # The band used for the graphs calculation, in case of a BandNormalized SED
+  band: Band
+
+  # The emission line used for the graphs calculation, in case of an EmissionLines SED
+  emissionLine: Wavelength
 }
 
 type SpectroscopyGraphsResult {

@@ -101,7 +101,7 @@ trait ItcCacheOrRemote extends Version:
 
   private def requestSpecTimeCalc[F[_]: Functor](itc: Itc[F])(
     calcRequest: TargetSpectroscopyTimeRequest
-  ): F[(NonEmptyChain[IntegrationTime], Band)] =
+  ): F[TargetIntegrationTime] =
     val band: Band = calcRequest.target.bandFor(calcRequest.atWavelength)
     itc
       .calculateIntegrationTime(
@@ -112,7 +112,6 @@ trait ItcCacheOrRemote extends Version:
         calcRequest.constraints,
         calcRequest.signalToNoise
       )
-      .map((_, band))
 
   /**
    * Request exposure time calculation for spectroscopy
@@ -122,7 +121,7 @@ trait ItcCacheOrRemote extends Version:
   )(
     itc:         Itc[F],
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
-  ): F[(NonEmptyChain[IntegrationTime], Band)] =
+  ): F[TargetIntegrationTime] =
     cacheOrRemote(calcRequest, requestSpecTimeCalc(itc))(
       "itc:calc:spec",
       redis

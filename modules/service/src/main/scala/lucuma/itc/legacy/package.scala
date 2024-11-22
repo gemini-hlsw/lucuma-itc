@@ -23,8 +23,8 @@ enum ItcWavefrontSensor(val ocs2Tag: String):
 case class ItcTelescopeDetails(wfs: ItcWavefrontSensor)
 
 case class ItcSourceDefinition(
-  target: TargetData,
-  band:   Band
+  target:     TargetData,
+  bandOrLine: Either[Band, Wavelength]
 ):
   export target.*
 
@@ -42,6 +42,13 @@ object ItcInstrumentDetails:
   def fromObservingMode(mode: ObservingMode): ItcInstrumentDetails =
     apply(mode)
 
+private def sourceDefinition(
+  target:       TargetData,
+  atWavelength: Wavelength
+): (ItcSourceDefinition, Either[Band, Wavelength]) =
+  val bandOrLine: Either[Band, Wavelength] = target.bandOrLine(atWavelength)
+  (ItcSourceDefinition(target, bandOrLine), bandOrLine)
+
 /** Convert model types into OCS2 ITC-compatible types for a spectroscopy request. */
 def spectroscopyGraphParams(
   target:           TargetData,
@@ -50,53 +57,60 @@ def spectroscopyGraphParams(
   exposureDuration: FiniteDuration,
   conditions:       ItcObservingConditions,
   exposureCount:    Int
-): ItcParameters =
-  ItcParameters(
-    source = ItcSourceDefinition(target, band),
-    observation = ItcObservationDetails(
-      calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
-        exposureCount = exposureCount,
-        coadds = None,
-        exposureDuration = exposureDuration,
-        sourceFraction = 1.0,
-        ditherOffset = Angle.Angle0
+): (ItcParameters, Either[Band, Wavelength]) = // Bubble up the selected band or line
+  val (sourceDefinition, bandOrLine): (ItcSourceDefinition, Either[Band, Wavelength]) =
+    sourceDefinition(target, atWavelength)
+  val parameters: ItcParameters                                                       =
+    ItcParameters(
+      source = sourceDefinition,
+      observation = ItcObservationDetails(
+        calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
+          exposureCount = exposureCount,
+          coadds = None,
+          exposureDuration = exposureDuration,
+          sourceFraction = 1.0,
+          ditherOffset = Angle.Angle0
+        ),
+        analysisMethod = observingMode.analysisMethod
       ),
-      analysisMethod = observingMode.analysisMethod
-    ),
-    conditions = conditions,
-    telescope = ItcTelescopeDetails(
-      wfs = ItcWavefrontSensor.OIWFS
-    ),
-    instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
-  )
+      conditions = conditions,
+      telescope = ItcTelescopeDetails(
+        wfs = ItcWavefrontSensor.OIWFS
+      ),
+      instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
+    )
+  (parameters, bandOrLine)
 
 def spectroscopyExposureTimeParams(
   target:        TargetData,
   atWavelength:  Wavelength,
-  band:          Band,
   observingMode: ObservingMode.SpectroscopyMode,
   conditions:    ItcObservingConditions,
   sigma:         SignalToNoise
-): ItcParameters =
-  ItcParameters(
-    source = ItcSourceDefinition(target, band),
-    observation = ItcObservationDetails(
-      calculationMethod =
-        ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
-          sigma = sigma.toBigDecimal.toDouble,
-          coadds = None,
-          wavelength = atWavelength,
-          sourceFraction = 1.0,
-          ditherOffset = Angle.Angle0
-        ),
-      analysisMethod = observingMode.analysisMethod
-    ),
-    conditions = conditions,
-    telescope = ItcTelescopeDetails(
-      wfs = ItcWavefrontSensor.OIWFS
-    ),
-    instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
-  )
+): (ItcParameters, Either[Band, Wavelength]) = // Bubble up the selected band or line
+  val (sourceDefinition, bandOrLine): (ItcSourceDefinition, Either[Band, Wavelength]) =
+    sourceDefinition(target, atWavelength)
+  val parameters: ItcParameters                                                       =
+    ItcParameters(
+      source = sourceDefinition,
+      observation = ItcObservationDetails(
+        calculationMethod =
+          ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
+            sigma = sigma.toBigDecimal.toDouble,
+            coadds = None,
+            wavelength = atWavelength,
+            sourceFraction = 1.0,
+            ditherOffset = Angle.Angle0
+          ),
+        analysisMethod = observingMode.analysisMethod
+      ),
+      conditions = conditions,
+      telescope = ItcTelescopeDetails(
+        wfs = ItcWavefrontSensor.OIWFS
+      ),
+      instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
+    )
+  (parameters, bandOrLine)
 
 def imagingParams(
   target:        TargetData,
@@ -104,21 +118,25 @@ def imagingParams(
   observingMode: ObservingMode,
   conditions:    ItcObservingConditions,
   sigma:         SignalToNoise
-): ItcParameters =
-  ItcParameters(
-    source = ItcSourceDefinition(target, band),
-    observation = ItcObservationDetails(
-      calculationMethod = ItcObservationDetails.CalculationMethod.IntegrationTime.ImagingExp(
-        sigma = sigma.toBigDecimal.toDouble,
-        coadds = None,
-        sourceFraction = 1.0,
-        ditherOffset = Angle.Angle0
+): (ItcParameters, Either[Band, Wavelength]) = // Bubble up the selected band or line
+  val (sourceDefinition, bandOrLine): (ItcSourceDefinition, Either[Band, Wavelength]) =
+    sourceDefinition(target, atWavelength)
+  val parameters: ItcParameters                                                       =
+    ItcParameters(
+      source = sourceDefinition,
+      observation = ItcObservationDetails(
+        calculationMethod = ItcObservationDetails.CalculationMethod.IntegrationTime.ImagingExp(
+          sigma = sigma.toBigDecimal.toDouble,
+          coadds = None,
+          sourceFraction = 1.0,
+          ditherOffset = Angle.Angle0
+        ),
+        analysisMethod = observingMode.analysisMethod
       ),
-      analysisMethod = observingMode.analysisMethod
-    ),
-    conditions = conditions,
-    telescope = ItcTelescopeDetails(
-      wfs = ItcWavefrontSensor.OIWFS
-    ),
-    instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
-  )
+      conditions = conditions,
+      telescope = ItcTelescopeDetails(
+        wfs = ItcWavefrontSensor.OIWFS
+      ),
+      instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
+    )
+  (parameters, bandOrLine)

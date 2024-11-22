@@ -20,11 +20,10 @@ trait Itc[F[_]]:
   def calculateIntegrationTime(
     target:        TargetData,
     atWavelength:  Wavelength,
-    band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     signalToNoise: SignalToNoise
-  ): F[NonEmptyChain[IntegrationTime]]
+  ): F[TargetIntegrationTime]
 
   /**
    * Retrieve the graph data for the given mode and exposureTime and exposures
@@ -32,7 +31,6 @@ trait Itc[F[_]]:
   def calculateGraph(
     target:        TargetData,
     atWavelength:  Wavelength,
-    band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
