@@ -7,6 +7,7 @@ import cats.effect.*
 import io.circe.Json
 import io.circe.parser.*
 import lucuma.itc.Itc
+import lucuma.itc.tests.EmissionLineMockItc
 import lucuma.itc.tests.FailingMockItc
 import lucuma.itc.tests.MockImagingItc
 import lucuma.itc.tests.MockItc
@@ -62,6 +63,9 @@ trait GraphQLSuite extends GraphQLSuiteBase:
 
 trait GraphImagingQLSuite extends GraphQLSuiteBase:
   override def itcService = MockImagingItc
+
+trait GraphQLEmissionLineSuite extends GraphQLSuiteBase:
+  override def itcService = EmissionLineMockItc
 
 trait FailingCalculationSuite extends GraphQLSuiteBase:
   override def itcService = FailingMockItc
