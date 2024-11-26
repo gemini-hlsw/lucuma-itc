@@ -76,7 +76,7 @@ object decoders:
         c.downField("band")
           .as[Band]
           .map(_.asLeft)
-          .orElse(c.downField("line").as[Wavelength].map(_.asRight))
+          .orElse(c.downField("emissionLine").as[Wavelength].map(_.asRight))
       times      <- c.as[Zipper[IntegrationTime]]
     yield TargetIntegrationTime(times, bandOrLine)
 

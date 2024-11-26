@@ -145,6 +145,32 @@ object MockImagingItc extends Itc[IO]:
     )
       .pure[IO]
 
+object EmissionLineMockItc extends Itc[IO]:
+
+  override def calculateIntegrationTime(
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    signalToNoise: SignalToNoise
+  ): IO[TargetIntegrationTime] =
+    TargetIntegrationTime(
+      Zipper.one:
+        IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get)
+      ,
+      Wavelength.unsafeFromIntPicometers(650000).asRight
+    ).pure[IO]
+
+  override def calculateGraphs(
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: PosInt
+  ): IO[TargetGraphsCalcResult] =
+    IO.raiseError(CalculationError("Not implemented"))
+
 object FailingMockItc extends Itc[IO]:
 
   override def calculateIntegrationTime(

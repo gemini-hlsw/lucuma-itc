@@ -30,6 +30,7 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
 
       fragment TargetIntegrationTimeFields on TargetIntegrationTime {
         band
+        emissionLine { picometers }
         all {
           ...IntegrationTimeFields
         }
@@ -91,6 +92,7 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
 
       fragment TargetIntegrationTimeFields on TargetIntegrationTime {
         band
+        emissionLine { picometers }
         all {
           ...IntegrationTimeFields
         }
@@ -197,6 +199,7 @@ object SpectroscopyGraphsQuery extends GraphQLOperation[Unit] {
                 }
               }
               band
+              emissionLine { picometers }
             }
             ... on TargetError {
               errorCode
@@ -239,6 +242,7 @@ object SpectroscopyIntegrationTimeAndGraphsQuery extends GraphQLOperation[Unit] 
 
       fragment TargetIntegrationTimeFields on TargetIntegrationTime {
         band
+        emissionLine { picometers }
         all {
           ...IntegrationTimeFields
         }

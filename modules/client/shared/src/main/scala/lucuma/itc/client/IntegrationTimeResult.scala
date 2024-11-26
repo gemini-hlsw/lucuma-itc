@@ -21,10 +21,10 @@ case class IntegrationTimeResult(
 object IntegrationTimeResult:
   given Decoder[IntegrationTimeResult] with
     def apply(c: HCursor): Decoder.Result[IntegrationTimeResult] =
-      for {
+      for
         v <- c.downField("versions").as[ItcVersions]
         t <- c.downField("targetTimes").as[AsterismIntegrationTimeOutcomes]
-      } yield IntegrationTimeResult(v, t)
+      yield IntegrationTimeResult(v, t)
 
   given Eq[IntegrationTimeResult] with
     def eqv(x: IntegrationTimeResult, y: IntegrationTimeResult): Boolean =

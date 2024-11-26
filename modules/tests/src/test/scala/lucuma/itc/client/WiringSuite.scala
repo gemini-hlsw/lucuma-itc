@@ -4,10 +4,12 @@
 package lucuma.itc.client
 
 import buildinfo.BuildInfo
+import cats.Order.given
 import cats.data.NonEmptyChain
 import cats.data.NonEmptyList
 import cats.syntax.either.*
 import cats.syntax.option.*
+import coulomb.syntax.*
 import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
@@ -26,18 +28,28 @@ import lucuma.core.enums.ImageQuality
 import lucuma.core.enums.SkyBackground
 import lucuma.core.enums.WaterVapor
 import lucuma.core.math.BrightnessUnits.Brightness
+import lucuma.core.math.BrightnessUnits.FluxDensityContinuum
 import lucuma.core.math.BrightnessUnits.Integrated
+import lucuma.core.math.BrightnessUnits.LineFlux
 import lucuma.core.math.BrightnessValue
+import lucuma.core.math.FluxDensityContinuumValue
+import lucuma.core.math.LineFluxValue
+import lucuma.core.math.LineWidthValue
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.Measure
 import lucuma.core.math.dimensional.TaggedUnit
+import lucuma.core.math.units.KilometersPerSecond
 import lucuma.core.math.units.VegaMagnitude
+import lucuma.core.math.units.WattsPerMeter2
+import lucuma.core.math.units.WattsPerMeter2Micrometer
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange.AirMass
+import lucuma.core.model.EmissionLine
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
+import lucuma.core.model.SpectralDefinition.EmissionLines
 import lucuma.core.model.UnnormalizedSED.Galaxy
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.*
@@ -152,6 +164,25 @@ class WiringSuite extends ClientSuite {
                 Band.R
               ).asRight
           )
+      ).asRight
+    )
+  }
+
+  test("ItcClient spectroscopy with emission lines basic wiring and sanity check") {
+    spectroscopyEmissionLines(
+      WiringSuite.SpectroscopyEmissionLinesInput,
+      IntegrationTimeResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+          BuildInfo.ocslibHash.some
+        ),
+        AsterismIntegrationTimeOutcomes:
+          NonEmptyChain:
+            TargetIntegrationTimeOutcome:
+              TargetIntegrationTime(
+                Zipper.fromNel(NonEmptyList.one(selected)),
+                Wavelength.unsafeFromIntPicometers(650000).asRight
+              ).asRight
       ).asRight
     )
   }
@@ -282,6 +313,58 @@ object WiringSuite {
                     TaggedUnit[VegaMagnitude, Brightness[Integrated]].unit
                   ).tag
               )
+            )
+          ),
+          RadialVelocity.fromMetersPerSecond.getOption(1.0).get
+        )
+      )
+    )
+
+  val SpectroscopyEmissionLinesInput: SpectroscopyIntegrationTimeInput =
+    SpectroscopyIntegrationTimeInput(
+      SpectroscopyIntegrationTimeParameters(
+        Wavelength.Min,
+        SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+        ConstraintSet(
+          ImageQuality.PointOne,
+          CloudExtinction.PointOne,
+          SkyBackground.Darkest,
+          WaterVapor.VeryDry,
+          AirMass.Default
+        ),
+        InstrumentMode.GmosNorthSpectroscopy(
+          Wavelength.Min,
+          GmosNorthGrating.B1200_G5301,
+          GmosNorthFilter.GPrime.some,
+          GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
+          GmosCcdMode(
+            GmosXBinning.Two,
+            GmosYBinning.Two,
+            GmosAmpCount.Twelve,
+            GmosAmpGain.High,
+            GmosAmpReadMode.Fast
+          ).some,
+          GmosRoi.FullFrame.some
+        )
+      ),
+      NonEmptyList.of(
+        TargetInput(
+          SourceProfile.Point(
+            EmissionLines[Integrated](
+              SortedMap(
+                Wavelength.unsafeFromIntPicometers(650000) ->
+                  EmissionLine(
+                    LineWidthValue.unsafeFrom(BigDecimal(1.0)).withUnit[KilometersPerSecond],
+                    Measure(
+                      LineFluxValue.unsafeFrom(BigDecimal(0.5)),
+                      TaggedUnit[WattsPerMeter2, LineFlux[Integrated]].unit
+                    ).tag
+                  )
+              ),
+              Measure(
+                FluxDensityContinuumValue.unsafeFrom(BigDecimal(0.5)),
+                TaggedUnit[WattsPerMeter2Micrometer, FluxDensityContinuum[Integrated]].unit
+              ).tag
             )
           ),
           RadialVelocity.fromMetersPerSecond.getOption(1.0).get

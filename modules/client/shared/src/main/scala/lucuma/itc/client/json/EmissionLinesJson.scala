@@ -15,7 +15,7 @@ given [T]: Encoder[EmissionLines[T]] with
     Json.obj(
       "lines"                -> Json.arr(el.lines.toList.map { case (w, l) =>
         Json.obj(
-          "wavelength" -> w.asJson,
+          "wavelength" -> Json.obj("picometers" -> w.toPicometers.value.asJson),
           "lineWidth"  -> l.lineWidth.value.asJson,
           "lineFlux"   ->
             Json.obj(
