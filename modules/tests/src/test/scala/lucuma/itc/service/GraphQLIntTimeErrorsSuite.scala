@@ -94,13 +94,13 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
       json"""
         {
           "errors": [{
-            "message": "A calculation error",
+            "message": "Error calculating ITC: A calculation error",
             "extensions": {
               "targetIndex": 0,
               "error": {
                 "wellHalfFilledSeconds": null,
                 "errorCode": "GENERAL",
-                "message": "A calculation error"
+                "message": "Error calculating ITC: A calculation error"
               }
             }
           }],

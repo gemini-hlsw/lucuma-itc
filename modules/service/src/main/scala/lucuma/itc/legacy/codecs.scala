@@ -17,6 +17,7 @@ import lucuma.core.math.BrightnessUnits.*
 import lucuma.core.math.Redshift
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
+import lucuma.core.math.dimensional.syntax.*
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
@@ -246,17 +247,6 @@ private given Encoder[Band] =
 
 private given Encoder[Redshift] =
   Encoder.forProduct1("z")(_.z)
-
-import lucuma.core.util.Display
-import lucuma.core.math.LineFluxValue
-import lucuma.core.math.LineWidthValue
-import lucuma.core.math.FluxDensityContinuumValue
-import lucuma.core.math.units.KilometersPerSecond
-given Display[LineFluxValue]             = _.toString
-given Display[FluxDensityContinuumValue] = _.toString
-given Display[LineWidthValue]            = _.toString
-import lucuma.core.math.dimensional.*
-given UnitOfMeasure[KilometersPerSecond] = UnitOfMeasure("kilometers per second", "km/s", "KM_S")
 
 private def encodeEmissionLine[T](
   wavelength:           Wavelength,

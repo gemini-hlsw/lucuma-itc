@@ -19,6 +19,7 @@ import lucuma.core.math.BrightnessValue
 import lucuma.core.math.Redshift
 import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.*
+import lucuma.core.math.dimensional.syntax.*
 import lucuma.core.math.units.*
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition

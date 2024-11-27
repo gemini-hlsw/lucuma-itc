@@ -11,6 +11,8 @@ import lucuma.itc.search.ObservingMode
 
 sealed trait IntegrationTimeError extends RuntimeException {
   def message: String
+
+  override def getMessage(): String = message
 }
 
 object IntegrationTimeError {
