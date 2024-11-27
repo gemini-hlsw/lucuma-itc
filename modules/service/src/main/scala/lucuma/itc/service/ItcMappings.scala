@@ -58,10 +58,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     Result(ItcVersions(version(environment).value, BuildInfo.ocslibHash.some)).pure[F]
 
   private val buildError: Throwable => Error =
-    case SourceTooBright(hw)       => Error.SourceTooBright(hw)
-    case UpstreamException(m)      => Error.General(m.mkString("\n"))
-    case IntegrationTimeError(msg) => Error.General(msg)
-    case t                         => Error.General(s"Error calculating ITC: ${t.getMessage}")
+    case SourceTooBright(hw) => Error.SourceTooBright(hw)
+    case t                   => Error.General(s"Error calculating ITC: ${t.getMessage}")
 
   private def errorToProblem(error: Error, targetIndex: Int): Problem =
     Problem(error.message, extensions = ErrorExtension(targetIndex, error).asJsonObject.some)

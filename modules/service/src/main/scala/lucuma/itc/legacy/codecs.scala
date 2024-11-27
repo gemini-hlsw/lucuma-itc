@@ -20,6 +20,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
+import lucuma.core.syntax.display.*
 import lucuma.core.syntax.string.*
 import lucuma.itc.GraphType
 import lucuma.itc.ItcGraph
@@ -246,6 +247,17 @@ private given Encoder[Band] =
 private given Encoder[Redshift] =
   Encoder.forProduct1("z")(_.z)
 
+import lucuma.core.util.Display
+import lucuma.core.math.LineFluxValue
+import lucuma.core.math.LineWidthValue
+import lucuma.core.math.FluxDensityContinuumValue
+import lucuma.core.math.units.KilometersPerSecond
+given Display[LineFluxValue]             = _.toString
+given Display[FluxDensityContinuumValue] = _.toString
+given Display[LineWidthValue]            = _.toString
+import lucuma.core.math.dimensional.*
+given UnitOfMeasure[KilometersPerSecond] = UnitOfMeasure("kilometers per second", "km/s", "KM_S")
+
 private def encodeEmissionLine[T](
   wavelength:           Wavelength,
   lineWidth:            LineWidthQuantity,
@@ -253,10 +265,12 @@ private def encodeEmissionLine[T](
   fluxDensityContinuum: FluxDensityContinuumMeasure[T]
 ): Json =
   Json.obj(
-    "wavelength" -> wavelength.asJson,
-    "width"      -> lineWidth.show.asJson,
-    "flux"       -> lineflux.toExactQuantity.show.asJson,
-    "continuum"  -> fluxDensityContinuum.toExactQuantity.show.asJson
+    "EmissionLine" -> Json.obj(
+      "wavelength" -> wavelength.asJson,
+      "width"      -> lineWidth.toMeasure.shortName.asJson,
+      "flux"       -> lineflux.exact.shortName.asJson,
+      "continuum"  -> fluxDensityContinuum.exact.shortName.asJson
+    )
   )
 
 given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
@@ -292,6 +306,18 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
         .map: b =>
           Json.obj("MagnitudeSystem" -> b.units.abbv.stripSuffix(" mag").asJson)
         .getOrElse(Json.Null)
+    case (Right(_),
+          SourceProfile.Point(SpectralDefinition.EmissionLines(_, fluxDensityContinuum))
+        ) =>
+      Json.obj("MagnitudeSystem" -> fluxDensityContinuum.units.abbv.asJson)
+    case (Right(_),
+          SourceProfile.Uniform(SpectralDefinition.EmissionLines(_, fluxDensityContinuum))
+        ) =>
+      Json.obj("SurfaceBrightness" -> fluxDensityContinuum.units.abbv.asJson)
+    case (Right(_),
+          SourceProfile.Gaussian(_, SpectralDefinition.EmissionLines(_, fluxDensityContinuum))
+        ) =>
+      Json.obj("MagnitudeSystem" -> fluxDensityContinuum.units.abbv.asJson)
     case _                                                                                       =>
       Json.Null
 
@@ -347,11 +373,15 @@ given Encoder[ItcSourceDefinition] = (s: ItcSourceDefinition) =>
         .map: line =>
           encodeEmissionLine(wavelength, line.lineWidth, line.lineFlux, fluxDensityContinuum)
         .getOrElse(Json.Null)
-    case _                                                                                  => Json.Null
+    case _                                                                                  =>
+      Json.Null
+
+  val normBand: Json = // Use a dummy value in case of emission lines
+    s.bandOrLine.fold(_.asJson, _ => (Band.R: Band).asJson)
 
   Json.obj(
     "profile"      -> source,
-    "normBand"     -> s.bandOrLine.fold(_.asJson, _ => Json.Null),
+    "normBand"     -> normBand,
     "norm"         -> value,
     "redshift"     -> s.redshift.asJson,
     "units"        -> units,
