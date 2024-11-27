@@ -3,9 +3,7 @@
 
 package lucuma.itc
 
-import cats.data.NonEmptyChain
 import eu.timepit.refined.types.numeric.PosInt
-import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
@@ -20,19 +18,17 @@ trait Itc[F[_]]:
   def calculateIntegrationTime(
     target:        TargetData,
     atWavelength:  Wavelength,
-    band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     signalToNoise: SignalToNoise
-  ): F[NonEmptyChain[IntegrationTime]]
+  ): F[TargetIntegrationTime]
 
   /**
    * Retrieve the graph data for the given mode and exposureTime and exposures
    */
-  def calculateGraph(
+  def calculateGraphs(
     target:        TargetData,
     atWavelength:  Wavelength,
-    band:          Band,
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,

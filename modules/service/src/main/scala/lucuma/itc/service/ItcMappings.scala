@@ -58,16 +58,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     Result(ItcVersions(version(environment).value, BuildInfo.ocslibHash.some)).pure[F]
 
   private val buildError: Throwable => Error =
-    case SourceTooBright(hw)       => Error.SourceTooBright(hw)
-    case UpstreamException(m)      => Error.General(m.mkString("\n"))
-    case IntegrationTimeError(msg) => Error.General(msg)
-    case t                         => Error.General(s"Error calculating ITC: ${t.getMessage}")
-
-  private def buildTargetIntegrationTime(
-    ccdTimes: NonEmptyChain[IntegrationTime],
-    band:     Band
-  ): TargetIntegrationTime =
-    TargetIntegrationTime(Zipper.of(ccdTimes.head, ccdTimes.tail.toList*), band)
+    case SourceTooBright(hw) => Error.SourceTooBright(hw)
+    case t                   => Error.General(s"Error calculating ITC: ${t.getMessage}")
 
   private def errorToProblem(error: Error, targetIndex: Int): Problem =
     Problem(error.message, extensions = ErrorExtension(targetIndex, error).asJsonObject.some)
@@ -92,9 +84,9 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetSpectroscopyTimeRequest) =>
         specTimeFromCacheOrRemote(targetRequest)(itc, redis).attempt
-          .map: (result: Either[Throwable, (NonEmptyChain[IntegrationTime], Band)]) =>
+          .map: (result: Either[Throwable, TargetIntegrationTime]) =>
             TargetIntegrationTimeOutcome:
-              result.bimap(buildError, buildTargetIntegrationTime)
+              result.leftMap(buildError)
       .map: (targetOutcomes: NonEmptyChain[TargetIntegrationTimeOutcome]) =>
         IntegrationTimeCalculationResult(
           ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
@@ -115,10 +107,10 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetImagingTimeRequest) =>
         imgTimeFromCacheOrRemote(targetRequest)(itc, redis).attempt
-          .map: (result: Either[Throwable, (NonEmptyChain[IntegrationTime], Band)]) =>
+          .map: (result: Either[Throwable, TargetIntegrationTime]) =>
             TargetIntegrationTimeOutcome:
               result
-                .bimap(buildError, buildTargetIntegrationTime)
+                .leftMap(buildError)
                 .map: (integrationTime: TargetIntegrationTime) =>
                   asterismRequest.imagingMode match
                     case ObservingMode.ImagingMode.GmosNorth(_, _) |
@@ -137,8 +129,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           .error(t)(s"Error calculating imaging integration time for input: $asterismRequest")
 
   private def buildTargetGraphsResult(significantFigures: Option[SignificantFigures])(
-    graphResult: TargetGraphsCalcResult,
-    band:        Band
+    graphResult: TargetGraphsCalcResult
   ): TargetGraphsResult = {
     val graphs: NonEmptyChain[ItcGraphGroup] =
       significantFigures.fold(graphResult.data): v =>
@@ -173,7 +164,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
         peakSingleSNRatio,
         atWvSingleSNRatio
       ),
-      band
+      graphResult.bandOrLine
     )
   }
 
@@ -184,8 +175,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   )(asterismRequest: AsterismGraphRequest): F[Result[SpectroscopyGraphsResult]] =
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetGraphRequest) =>
-        graphFromCacheOrRemote(targetRequest)(itc, redis).attempt
-          .map: (result: Either[Throwable, (TargetGraphsCalcResult, Band)]) =>
+        graphsFromCacheOrRemote(targetRequest)(itc, redis).attempt
+          .map: (result: Either[Throwable, TargetGraphsCalcResult]) =>
             TargetGraphsOutcome:
               result.bimap(buildError, buildTargetGraphsResult(asterismRequest.significantFigures))
       .map: (targetGraphs: NonEmptyChain[TargetGraphsOutcome]) =>
@@ -195,7 +186,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
         ).toResult
       .onError: t =>
         Logger[F]
-          .error(t)(s"Error calculating spectroscopy graph for input: $asterismRequest")
+          .error(t)(s"Error calculating spectroscopy graphs for input: $asterismRequest")
 
   private def buildAsterismGraphRequest(
     asterismRequest: AsterismSpectroscopyTimeRequest,

@@ -9,9 +9,13 @@ import cats.derived.*
 import cats.syntax.all.*
 import io.circe.Decoder
 import io.circe.Encoder
+import io.circe.JsonObject
+import io.circe.syntax.*
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.Wavelength
 import lucuma.core.util.Enumerated
+import lucuma.itc.encoders.given
 
 enum SeriesDataType(val tag: String) derives Enumerated:
   case SignalData     extends SeriesDataType("signal_data")
@@ -79,11 +83,18 @@ case class TargetGraphs(
       Encoder.AsObject
 
 case class TargetGraphsResult(
-  graphs: TargetGraphs,
-  band:   Band
-) derives Eq,
-      Encoder.AsObject:
+  graphs:     TargetGraphs,
+  bandOrLine: Either[Band, Wavelength]
+) derives Eq:
   export graphs.*
+
+object TargetGraphsResult:
+  given Encoder.AsObject[TargetGraphsResult] = x =>
+    JsonObject(
+      "graphs"       -> x.graphs.asJson,
+      "band"         -> x.bandOrLine.left.toOption.asJson,
+      "emissionLine" -> x.bandOrLine.toOption.asJson
+    )
 
 case class SpectroscopyGraphsResult(
   versions:     ItcVersions,

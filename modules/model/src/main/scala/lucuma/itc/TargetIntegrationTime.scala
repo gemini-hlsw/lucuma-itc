@@ -10,8 +10,13 @@ import io.circe.syntax.*
 import lucuma.core.data.Zipper
 import lucuma.core.data.ZipperCodec.given
 import lucuma.core.enums.Band
+import lucuma.core.math.Wavelength
+import lucuma.itc.encoders.given
 
-case class TargetIntegrationTime(times: Zipper[IntegrationTime], band: Band):
+case class TargetIntegrationTime(
+  times:      Zipper[IntegrationTime],
+  bandOrLine: Either[Band, Wavelength]
+):
   def focusIndex(index: Int): Option[TargetIntegrationTime] =
     times
       .focusIndex(index)
@@ -21,7 +26,10 @@ case class TargetIntegrationTime(times: Zipper[IntegrationTime], band: Band):
 object TargetIntegrationTime:
   given Encoder[TargetIntegrationTime] = t =>
     Json
-      .obj("band" -> t.band.asJson)
+      .obj(
+        "band"         -> t.bandOrLine.left.toOption.asJson,
+        "emissionLine" -> t.bandOrLine.toOption.asJson
+      )
       .deepMerge(t.times.asJson)
 
   given Order[TargetIntegrationTime] = Order.by(_.times.focus)

@@ -6,12 +6,10 @@ package lucuma.itc.service
 import boopickle.DefaultBasic.*
 import buildinfo.BuildInfo
 import cats.*
-import cats.data.NonEmptyChain
 import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
 import dev.profunktor.redis4cats.algebra.StringCommands
-import lucuma.core.enums.Band
 import lucuma.itc.*
 import lucuma.itc.service.redis.given
 import lucuma.itc.service.requests.*
@@ -72,47 +70,41 @@ trait ItcCacheOrRemote extends Version:
     }
   }
 
-  private def requestGraph[F[_]: Functor](itc: Itc[F])(
+  private def requestGraphs[F[_]: Functor](itc: Itc[F])(
     request: TargetGraphRequest
-  ): F[(TargetGraphsCalcResult, Band)] =
-    val band: Band = request.target.bandFor(request.atWavelength)
+  ): F[TargetGraphsCalcResult] =
     itc
-      .calculateGraph(
+      .calculateGraphs(
         request.target,
         request.atWavelength,
-        band,
         request.specMode,
         request.constraints,
         request.expTime,
         request.exp
       )
-      .map((_, band))
 
   /**
    * Request a graph
    */
-  def graphFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
+  def graphsFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
     request: TargetGraphRequest
   )(
     itc:     Itc[F],
     redis:   StringCommands[F, Array[Byte], Array[Byte]]
-  ): F[(TargetGraphsCalcResult, Band)] =
-    cacheOrRemote(request, requestGraph(itc))("itc:graph:spec", redis)
+  ): F[TargetGraphsCalcResult] =
+    cacheOrRemote(request, requestGraphs(itc))("itc:graph:spec", redis)
 
   private def requestSpecTimeCalc[F[_]: Functor](itc: Itc[F])(
     calcRequest: TargetSpectroscopyTimeRequest
-  ): F[(NonEmptyChain[IntegrationTime], Band)] =
-    val band: Band = calcRequest.target.bandFor(calcRequest.atWavelength)
+  ): F[TargetIntegrationTime] =
     itc
       .calculateIntegrationTime(
         calcRequest.target,
         calcRequest.atWavelength,
-        band,
         calcRequest.specMode,
         calcRequest.constraints,
         calcRequest.signalToNoise
       )
-      .map((_, band))
 
   /**
    * Request exposure time calculation for spectroscopy
@@ -122,7 +114,7 @@ trait ItcCacheOrRemote extends Version:
   )(
     itc:         Itc[F],
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
-  ): F[(NonEmptyChain[IntegrationTime], Band)] =
+  ): F[TargetIntegrationTime] =
     cacheOrRemote(calcRequest, requestSpecTimeCalc(itc))(
       "itc:calc:spec",
       redis
@@ -130,18 +122,15 @@ trait ItcCacheOrRemote extends Version:
 
   private def requestImgTimeCalc[F[_]: Functor](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest
-  ): F[(NonEmptyChain[IntegrationTime], Band)] =
-    val band: Band = calcRequest.target.bandFor(calcRequest.atWavelength)
+  ): F[TargetIntegrationTime] =
     itc
       .calculateIntegrationTime(
         calcRequest.target,
         calcRequest.atWavelength,
-        band,
         calcRequest.imagingMode,
         calcRequest.constraints,
         calcRequest.signalToNoise
       )
-      .map((_, band))
 
   /**
    * Request exposure time calculation for imaging
@@ -151,7 +140,7 @@ trait ItcCacheOrRemote extends Version:
   )(
     itc:         Itc[F],
     redis:       StringCommands[F, Array[Byte], Array[Byte]]
-  ): F[(NonEmptyChain[IntegrationTime], Band)] =
+  ): F[TargetIntegrationTime] =
     cacheOrRemote(calcRequest, requestImgTimeCalc(itc))(
       "itc:calc:img",
       redis

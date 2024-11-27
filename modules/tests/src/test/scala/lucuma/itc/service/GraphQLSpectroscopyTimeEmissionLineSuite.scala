@@ -5,34 +5,38 @@ package lucuma.itc.service
 
 import io.circe.literal.*
 
-class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
+class GraphQLSpectroscopyTimeEmissionLineSuite extends GraphQLEmissionLineSuite {
 
-  test("Test error channel") {
+  test("emission lines") {
     query(
       """
         query {
           spectroscopyIntegrationTime(input: {
             atWavelength: {
-              nanometers: 60
+              nanometers: 60,
             },
             signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {
                   point: {
-                    bandNormalized: {
-                      sed: {
-                        stellarLibrary: O5_V
+                    emissionLines: {
+                      lines: [
+                        {
+                          wavelength: {
+                            picometers: 650000
+                          },
+                          lineWidth: 1,
+                          lineFlux: {
+                            value: 0.5,
+                            units: W_PER_M_SQUARED
+                          }
+                        }
+                      ],
+                      fluxDensityContinuum: {
+                        value: 0.5,
+                        units: W_PER_M_SQUARED_PER_UM
                       }
-                      brightnesses: [ {
-                        band: R
-                        value: 3
-                        units: ERG_PER_S_PER_CM_SQUARED_PER_A
-                      }, {
-                        band: J
-                        value: 2.1
-                        units: AB_MAGNITUDE
-                      }]
                     }
                   }
                 },
@@ -87,36 +91,36 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
                   seconds
                 }
               }
+              emissionLine { picometers }
             }
           }
         }
         """,
       json"""
         {
-          "errors": [{
-            "message": "Error calculating ITC: A calculation error",
-            "extensions": {
-              "targetIndex": 0,
-              "error": {
-                "wellHalfFilledSeconds": null,
-                "errorCode": "GENERAL",
-                "message": "Error calculating ITC: A calculation error"
-              }
-            }
-          }],
           "data": {
             "spectroscopyIntegrationTime" : {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "resolution" : 970,
-                "params" : {
-                  "grating" : "B1200_G5301"
+                "params": {
+                  "grating": "B1200_G5301"
                 },
                 "centralWavelength" : {
                   "nanometers" : 60.000
                 }
               },
-              "brightest" : null
+              "brightest": {
+                "selected" : {
+                  "exposureCount" : 10,
+                  "exposureTime" : {
+                    "seconds" : 1.000000
+                  }
+                },
+                "emissionLine": {
+                  "picometers": 650000
+                }
+              }
             }
           }
         }

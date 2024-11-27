@@ -6,7 +6,9 @@ package lucuma.itc.client
 import cats.effect.*
 import cats.implicits.*
 import com.comcast.ip4s.*
+import lucuma.itc.Itc
 import lucuma.itc.ItcVersions
+import lucuma.itc.tests.EmissionLineMockItc
 import lucuma.itc.tests.MockItc
 import munit.CatsEffectSuite
 import munit.catseffect.IOFixture
@@ -26,67 +28,78 @@ trait ClientSuite extends CatsEffectSuite {
   given Logger[IO] =
     Slf4jLogger.getLoggerFromClass(getClass)
 
-  private val httpApp: Resource[IO, WebSocketBuilder2[IO] => HttpApp[IO]] =
-    Resource.eval(lucuma.itc.tests.app(MockItc))
+  private def httpApp(backend: Itc[IO]): Resource[IO, WebSocketBuilder2[IO] => HttpApp[IO]] =
+    Resource.eval(lucuma.itc.tests.app(backend))
 
-  private val server: Resource[IO, Server] =
-    httpApp.flatMap { app =>
+  private def server(backend: Itc[IO], port: Int): Resource[IO, Server] =
+    httpApp(backend).flatMap: app =>
       EmberServerBuilder
         .default[IO]
         .withHost(ipv4"0.0.0.0")
+        .withPort(Port.fromInt(port).get)
         .withHttpWebSocketApp(app)
         .withShutdownTimeout(2.seconds)
         .build
-    }
 
-  private val serverFixture: IOFixture[Server] =
-    ResourceSuiteLocalFixture("server", server)
+  private def serverFixture(backend: Itc[IO], port: Int): IOFixture[Server] =
+    ResourceSuiteLocalFixture("server", server(backend, port))
 
-  override def munitFixtures = List(serverFixture)
+  private val bandNormalizedFixture = serverFixture(MockItc, 8080)
+  private val emissionLineFixture   = serverFixture(EmissionLineMockItc, 8081)
 
-  private val itcClient: IO[ItcClient[IO]] =
-    for {
+  override def munitFixtures = List(bandNormalizedFixture, emissionLineFixture)
+
+  private def itcClient(fixture: IOFixture[Server]): IO[ItcClient[IO]] =
+    for
       h <- JdkHttpClient.simple[IO]
-      u <- IO(serverFixture()).map(_.baseUri / "graphql")
+      u <- IO(fixture()).map(_.baseUri / "graphql")
       c <- ItcClient.create[IO](u, h)
-    } yield c
+    yield c
+
+  private val bandNormalizedClient = itcClient(bandNormalizedFixture)
+  private val emissionLineClient   = itcClient(emissionLineFixture)
 
   def spectroscopy(
     in:       SpectroscopyIntegrationTimeInput,
     expected: Either[String, IntegrationTimeResult]
   ): IO[Unit] =
-    itcClient.flatMap {
+    bandNormalizedClient.flatMap:
       _.spectroscopy(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
-    }
 
   def imaging(
     in:       ImagingIntegrationTimeInput,
     expected: Either[String, IntegrationTimeResult]
   ): IO[Unit] =
-    itcClient.flatMap {
+    bandNormalizedClient.flatMap:
       _.imaging(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
-    }
 
   def spectroscopyGraphs(
     in:       SpectroscopyGraphsInput,
     expected: Either[String, SpectroscopyGraphsResult]
   ): IO[Unit] =
-    itcClient.flatMap {
+    bandNormalizedClient.flatMap:
       _.spectroscopyGraphs(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
-    }
 
   def versions(
     expected: Either[String, ItcVersions]
   ): IO[Unit] =
-    itcClient.flatMap {
+    bandNormalizedClient.flatMap:
       _.versions.attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
-    }
+
+  def spectroscopyEmissionLines(
+    in:       SpectroscopyIntegrationTimeInput,
+    expected: Either[String, IntegrationTimeResult]
+  ): IO[Unit] =
+    emissionLineClient.flatMap:
+      _.spectroscopy(in).attempt
+        .map(_.leftMap(_.getMessage))
+        .assertEquals(expected)
 }
