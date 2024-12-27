@@ -29,7 +29,7 @@ val natchezVersion              = "0.3.7"
 val natchezHttp4sVersion        = "0.6.0"
 val pprintVersion               = "0.9.0"
 val redis4CatsVersion           = "1.7.0"
-val refinedVersion              = "0.11.2"
+val refinedVersion              = "0.11.3"
 val slf4jVersion                = "2.0.16"
 val spireVersion                = "0.18.0"
 
