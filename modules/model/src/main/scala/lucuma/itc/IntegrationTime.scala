@@ -3,9 +3,7 @@
 
 package lucuma.itc
 
-import cats.Eq
 import cats.Order
-import cats.derived.*
 import eu.timepit.refined.cats.*
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.*
@@ -18,8 +16,7 @@ case class IntegrationTime(
   exposureTime:  TimeSpan,
   exposureCount: PosInt,
   signalToNoise: SignalToNoise
-) derives Eq,
-      Encoder.AsObject
+) derives Encoder.AsObject
 
 object IntegrationTime:
   // The brightest target will be the one with the smallest exposure time.

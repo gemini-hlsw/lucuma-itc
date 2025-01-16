@@ -49,21 +49,21 @@ trait ClientSuite extends CatsEffectSuite {
 
   override def munitFixtures = List(bandNormalizedFixture, emissionLineFixture)
 
-  private def itcClient(fixture: IOFixture[Server]): IO[ItcClient[IO]] =
+  private def itcClient(fixture: IOFixture[Server]): Resource[IO, ItcClient[IO]] =
     for
       h <- JdkHttpClient.simple[IO]
-      u <- IO(fixture()).map(_.baseUri / "graphql")
-      c <- ItcClient.create[IO](u, h)
+      u <- Resource.eval(IO(fixture()).map(_.baseUri / "graphql"))
+      c <- Resource.eval(ItcClient.create[IO](u, h))
     yield c
 
-  private val bandNormalizedClient = itcClient(bandNormalizedFixture)
-  private val emissionLineClient   = itcClient(emissionLineFixture)
+  private val bandNormalizedClient: Resource[IO, ItcClient[IO]] = itcClient(bandNormalizedFixture)
+  private val emissionLineClient: Resource[IO, ItcClient[IO]]   = itcClient(emissionLineFixture)
 
   def spectroscopy(
     in:       SpectroscopyIntegrationTimeInput,
     expected: Either[String, IntegrationTimeResult]
   ): IO[Unit] =
-    bandNormalizedClient.flatMap:
+    bandNormalizedClient.use:
       _.spectroscopy(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
@@ -72,7 +72,7 @@ trait ClientSuite extends CatsEffectSuite {
     in:       ImagingIntegrationTimeInput,
     expected: Either[String, IntegrationTimeResult]
   ): IO[Unit] =
-    bandNormalizedClient.flatMap:
+    bandNormalizedClient.use:
       _.imaging(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
@@ -81,7 +81,7 @@ trait ClientSuite extends CatsEffectSuite {
     in:       SpectroscopyGraphsInput,
     expected: Either[String, SpectroscopyGraphsResult]
   ): IO[Unit] =
-    bandNormalizedClient.flatMap:
+    bandNormalizedClient.use:
       _.spectroscopyGraphs(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
@@ -89,7 +89,7 @@ trait ClientSuite extends CatsEffectSuite {
   def versions(
     expected: Either[String, ItcVersions]
   ): IO[Unit] =
-    bandNormalizedClient.flatMap:
+    bandNormalizedClient.use:
       _.versions.attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
@@ -98,7 +98,7 @@ trait ClientSuite extends CatsEffectSuite {
     in:       SpectroscopyIntegrationTimeInput,
     expected: Either[String, IntegrationTimeResult]
   ): IO[Unit] =
-    emissionLineClient.flatMap:
+    emissionLineClient.use:
       _.spectroscopy(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)

@@ -39,7 +39,7 @@ class NoOpRedis[F[_]: ApplicativeThrow, K, V] extends StringCommands[F, K, V] {
 
   override def decrBy(key: K, amount: Long): F[Long] = (amount - 1).pure[F]
 
-  override def strLen(key: K): F[Option[Long]] = none.pure[F]
+  override def strLen(key: K): F[Long] = 0L.pure[F]
 
   override def mSet(keyValues: Map[K, V]): F[Unit] = Applicative[F].unit
 

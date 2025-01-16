@@ -122,7 +122,7 @@ object Main extends IOApp with ItcCacheOrRemote {
       .withHttpWebSocketApp(app)
       .build
 
-  def routes[F[_]: Async: Concurrent: Logger: Parallel: Trace: Compression](
+  def routes[F[_]: Async: Logger: Parallel: Trace: Compression](
     cfg: Config,
     itc: LocalItc
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
