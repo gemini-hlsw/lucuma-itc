@@ -8,7 +8,6 @@ import clue.GraphQLOperation
 import io.circe.Decoder
 import io.circe.Encoder
 import io.circe.HCursor
-import io.circe.Json
 import io.circe.JsonObject
 import lucuma.itc.AsterismIntegrationTimeOutcomes
 import lucuma.itc.ItcVersions

@@ -20,8 +20,7 @@ import lucuma.itc.client.json.decoders.given
 case class TargetTimeAndGraphsResult(
   integrationTime: TargetIntegrationTime,
   graphs:          TargetGraphs
-) derives Eq,
-      Decoder:
+) derives Decoder:
   export integrationTime.*
   export graphs.*
 

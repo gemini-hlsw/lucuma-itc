@@ -6,9 +6,9 @@ package lucuma.itc.client
 import cats.effect.Async
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
-import clue.ErrorPolicy
 import clue.http4s.Http4sHttpBackend
 import clue.http4s.Http4sHttpClient
+import clue.syntax.*
 import io.circe.syntax.*
 import lucuma.itc.ItcVersions
 import org.http4s.Uri
@@ -49,7 +49,7 @@ object ItcClient {
     uri:    Uri,
     client: Client[F]
   ): F[ItcClient[F]] =
-    for {
+    for
       specCache         <- ItcCache.simple[F, SpectroscopyIntegrationTimeInput, IntegrationTimeResult]
       imgCache          <- ItcCache.simple[F, ImagingIntegrationTimeInput, IntegrationTimeResult]
       graphCache        <-
@@ -60,7 +60,7 @@ object ItcClient {
                         SpectroscopyIntegrationTimeAndGraphsResult
         ]
       http              <- Http4sHttpClient.of[F, Unit](uri)(Async[F], Http4sHttpBackend(client), Logger[F])
-    } yield new ItcClient[F] {
+    yield new ItcClient[F] {
 
       override def spectroscopy(
         input:    SpectroscopyIntegrationTimeInput,
@@ -68,14 +68,17 @@ object ItcClient {
       ): F[IntegrationTimeResult] = {
 
         val callOut: F[IntegrationTimeResult] =
-          http.request(SpectroscopyIntegrationTime).withInput(input).map(_.data)
+          http
+            .request(SpectroscopyIntegrationTime)
+            .withInput(input)
+            .raiseGraphQLErrorsOnNoData
 
-        for {
+        for
           _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")
           v <- if (useCache) specCache.getOrCalcF(input)(callOut)
                else callOut.flatTap(specCache.put(input))
           _ <- Logger[F].debug(s"ITC Result:\n$v")
-        } yield v
+        yield v
       }
 
       override def imaging(
@@ -84,32 +87,38 @@ object ItcClient {
       ): F[IntegrationTimeResult] = {
 
         val callOut: F[IntegrationTimeResult] =
-          http.request(ImagingIntegrationTime).withInput(input).map(_.data)
+          http
+            .request(ImagingIntegrationTime)
+            .withInput(input)
+            .raiseGraphQLErrorsOnNoData
 
-        for {
+        for
           _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")
           v <- if (useCache) imgCache.getOrCalcF(input)(callOut)
                else callOut.flatTap(imgCache.put(input))
           _ <- Logger[F].debug(s"ITC Result:\n$v")
-        } yield v
+        yield v
       }
 
       override val versions: F[ItcVersions] =
-        http.request(VersionsQuery)(using ErrorPolicy.RaiseAlways)
+        http.request(VersionsQuery).raiseGraphQLErrors
 
       def spectroscopyGraphs(
         input:    SpectroscopyGraphsInput,
         useCache: Boolean = true
       ): F[SpectroscopyGraphsResult] = {
         val callOut: F[SpectroscopyGraphsResult] =
-          http.request(SpectroscopyGraphsQuery).withInput(input).map(_.data)
+          http
+            .request(SpectroscopyGraphsQuery)
+            .withInput(input)
+            .raiseGraphQLErrorsOnNoData
 
-        for {
+        for
           _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")
           v <- if (useCache) graphCache.getOrCalcF(input)(callOut)
                else callOut.flatTap(graphCache.put(input))
           _ <- Logger[F].debug(s"ITC Result:\n$v")
-        } yield v
+        yield v
       }
 
       def spectroscopyIntegrationTimeAndGraphs(
@@ -117,14 +126,17 @@ object ItcClient {
         useCache: Boolean = true
       ): F[SpectroscopyIntegrationTimeAndGraphsResult] = {
         val callOut: F[SpectroscopyIntegrationTimeAndGraphsResult] =
-          http.request(SpectroscopyIntegrationTimeAndGraphsQuery).withInput(input).map(_.data)
+          http
+            .request(SpectroscopyIntegrationTimeAndGraphsQuery)
+            .withInput(input)
+            .raiseGraphQLErrorsOnNoData
 
-        for {
+        for
           _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")
           v <- if (useCache) timeAndGraphCache.getOrCalcF(input)(callOut)
                else callOut.flatTap(timeAndGraphCache.put(input))
           _ <- Logger[F].debug(s"ITC Result:\n$v")
-        } yield v
+        yield v
       }
     }
 
