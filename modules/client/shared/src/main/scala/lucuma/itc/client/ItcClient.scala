@@ -101,7 +101,7 @@ object ItcClient {
       }
 
       override val versions: F[ItcVersions] =
-        http.request(VersionsQuery).apply.raiseGraphQLErrors
+        http.request(VersionsQuery).raiseGraphQLErrors
 
       def spectroscopyGraphs(
         input:    SpectroscopyGraphsInput,
