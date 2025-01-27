@@ -16,11 +16,13 @@ import lucuma.itc.GmosNImagingParams
 import lucuma.itc.GmosNSpectroscopyParams
 import lucuma.itc.GmosSImagingParams
 import lucuma.itc.GmosSSpectroscopyParams
+import lucuma.itc.F2SpectroscopyParams
 import lucuma.itc.encoders.given
 import lucuma.itc.search.hashes.given
 import lucuma.itc.search.syntax.*
 import spire.math.Interval
 import spire.math.Rational
+import lucuma.itc.search.ItcObservationDetails.AnalysisMethod
 
 case class GmosNorthFpuParam(
   builtin: GmosNorthFpu
@@ -53,8 +55,9 @@ object ObservingMode {
 
   object SpectroscopyMode {
     given Encoder[ObservingMode.SpectroscopyMode] = Encoder.instance {
-      case gn: GmosNorth => gn.asJson
-      case gs: GmosSouth => gs.asJson
+      case gn: GmosNorth  => gn.asJson
+      case gs: GmosSouth  => gs.asJson
+      case f2: Flamingos2 => f2.asJson
     }
 
     sealed trait GmosSpectroscopy extends SpectroscopyMode derives Hash {
@@ -133,6 +136,43 @@ object ObservingMode {
         Json.obj(
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
           ("params", GmosSSpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
+          ("centralWavelength", a.centralWavelength.asJson)
+        )
+
+    case class Flamingos2(
+      centralWavelength: Wavelength,
+      disperser:         F2Disperser,
+      fpu:               F2Fpu,
+      filter:            F2Filter
+    ) extends SpectroscopyMode derives Hash {
+
+      override def analysisMethod: AnalysisMethod =
+        ItcObservationDetails.AnalysisMethod.Ifu.Single(skyFibres = 250, offset = 5.0)
+
+      override def resolution: Rational = ???
+
+      override def coverage: Interval[Wavelength] = ???
+
+      val isIfu = fpu.slitWidth > 0
+
+      val instrument: Instrument =
+        Instrument.Flamingos2
+
+      // def resolution: Rational =
+      //   disperser.resolution(centralWavelength, fpu.effectiveSlitWidth)
+      //
+      // def coverage: Interval[Wavelength] =
+      //   filter.foldLeft(disperser.simultaneousCoverage.centeredAt(centralWavelength).toInterval)(
+      //     (a, b) => a.intersect(b.coverageGN)
+      //   )
+    }
+
+    object Flamingos2:
+      given Encoder[Flamingos2] = a =>
+        Json.obj(
+          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+          ("resolution", Json.fromInt(a.resolution.toInt)),
+          ("params", F2SpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
           ("centralWavelength", a.centralWavelength.asJson)
         )
 

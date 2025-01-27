@@ -172,3 +172,33 @@ trait GmosSouthFpuSyntax:
       }
 
 object gmossouthfpu extends GmosSouthFpuSyntax
+
+trait F2DisperserSyntax:
+  import lucuma.core.enums.F2Disperser
+  import lucuma.core.enums.F2Disperser.*
+  extension (self: F2Disperser) def ocs2Tag: String = self.longName
+
+object f2disperser extends F2DisperserSyntax
+
+trait F2FilterSyntax:
+  import lucuma.core.enums.F2Filter
+  extension (self: F2Filter) def ocs2Tag: String = self.longName
+
+object f2filter extends F2FilterSyntax
+
+trait F2FpuSyntax:
+  import lucuma.core.enums.F2Fpu
+  import lucuma.core.enums.F2Fpu.*
+  extension (self: F2Fpu)
+    def ocs2Tag: String =
+      self match
+        case Pinhole       => "pinhole"
+        case SubPixPinhole => "subpixPinhole"
+        case LongSlit1     => "longslit_1"
+        case LongSlit2     => "longslit_2"
+        case LongSlit3     => "longslit_3"
+        case LongSlit4     => "longslit_4"
+        case LongSlit6     => "longslit_6"
+        case LongSlit8     => "longslit_8"
+
+object f2fpu extends F2FpuSyntax

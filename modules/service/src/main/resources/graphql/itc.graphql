@@ -17402,7 +17402,8 @@ input Flamingos2SpectroscopyInput {
   disperser: Flamingos2Disperser!
 
   # Flamingos2 Focal plane unit
-  fpu: Flamingos2FpuInput!
+  # fpu: Flamingos2FpuInput!
+  fpu: Flamingos2Fpu!
 
   # Flamingos2 filter
   filter: Flamingos2Filter
