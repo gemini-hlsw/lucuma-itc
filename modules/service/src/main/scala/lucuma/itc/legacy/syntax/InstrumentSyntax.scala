@@ -175,7 +175,6 @@ object gmossouthfpu extends GmosSouthFpuSyntax
 
 trait F2DisperserSyntax:
   import lucuma.core.enums.F2Disperser
-  import lucuma.core.enums.F2Disperser.*
   extension (self: F2Disperser) def ocs2Tag: String = self.longName
 
 object f2disperser extends F2DisperserSyntax

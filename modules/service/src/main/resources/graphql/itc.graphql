@@ -17399,14 +17399,13 @@ input Flamingos2SpectroscopyInput {
   centralWavelength: WavelengthInput!
 
   # Flamingos2 disperser
-  disperser: Flamingos2Disperser!
+  #disperser: Flamingos2Disperser!
 
   # Flamingos2 Focal plane unit
-  # fpu: Flamingos2FpuInput!
-  fpu: Flamingos2Fpu!
+  #fpu: GmosNorthFpuInput!
 
   # Flamingos2 filter
-  filter: Flamingos2Filter
+  #filter: Flamingos2Filter
 }
 
 type GmosSITCParams {
@@ -17464,8 +17463,8 @@ input InstrumentModesInput {
   """Gmos South Imaging"""
   gmosSImaging: GmosSImagingInput
 
-  # Flamingos2 Spectroscop
-  flamingos: Flamingos2SpectroscopyInput
+  # Flamingos2 Spectroscopy
+  flamingos2Spectroscopy: Flamingos2SpectroscopyInput
 }
 
 """Params for spectroscopy integration time calculation"""
