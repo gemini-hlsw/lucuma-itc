@@ -23,18 +23,16 @@ case class SpectroscopyIntegrationTimeParameters(
   mode:          InstrumentMode
 ) derives Eq
 
-object SpectroscopyIntegrationTimeParameters {
-  given Encoder[SpectroscopyIntegrationTimeParameters] with
-    def apply(a: SpectroscopyIntegrationTimeParameters): Json =
-      Json
-        .obj(
-          "atWavelength"  -> Json.obj("picometers" -> a.atWavelength.toPicometers.value.asJson),
-          "signalToNoise" -> a.signalToNoise.asJson,
-          "constraints"   -> a.constraints.asJson,
-          "mode"          -> a.mode.asJson
-        )
-        .dropNullValues
-}
+object SpectroscopyIntegrationTimeParameters:
+  given Encoder[SpectroscopyIntegrationTimeParameters] = a =>
+    Json
+      .obj(
+        "atWavelength"  -> Json.obj("picometers" -> a.atWavelength.toPicometers.value.asJson),
+        "signalToNoise" -> a.signalToNoise.asJson,
+        "constraints"   -> a.constraints.asJson,
+        "mode"          -> a.mode.asJson
+      )
+      .dropNullValues
 
 case class SpectroscopyIntegrationTimeInput(
   parameters: SpectroscopyIntegrationTimeParameters,
@@ -42,8 +40,6 @@ case class SpectroscopyIntegrationTimeInput(
 ) derives Eq:
   export parameters.*
 
-object SpectroscopyIntegrationTimeInput {
-  given Encoder[SpectroscopyIntegrationTimeInput] with
-    def apply(a: SpectroscopyIntegrationTimeInput): Json =
-      Json.obj("asterism" -> a.asterism.asJson).deepMerge(a.parameters.asJson)
-}
+object SpectroscopyIntegrationTimeInput:
+  given Encoder[SpectroscopyIntegrationTimeInput] = a =>
+    Json.obj("asterism" -> a.asterism.asJson).deepMerge(a.parameters.asJson)
