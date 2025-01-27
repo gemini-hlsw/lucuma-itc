@@ -4,12 +4,7 @@
 package lucuma.itc.input
 
 import cats.syntax.parallel.*
-import lucuma.core.enums.GmosSouthFilter
-import lucuma.core.model.sequence.gmos.GmosCcdMode
-import lucuma.odb.graphql.binding.*
-import lucuma.odb.graphql.input.GmosCcdModeInput
 import lucuma.core.enums.F2Disperser
-import lucuma.core.model.sequence.f2.F2DynamicConfig
 import lucuma.core.enums.F2Fpu
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
@@ -28,11 +23,14 @@ object F2SpectroscopyInput:
   def binding: Matcher[F2SpectroscopyInput] =
     ObjectFieldsBinding.rmap {
       case List(
-            WavelengthInput.Binding("centralWavelength", centralWavelength),
-            F2DisperserBinding("disperser", disperser),
+            WavelengthInput.Binding("centralWavelength", centralWavelength)
+            // F2DisperserBinding("disperser", disperser),
             // F2FpuInput.Binding("fpu", fpu),
-            F2FilterBinding("filter", filter),
-            F2FpuBinding("fpu", fpu)
+            // F2FilterBinding("filter", filter),
+            // F2FpuBinding("fpu", fpu)
           ) =>
-        (centralWavelength, disperser, filter, fpu).parMapN(apply)
+        centralWavelength.map(c =>
+          F2SpectroscopyInput(c, F2Disperser.R3000, F2Filter.Y, F2Fpu.LongSlit1)
+        )
+      // (centralWavelength, disperser, filter, fpu).parMapN(apply)
     }

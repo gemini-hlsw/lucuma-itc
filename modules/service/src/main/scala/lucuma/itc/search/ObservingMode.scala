@@ -142,36 +142,24 @@ object ObservingMode {
     case class Flamingos2(
       centralWavelength: Wavelength,
       disperser:         F2Disperser,
-      fpu:               F2Fpu,
-      filter:            F2Filter
+      filter:            F2Filter,
+      fpu:               F2Fpu
     ) extends SpectroscopyMode derives Hash {
 
       override def analysisMethod: AnalysisMethod =
         ItcObservationDetails.AnalysisMethod.Ifu.Single(skyFibres = 250, offset = 5.0)
-
-      override def resolution: Rational = ???
-
-      override def coverage: Interval[Wavelength] = ???
 
       val isIfu = fpu.slitWidth > 0
 
       val instrument: Instrument =
         Instrument.Flamingos2
 
-      // def resolution: Rational =
-      //   disperser.resolution(centralWavelength, fpu.effectiveSlitWidth)
-      //
-      // def coverage: Interval[Wavelength] =
-      //   filter.foldLeft(disperser.simultaneousCoverage.centeredAt(centralWavelength).toInterval)(
-      //     (a, b) => a.intersect(b.coverageGN)
-      //   )
     }
 
     object Flamingos2:
       given Encoder[Flamingos2] = a =>
         Json.obj(
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-          ("resolution", Json.fromInt(a.resolution.toInt)),
           ("params", F2SpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
           ("centralWavelength", a.centralWavelength.asJson)
         )

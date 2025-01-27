@@ -22,6 +22,8 @@ import lucuma.core.util.TimeSpan
 import lucuma.itc.legacy.FLocalItc
 import lucuma.itc.legacy.IntegrationTimeRemoteResult
 import lucuma.itc.search.ObservingMode
+import lucuma.itc.search.ObservingMode.SpectroscopyMode
+import lucuma.itc.search.ObservingMode.ImagingMode
 import lucuma.itc.search.TargetData
 import natchez.Trace
 import org.typelevel.log4cats.Logger
@@ -47,8 +49,9 @@ object ItcImpl {
       ): F[TargetIntegrationTime] =
         T.span("calculate-integration-time"):
           observingMode match
-            case s @ (ObservingMode.SpectroscopyMode.GmosNorth(_, _, _, _, _, _) |
-                ObservingMode.SpectroscopyMode.GmosSouth(_, _, _, _, _, _)) =>
+            case s @ (SpectroscopyMode.GmosNorth(_, _, _, _, _, _) |
+                SpectroscopyMode.GmosSouth(_, _, _, _, _, _) |
+                SpectroscopyMode.Flamingos2(_, _, _, _)) =>
               spectroscopyIntegrationTime(target, atWavelength, s, constraints, signalToNoise)
             case i @ (
                   ObservingMode.ImagingMode.GmosNorth(_, _) |
@@ -65,8 +68,9 @@ object ItcImpl {
         exposureCount: PosInt
       ): F[TargetGraphsCalcResult] =
         observingMode match
-          case s @ (ObservingMode.SpectroscopyMode.GmosNorth(_, _, _, _, _, _) |
-              ObservingMode.SpectroscopyMode.GmosSouth(_, _, _, _, _, _)) =>
+          case s @ (SpectroscopyMode.GmosNorth(_, _, _, _, _, _) |
+              SpectroscopyMode.GmosSouth(_, _, _, _, _, _) |
+              SpectroscopyMode.Flamingos2(_, _, _, _)) =>
             spectroscopyGraphs(
               target,
               atWavelength,
@@ -75,8 +79,7 @@ object ItcImpl {
               exposureTime.toMilliseconds.withUnit[Millisecond].toUnit[Second],
               exposureCount.value
             )
-          case ObservingMode.ImagingMode.GmosNorth(_, _) |
-              ObservingMode.ImagingMode.GmosSouth(_, _) =>
+          case ImagingMode.GmosNorth(_, _) | ImagingMode.GmosSouth(_, _) =>
             MonadThrow[F].raiseError:
               new IllegalArgumentException("Imaging mode not supported for graph calculation")
 
