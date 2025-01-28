@@ -7,9 +7,10 @@ import cats.syntax.either.*
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength
+import lucuma.core.util.TimeSpan
 import lucuma.itc.client.*
 
 // Decoders for the client don't need to be as generic as the ones for the server.
-object encoders {
+object encoders:
+  given Encoder[TimeSpan]   = t => Json.obj("microseconds" -> TimeSpan.FromMicroseconds.reverseGet(t).asJson)
   given Encoder[Wavelength] = w => Json.obj("picometers" -> w.toPicometers.value.value.asJson)
-}

@@ -9,18 +9,16 @@ import cats.derived.*
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
-import lucuma.core.math.SignalToNoise
-import lucuma.core.math.Wavelength
 import lucuma.core.model.ConstraintSet
+import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
 import lucuma.itc.encoders.given
 
 case class ImagingIntegrationTimeParameters(
-  atWavelength:  Wavelength,
-  signalToNoise: SignalToNoise,
-  constraints:   ConstraintSet,
-  mode:          InstrumentMode
+  exposureTimeMode: ExposureTimeMode,
+  constraints:      ConstraintSet,
+  mode:             InstrumentMode
 ) derives Eq
 
 object ImagingIntegrationTimeParameters {
@@ -28,10 +26,9 @@ object ImagingIntegrationTimeParameters {
     def apply(a: ImagingIntegrationTimeParameters): Json =
       Json
         .obj(
-          "atWavelength"  -> Json.obj("picometers" -> a.atWavelength.toPicometers.value.asJson),
-          "signalToNoise" -> a.signalToNoise.asJson,
-          "constraints"   -> a.constraints.asJson,
-          "mode"          -> a.mode.asJson
+          "exposureTimeMode" -> a.exposureTimeMode.asJson,
+          "constraints"      -> a.constraints.asJson,
+          "mode"             -> a.mode.asJson
         )
         .dropNullValues
 }
