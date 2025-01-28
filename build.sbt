@@ -71,6 +71,16 @@ ThisBuild / watchOnTermination := { (action, cmd, times, state) =>
   }
 }
 
+ThisBuild / githubWorkflowBuild +=
+  WorkflowStep.Use(
+    UseRef.Public("kamilkisiela", "graphql-inspector", "master"),
+    name = Some("Validate GraphQL schema changes"),
+    params = Map("schema"        -> "main:modules/service/src/main/resources/graphql/itc.graphql",
+                 "approve-label" -> "expected-breaking-change"
+    )
+    // cond = Some("github.event_name == 'pull_request'")
+  )
+
 // Basic model classes
 lazy val model = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
