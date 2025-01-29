@@ -12,10 +12,12 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
       """
         query {
           spectroscopyIntegrationTime(input: {
-            atWavelength: {
-              nanometers: 60
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {

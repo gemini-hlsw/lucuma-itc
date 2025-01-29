@@ -11,6 +11,7 @@ import grackle.*
 import lucuma.core.enums.{ExecutionEnvironment as _, *}
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
+import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.*
 import lucuma.itc.input.*
 import lucuma.itc.search.ObservingMode
@@ -18,10 +19,9 @@ import lucuma.itc.search.TargetData
 import lucuma.itc.search.hashes.given
 
 case class ImagingTimeParameters(
-  atWavelength:  Wavelength,
-  imagingMode:   ObservingMode.ImagingMode,
-  constraints:   ItcObservingConditions,
-  signalToNoise: SignalToNoise
+  exposureTimeMode: ExposureTimeMode,
+  imagingMode:      ObservingMode.ImagingMode,
+  constraints:      ItcObservingConditions
 ) derives Hash
 
 case class TargetImagingTimeRequest(
@@ -43,8 +43,7 @@ case class AsterismImagingTimeRequest(
 object AsterismImagingTimeRequest:
   def fromInput(input: ImagingIntegrationTimeInput): Result[AsterismImagingTimeRequest] = {
     val ImagingIntegrationTimeInput(
-      atWavelength,
-      signalToNoise,
+      exposureTimeMode,
       asterism,
       constraints,
       mode
@@ -71,6 +70,6 @@ object AsterismImagingTimeRequest:
     (asterismResult, modeResult, conditionsResult).parMapN: (asterism, mode, conditions) =>
       AsterismImagingTimeRequest(
         asterism,
-        ImagingTimeParameters(atWavelength, mode, conditions, signalToNoise)
+        ImagingTimeParameters(exposureTimeMode, mode, conditions)
       )
   }

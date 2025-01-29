@@ -47,6 +47,7 @@ import lucuma.core.math.units.WattsPerMeter2Micrometer
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange.AirMass
 import lucuma.core.model.EmissionLine
+import lucuma.core.model.ExposureTimeMode
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.SpectralDefinition.EmissionLines
@@ -193,8 +194,10 @@ object WiringSuite {
   val SpectroscopyInput: SpectroscopyIntegrationTimeInput =
     SpectroscopyIntegrationTimeInput(
       SpectroscopyIntegrationTimeParameters(
-        Wavelength.Min,
-        SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+        ExposureTimeMode.SignalToNoiseMode(
+          SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+          Wavelength.Min
+        ),
         ConstraintSet(
           ImageQuality.PointOne,
           CloudExtinction.PointOne,
@@ -239,8 +242,10 @@ object WiringSuite {
   val ImagingInput: ImagingIntegrationTimeInput =
     ImagingIntegrationTimeInput(
       ImagingIntegrationTimeParameters(
-        Wavelength.Min,
-        SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+        ExposureTimeMode.SignalToNoiseMode(
+          SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+          Wavelength.Min
+        ),
         ConstraintSet(
           ImageQuality.PointOne,
           CloudExtinction.PointOne,
@@ -323,8 +328,10 @@ object WiringSuite {
   val SpectroscopyEmissionLinesInput: SpectroscopyIntegrationTimeInput =
     SpectroscopyIntegrationTimeInput(
       SpectroscopyIntegrationTimeParameters(
-        Wavelength.Min,
-        SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+        ExposureTimeMode.SignalToNoiseMode(
+          SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+          Wavelength.Min
+        ),
         ConstraintSet(
           ImageQuality.PointOne,
           CloudExtinction.PointOne,

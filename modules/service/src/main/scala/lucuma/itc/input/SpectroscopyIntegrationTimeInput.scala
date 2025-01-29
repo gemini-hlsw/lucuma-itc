@@ -4,72 +4,61 @@
 package lucuma.itc.input
 
 import cats.syntax.all.*
-import lucuma.core.math.SignalToNoise
-import lucuma.core.math.Wavelength
+import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.SignificantFigures
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 
-sealed trait SpectroscopyTimeInput {
-  def atWavelength: Wavelength
-  def signalToNoise: SignalToNoise
+sealed trait SpectroscopyTimeInput:
+  def exposureTimeMode: ExposureTimeMode
   def asterism: List[TargetDataInput]
   def constraints: ConstraintSetInput
   def mode: InstrumentModesInput
-}
 
 object SpectroscopyTimeInput:
   def unapply(
     arg: SpectroscopyTimeInput
-  ): (Wavelength, SignalToNoise, List[TargetDataInput], ConstraintSetInput, InstrumentModesInput) =
-    (arg.atWavelength, arg.signalToNoise, arg.asterism, arg.constraints, arg.mode)
+  ): (ExposureTimeMode, List[TargetDataInput], ConstraintSetInput, InstrumentModesInput) =
+    (arg.exposureTimeMode, arg.asterism, arg.constraints, arg.mode)
 
 case class SpectroscopyIntegrationTimeInput(
-  atWavelength:  Wavelength,
-  signalToNoise: SignalToNoise,
-  asterism:      List[TargetDataInput],
-  constraints:   ConstraintSetInput,
-  mode:          InstrumentModesInput
+  exposureTimeMode: ExposureTimeMode,
+  asterism:         List[TargetDataInput],
+  constraints:      ConstraintSetInput,
+  mode:             InstrumentModesInput
 ) extends SpectroscopyTimeInput
 
-object SpectroscopyIntegrationTimeInput {
+object SpectroscopyIntegrationTimeInput:
 
   def binding: Matcher[SpectroscopyIntegrationTimeInput] =
     ObjectFieldsBinding.rmap {
       case List(
-            WavelengthInput.Binding("atWavelength", wavelength),
-            SignalToNoiseBinding("signalToNoise", signalToNoise),
+            ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
             TargetDataInput.binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
             InstrumentModesInput.binding("mode", mode)
           ) =>
-        (wavelength, signalToNoise, asterism, constraints, mode).parMapN(apply)
+        (exposureTimeMode, asterism, constraints, mode).parMapN(apply)
     }
 
-}
-
 case class SpectroscopyIntegrationTimeAndGraphsInput(
-  atWavelength:       Wavelength,
-  signalToNoise:      SignalToNoise,
+  exposureTimeMode:   ExposureTimeMode,
   asterism:           List[TargetDataInput],
   constraints:        ConstraintSetInput,
   mode:               InstrumentModesInput,
   significantFigures: Option[SignificantFigures]
 ) extends SpectroscopyTimeInput
 
-object SpectroscopyIntegrationTimeAndGraphsInput {
+object SpectroscopyIntegrationTimeAndGraphsInput:
 
   def binding: Matcher[SpectroscopyIntegrationTimeAndGraphsInput] =
     ObjectFieldsBinding.rmap {
       case List(
-            WavelengthInput.Binding("atWavelength", wavelength),
-            SignalToNoiseBinding("signalToNoise", signalToNoise),
+            ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
             TargetDataInput.binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
             InstrumentModesInput.binding("mode", mode),
             SignificantFiguresInput.binding.Option("significantFigures", significantFigures)
           ) =>
-        (wavelength, signalToNoise, asterism, constraints, mode, significantFigures).parMapN(apply)
+        (exposureTimeMode, asterism, constraints, mode, significantFigures).parMapN(apply)
     }
-
-}

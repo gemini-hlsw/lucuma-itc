@@ -10,6 +10,7 @@ import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
 import dev.profunktor.redis4cats.algebra.StringCommands
+import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.*
 import lucuma.itc.service.redis.given
 import lucuma.itc.service.requests.*
@@ -94,17 +95,28 @@ trait ItcCacheOrRemote extends Version:
   ): F[TargetGraphsCalcResult] =
     cacheOrRemote(request, requestGraphs(itc))("itc:graph:spec", redis)
 
-  private def requestSpecTimeCalc[F[_]: Functor](itc: Itc[F])(
+  private def timeAndCountModeNotImplemented[F[_]: MonadThrow, A]: F[A] =
+    MonadThrow[F].raiseError[A](
+      new UnsupportedOperationException(
+        "'Time And Count' exposure time mode is not yet implemented."
+      )
+    )
+
+  private def requestSpecTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
     calcRequest: TargetSpectroscopyTimeRequest
   ): F[TargetIntegrationTime] =
-    itc
-      .calculateIntegrationTime(
-        calcRequest.target,
-        calcRequest.atWavelength,
-        calcRequest.specMode,
-        calcRequest.constraints,
-        calcRequest.signalToNoise
-      )
+    calcRequest.exposureTimeMode match
+      case ExposureTimeMode.SignalToNoiseMode(value, at) =>
+        itc
+          .calculateIntegrationTime(
+            calcRequest.target,
+            at,
+            calcRequest.specMode,
+            calcRequest.constraints,
+            value
+          )
+      case ExposureTimeMode.TimeAndCountMode(_, _, _)    =>
+        timeAndCountModeNotImplemented
 
   /**
    * Request exposure time calculation for spectroscopy
@@ -120,17 +132,21 @@ trait ItcCacheOrRemote extends Version:
       redis
     )
 
-  private def requestImgTimeCalc[F[_]: Functor](itc: Itc[F])(
+  private def requestImgTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest
   ): F[TargetIntegrationTime] =
-    itc
-      .calculateIntegrationTime(
-        calcRequest.target,
-        calcRequest.atWavelength,
-        calcRequest.imagingMode,
-        calcRequest.constraints,
-        calcRequest.signalToNoise
-      )
+    calcRequest.exposureTimeMode match
+      case ExposureTimeMode.SignalToNoiseMode(value, at) =>
+        itc
+          .calculateIntegrationTime(
+            calcRequest.target,
+            at,
+            calcRequest.imagingMode,
+            calcRequest.constraints,
+            value
+          )
+      case ExposureTimeMode.TimeAndCountMode(_, _, _)    =>
+        timeAndCountModeNotImplemented
 
   /**
    * Request exposure time calculation for imaging

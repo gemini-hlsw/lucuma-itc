@@ -11,6 +11,7 @@ import grackle.*
 import lucuma.core.enums.{ExecutionEnvironment as _, *}
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
+import lucuma.core.model.ExposureTimeMode
 import lucuma.core.model.sequence.gmos.GmosFpuMask
 import lucuma.itc.*
 import lucuma.itc.input.*
@@ -21,10 +22,9 @@ import lucuma.itc.search.TargetData
 import lucuma.itc.search.hashes.given
 
 case class SpectroscopyTimeParameters(
-  atWavelength:  Wavelength,
-  specMode:      ObservingMode.SpectroscopyMode,
-  constraints:   ItcObservingConditions,
-  signalToNoise: SignalToNoise
+  exposureTimeMode: ExposureTimeMode,
+  specMode:         ObservingMode.SpectroscopyMode,
+  constraints:      ItcObservingConditions
 ) derives Hash
 
 case class TargetSpectroscopyTimeRequest(
@@ -45,7 +45,7 @@ case class AsterismSpectroscopyTimeRequest(
 
 object AsterismSpectroscopyTimeRequest:
   def fromInput(input: SpectroscopyTimeInput): Result[AsterismSpectroscopyTimeRequest] = {
-    val SpectroscopyTimeInput(wavelength, signalToNoise, asterism, constraints, mode) =
+    val SpectroscopyTimeInput(exposureTimeMode, asterism, constraints, mode) =
       input
 
     val asterismResult: Result[NonEmptyChain[TargetData]] =
@@ -85,6 +85,6 @@ object AsterismSpectroscopyTimeRequest:
     (asterismResult, modeResult, conditionsResult).parMapN: (asterism, mode, conditions) =>
       AsterismSpectroscopyTimeRequest(
         asterism,
-        SpectroscopyTimeParameters(wavelength, mode, conditions, signalToNoise)
+        SpectroscopyTimeParameters(exposureTimeMode, mode, conditions)
       )
   }

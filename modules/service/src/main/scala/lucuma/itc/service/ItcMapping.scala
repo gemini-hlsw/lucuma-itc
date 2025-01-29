@@ -200,7 +200,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     AsterismGraphRequest(
       asterismRequest.asterism,
       GraphParameters(
-        asterismRequest.atWavelength,
+        asterismRequest.exposureTimeMode.at,
         asterismRequest.specMode,
         asterismRequest.constraints,
         expTime,

@@ -25,9 +25,9 @@ trait ArbIntegrationTimeInput {
   given Arbitrary[SpectroscopyIntegrationTimeParameters] =
     Arbitrary:
       for
-        ex  <- arbitrary[ExposureTimeMode]
-        cs  <- arbitrary[ConstraintSet]
-        im  <- arbitrary[InstrumentMode]
+        ex <- arbitrary[ExposureTimeMode]
+        cs <- arbitrary[ConstraintSet]
+        im <- arbitrary[InstrumentMode]
       yield SpectroscopyIntegrationTimeParameters(ex, cs, im)
 
   given Arbitrary[SpectroscopyIntegrationTimeInput] =
@@ -46,9 +46,9 @@ trait ArbIntegrationTimeInput {
   given Arbitrary[ImagingIntegrationTimeParameters] =
     Arbitrary:
       for {
-        ex  <- arbitrary[ExposureTimeMode]
-        cs  <- arbitrary[ConstraintSet]
-        im  <- arbitrary[InstrumentMode]
+        ex <- arbitrary[ExposureTimeMode]
+        cs <- arbitrary[ConstraintSet]
+        im <- arbitrary[InstrumentMode]
       } yield ImagingIntegrationTimeParameters(ex, cs, im)
 
   given Arbitrary[ImagingIntegrationTimeInput] =

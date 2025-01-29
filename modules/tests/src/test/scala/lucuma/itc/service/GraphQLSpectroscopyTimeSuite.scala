@@ -17,10 +17,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       """
         query {
           spectroscopyIntegrationTime(input: {
-            atWavelength: {
-              nanometers: 60,
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {
@@ -130,10 +132,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       """
         query {
           spectroscopyIntegrationTime(input: {
-            atWavelength: {
-              nanometers: 60,
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {
@@ -245,10 +249,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       """
         {
           "spectroscopy" : {
-            "atWavelength" : {
-              "nanometers" : "600"
+            "exposureTimeMode": {
+              "signalToNoise": {
+                "value": 2,
+                "at": { "nanometers": "600" }
+              }
             },
-            "signalToNoise" : 2,
             "asterism": [
               {
                 "sourceProfile": {
@@ -338,10 +344,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
         query {
           spectroscopyIntegrationTime(input: {
-            atWavelength: {
-              nanometers: 60,
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {
@@ -451,10 +459,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       """
         query {
           spectroscopyIntegrationTime(input: {
-            atWavelength: {
-              nanometers: 60,
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {
@@ -548,10 +558,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
         query {
           spectroscopyIntegrationTime(input: {
-            atWavelength: {
-              nanometers: 60,
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {
@@ -662,10 +674,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
         query {
           spectroscopyIntegrationTime(input: {
-            atWavelength: {
-              nanometers: 60,
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {
@@ -781,10 +795,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
           query {
             spectroscopyIntegrationTime(input: {
-              atWavelength: {
-                nanometers: 60,
+              exposureTimeMode: {
+                signalToNoise: {
+                  value: 2,
+                  at: { nanometers: 60 }
+                }
               },
-              signalToNoise: 2,
               asterism: [
                 {
                   sourceProfile: {
@@ -904,10 +920,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
         query {
           spectroscopyIntegrationTime(input: {
-            atWavelength: {
-              nanometers: 60,
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {
@@ -1022,10 +1040,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
         query {
           spectroscopyIntegrationTime(input: {
-            atWavelength: {
-              nanometers: 60,
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {
@@ -1136,10 +1156,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         s"""
         query {
           spectroscopyIntegrationTime(input: {
-            atWavelength: {
-              nanometers: 60,
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {
@@ -1249,10 +1271,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       """
         query {
           spectroscopyIntegrationTime(input: {
-            atWavelength: {
-              nanometers: 600,
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {
