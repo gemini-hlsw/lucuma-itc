@@ -173,14 +173,11 @@ private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.
 private val encodeF2Spectroscopy: Encoder[ObservingMode.SpectroscopyMode.Flamingos2] = a =>
   Json.obj(
     // Translate observing mode to OCS2 style
-    "centralWavelength" -> a.centralWavelength.asJson,
-    "filter"            -> Json.obj(
-      "FilterSouth" -> Json.fromString(a.filter.ocs2Tag)
-    ),
-    "grating"           -> Json.obj("DisperserSouth" -> Json.fromString(a.disperser.ocs2Tag)),
-    "fpMask"            -> Json.obj("FPUnitSouth" -> Json.fromString(a.fpu.ocs2Tag)),
-    "site"              -> Json.fromString("GS"),
-    "customSlitWidth"   -> Json.Null
+    "filter"          -> Json.fromString(a.filter.ocs2Tag),
+    "grism"           -> Json.fromString(a.disperser.ocs2Tag),
+    "mask"            -> Json.fromString(a.fpu.ocs2Tag),
+    "readMode"        -> Json.fromString("FAINT_OBJECT_SPEC"),
+    "customSlitWidth" -> Json.Null
   )
 
 private val encodeGmosSouthImaging: Encoder[ObservingMode.ImagingMode.GmosSouth] =

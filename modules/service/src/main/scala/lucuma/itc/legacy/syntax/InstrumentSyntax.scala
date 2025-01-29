@@ -7,6 +7,7 @@ import lucuma.core.enums.GmosNorthGrating
 import lucuma.core.enums.GmosNorthGrating.*
 import lucuma.core.enums.GmosSouthGrating
 import lucuma.core.enums.GmosSouthGrating.*
+import lucuma.core.syntax.string.*
 
 /**
  * Syntax extensions for missing properties. These need to be folded back into the lucuma.core
@@ -175,13 +176,13 @@ object gmossouthfpu extends GmosSouthFpuSyntax
 
 trait F2DisperserSyntax:
   import lucuma.core.enums.F2Disperser
-  extension (self: F2Disperser) def ocs2Tag: String = self.longName
+  extension (self: F2Disperser) def ocs2Tag: String = self.shortName
 
 object f2disperser extends F2DisperserSyntax
 
 trait F2FilterSyntax:
   import lucuma.core.enums.F2Filter
-  extension (self: F2Filter) def ocs2Tag: String = self.longName
+  extension (self: F2Filter) def ocs2Tag: String = self.shortName
 
 object f2filter extends F2FilterSyntax
 
@@ -191,13 +192,13 @@ trait F2FpuSyntax:
   extension (self: F2Fpu)
     def ocs2Tag: String =
       self match
-        case Pinhole       => "pinhole"
-        case SubPixPinhole => "subpixPinhole"
-        case LongSlit1     => "longslit_1"
-        case LongSlit2     => "longslit_2"
-        case LongSlit3     => "longslit_3"
-        case LongSlit4     => "longslit_4"
-        case LongSlit6     => "longslit_6"
-        case LongSlit8     => "longslit_8"
+        case Pinhole       => "PINHOLE"
+        case SubPixPinhole => "SUBPIXPINHOLE"
+        case LongSlit1     => "LONGSLIT_1"
+        case LongSlit2     => "LONGSLIT_2"
+        case LongSlit3     => "LONGSLIT_3"
+        case LongSlit4     => "LONGSLIT_4"
+        case LongSlit6     => "LONGSLIT_6"
+        case LongSlit8     => "LONGSLIT_8"
 
 object f2fpu extends F2FpuSyntax

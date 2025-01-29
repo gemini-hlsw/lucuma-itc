@@ -147,7 +147,9 @@ object ObservingMode {
     ) extends SpectroscopyMode derives Hash {
 
       override def analysisMethod: AnalysisMethod =
-        ItcObservationDetails.AnalysisMethod.Ifu.Single(skyFibres = 250, offset = 5.0)
+        ItcObservationDetails.AnalysisMethod.Aperture.Auto(
+          skyAperture = 1.0
+        )
 
       val isIfu = fpu.slitWidth > 0
 
