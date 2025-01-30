@@ -5,11 +5,11 @@ package lucuma.itc.input
 
 import cats.syntax.parallel.*
 import lucuma.core.enums.F2Disperser
+import lucuma.core.enums.F2Filter
 import lucuma.core.enums.F2Fpu
+import lucuma.core.math.Wavelength
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
-import lucuma.core.enums.F2Filter
-import lucuma.core.math.Wavelength
 
 case class F2SpectroscopyInput(
   centralWavelength: Wavelength,
@@ -23,14 +23,13 @@ object F2SpectroscopyInput:
   def binding: Matcher[F2SpectroscopyInput] =
     ObjectFieldsBinding.rmap {
       case List(
-            WavelengthInput.Binding("centralWavelength", centralWavelength)
-            // F2DisperserBinding("disperser", disperser),
+            WavelengthInput.Binding("centralWavelength", centralWavelength),
+            F2DisperserBinding("disperser", disperser),
             // F2FpuInput.Binding("fpu", fpu),
-            // F2FilterBinding("filter", filter),
-            // F2FpuBinding("fpu", fpu)
+            F2FpuBinding("fpu", fpu),
+            F2FilterBinding("filter", filter)
           ) =>
-        centralWavelength.map(c =>
-          F2SpectroscopyInput(c, F2Disperser.R3000, F2Filter.Y, F2Fpu.LongSlit1)
+        (centralWavelength, disperser, filter, fpu).parMapN((c, d, f, u) =>
+          F2SpectroscopyInput(c, d, f, u)
         )
-      // (centralWavelength, disperser, filter, fpu).parMapN(apply)
     }

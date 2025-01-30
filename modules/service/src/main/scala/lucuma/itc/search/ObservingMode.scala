@@ -12,17 +12,17 @@ import lucuma.core.enums.*
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import lucuma.core.model.sequence.gmos.GmosCcdMode
+import lucuma.itc.F2SpectroscopyParams
 import lucuma.itc.GmosNImagingParams
 import lucuma.itc.GmosNSpectroscopyParams
 import lucuma.itc.GmosSImagingParams
 import lucuma.itc.GmosSSpectroscopyParams
-import lucuma.itc.F2SpectroscopyParams
 import lucuma.itc.encoders.given
+import lucuma.itc.search.ItcObservationDetails.AnalysisMethod
 import lucuma.itc.search.hashes.given
 import lucuma.itc.search.syntax.*
 import spire.math.Interval
 import spire.math.Rational
-import lucuma.itc.search.ItcObservationDetails.AnalysisMethod
 
 case class GmosNorthFpuParam(
   builtin: GmosNorthFpu
@@ -161,7 +161,7 @@ object ObservingMode {
     object Flamingos2:
       given Encoder[Flamingos2] = a =>
         Json.obj(
-          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+          ("instrument", a.instrument.asJson),
           ("params", F2SpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
           ("centralWavelength", a.centralWavelength.asJson)
         )
