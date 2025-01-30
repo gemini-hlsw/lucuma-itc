@@ -21,8 +21,8 @@ import lucuma.core.util.TimeSpan
 import lucuma.itc.legacy.FLocalItc
 import lucuma.itc.legacy.IntegrationTimeRemoteResult
 import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.ObservingMode.SpectroscopyMode
 import lucuma.itc.search.ObservingMode.ImagingMode
+import lucuma.itc.search.ObservingMode.SpectroscopyMode
 import lucuma.itc.search.TargetData
 import natchez.Trace
 import org.typelevel.log4cats.Logger

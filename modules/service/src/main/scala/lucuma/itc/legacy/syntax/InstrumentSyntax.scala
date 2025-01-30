@@ -7,7 +7,6 @@ import lucuma.core.enums.GmosNorthGrating
 import lucuma.core.enums.GmosNorthGrating.*
 import lucuma.core.enums.GmosSouthGrating
 import lucuma.core.enums.GmosSouthGrating.*
-import lucuma.core.syntax.string.*
 
 /**
  * Syntax extensions for missing properties. These need to be folded back into the lucuma.core

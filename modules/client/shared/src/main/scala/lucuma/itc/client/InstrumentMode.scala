@@ -13,6 +13,9 @@ import io.circe.DecodingFailure
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
+import lucuma.core.enums.F2Disperser
+import lucuma.core.enums.F2Filter
+import lucuma.core.enums.F2Fpu
 import lucuma.core.enums.GmosNorthFilter
 import lucuma.core.enums.GmosNorthGrating
 import lucuma.core.enums.GmosRoi
@@ -25,9 +28,6 @@ import lucuma.odb.json.gmos.given
 import lucuma.odb.json.wavelength.transport.given
 import monocle.Prism
 import monocle.macros.GenPrism
-import lucuma.core.enums.F2Disperser
-import lucuma.core.enums.F2Filter
-import lucuma.core.enums.F2Fpu
 
 sealed trait InstrumentMode
 

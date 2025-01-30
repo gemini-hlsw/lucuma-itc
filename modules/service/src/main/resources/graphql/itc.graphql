@@ -17399,13 +17399,14 @@ input Flamingos2SpectroscopyInput {
   centralWavelength: WavelengthInput!
 
   # Flamingos2 disperser
-  #disperser: Flamingos2Disperser!
+  disperser: Flamingos2Disperser
 
   # Flamingos2 Focal plane unit
-  #fpu: GmosNorthFpuInput!
+  # fpu: GmosNorthFpuInput!
+  fpu: Flamingos2Fpu!
 
   # Flamingos2 filter
-  #filter: Flamingos2Filter
+  filter: Flamingos2Filter!
 }
 
 type GmosSITCParams {

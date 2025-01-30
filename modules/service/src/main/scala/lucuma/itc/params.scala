@@ -28,9 +28,9 @@ case class GmosSSpectroscopyParams(
 ) extends SpectroscopyParams derives Encoder.AsObject
 
 case class F2SpectroscopyParams(
-  grating: F2Disperser,
-  fpu:     F2Fpu,
-  filter:  F2Filter
+  disperser: F2Disperser,
+  fpu:       F2Fpu,
+  filter:    F2Filter
 ) extends SpectroscopyParams derives Encoder.AsObject
 
 sealed trait ImagingParams
