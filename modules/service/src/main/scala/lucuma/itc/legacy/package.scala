@@ -38,10 +38,6 @@ case class ItcParameters(
 
 case class ItcInstrumentDetails(mode: ObservingMode)
 
-object ItcInstrumentDetails:
-  def fromObservingMode(mode: ObservingMode): ItcInstrumentDetails =
-    apply(mode)
-
 private def buildSourceDefinition(
   target:       TargetData,
   atWavelength: Wavelength
@@ -78,7 +74,7 @@ def spectroscopyGraphParams(
       telescope = ItcTelescopeDetails(
         wfs = ItcWavefrontSensor.OIWFS
       ),
-      instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
+      instrument = ItcInstrumentDetails(observingMode)
     )
   (parameters, bandOrLine)
 
@@ -109,7 +105,7 @@ def spectroscopyExposureTimeParams(
       telescope = ItcTelescopeDetails(
         wfs = ItcWavefrontSensor.OIWFS
       ),
-      instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
+      instrument = ItcInstrumentDetails(observingMode)
     )
   (parameters, bandOrLine)
 
@@ -170,6 +166,6 @@ def imagingParams(
       telescope = ItcTelescopeDetails(
         wfs = ItcWavefrontSensor.OIWFS
       ),
-      instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
+      instrument = ItcInstrumentDetails(observingMode)
     )
   (parameters, bandOrLine)
