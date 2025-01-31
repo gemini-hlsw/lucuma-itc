@@ -7,7 +7,7 @@ import cats.data.NonEmptyChain
 import cats.effect.IO
 import cats.syntax.applicative.*
 import cats.syntax.either.*
-import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
@@ -48,7 +48,7 @@ object MockItc extends Itc[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: PosInt
+    exposureCount: NonNegInt
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(
@@ -108,7 +108,7 @@ object MockImagingItc extends Itc[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: PosInt
+    exposureCount: NonNegInt
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(
@@ -167,7 +167,7 @@ object EmissionLineMockItc extends Itc[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: PosInt
+    exposureCount: NonNegInt
   ): IO[TargetGraphsCalcResult] =
     IO.raiseError(CalculationError("Not implemented"))
 
@@ -188,7 +188,7 @@ object FailingMockItc extends Itc[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: PosInt
+    exposureCount: NonNegInt
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(

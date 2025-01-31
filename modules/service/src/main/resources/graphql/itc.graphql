@@ -10450,7 +10450,7 @@ type IntegrationTime {
   exposureTime: TimeSpan!
 
   # Exposures
-  exposureCount: PosInt!
+  exposureCount: NonNegInt!
 
   # Signal/Noise ratio
   signalToNoise: SignalToNoise!

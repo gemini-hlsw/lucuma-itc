@@ -4,7 +4,7 @@
 package lucuma.itc.client.json
 
 import cats.syntax.either.*
-import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.*
 import io.circe.Decoder
 import io.circe.DecodingFailure
@@ -47,9 +47,9 @@ object decoders:
           )
       )
 
-  given Decoder[PosInt] = c =>
+  given Decoder[NonNegInt] = c =>
     c.as[Int]
-      .flatMap(l => PosInt.from(l).leftMap(m => DecodingFailure(m, c.history)))
+      .flatMap(l => NonNegInt.from(l).leftMap(m => DecodingFailure(m, c.history)))
 
   given Decoder[IntegrationTime] = c =>
     for {
@@ -65,7 +65,7 @@ object decoders:
              )
       n <- c.downField("exposureCount")
              .as[Int]
-             .flatMap(n => PosInt.from(n).leftMap(m => DecodingFailure(m, c.history)))
+             .flatMap(n => NonNegInt.from(n).leftMap(m => DecodingFailure(m, c.history)))
       s <- c.downField("signalToNoise")
              .as[SignalToNoise]
     } yield IntegrationTime(t, n, s)

@@ -10,7 +10,7 @@ import cats.data.NonEmptyList
 import cats.syntax.either.*
 import cats.syntax.option.*
 import coulomb.syntax.*
-import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
 import lucuma.core.enums.CloudExtinction
@@ -74,7 +74,7 @@ import scala.collection.immutable.SortedMap
 class WiringSuite extends ClientSuite {
   val selected = IntegrationTime(
     TimeSpan.FromString.getOption("PT1S").get,
-    PosInt.unsafeFrom(10),
+    NonNegInt.unsafeFrom(10),
     SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
   )
 
@@ -282,7 +282,7 @@ object WiringSuite {
       SpectroscopyGraphParameters(
         Wavelength.Min,
         TimeSpan.fromSeconds(1).get,
-        PosInt.unsafeFrom(5),
+        NonNegInt.unsafeFrom(5),
         ConstraintSet(
           ImageQuality.PointOne,
           CloudExtinction.PointOne,

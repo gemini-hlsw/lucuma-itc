@@ -10,8 +10,7 @@ import cats.effect.*
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.StringCommands
 import eu.timepit.refined.*
-import eu.timepit.refined.numeric.Positive
-import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.NonNegInt
 import grackle.*
 import grackle.circe.CirceMapping
 import io.circe.syntax.*
@@ -195,7 +194,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     val brightestTarget: TargetIntegrationTime = integrationTimes.value.focus
     val selectedVariation: IntegrationTime     = brightestTarget.times.focus
     val expTime: TimeSpan                      = selectedVariation.exposureTime
-    val expCount: PosInt                       = selectedVariation.exposureCount
+    val expCount: NonNegInt                    = selectedVariation.exposureCount
 
     AsterismGraphRequest(
       asterismRequest.asterism,
@@ -260,7 +259,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
         val QueryType         = schema.ref("Query")
         val BigDecimalType    = schema.ref("BigDecimal")
         val LongType          = schema.ref("Long")
-        val PosIntType        = schema.ref("PosInt")
+        val NonNegIntType     = schema.ref("NonNegInt")
         val SignalToNoiseType = schema.ref("SignalToNoise")
 
         val typeMappings: TypeMappings =
@@ -304,7 +303,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             ),
             LeafMapping[BigDecimal](BigDecimalType),
             LeafMapping[Long](LongType),
-            LeafMapping[PosInt](PosIntType),
+            LeafMapping[NonNegInt](NonNegIntType),
             LeafMapping[SignalToNoise](SignalToNoiseType)
           )
 

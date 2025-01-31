@@ -7,6 +7,7 @@ import cats.data.NonEmptyList
 import coulomb.*
 import coulomb.units.si.prefixes.*
 import coulomb.units.time.*
+import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.numeric.PosLong
 import eu.timepit.refined.types.string.NonEmptyString
@@ -24,6 +25,7 @@ object encoders:
 
   given nelEncoder[A: Encoder]: Encoder[NonEmptyList[A]] = Encoder.encodeList[A].contramap(_.toList)
   given Encoder[NonEmptyString]                          = (s: NonEmptyString) => s.value.asJson
+  given Encoder[NonNegInt]                               = (s: NonNegInt) => s.value.asJson
   given Encoder[PosInt]                                  = (s: PosInt) => s.value.asJson
   given Encoder[PosLong]                                 = (s: PosLong) => s.value.asJson
 
