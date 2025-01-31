@@ -154,7 +154,12 @@ object ItcImpl {
           .traverse: r =>
             TimeSpan
               .fromSeconds(r.exposureTime)
-              .map(expTime => IntegrationTime(expTime, NonNegInt.unsafeFrom(r.exposureCount.value), r.signalToNoise).pure[F])
+              .map(expTime =>
+                IntegrationTime(expTime,
+                                NonNegInt.unsafeFrom(r.exposureCount.value),
+                                r.signalToNoise
+                ).pure[F]
+              )
               .getOrElse:
                 MonadThrow[F].raiseError:
                   CalculationError(s"Negative exposure time ${r.exposureTime}")
