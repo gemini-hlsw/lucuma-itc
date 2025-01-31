@@ -73,6 +73,8 @@ case class LocalItc(classLoader: ClassLoader):
       .invoke(null, jsonParams) // null as it is a static method
       .asInstanceOf[String]
 
+    // println(jsonParams)
+    // println(res)
     res match
       case LegacyRight(result)    =>
         decode[legacy.IntegrationTimeRemoteResult](result).leftMap { e =>
