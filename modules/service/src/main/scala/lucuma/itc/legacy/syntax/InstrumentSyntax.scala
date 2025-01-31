@@ -181,7 +181,17 @@ object f2disperser extends F2DisperserSyntax
 
 trait F2FilterSyntax:
   import lucuma.core.enums.F2Filter
-  extension (self: F2Filter) def ocs2Tag: String = self.shortName
+  extension (self: F2Filter)
+    def ocs2Tag: String =
+      self match
+        case F2Filter.JLow   => "J_LOW"
+        case F2Filter.KLong  => "K_LONG"
+        case F2Filter.KShort => "K_SHORT"
+        case F2Filter.KBlue  => "K_BLUE"
+        case F2Filter.KRed   => "K_RED"
+        case F2Filter.Open   => "OPEN"
+        case F2Filter.Dark   => "DARK"
+        case _               => self.tag
 
 object f2filter extends F2FilterSyntax
 
@@ -192,7 +202,7 @@ trait F2FpuSyntax:
     def ocs2Tag: String =
       self match
         case Pinhole       => "PINHOLE"
-        case SubPixPinhole => "SUBPIXPINHOLE"
+        case SubPixPinhole => "SUBPIX_PINHOLE"
         case LongSlit1     => "LONGSLIT_1"
         case LongSlit2     => "LONGSLIT_2"
         case LongSlit3     => "LONGSLIT_3"
