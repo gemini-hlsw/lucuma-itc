@@ -5,7 +5,7 @@ package lucuma.itc
 
 import cats.Order
 import eu.timepit.refined.cats.*
-import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.TimeSpan
@@ -14,7 +14,7 @@ import spire.implicits.*
 
 case class IntegrationTime(
   exposureTime:  TimeSpan,
-  exposureCount: PosInt,
+  exposureCount: NonNegInt,
   signalToNoise: SignalToNoise
 ) derives Encoder.AsObject
 

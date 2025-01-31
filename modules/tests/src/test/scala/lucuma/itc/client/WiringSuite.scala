@@ -10,7 +10,7 @@ import cats.data.NonEmptyList
 import cats.syntax.either.*
 import cats.syntax.option.*
 import coulomb.syntax.*
-import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
 import lucuma.core.enums.CloudExtinction
@@ -47,6 +47,7 @@ import lucuma.core.math.units.WattsPerMeter2Micrometer
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange.AirMass
 import lucuma.core.model.EmissionLine
+import lucuma.core.model.ExposureTimeMode
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.SpectralDefinition.EmissionLines
@@ -73,7 +74,7 @@ import scala.collection.immutable.SortedMap
 class WiringSuite extends ClientSuite {
   val selected = IntegrationTime(
     TimeSpan.FromString.getOption("PT1S").get,
-    PosInt.unsafeFrom(10),
+    NonNegInt.unsafeFrom(10),
     SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
   )
 
@@ -193,8 +194,10 @@ object WiringSuite {
   val SpectroscopyInput: SpectroscopyIntegrationTimeInput =
     SpectroscopyIntegrationTimeInput(
       SpectroscopyIntegrationTimeParameters(
-        Wavelength.Min,
-        SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+        ExposureTimeMode.SignalToNoiseMode(
+          SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+          Wavelength.Min
+        ),
         ConstraintSet(
           ImageQuality.PointOne,
           CloudExtinction.PointOne,
@@ -239,8 +242,10 @@ object WiringSuite {
   val ImagingInput: ImagingIntegrationTimeInput =
     ImagingIntegrationTimeInput(
       ImagingIntegrationTimeParameters(
-        Wavelength.Min,
-        SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+        ExposureTimeMode.SignalToNoiseMode(
+          SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+          Wavelength.Min
+        ),
         ConstraintSet(
           ImageQuality.PointOne,
           CloudExtinction.PointOne,
@@ -277,7 +282,7 @@ object WiringSuite {
       SpectroscopyGraphParameters(
         Wavelength.Min,
         TimeSpan.fromSeconds(1).get,
-        PosInt.unsafeFrom(5),
+        NonNegInt.unsafeFrom(5),
         ConstraintSet(
           ImageQuality.PointOne,
           CloudExtinction.PointOne,
@@ -323,8 +328,10 @@ object WiringSuite {
   val SpectroscopyEmissionLinesInput: SpectroscopyIntegrationTimeInput =
     SpectroscopyIntegrationTimeInput(
       SpectroscopyIntegrationTimeParameters(
-        Wavelength.Min,
-        SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+        ExposureTimeMode.SignalToNoiseMode(
+          SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+          Wavelength.Min
+        ),
         ConstraintSet(
           ImageQuality.PointOne,
           CloudExtinction.PointOne,

@@ -12,10 +12,12 @@ class GraphQLSpectroscopyTimeAndGraphSuite extends GraphQLSuite {
       """
         query {
           spectroscopyIntegrationTimeAndGraphs(input: {
-            atWavelength: {
-              nanometers: 60,
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {

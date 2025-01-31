@@ -4,33 +4,26 @@
 package lucuma.itc.input
 
 import cats.syntax.parallel.*
-import lucuma.core.math.SignalToNoise
-import lucuma.core.math.Wavelength
+import lucuma.core.model.ExposureTimeMode
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 
 case class ImagingIntegrationTimeInput(
-  atWavelength:  Wavelength,
-  signalToNoise: SignalToNoise,
-  asterism:      List[TargetDataInput],
-  constraints:   ConstraintSetInput,
-  mode:          InstrumentModesInput
+  exposureTimeMode: ExposureTimeMode,
+  asterism:         List[TargetDataInput],
+  constraints:      ConstraintSetInput,
+  mode:             InstrumentModesInput
 )
 
-object ImagingIntegrationTimeInput {
+object ImagingIntegrationTimeInput:
 
   def binding: Matcher[ImagingIntegrationTimeInput] =
     ObjectFieldsBinding.rmap {
       case List(
-            WavelengthInput.Binding("atWavelength", wavelength),
-            SignalToNoiseBinding("signalToNoise", signalToNoise),
+            ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
             TargetDataInput.binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
             InstrumentModesInput.binding("mode", mode)
           ) =>
-        (wavelength, signalToNoise, asterism, constraints, mode).parMapN(
-          apply
-        )
+        (exposureTimeMode, asterism, constraints, mode).parMapN(apply)
     }
-
-}

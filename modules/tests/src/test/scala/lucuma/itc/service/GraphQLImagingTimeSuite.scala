@@ -12,10 +12,12 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
       """
         query {
           imagingIntegrationTime(input: {
-            atWavelength: {
-              picometers: 530000
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 600,
+                at: { picometers: 530000 }
+              }
             },
-            signalToNoise: 600,
             asterism: [
               {
                 sourceProfile: {
