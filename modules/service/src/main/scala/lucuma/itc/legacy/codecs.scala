@@ -482,6 +482,8 @@ given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
         _.as[ExposureCalculation]
           .map(c => IntegrationTimeRemoteResult(NonEmptyChain.one(c)))
 
+  // println(c.value.spaces2)
+
   val img: Decoder.Result[IntegrationTimeRemoteResult] =
     c.downField("ItcImagingResult")
       .downField("exposureCalculation")
