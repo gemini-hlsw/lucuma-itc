@@ -118,7 +118,6 @@ lazy val service = project
                                  "-Dcats.effect.tracing.mode=none"
     ),
     reStart / envVars     := Map(
-      "ITC_URL"        -> "https://itc-server-exp.herokuapp.com/",
       "REDISCLOUD_URL" -> "redis://localhost"
     ),
     libraryDependencies ++= Seq(
@@ -236,5 +235,9 @@ lazy val tests = project
       "org.scalameta" %%% "munit"                  % munitVersion               % Test,
       "org.typelevel" %%% "discipline-munit"       % disciplineMunitVersion     % Test
     ),
+    Test / testOptions ++= {
+      if (sys.env.get("CI").contains("true")) Seq(Tests.Argument("munit.ExcludeTags", "LocalOnly"))
+      else Seq()
+    },
     testFrameworks += MUnitFramework
   )
