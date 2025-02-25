@@ -269,39 +269,40 @@ object ItcMapping extends ItcCacheOrRemote with Version {
               fieldMappings = List(
                 RootEffect.computeEncodable("versions")((_, _) => versions(environment, redis)),
                 RootEffect.computeEncodable("spectroscopyIntegrationTime") { (_, env) =>
-                  val xxx =
-                    env
-                      .getR[F[SpectroscopyIntegrationTimeInput]]("input")
-                      // .flatMap(input => input.map(AsterismSpectroscopyTimeRequest.fromInput).sequence)
-                      .flatTraverse(input => input.map(AsterismSpectroscopyTimeRequest.fromInput))
-                  xxx.flatMap: yyy =>
-                    yyy.flatTraverse:
-                      calculateSpectroscopyIntegrationTime(environment, redis, itc)
-                  // xxx
+                  env
+                    .getR[F[SpectroscopyIntegrationTimeInput]]("input")
+                    .flatTraverse(_.map(AsterismSpectroscopyTimeRequest.fromInput))
+                    .flatMap:
+                      _.flatTraverse:
+                        calculateSpectroscopyIntegrationTime(environment, redis, itc)
                 },
                 RootEffect.computeEncodable("imagingIntegrationTime") { (_, env) =>
                   env
-                    .getR[ImagingIntegrationTimeInput]("input")
-                    .flatMap(AsterismImagingTimeRequest.fromInput)
-                    .flatTraverse:
-                      calculateImagingIntegrationTime(environment, redis, itc)
+                    .getR[F[ImagingIntegrationTimeInput]]("input")
+                    .flatTraverse(_.map(AsterismImagingTimeRequest.fromInput))
+                    .flatMap:
+                      _.flatTraverse:
+                        calculateImagingIntegrationTime(environment, redis, itc)
                 },
                 RootEffect.computeEncodable("spectroscopyGraphs") { (_, env) =>
                   env
-                    .getR[SpectroscopyGraphsInput]("input")
-                    .flatMap(AsterismGraphRequest.fromInput)
-                    .flatTraverse:
-                      spectroscopyGraphs(environment, redis, itc)
+                    .getR[F[SpectroscopyGraphsInput]]("input")
+                    .flatTraverse(_.map(AsterismGraphRequest.fromInput))
+                    .flatMap:
+                      _.flatTraverse:
+                        spectroscopyGraphs(environment, redis, itc)
                 },
                 RootEffect.computeEncodable("spectroscopyIntegrationTimeAndGraphs") { (_, env) =>
                   env
-                    .getR[SpectroscopyIntegrationTimeAndGraphsInput]("input")
-                    .flatMap: input =>
-                      AsterismSpectroscopyTimeRequest
-                        .fromInput(input)
-                        .map((_, input.significantFigures))
-                    .flatTraverse: (tr, fig) =>
-                      spectroscopyIntegrationTimeAndGraphs(environment, redis, itc)(tr, fig)
+                    .getR[F[SpectroscopyIntegrationTimeAndGraphsInput]]("input")
+                    .flatTraverse:
+                      _.map: input =>
+                        AsterismSpectroscopyTimeRequest
+                          .fromInput(input)
+                          .map((_, input.significantFigures))
+                    .flatMap:
+                      _.flatTraverse: (tr, fig) =>
+                        spectroscopyIntegrationTimeAndGraphs(environment, redis, itc)(tr, fig)
                 }
               )
             ),
