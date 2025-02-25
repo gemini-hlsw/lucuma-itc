@@ -267,29 +267,33 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             ObjectMapping(
               tpe = QueryType,
               fieldMappings = List(
-                RootEffect.computeEncodable("versions")((p, env) => versions(environment, redis)),
-                RootEffect.computeEncodable("spectroscopyIntegrationTime") { (p, env) =>
-                  env
-                    .getR[SpectroscopyIntegrationTimeInput]("input")
-                    .flatMap(AsterismSpectroscopyTimeRequest.fromInput)
-                    .flatTraverse:
+                RootEffect.computeEncodable("versions")((_, _) => versions(environment, redis)),
+                RootEffect.computeEncodable("spectroscopyIntegrationTime") { (_, env) =>
+                  val xxx =
+                    env
+                      .getR[F[SpectroscopyIntegrationTimeInput]]("input")
+                      // .flatMap(input => input.map(AsterismSpectroscopyTimeRequest.fromInput).sequence)
+                      .flatTraverse(input => input.map(AsterismSpectroscopyTimeRequest.fromInput))
+                  xxx.flatMap: yyy =>
+                    yyy.flatTraverse:
                       calculateSpectroscopyIntegrationTime(environment, redis, itc)
+                  // xxx
                 },
-                RootEffect.computeEncodable("imagingIntegrationTime") { (p, env) =>
+                RootEffect.computeEncodable("imagingIntegrationTime") { (_, env) =>
                   env
                     .getR[ImagingIntegrationTimeInput]("input")
                     .flatMap(AsterismImagingTimeRequest.fromInput)
                     .flatTraverse:
                       calculateImagingIntegrationTime(environment, redis, itc)
                 },
-                RootEffect.computeEncodable("spectroscopyGraphs") { (p, env) =>
+                RootEffect.computeEncodable("spectroscopyGraphs") { (_, env) =>
                   env
                     .getR[SpectroscopyGraphsInput]("input")
                     .flatMap(AsterismGraphRequest.fromInput)
                     .flatTraverse:
                       spectroscopyGraphs(environment, redis, itc)
                 },
-                RootEffect.computeEncodable("spectroscopyIntegrationTimeAndGraphs") { (p, env) =>
+                RootEffect.computeEncodable("spectroscopyIntegrationTimeAndGraphs") { (_, env) =>
                   env
                     .getR[SpectroscopyIntegrationTimeAndGraphsInput]("input")
                     .flatMap: input =>
@@ -310,6 +314,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
         override val selectElaborator =
           def handle[A](input: Result[A]): Elab[Unit] =
             Elab.liftR(input).flatMap(i => Elab.env("input" -> i))
+
           SelectElaborator {
             case (QueryType,
                   "spectroscopyIntegrationTime",
