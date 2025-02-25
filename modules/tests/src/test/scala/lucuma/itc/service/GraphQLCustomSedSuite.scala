@@ -3,12 +3,7 @@
 
 package lucuma.itc.service
 
-import cats.syntax.all.*
 import io.circe.literal.*
-import lucuma.core.enums.*
-import lucuma.core.syntax.string.*
-import lucuma.core.util.Enumerated
-import lucuma.itc.ItcObservingConditions
 
 class GraphQLCustomSedSuite extends GraphQLSuite {
 
