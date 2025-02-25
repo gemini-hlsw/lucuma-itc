@@ -3,12 +3,12 @@
 
 package lucuma.itc.input
 
+import cats.Applicative
 import cats.syntax.all.*
 import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.SignificantFigures
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
-import cats.Applicative
 
 sealed trait SpectroscopyTimeInput:
   def exposureTimeMode: ExposureTimeMode
@@ -39,7 +39,12 @@ object SpectroscopyIntegrationTimeInput:
             ConstraintSetInput.Binding("constraints", constraints),
             InstrumentModesInput.binding("mode", mode)
           ) =>
-        (exposureTimeMode, asterism, constraints, mode).parMapN(apply).map(Applicative[F].pure)
+        (exposureTimeMode.map(_.pure[F]),
+         asterism.map(_.sequence),
+         constraints.map(_.pure[F]),
+         mode.map(_.pure[F])
+        )
+          .parMapN((_, _, _, _).mapN(apply))
     }
 
 case class SpectroscopyIntegrationTimeAndGraphsInput(
@@ -52,7 +57,7 @@ case class SpectroscopyIntegrationTimeAndGraphsInput(
 
 object SpectroscopyIntegrationTimeAndGraphsInput:
 
-  def binding: Matcher[SpectroscopyIntegrationTimeAndGraphsInput] =
+  def binding[F[_]: Applicative]: Matcher[F[SpectroscopyIntegrationTimeAndGraphsInput]] =
     ObjectFieldsBinding.rmap {
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
@@ -61,5 +66,10 @@ object SpectroscopyIntegrationTimeAndGraphsInput:
             InstrumentModesInput.binding("mode", mode),
             SignificantFiguresInput.binding.Option("significantFigures", significantFigures)
           ) =>
-        (exposureTimeMode, asterism, constraints, mode, significantFigures).parMapN(apply)
+        (exposureTimeMode.map(_.pure[F]),
+         asterism.map(_.sequence),
+         constraints.map(_.pure[F]),
+         mode.map(_.pure[F]),
+         significantFigures.map(_.pure[F])
+        ).parMapN((_, _, _, _, _).mapN(apply))
     }

@@ -5,6 +5,7 @@ package lucuma.odb.graphql
 package input
 package sourceprofile
 
+import cats.Applicative
 import cats.syntax.all.*
 import grackle.Result
 import lucuma.core.enums.Band
@@ -22,52 +23,52 @@ object BandNormalizedInput {
 
   object Integrated {
 
-    val CreateBinding: Matcher[BandNormalized[Integrated]] =
-      createBinding(pairToMap(BandBrightnessInput.Integrated.Binding))
+    def createBinding[F[_]: Applicative]: Matcher[F[BandNormalized[Integrated]]] =
+      createBindingInternal(pairToMap(BandBrightnessInput.Integrated.Binding))
 
-    val EditBinding: Matcher[BandNormalized[Integrated] => Result[BandNormalized[Integrated]]] =
-      editBinding(pairToMap(BandBrightnessInput.Integrated.Binding))
+    // val EditBinding: Matcher[BandNormalized[Integrated] => Result[BandNormalized[Integrated]]] =
+    //   editBinding(pairToMap(BandBrightnessInput.Integrated.Binding))
 
   }
 
   object Surface {
 
-    val CreateBinding: Matcher[BandNormalized[Surface]] =
-      createBinding(pairToMap(BandBrightnessInput.Surface.Binding))
+    def createBinding[F[_]: Applicative]: Matcher[F[BandNormalized[Surface]]] =
+      createBindingInternal(pairToMap(BandBrightnessInput.Surface.Binding))
 
-    val EditBinding: Matcher[BandNormalized[Surface] => Result[BandNormalized[Surface]]] =
-      editBinding(pairToMap(BandBrightnessInput.Surface.Binding))
-
+    // def editBinding[F[_]: Applicative]: Matcher[F[BandNormalized[Surface]] => Result[F[BandNormalized[Surface]]] =
+    //   editBinding(pairToMap(BandBrightnessInput.Surface.Binding))
   }
 
-  def createBinding[A](
+  private def createBindingInternal[F[_]: Applicative, A](
     brightnesses: Matcher[SortedMap[Band, BrightnessMeasure[A]]]
-  ): Matcher[BandNormalized[A]] =
+  ): Matcher[F[BandNormalized[A]]] =
     ObjectFieldsBinding.rmap {
       case List(
-            UnnormalizedSedInput.Binding.Option("sed", rSed),
+            UnnormalizedSedInput.binding.Option("sed", rSed),
             brightnesses.Option("brightnesses", rBrightnesses)
           ) =>
         (rSed, rBrightnesses).parTupled.flatMap {
-          case (sed, Some(brightnesses)) => Result(BandNormalized(sed, brightnesses))
+          case (sed, Some(brightnesses)) =>
+            Result(sed.sequence.map(BandNormalized(_, brightnesses)))
           case _                         => Result.failure("Brightness is required.")
         }
     }
 
-  def editBinding[A](
-    brightnesses: Matcher[SortedMap[Band, BrightnessMeasure[A]]]
-  ): Matcher[BandNormalized[A] => Result[BandNormalized[A]]] =
-    ObjectFieldsBinding.rmap {
-      case List(
-            UnnormalizedSedInput.Binding.Nullable("sed", rSed),
-            brightnesses.Option("brightnesses", rBrightnesses)
-          ) =>
-        (rSed, rBrightnesses).parTupled.flatMap { case (sed, brightnesses) =>
-          Result { a0 =>
-            val a1 = sed.fold(a0.copy(sed = none), a0, b => a0.copy(sed = b.some))
-            val a2 = brightnesses.foldLeft(a1)((a, b) => a.copy(brightnesses = b))
-            Result(a2)
-          }
-        }
-    }
+  // def editBinding[F[_]: Applicative,A](
+  //   brightnesses: Matcher[SortedMap[Band, BrightnessMeasure[A]]]
+  // ): Matcher[BandNormalized[A] => Result[BandNormalized[A]]] =
+  //   ObjectFieldsBinding.rmap {
+  //     case List(
+  //           UnnormalizedSedInput.binding.Nullable("sed", rSed),
+  //           brightnesses.Option("brightnesses", rBrightnesses)
+  //         ) =>
+  //       (rSed.sequence, rBrightnesses).parTupled.flatMap { case (sed, brightnesses) =>
+  //         Result { a0 =>
+  //           val a1 = sed.fold(a0.copy(sed = none), a0, b => a0.copy(sed = b.some))
+  //           val a2 = brightnesses.foldLeft(a1)((a, b) => a.copy(brightnesses = b))
+  //           Result(a2)
+  //         }
+  //       }
+  //   }
 }

@@ -130,7 +130,7 @@ object Main extends IOApp with ItcCacheOrRemote {
       itc     <- Resource.eval(ItcImpl.build(FLocalItc[F](itc)).pure[F])
       redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
       _       <- Resource.eval(checkVersionToPurge[F](redis, itc))
-      mapping <- Resource.eval(ItcMapping(cfg.environment, redis, itc))
+      mapping <- Resource.eval(ItcMapping[F](cfg.environment, redis, itc))
     yield wsb =>
       // Routes for the ITC GraphQL service
       NatchezMiddleware.server(
