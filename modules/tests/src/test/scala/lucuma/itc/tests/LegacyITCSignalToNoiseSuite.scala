@@ -3,10 +3,12 @@
 
 package lucuma.itc
 
+import cats.data.NonEmptyMap
 import cats.implicits.*
 import coulomb.*
 import coulomb.syntax.*
 import coulomb.units.si.*
+import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.enums.*
@@ -40,7 +42,7 @@ import scala.collection.immutable.SortedMap
  * legacy ITC (Note that the ITC may still return an error but we want to ensure it can parse the
  * values
  */
-class LegacyITCSignalToNiseSuite extends FunSuite with CommonITCSuite:
+class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
 
   val sourceDefinition = ItcSourceDefinition(
     TargetData(
@@ -85,21 +87,23 @@ class LegacyITCSignalToNiseSuite extends FunSuite with CommonITCSuite:
       GmosNorthGrating.B1200_G5301,
       GmosNorthFpuParam(GmosNorthFpu.LongSlit_5_00),
       none,
-      GmosCcdMode(GmosXBinning.One,
-                  GmosYBinning.One,
-                  GmosAmpCount.Twelve,
-                  GmosAmpGain.High,
-                  GmosAmpReadMode.Fast
+      GmosCcdMode(
+        GmosXBinning.One,
+        GmosYBinning.One,
+        GmosAmpCount.Twelve,
+        GmosAmpGain.High,
+        GmosAmpReadMode.Fast
       ).some,
       GmosRoi.FullFrame.some
     )
   )
 
-  val conditions = ItcObservingConditions(ImageQuality.PointEight,
-                                          CloudExtinction.OnePointFive,
-                                          WaterVapor.Median,
-                                          SkyBackground.Bright,
-                                          1
+  val conditions = ItcObservingConditions(
+    ImageQuality.PointEight,
+    CloudExtinction.OnePointFive,
+    WaterVapor.Median,
+    SkyBackground.Bright,
+    1
   )
 
   def bodyCond(c: ItcObservingConditions) =
@@ -321,6 +325,21 @@ class LegacyITCSignalToNiseSuite extends FunSuite with CommonITCSuite:
           bodyIntMagUnits(f.withValueTagged(BrightnessValue.unsafeFrom(5))).asJson.noSpaces
         )
       assert(result.fold(allowedErrors, _ => true))
+
+  test("user defined SED".tag(LocalOnly)) {
+    val userDefinedFluxDensities = NonEmptyMap.of(
+      Wavelength.decimalNanometers.getOption(500).get -> PosBigDecimal.unsafeFrom(1.0),
+      Wavelength.decimalNanometers.getOption(600).get -> PosBigDecimal.unsafeFrom(2.0),
+      Wavelength.decimalNanometers.getOption(700).get -> PosBigDecimal.unsafeFrom(3.0)
+    )
+
+    val result = localItc
+      .calculateIntegrationTime(
+        bodySED(UnnormalizedSED.UserDefined(userDefinedFluxDensities)).asJson.noSpaces
+      )
+
+    assert(result.fold(allowedErrors, _ => true))
+  }
 
   def bodySurfaceMagUnits(c: BrightnessMeasure[Surface]) =
     ItcParameters(

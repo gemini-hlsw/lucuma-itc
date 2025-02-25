@@ -16,7 +16,7 @@ object FluxDensityInput {
   val Binding: Matcher[(Wavelength, PosBigDecimal)] =
     ObjectFieldsBinding.rmap {
       case List(
-            WavelengthInput.Binding("wavelenth", rWavelength),
+            WavelengthInput.Binding("wavelength", rWavelength),
             BigDecimalBinding("density", rDensity)
           ) =>
         (rWavelength, rDensity).parTupled.flatMap { case (wavelength, density) =>
