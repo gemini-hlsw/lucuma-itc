@@ -218,30 +218,41 @@ private given Encoder[SourceProfile] = (a: SourceProfile) =>
 private given Encoder[UnnormalizedSED] = (a: UnnormalizedSED) =>
   import UnnormalizedSED.*
   a match
-    case BlackBody(t)       =>
+    case BlackBody(t)               =>
       Json.obj(
         "BlackBody" -> Json.obj(
           "temperature" -> Json.fromDoubleOrNull(t.value.value.toDouble)
         )
       )
-    case PowerLaw(i)        =>
+    case PowerLaw(i)                =>
       Json.obj("PowerLaw" -> Json.obj("index" -> Json.fromDoubleOrNull(i.toDouble)))
-    case StellarLibrary(s)  =>
+    case StellarLibrary(s)          =>
       Json.obj("Library" -> Json.obj("LibraryStar" -> Json.fromString(s.ocs2Tag)))
-    case s: CoolStarModel   =>
+    case s: CoolStarModel           =>
       Json.obj("Library" -> Json.obj("LibraryStar" -> Json.fromString(s.ocs2Tag)))
-    case PlanetaryNebula(s) =>
+    case PlanetaryNebula(s)         =>
       Json.obj("Library" -> Json.obj("LibraryStar" -> Json.fromString(s.ocs2Tag)))
-    case Galaxy(s)          =>
+    case Galaxy(s)                  =>
       Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
-    case Planet(s)          =>
+    case Planet(s)                  =>
       Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
-    case HIIRegion(s)       =>
+    case HIIRegion(s)               =>
       Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
-    case Quasar(s)          =>
+    case Quasar(s)                  =>
       Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
-    case _                  => // TODO UserDefined
-      Json.obj("Library" -> Json.Null)
+    case UserDefined(fluxDensities) =>
+      Json.obj(
+        "UserDefined" -> Json.obj(
+          "UserDefinedSpectrum" -> Json.obj(
+            "name"     -> Json.fromString("UserDefined"),
+            "spectrum" -> Json.fromString:
+              fluxDensities.toNel.toList
+                .map: (w, f) =>
+                  s"${w.toNanometers} ${f.value}"
+                .mkString("\n")
+          )
+        )
+      )
 
 private given Encoder[Band] =
   Encoder[String].contramap(_.shortName)
