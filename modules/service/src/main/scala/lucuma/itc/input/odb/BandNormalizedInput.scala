@@ -22,25 +22,16 @@ object BandNormalizedInput {
     pair.List.map(SortedMap.from(_))
 
   object Integrated {
-
-    def createBinding[F[_]: Applicative]: Matcher[F[BandNormalized[Integrated]]] =
-      createBindingInternal(pairToMap(BandBrightnessInput.Integrated.Binding))
-
-    // val EditBinding: Matcher[BandNormalized[Integrated] => Result[BandNormalized[Integrated]]] =
-    //   editBinding(pairToMap(BandBrightnessInput.Integrated.Binding))
-
+    def binding[F[_]: Applicative]: Matcher[F[BandNormalized[Integrated]]] =
+      bindingInternal(pairToMap(BandBrightnessInput.Integrated.Binding))
   }
 
   object Surface {
-
-    def createBinding[F[_]: Applicative]: Matcher[F[BandNormalized[Surface]]] =
-      createBindingInternal(pairToMap(BandBrightnessInput.Surface.Binding))
-
-    // def editBinding[F[_]: Applicative]: Matcher[F[BandNormalized[Surface]] => Result[F[BandNormalized[Surface]]] =
-    //   editBinding(pairToMap(BandBrightnessInput.Surface.Binding))
+    def binding[F[_]: Applicative]: Matcher[F[BandNormalized[Surface]]] =
+      bindingInternal(pairToMap(BandBrightnessInput.Surface.Binding))
   }
 
-  private def createBindingInternal[F[_]: Applicative, A](
+  private def bindingInternal[F[_]: Applicative, A](
     brightnesses: Matcher[SortedMap[Band, BrightnessMeasure[A]]]
   ): Matcher[F[BandNormalized[A]]] =
     ObjectFieldsBinding.rmap {
@@ -51,24 +42,8 @@ object BandNormalizedInput {
         (rSed, rBrightnesses).parTupled.flatMap {
           case (sed, Some(brightnesses)) =>
             Result(sed.sequence.map(BandNormalized(_, brightnesses)))
-          case _                         => Result.failure("Brightness is required.")
+          case _                         =>
+            Result.failure("Brightness is required.")
         }
     }
-
-  // def editBinding[F[_]: Applicative,A](
-  //   brightnesses: Matcher[SortedMap[Band, BrightnessMeasure[A]]]
-  // ): Matcher[BandNormalized[A] => Result[BandNormalized[A]]] =
-  //   ObjectFieldsBinding.rmap {
-  //     case List(
-  //           UnnormalizedSedInput.binding.Nullable("sed", rSed),
-  //           brightnesses.Option("brightnesses", rBrightnesses)
-  //         ) =>
-  //       (rSed.sequence, rBrightnesses).parTupled.flatMap { case (sed, brightnesses) =>
-  //         Result { a0 =>
-  //           val a1 = sed.fold(a0.copy(sed = none), a0, b => a0.copy(sed = b.some))
-  //           val a2 = brightnesses.foldLeft(a1)((a, b) => a.copy(brightnesses = b))
-  //           Result(a2)
-  //         }
-  //       }
-  //   }
 }

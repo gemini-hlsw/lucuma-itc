@@ -21,7 +21,7 @@ object TargetDataInput {
   def binding[F[_]: Applicative]: Matcher[F[TargetDataInput]] =
     ObjectFieldsBinding.rmap {
       case List(
-            SourceProfileInput.createBinding("sourceProfile", sourceProfile),
+            SourceProfileInput.binding("sourceProfile", sourceProfile),
             RadialVelocityInput.Binding("radialVelocity", radialVelocity)
           ) =>
         (sourceProfile, radialVelocity).parMapN((sp, rv) => sp.map(TargetDataInput(_, rv)))
