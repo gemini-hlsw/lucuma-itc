@@ -338,7 +338,6 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
         bodySED(UnnormalizedSED.UserDefined(userDefinedFluxDensities)).asJson.noSpaces
       )
 
-    println(result)
     assert(result.fold(allowedErrors, _ => true))
   }
 
