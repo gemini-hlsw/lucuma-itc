@@ -18,7 +18,7 @@ case class TargetDataInput(
 )
 
 object TargetDataInput {
-  def binding[F[_]: Applicative]: Matcher[F[TargetDataInput]] =
+  def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[TargetDataInput]] =
     ObjectFieldsBinding.rmap {
       case List(
             SourceProfileInput.binding("sourceProfile", sourceProfile),

@@ -18,7 +18,7 @@ case class ImagingIntegrationTimeInput(
 
 object ImagingIntegrationTimeInput:
 
-  def binding[F[_]: Applicative]: Matcher[F[ImagingIntegrationTimeInput]] =
+  def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[ImagingIntegrationTimeInput]] =
     ObjectFieldsBinding.rmap {
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),

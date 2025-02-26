@@ -13,6 +13,7 @@ import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.SpectralDefinition.EmissionLines
 import lucuma.odb.graphql.binding.*
+import lucuma.itc.input.CustomSed
 
 object SpectralDefinitionInput {
 
@@ -27,7 +28,7 @@ object SpectralDefinitionInput {
   }
 
   object Integrated {
-    def binding[F[_]: Applicative]: Matcher[F[SpectralDefinition[Integrated]]] =
+    def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[SpectralDefinition[Integrated]]] =
       bindingInternal[F, Integrated](
         BandNormalizedInput.Integrated.binding,
         EmissionLinesInput.Integrated.Binding
@@ -35,14 +36,14 @@ object SpectralDefinitionInput {
   }
 
   object Surface {
-    def binding[F[_]: Applicative]: Matcher[F[SpectralDefinition[Surface]]] =
+    def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[SpectralDefinition[Surface]]] =
       bindingInternal[F, Surface](
         BandNormalizedInput.Surface.binding,
         EmissionLinesInput.Surface.Binding
       )
   }
 
-  private def bindingInternal[F[_]: Applicative, A](
+  private def bindingInternal[F[_]: Applicative: CustomSed.Resolver, A](
     bandNormalized: Matcher[F[BandNormalized[A]]],
     emissionLines:  Matcher[EmissionLines[A]]
   ): Matcher[F[SpectralDefinition[A]]] =

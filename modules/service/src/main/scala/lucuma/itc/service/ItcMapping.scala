@@ -244,7 +244,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           .error(t):
             s"Error calculating spectroscopy integration time and graph for input: $asterismRequest"
 
-  def apply[F[_]: Sync: Logger: Parallel: Trace](
+  def apply[F[_]: Sync: Logger: Parallel: Trace: CustomSed.Resolver](
     environment: ExecutionEnvironment,
     redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]

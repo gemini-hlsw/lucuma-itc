@@ -11,6 +11,7 @@ import grackle.Result
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SourceProfile.*
 import lucuma.odb.graphql.binding.*
+import lucuma.itc.input.CustomSed
 
 object SourceProfileInput {
 
@@ -35,7 +36,7 @@ object SourceProfileInput {
           "Not a gaussian source.  To change profile type, please provide a full definition."
   }
 
-  def binding[F[_]: Applicative]: Matcher[F[SourceProfile]] =
+  def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[SourceProfile]] =
     ObjectFieldsBinding.rmap {
       case List(
             SpectralDefinitionInput.Integrated.binding.Option("point", rPoint),

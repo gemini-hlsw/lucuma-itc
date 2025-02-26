@@ -24,7 +24,7 @@ case class SpectroscopyGraphsInput(
 
 object SpectroscopyGraphsInput {
 
-  def binding[F[_]: Applicative]: Matcher[F[SpectroscopyGraphsInput]] =
+  def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[SpectroscopyGraphsInput]] =
     ObjectFieldsBinding.rmap {
       case List(
             WavelengthInput.Binding("atWavelength", wavelength),

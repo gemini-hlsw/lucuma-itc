@@ -48,6 +48,7 @@ import java.net.URL
 import java.net.URLClassLoader
 import scala.concurrent.duration.*
 import scala.util.Try
+import lucuma.itc.input.CustomSed
 
 // #server
 object Main extends IOApp with ItcCacheOrRemote {
@@ -122,7 +123,7 @@ object Main extends IOApp with ItcCacheOrRemote {
       .withHttpWebSocketApp(app)
       .build
 
-  def routes[F[_]: Async: Logger: Parallel: Trace: Compression](
+  def routes[F[_]: Async: Logger: Parallel: Trace: Compression: CustomSed.Resolver](
     cfg: Config,
     itc: LocalItc
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
