@@ -3,7 +3,8 @@
 
 package lucuma.itc.input
 
-import cats.syntax.parallel.*
+import cats.Applicative
+import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
@@ -23,7 +24,7 @@ case class SpectroscopyGraphsInput(
 
 object SpectroscopyGraphsInput {
 
-  def binding: Matcher[SpectroscopyGraphsInput] =
+  def binding[F[_]: Applicative]: Matcher[F[SpectroscopyGraphsInput]] =
     ObjectFieldsBinding.rmap {
       case List(
             WavelengthInput.Binding("atWavelength", wavelength),
@@ -34,8 +35,15 @@ object SpectroscopyGraphsInput {
             InstrumentModesInput.binding("mode", mode),
             SignificantFiguresInput.binding.Option("significantFigures", significantFigures)
           ) =>
-        (wavelength, exposureTime, exposureCount, asterism, constraints, mode, significantFigures)
-          .parMapN(apply)
+        (wavelength.map(_.pure[F]),
+         exposureTime.map(_.pure[F]),
+         exposureCount.map(_.pure[F]),
+         asterism.map(_.sequence),
+         constraints.map(_.pure[F]),
+         mode.map(_.pure[F]),
+         significantFigures.map(_.pure[F])
+        )
+          .parMapN((_, _, _, _, _, _, _).mapN(apply))
     }
 
 }

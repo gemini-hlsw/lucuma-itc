@@ -3,6 +3,8 @@
 
 package lucuma.itc.input
 
+import cats.Applicative
+import cats.syntax.functor.*
 import cats.syntax.parallel.*
 import lucuma.core.math.RadialVelocity
 import lucuma.core.model.SourceProfile
@@ -16,12 +18,12 @@ case class TargetDataInput(
 )
 
 object TargetDataInput {
-  def binding: Matcher[TargetDataInput] =
+  def binding[F[_]: Applicative]: Matcher[F[TargetDataInput]] =
     ObjectFieldsBinding.rmap {
       case List(
-            SourceProfileInput.CreateBinding("sourceProfile", sourceProfile),
+            SourceProfileInput.binding("sourceProfile", sourceProfile),
             RadialVelocityInput.Binding("radialVelocity", radialVelocity)
           ) =>
-        (sourceProfile, radialVelocity).parMapN(apply)
+        (sourceProfile, radialVelocity).parMapN((sp, rv) => sp.map(TargetDataInput(_, rv)))
     }
 }

@@ -3385,6 +3385,7 @@ input UnnormalizedSedInput {
   powerLaw: BigDecimal
   blackBodyTempK: PosInt
   fluxDensities: [FluxDensity!]
+  fluxDensitiesUrl: String
 }
 
 """

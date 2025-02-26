@@ -3,7 +3,8 @@
 
 package lucuma.itc.input
 
-import cats.syntax.parallel.*
+import cats.Applicative
+import cats.syntax.all.*
 import lucuma.core.model.ExposureTimeMode
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
@@ -17,7 +18,7 @@ case class ImagingIntegrationTimeInput(
 
 object ImagingIntegrationTimeInput:
 
-  def binding: Matcher[ImagingIntegrationTimeInput] =
+  def binding[F[_]: Applicative]: Matcher[F[ImagingIntegrationTimeInput]] =
     ObjectFieldsBinding.rmap {
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
@@ -25,5 +26,10 @@ object ImagingIntegrationTimeInput:
             ConstraintSetInput.Binding("constraints", constraints),
             InstrumentModesInput.binding("mode", mode)
           ) =>
-        (exposureTimeMode, asterism, constraints, mode).parMapN(apply)
+        (exposureTimeMode.map(_.pure[F]),
+         asterism.map(_.sequence),
+         constraints.map(_.pure[F]),
+         mode.map(_.pure[F])
+        )
+          .parMapN((_, _, _, _).mapN(apply))
     }
