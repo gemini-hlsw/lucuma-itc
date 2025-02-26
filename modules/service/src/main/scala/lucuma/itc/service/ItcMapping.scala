@@ -22,6 +22,7 @@ import lucuma.itc.*
 import lucuma.itc.ItcVersions
 import lucuma.itc.encoders.given
 import lucuma.itc.input.*
+import lucuma.itc.input.customSed.CustomSed
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.service.config.*
 import lucuma.itc.service.requests.*
@@ -41,14 +42,13 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   // for error in dev is high and it's nice to handle failures in `F`.
   def loadSchema[F[_]: Sync: Logger]: F[Schema] =
     Sync[F]
-      .defer {
-        Using(Source.fromResource("graphql/itc.graphql", getClass().getClassLoader())) { src =>
+      .defer:
+        Using(Source.fromResource("graphql/itc.graphql", getClass().getClassLoader())): src =>
           Schema(src.mkString).toEither.fold(
             x => sys.error(s"Invalid schema: ${x.toList.mkString(", ")}"),
             identity
           )
-        }.liftTo[F]
-      }
+        .liftTo[F]
 
   def versions[F[_]: Applicative: Logger](
     environment: ExecutionEnvironment,
@@ -73,6 +73,11 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       graphResult.targetGraphs.collectErrors.fold(Result.success(graphResult)): errors =>
         Result.Warning(errors.map(errorToProblem), graphResult)
 
+  extension [F[_]: MonadThrow, A](f: F[Result[A]])
+    private def toGraphQLErrors: F[Result[A]] =
+      f.handleError: t =>
+        Result.failure(Problem(t.getMessage))
+
   def calculateSpectroscopyIntegrationTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment:     ExecutionEnvironment,
     redis:           StringCommands[F, Array[Byte], Array[Byte]],
@@ -94,9 +99,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
         ).toResult
       .onError: t =>
         Logger[F]
-          .error(t)(
+          .error(t):
             s"Error calculating spectroscopy integration time for input: $asterismRequest"
-          )
 
   def calculateImagingIntegrationTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
@@ -126,6 +130,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       .onError: t =>
         Logger[F]
           .error(t)(s"Error calculating imaging integration time for input: $asterismRequest")
+      .toGraphQLErrors
 
   private def buildTargetGraphsResult(significantFigures: Option[SignificantFigures])(
     graphResult: TargetGraphsCalcResult
@@ -186,6 +191,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       .onError: t =>
         Logger[F]
           .error(t)(s"Error calculating spectroscopy graphs for input: $asterismRequest")
+      .toGraphQLErrors
 
   private def buildAsterismGraphRequest(
     asterismRequest: AsterismSpectroscopyTimeRequest,
@@ -243,6 +249,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
         Logger[F]
           .error(t):
             s"Error calculating spectroscopy integration time and graph for input: $asterismRequest"
+      .toGraphQLErrors
 
   def apply[F[_]: Sync: Logger: Parallel: Trace: CustomSed.Resolver](
     environment: ExecutionEnvironment,
@@ -275,6 +282,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                     .flatMap:
                       _.flatTraverse:
                         calculateSpectroscopyIntegrationTime(environment, redis, itc)
+                    .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("imagingIntegrationTime") { (_, env) =>
                   env
@@ -283,6 +291,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                     .flatMap:
                       _.flatTraverse:
                         calculateImagingIntegrationTime(environment, redis, itc)
+                    .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("spectroscopyGraphs") { (_, env) =>
                   env
@@ -291,6 +300,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                     .flatMap:
                       _.flatTraverse:
                         spectroscopyGraphs(environment, redis, itc)
+                    .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("spectroscopyIntegrationTimeAndGraphs") { (_, env) =>
                   env
@@ -303,6 +313,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                     .flatMap:
                       _.flatTraverse: (tr, fig) =>
                         spectroscopyIntegrationTimeAndGraphs(environment, redis, itc)(tr, fig)
+                    .toGraphQLErrors
                 }
               )
             ),
@@ -312,7 +323,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             LeafMapping[SignalToNoise](SignalToNoiseType)
           )
 
-        override val selectElaborator =
+        override val selectElaborator: SelectElaborator =
           def handle[A](input: Result[A]): Elab[Unit] =
             Elab.liftR(input).flatMap(i => Elab.env("input" -> i))
 
@@ -338,7 +349,6 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                 ) =>
               handle(input)
           }
-
       }
     }
 }

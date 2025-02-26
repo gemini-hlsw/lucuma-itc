@@ -12,6 +12,8 @@ import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 import lucuma.odb.graphql.input.sourceprofile.*
 
+import customSed.CustomSed
+
 case class TargetDataInput(
   sourceProfile:  SourceProfile,
   radialVelocity: RadialVelocity

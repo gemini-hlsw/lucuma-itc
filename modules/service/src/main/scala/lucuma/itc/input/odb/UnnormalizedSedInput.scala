@@ -14,8 +14,8 @@ import grackle.Result
 import lucuma.core.enums.*
 import lucuma.core.enums.StellarLibrarySpectrum
 import lucuma.core.model.UnnormalizedSED
+import lucuma.itc.input.customSed.CustomSed
 import lucuma.odb.graphql.binding.*
-import lucuma.itc.input.CustomSed
 
 object UnnormalizedSedInput {
 

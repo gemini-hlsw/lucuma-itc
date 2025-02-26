@@ -12,6 +12,8 @@ import lucuma.itc.SignificantFigures
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 
+import customSed.CustomSed
+
 case class SpectroscopyGraphsInput(
   atWavelength:       Wavelength,
   exposureTime:       TimeSpan,

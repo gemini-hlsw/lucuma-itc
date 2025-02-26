@@ -137,6 +137,7 @@ lazy val service = project
       "org.slf4j"       % "slf4j-simple"          % slf4jVersion,
       "org.http4s"     %% "http4s-core"           % http4sVersion,
       "org.http4s"     %% "http4s-ember-server"   % http4sVersion,
+      "org.http4s"     %% "http4s-ember-client"   % http4sVersion,
       "eu.timepit"     %% "refined"               % refinedVersion,
       "eu.timepit"     %% "refined-cats"          % refinedVersion,
       "dev.profunktor" %% "redis4cats-effects"    % redis4CatsVersion,

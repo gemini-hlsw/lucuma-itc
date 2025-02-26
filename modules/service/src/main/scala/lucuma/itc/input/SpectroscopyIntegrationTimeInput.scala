@@ -10,6 +10,8 @@ import lucuma.itc.SignificantFigures
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 
+import customSed.CustomSed
+
 sealed trait SpectroscopyTimeInput:
   def exposureTimeMode: ExposureTimeMode
   def asterism: List[TargetDataInput]

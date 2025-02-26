@@ -19,6 +19,8 @@ import fs2.io.net.Network
 import lucuma.graphql.routes.GraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
+import lucuma.itc.input.customSed.CustomSed
+import lucuma.itc.input.customSed.CustomSedUrlResolver
 import lucuma.itc.legacy.FLocalItc
 import lucuma.itc.legacy.LocalItc
 import lucuma.itc.service.config.*
@@ -48,7 +50,6 @@ import java.net.URL
 import java.net.URLClassLoader
 import scala.concurrent.duration.*
 import scala.util.Try
-import lucuma.itc.input.CustomSed
 
 // #server
 object Main extends IOApp with ItcCacheOrRemote {
@@ -89,27 +90,21 @@ object Main extends IOApp with ItcCacheOrRemote {
   def entryPointResource[F[_]: Sync: Logger](
     config: Option[HoneycombConfig]
   ): Resource[F, EntryPoint[F]] =
-    config.fold(Log.entryPoint(ServiceName).pure[Resource[F, *]]) { cfg =>
-      Honeycomb.entryPoint(ServiceName) { cb =>
-        Sync[F].delay {
+    config.fold(Log.entryPoint(ServiceName).pure[Resource[F, *]]): cfg =>
+      Honeycomb.entryPoint(ServiceName): cb =>
+        Sync[F].delay:
           cb.setWriteKey(cfg.writeKey)
           cb.setDataset(cfg.dataset)
           cb.build()
-        }
-      }
-    }
 
-  def cacheMiddleware[F[_]: Functor](service: HttpRoutes[F]): HttpRoutes[F] = Kleisli {
-    (req: Request[F]) =>
-      service(req).map {
+  def cacheMiddleware[F[_]: Functor](service: HttpRoutes[F]): HttpRoutes[F] =
+    Kleisli: (req: Request[F]) =>
+      service(req).map:
         case Status.Successful(resp) =>
-          resp.putHeaders(
+          resp.putHeaders:
             `Cache-Control`(CacheDirective.public, CacheDirective.`max-age`(DefaultCacheTTL))
-          )
         case resp                    =>
           resp
-      }
-  }
 
   def serverResource[F[_]: Async: Network](
     app: WebSocketBuilder2[F] => HttpApp[F],
@@ -123,43 +118,37 @@ object Main extends IOApp with ItcCacheOrRemote {
       .withHttpWebSocketApp(app)
       .build
 
-  def routes[F[_]: Async: Logger: Parallel: Trace: Compression: CustomSed.Resolver](
+  def routes[F[_]: Async: Logger: Parallel: Trace: Compression: Network](
     cfg: Config,
     itc: LocalItc
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
-      itc     <- Resource.eval(ItcImpl.build(FLocalItc[F](itc)).pure[F])
-      redis   <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
-      _       <- Resource.eval(checkVersionToPurge[F](redis, itc))
-      mapping <- Resource.eval(ItcMapping[F](cfg.environment, redis, itc))
+      itc                         <- Resource.eval(ItcImpl.build(FLocalItc[F](itc)).pure[F])
+      redis                       <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
+      _                           <- Resource.eval(checkVersionToPurge[F](redis, itc))
+      given CustomSed.Resolver[F] <- CustomSedUrlResolver[F]
+      mapping                     <- Resource.eval(ItcMapping[F](cfg.environment, redis, itc))
     yield wsb =>
       // Routes for the ITC GraphQL service
-      NatchezMiddleware.server(
-        GZip(
-          cors(cfg.environment, none)(
-            cacheMiddleware(
+      NatchezMiddleware.server:
+        GZip:
+          cors(cfg.environment, none):
+            cacheMiddleware:
               Routes.forService(_ => GraphQLService[F](mapping).some.pure[F], wsb, "itc")
-            )
-          )
-        )
-      )
 
   // Custom class loader to give priority to the jars in the urls over the parent classloader
   class ReverseClassLoader(urls: Array[URL], parent: ClassLoader)
       extends URLClassLoader(urls, parent) {
     override def loadClass(name: String): Class[?] =
       // First check whether it's already been loaded, if so use it
-      if (name.startsWith("java.lang")) super.loadClass(name)
-      else {
-        Option(findLoadedClass(name)).getOrElse {
-
+      if (name.startsWith("java.lang"))
+        super.loadClass(name)
+      else
+        Option(findLoadedClass(name)).getOrElse:
           // Not loaded, try to load it
-          Try(findClass(name)).getOrElse {
+          Try(findClass(name)).getOrElse:
             // If not found locally, use normal parent delegation in URLClassloader
-            super.loadClass(name);
-          }
-        }
-      }
+            super.loadClass(name)
   }
 
   // Build a custom class loader to read and call the legacy ocs2 libs
@@ -167,7 +156,7 @@ object Main extends IOApp with ItcCacheOrRemote {
   // and it will conflict with the current scala 3 classes
   def legacyItcLoader[F[_]: Sync: Logger](config: Config): F[LocalItc] =
     Sync[F]
-      .delay {
+      .delay:
         val dir      =
           if (config.dyno.isDefined) "modules/service/target/universal/stage/ocslib" else "ocslib"
         val jarFiles =
@@ -178,7 +167,6 @@ object Main extends IOApp with ItcCacheOrRemote {
         LocalItc(
           new ReverseClassLoader(jarFiles.map(_.toURI.toURL), ClassLoader.getSystemClassLoader())
         )
-      }
 
   /**
    * Our main server, as a resource that starts up our server on acquire and shuts it all down in

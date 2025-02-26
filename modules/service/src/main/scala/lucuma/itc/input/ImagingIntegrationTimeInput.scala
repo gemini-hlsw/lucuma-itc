@@ -9,6 +9,8 @@ import lucuma.core.model.ExposureTimeMode
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 
+import customSed.CustomSed
+
 case class ImagingIntegrationTimeInput(
   exposureTimeMode: ExposureTimeMode,
   asterism:         List[TargetDataInput],

@@ -12,8 +12,8 @@ import lucuma.core.math.BrightnessUnits.*
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.SpectralDefinition.EmissionLines
+import lucuma.itc.input.customSed.CustomSed
 import lucuma.odb.graphql.binding.*
-import lucuma.itc.input.CustomSed
 
 object SpectralDefinitionInput {
 

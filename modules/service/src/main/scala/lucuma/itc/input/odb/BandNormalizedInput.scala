@@ -11,10 +11,10 @@ import grackle.Result
 import lucuma.core.enums.Band
 import lucuma.core.math.BrightnessUnits.*
 import lucuma.core.model.SpectralDefinition.BandNormalized
+import lucuma.itc.input.customSed.CustomSed
 import lucuma.odb.graphql.binding.*
 
 import scala.collection.immutable.SortedMap
-import lucuma.itc.input.CustomSed
 
 object BandNormalizedInput {
 

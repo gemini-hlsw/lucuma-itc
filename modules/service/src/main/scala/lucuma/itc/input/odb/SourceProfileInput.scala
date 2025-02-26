@@ -10,8 +10,8 @@ import cats.syntax.all.*
 import grackle.Result
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SourceProfile.*
+import lucuma.itc.input.customSed.CustomSed
 import lucuma.odb.graphql.binding.*
-import lucuma.itc.input.CustomSed
 
 object SourceProfileInput {
 
