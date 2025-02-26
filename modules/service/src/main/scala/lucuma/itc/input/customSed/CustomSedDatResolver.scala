@@ -20,7 +20,7 @@ import scala.collection.immutable.SortedMap
  * file.
  */
 trait CustomSedDatResolver[F[_]: Concurrent] extends CustomSed.Resolver[F]:
-  protected def datLines(url: CustomSed.Id): F[fs2.Stream[F, String]]
+  protected def datLines(id: CustomSed.Id): F[fs2.Stream[F, String]]
 
   // delimiters are whitespaces, commas or semicolons and comments (everything from "#" up to next \n).
   private val Delimiters = "(\\s|,|;|(#[^\\n]*))+"
@@ -42,9 +42,9 @@ trait CustomSedDatResolver[F[_]: Concurrent] extends CustomSed.Resolver[F]:
       case _                          =>
         Left(s"Invalid line in custom SED: [$line].")
 
-  def resolve(url: CustomSed.Id): F[NonEmptyMap[Wavelength, PosBigDecimal]] =
+  def resolve(id: CustomSed.Id): F[NonEmptyMap[Wavelength, PosBigDecimal]] =
     for
-      lines <- datLines(url)
+      lines <- datLines(id)
       pairs <-
         lines
           .map(parseLine)
@@ -54,6 +54,6 @@ trait CustomSedDatResolver[F[_]: Concurrent] extends CustomSed.Resolver[F]:
       map    = SortedMap.from(pairs)
       nem   <- NonEmptyMap
                  .fromMap(map)
-                 .toRight(new RuntimeException(s"Custom SED file at [$url] is empty."))
+                 .toRight(new RuntimeException(s"Custom SED file for id [$id] is empty."))
                  .liftTo[F]
     yield nem

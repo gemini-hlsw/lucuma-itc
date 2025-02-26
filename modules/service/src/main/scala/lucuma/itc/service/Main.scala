@@ -20,7 +20,7 @@ import lucuma.graphql.routes.GraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
 import lucuma.itc.input.customSed.CustomSed
-import lucuma.itc.input.customSed.CustomSedUrlResolver
+import lucuma.itc.input.customSed.CustomSedOdbAttachmentResolver
 import lucuma.itc.legacy.FLocalItc
 import lucuma.itc.legacy.LocalItc
 import lucuma.itc.service.config.*
@@ -126,7 +126,8 @@ object Main extends IOApp with ItcCacheOrRemote {
       itc                         <- Resource.eval(ItcImpl.build(FLocalItc[F](itc)).pure[F])
       redis                       <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
       _                           <- Resource.eval(checkVersionToPurge[F](redis, itc))
-      given CustomSed.Resolver[F] <- CustomSedUrlResolver[F]
+      given CustomSed.Resolver[F] <-
+        CustomSedOdbAttachmentResolver[F](cfg.odbBaseUrl, cfg.odbServiceToken)
       mapping                     <- Resource.eval(ItcMapping[F](cfg.environment, redis, itc))
     yield wsb =>
       // Routes for the ITC GraphQL service

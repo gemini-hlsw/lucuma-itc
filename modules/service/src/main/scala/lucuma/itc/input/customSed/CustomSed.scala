@@ -6,9 +6,10 @@ package lucuma.itc.input.customSed
 import cats.data.NonEmptyMap
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.math.Wavelength
+import lucuma.core.model.Attachment
 
 object CustomSed:
-  type Id = String
+  type Id = Attachment.Id
 
   trait Resolver[F[_]]:
     def resolve(id: Id): F[NonEmptyMap[Wavelength, PosBigDecimal]]

@@ -114,11 +114,13 @@ lazy val service = project
   .settings(
     name                  := "lucuma-itc-service",
     scalacOptions -= "-Vtype-diffs",
-    reStart / javaOptions := Seq("-Dcats.effect.stackTracing=DISABLED",
-                                 "-Dcats.effect.tracing.mode=none"
+    reStart / javaOptions := Seq(
+      "-Dcats.effect.stackTracing=DISABLED",
+      "-Dcats.effect.tracing.mode=none"
     ),
     reStart / envVars     := Map(
-      "REDISCLOUD_URL" -> "redis://localhost"
+      "REDISCLOUD_URL" -> "redis://localhost",
+      "ODB_BASE_URL"   -> "https://lucuma-postgres-odb-dev.herokuapp.com"
     ),
     libraryDependencies ++= Seq(
       "org.typelevel"  %% "grackle-core"          % grackleVersion,

@@ -40,7 +40,7 @@ object UnnormalizedSedInput {
             BigDecimalBinding.Option("powerLaw", rPowerLaw),
             IntBinding.Option("blackBodyTempK", rBlackBodyTempK),
             FluxDensityInput.Binding.List.Option("fluxDensities", rFluxDensities),
-            StringBinding.Option("fluxDensitiesUrl", rFluxDensitiesUrl)
+            AttachmentIdBinding.Option("fluxDensitiesAttachment", rFluxDensitiesAttachment)
           ) =>
         (rStellarLibrary,
          rCoolStar,
@@ -52,7 +52,7 @@ object UnnormalizedSedInput {
          rPowerLaw,
          rBlackBodyTempK,
          rFluxDensities,
-         rFluxDensitiesUrl
+         rFluxDensitiesAttachment
         ).parTupled.flatMap {
           case (Some(v), None, None, None, None, None, None, None, None, None, None) =>
             Result(UnnormalizedSED.StellarLibrary(v).pure[F])
