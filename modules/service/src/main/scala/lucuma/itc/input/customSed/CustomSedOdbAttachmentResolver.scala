@@ -17,38 +17,40 @@ import org.http4s.client.Client
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.headers.Authorization
 import org.typelevel.log4cats.Logger
+import natchez.Trace
 
 /**
  * Implementation of `CustomSed.Resolver` that uses a URL to fetch the custom SED.
  */
-class CustomSedOdbAttachmentResolver[F[_]: Async: Logger] private (
+class CustomSedOdbAttachmentResolver[F[_]: Async: Logger: Trace] private (
   client:     Client[F],
   odbBaseUrl: Uri,
   authToken:  String
 ) extends CustomSedDatResolver[F]:
 
   protected def datLines(id: CustomSed.Id): F[fs2.Stream[F, String]] =
-    val uri: Uri            =
-      odbBaseUrl / "attachment" / id.programId.show / id.attachmentId.show
-    val request: Request[F] =
-      Request(
-        uri = uri,
-        headers = Headers:
-          Authorization:
-            Credentials.Token(AuthScheme.Bearer, authToken)
-      )
+    Trace[F].span("custom-sed-attachment-resolver"):
+      val uri: Uri            =
+        odbBaseUrl / "attachment" / id.programId.show / id.attachmentId.show
+      val request: Request[F] =
+        Request(
+          uri = uri,
+          headers = Headers:
+            Authorization:
+              Credentials.Token(AuthScheme.Bearer, authToken)
+        )
 
-    Logger[F]
-      .info(s"Fetching custom SED for id [$id]: $uri")
-      .as:
-        client
-          .stream(request)
-          .flatMap(_.body)
-          .through(text.utf8.decode)
-          .through(text.lines)
+      for
+        _ <- Trace[F].put("custom-sed-attachment-resolver.uri" -> uri.toString)
+        _ <- Logger[F].info(s"Fetching custom SED for id [$id]: $uri")
+      yield client
+        .stream(request)
+        .flatMap(_.body)
+        .through(text.utf8.decode)
+        .through(text.lines)
 
 object CustomSedOdbAttachmentResolver:
-  def apply[F[_]: Async: Network: Logger](
+  def apply[F[_]: Async: Network: Logger: Trace](
     odbBaseUrl: Uri,
     authToken:  String
   ): Resource[F, CustomSed.Resolver[F]] =

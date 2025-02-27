@@ -9,7 +9,6 @@ import cats.*
 import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
-import dev.profunktor.redis4cats.algebra.StringCommands
 import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.*
 import lucuma.itc.service.redis.given
@@ -20,6 +19,7 @@ import org.typelevel.log4cats.Logger
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import scala.concurrent.duration.*
+import dev.profunktor.redis4cats.RedisCommands
 
 /**
  * Methods to check if a values is on the cache and if not retrieve them from old itc and store them
@@ -42,31 +42,38 @@ trait ItcCacheOrRemote extends Version:
     request: A => F[B]
   )(
     prefix:  String,
-    redis:   StringCommands[F, Array[Byte], Array[Byte]]
+    redis:   RedisCommands[F, Array[Byte], Array[Byte]]
   ): F[B] = {
     val hash        = Hash[A].hash(a)
     val redisKeyStr = s"$prefix:$hash"
     val redisKey    = redisKeyStr.getBytes(KeyCharset)
     val L           = Logger[F]
 
+    val whenFound: F[Unit] =
+      L.debug(s"$hash found on redis") >> redis.expire(redisKey, TTL).void
+
+    val whenMissing: F[B] =
+      for
+        _ <- L.debug(s"$hash not found on redis")
+        r <- Trace[F].span("request-call")(request(a))
+        _ <-
+          redis
+            .setEx(redisKey, Pickle.intoBytes(r).compact().array(), TTL)
+            .handleErrorWith(L.error(_)(s"Error writing $redisKey"))
+      yield r
+
     Trace[F].span("redis-cache-read") {
       for
         _         <- Trace[F].put("redis.key" -> redisKeyStr)
         _         <- L.debug(s"Read key $redisKeyStr")
-        fromRedis <- redis
-                       .get(redisKey)
-                       .handleErrorWith(e => L.error(e)(s"Error reading $redisKey") *> none.pure[F])
-        decoded   <-
-          fromRedis
-            .flatMap(b => Either.catchNonFatal(Unpickle[B].fromBytes(ByteBuffer.wrap(b))).toOption)
-            .pure[F]
-        _         <- L.debug(s"$hash found on redis").unlessA(fromRedis.isEmpty && decoded.isEmpty)
-        r         <- decoded.map(_.pure[F]).getOrElse(Trace[F].span("request-call")(request(a)))
-        _         <-
+        fromRedis <-
           redis
-            .setEx(redisKey, Pickle.intoBytes(r).compact().array(), TTL)
-            .handleErrorWith(L.error(_)(s"Error writing $redisKey"))
-            .whenA(fromRedis.isEmpty || decoded.isEmpty)
+            .get(redisKey)
+            .handleErrorWith(e => L.error(e)(s"Error reading $redisKey") *> none.pure[F])
+            .map:
+              _.flatMap: b =>
+                Either.catchNonFatal(Unpickle[B].fromBytes(ByteBuffer.wrap(b))).toOption
+        r         <- fromRedis.fold(whenMissing)(whenFound.as(_))
       yield r
     }
   }
@@ -91,7 +98,7 @@ trait ItcCacheOrRemote extends Version:
     request: TargetGraphRequest
   )(
     itc:     Itc[F],
-    redis:   StringCommands[F, Array[Byte], Array[Byte]]
+    redis:   RedisCommands[F, Array[Byte], Array[Byte]]
   ): F[TargetGraphsCalcResult] =
     cacheOrRemote(request, requestGraphs(itc))("itc:graph:spec", redis)
 
@@ -125,7 +132,7 @@ trait ItcCacheOrRemote extends Version:
     calcRequest: TargetSpectroscopyTimeRequest
   )(
     itc:         Itc[F],
-    redis:       StringCommands[F, Array[Byte], Array[Byte]]
+    redis:       RedisCommands[F, Array[Byte], Array[Byte]]
   ): F[TargetIntegrationTime] =
     cacheOrRemote(calcRequest, requestSpecTimeCalc(itc))(
       "itc:calc:spec",
@@ -155,7 +162,7 @@ trait ItcCacheOrRemote extends Version:
     calcRequest: TargetImagingTimeRequest
   )(
     itc:         Itc[F],
-    redis:       StringCommands[F, Array[Byte], Array[Byte]]
+    redis:       RedisCommands[F, Array[Byte], Array[Byte]]
   ): F[TargetIntegrationTime] =
     cacheOrRemote(calcRequest, requestImgTimeCalc(itc))(
       "itc:calc:img",
@@ -168,7 +175,7 @@ trait ItcCacheOrRemote extends Version:
    * cache
    */
   def checkVersionToPurge[F[_]: MonadThrow: Logger](
-    redis: StringCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]],
+    redis: RedisCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]],
     itc:   Itc[F]
   ): F[Unit] = {
     val L      = Logger[F]
