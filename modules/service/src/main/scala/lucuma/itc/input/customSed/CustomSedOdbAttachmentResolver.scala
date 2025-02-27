@@ -38,12 +38,14 @@ class CustomSedOdbAttachmentResolver[F[_]: Async: Logger] private (
             Credentials.Token(AuthScheme.Bearer, authToken)
       )
 
-    for _ <- Logger[F].info(s"Fetching custom SED for id [$id]: $uri")
-    yield client
-      .stream(request)
-      .flatMap(_.body)
-      .through(text.utf8.decode)
-      .through(text.lines)
+    Logger[F]
+      .info(s"Fetching custom SED for id [$id]: $uri")
+      .as:
+        client
+          .stream(request)
+          .flatMap(_.body)
+          .through(text.utf8.decode)
+          .through(text.lines)
 
 object CustomSedOdbAttachmentResolver:
   def apply[F[_]: Async: Network: Logger](
