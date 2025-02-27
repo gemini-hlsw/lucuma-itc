@@ -73,7 +73,7 @@ ThisBuild / watchOnTermination := { (action, cmd, times, state) =>
 
 ThisBuild / githubWorkflowBuild +=
   WorkflowStep.Use(
-    UseRef.Public("kamilkisiela", "graphql-inspector", "main"),
+    UseRef.Public("kamilkisiela", "graphql-inspector", "master"),
     name = Some("Validate GraphQL schema changes"),
     params = Map(
       "schema"        -> "main:modules/service/src/main/resources/graphql/itc.graphql",

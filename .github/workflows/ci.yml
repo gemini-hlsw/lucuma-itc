@@ -78,7 +78,7 @@ jobs:
 
       - name: Validate GraphQL schema changes
         if: github.event_name == 'pull_request'
-        uses: kamilkisiela/graphql-inspector@main
+        uses: kamilkisiela/graphql-inspector@master
         with:
           schema: 'main:modules/service/src/main/resources/graphql/itc.graphql'
           approve-label: expected-breaking-change
