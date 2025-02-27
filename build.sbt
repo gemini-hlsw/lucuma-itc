@@ -77,7 +77,8 @@ ThisBuild / githubWorkflowBuild +=
     name = Some("Validate GraphQL schema changes"),
     params = Map(
       "schema"        -> "main:modules/service/src/main/resources/graphql/itc.graphql",
-      "approve-label" -> "expected-breaking-change"
+      // "approve-label" -> "expected-breaking-change"
+      "approve-label" -> "approved-breaking-change"
     ),
     cond = Some("github.event_name == 'pull_request'")
   )
