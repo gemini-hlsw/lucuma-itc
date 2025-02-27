@@ -14,6 +14,7 @@ import grackle.Result
 import lucuma.core.enums.*
 import lucuma.core.enums.StellarLibrarySpectrum
 import lucuma.core.model.UnnormalizedSED
+import lucuma.itc.input.customSed.CustomSed
 import lucuma.odb.graphql.binding.*
 
 object UnnormalizedSedInput {
@@ -26,7 +27,7 @@ object UnnormalizedSedInput {
   val HiiRegionSpectrum: Matcher[HIIRegionSpectrum]                  = enumeratedBinding
   val PlanetaryNebulaSpectrum: Matcher[PlanetaryNebulaSpectrum]      = enumeratedBinding
 
-  def binding[F[_]: Applicative]: Matcher[F[UnnormalizedSED]] =
+  def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[UnnormalizedSED]] =
     ObjectFieldsBinding.rmap {
       case List(
             StellarLibrarySpectrumBinding.Option("stellarLibrary", rStellarLibrary),
@@ -39,7 +40,7 @@ object UnnormalizedSedInput {
             BigDecimalBinding.Option("powerLaw", rPowerLaw),
             IntBinding.Option("blackBodyTempK", rBlackBodyTempK),
             FluxDensityInput.Binding.List.Option("fluxDensities", rFluxDensities),
-            StringBinding.Option("fluxDensitiesUrl", rFluxDensitiesUrl)
+            CustomSedIdInput.Binding.Option("fluxDensitiesAttachment", rFluxDensitiesAttachment)
           ) =>
         (rStellarLibrary,
          rCoolStar,
@@ -51,7 +52,7 @@ object UnnormalizedSedInput {
          rPowerLaw,
          rBlackBodyTempK,
          rFluxDensities,
-         rFluxDensitiesUrl
+         rFluxDensitiesAttachment
         ).parTupled.flatMap {
           case (Some(v), None, None, None, None, None, None, None, None, None, None) =>
             Result(UnnormalizedSED.StellarLibrary(v).pure[F])
@@ -78,10 +79,10 @@ object UnnormalizedSedInput {
               case Nil    => Result.failure("fluxDensities cannot be empty")
               case h :: t => Result(UnnormalizedSED.UserDefined(NonEmptyMap.of(h, t*)).pure[F])
           case (None, None, None, None, None, None, None, None, None, None, Some(v)) =>
-            ???
+            Result(CustomSed.Resolver[F].resolve(v).map(UnnormalizedSED.UserDefined(_)))
           case _                                                                     =>
             Result.failure:
-              "Exactly one of stellarLibrary, coolStar, galaxy, planet, quasar, hiiRegion, planetaryNebula, powerLaw, blackBodyTempK, fluxDensities must be specified."
+              "Exactly one of stellarLibrary, coolStar, galaxy, planet, quasar, hiiRegion, planetaryNebula, powerLaw, blackBodyTempK, fluxDensities, fluxDensitiesUrl must be specified."
         }
     }
 

@@ -11,11 +11,13 @@ import org.http4s.Uri
  * Application configuration.
  */
 final case class Config(
-  environment: ExecutionEnvironment,
-  port:        Int,
-  redisUrl:    Uri,
-  honeycomb:   Option[HoneycombConfig],
-  dyno:        Option[String]
+  environment:     ExecutionEnvironment,
+  port:            Int,
+  redisUrl:        Uri,
+  odbBaseUrl:      Uri,
+  odbServiceToken: String,
+  honeycomb:       Option[HoneycombConfig],
+  dyno:            Option[String]
 )
 
 object Config:
@@ -36,6 +38,8 @@ object Config:
      envOrProp("REDISCLOUD_URL")
        .or(envOrProp("REDIS_URL"))
        .as[Uri],
+     envOrProp("ODB_BASE_URL").as[Uri],
+     envOrProp("ODB_SERVICE_JWT"),
      HoneycombConfig.config.option,
      env("DYNO").option
     ).parMapN(Config.apply)

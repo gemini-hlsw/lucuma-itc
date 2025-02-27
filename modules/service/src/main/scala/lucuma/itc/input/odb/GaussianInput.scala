@@ -9,11 +9,12 @@ import cats.Applicative
 import cats.syntax.all.*
 import grackle.Result
 import lucuma.core.model.SourceProfile
+import lucuma.itc.input.customSed.CustomSed
 import lucuma.odb.graphql.binding.*
 
 object GaussianInput {
 
-  def binding[F[_]: Applicative]: Matcher[F[SourceProfile.Gaussian]] =
+  def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[SourceProfile.Gaussian]] =
     ObjectFieldsBinding.rmap {
       case List(
             AngleInput.Binding.Option("fwhm", rFwhm),

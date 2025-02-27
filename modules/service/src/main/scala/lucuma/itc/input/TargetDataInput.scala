@@ -12,13 +12,15 @@ import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 import lucuma.odb.graphql.input.sourceprofile.*
 
+import customSed.CustomSed
+
 case class TargetDataInput(
   sourceProfile:  SourceProfile,
   radialVelocity: RadialVelocity
 )
 
 object TargetDataInput {
-  def binding[F[_]: Applicative]: Matcher[F[TargetDataInput]] =
+  def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[TargetDataInput]] =
     ObjectFieldsBinding.rmap {
       case List(
             SourceProfileInput.binding("sourceProfile", sourceProfile),

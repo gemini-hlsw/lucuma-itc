@@ -2431,7 +2431,7 @@ input ObservationPropertiesInput {
   """
   The obsAttachments defaults to empty if not specified on creation, and may be edited by specifying a new whole array
   """
-  obsAttachments: [ObsAttachmentId!]
+  obsAttachments: [AttachmentId!]
 
   """
   The scienceRequirements defaults to spectroscopy if not specified on creation, and may be edited but not deleted
@@ -3371,6 +3371,11 @@ input TimingWindowInput {
   end: TimingWindowEndInput
 }
 
+input CustomSedIdInput {
+  programId: ProgramId!
+  attachmentId: AttachmentId!
+}
+
 """
 Un-normalized SED input parameters.  Define one value only.
 """
@@ -3385,7 +3390,7 @@ input UnnormalizedSedInput {
   powerLaw: BigDecimal
   blackBodyTempK: PosInt
   fluxDensities: [FluxDensity!]
-  fluxDensitiesUrl: String
+  fluxDensitiesAttachment: CustomSedIdInput
 }
 
 """
@@ -3863,15 +3868,15 @@ type AsterismGroupSelectResult {
 }
 
 """
-ObsAttachmentId id formatted as `a-[1-9a-f][0-9a-f]*`
+AttachmentId id formatted as `a-[1-9a-f][0-9a-f]*`
 """
-scalar ObsAttachmentId
+scalar AttachmentId
 
 """
 Program Observation Attachment
 """
 type ObsAttachment {
-  id:             ObsAttachmentId!
+  id:             AttachmentId!
   attachmentType: ObsAttachmentType!
   fileName:       NonEmptyString!
   description:    NonEmptyString
@@ -8681,7 +8686,7 @@ input WhereObsAttachment {
   """
   Matches the attachment ID.
   """
-  id: WhereOrderObsAttachmentId
+  id: WhereOrderAttachmentId
 
   """
   Matches the attachment file name.
@@ -8737,46 +8742,46 @@ criteria must match, but usually only one is selected.  E.g., 'GT = 2'
 for an integer property will match when the value is 3 or more.
 
 """
-input WhereOrderObsAttachmentId {
+input WhereOrderAttachmentId {
   """
   Matches if the property is exactly the supplied value.
   """
-  EQ: ObsAttachmentId
+  EQ: AttachmentId
 
   """
   Matches if the property is not the supplied value.
   """
-  NEQ: ObsAttachmentId
+  NEQ: AttachmentId
 
   """
   Matches if the property value is any of the supplied options.
   """
-  IN: [ObsAttachmentId!]
+  IN: [AttachmentId!]
 
   """
   Matches if the property value is none of the supplied values.
   """
-  NIN: [ObsAttachmentId!]
+  NIN: [AttachmentId!]
 
   """
   Matches if the property is ordered after (>) the supplied value.
   """
-  GT: ObsAttachmentId
+  GT: AttachmentId
 
   """
   Matches if the property is ordered before (<) the supplied value.
   """
-  LT: ObsAttachmentId
+  LT: AttachmentId
 
   """
   Matches if the property is ordered after or equal (>=) the supplied value.
   """
-  GTE: ObsAttachmentId
+  GTE: AttachmentId
 
   """
   Matches if the property is ordered before or equal (<=) the supplied value.
   """
-  LTE: ObsAttachmentId
+  LTE: AttachmentId
 }
 
 """

@@ -38,7 +38,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 ThisBuild / scalaVersion        := "3.6.3"
 ThisBuild / crossScalaVersions  := Seq("3.6.3")
 ThisBuild / tlBaseVersion       := "0.27"
-ThisBuild / tlCiReleaseBranches := Seq("master")
+ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -75,8 +75,9 @@ ThisBuild / githubWorkflowBuild +=
   WorkflowStep.Use(
     UseRef.Public("kamilkisiela", "graphql-inspector", "master"),
     name = Some("Validate GraphQL schema changes"),
-    params = Map("schema"        -> "main:modules/service/src/main/resources/graphql/itc.graphql",
-                 "approve-label" -> "expected-breaking-change"
+    params = Map(
+      "schema"        -> "main:modules/service/src/main/resources/graphql/itc.graphql",
+      "approve-label" -> "expected-breaking-change"
     ),
     cond = Some("github.event_name == 'pull_request'")
   )
@@ -114,11 +115,13 @@ lazy val service = project
   .settings(
     name                  := "lucuma-itc-service",
     scalacOptions -= "-Vtype-diffs",
-    reStart / javaOptions := Seq("-Dcats.effect.stackTracing=DISABLED",
-                                 "-Dcats.effect.tracing.mode=none"
+    reStart / javaOptions := Seq(
+      "-Dcats.effect.stackTracing=DISABLED",
+      "-Dcats.effect.tracing.mode=none"
     ),
     reStart / envVars     := Map(
-      "REDISCLOUD_URL" -> "redis://localhost"
+      "REDISCLOUD_URL" -> "redis://localhost",
+      "ODB_BASE_URL"   -> "https://lucuma-postgres-odb-dev.herokuapp.com"
     ),
     libraryDependencies ++= Seq(
       "org.typelevel"  %% "grackle-core"          % grackleVersion,
@@ -137,6 +140,7 @@ lazy val service = project
       "org.slf4j"       % "slf4j-simple"          % slf4jVersion,
       "org.http4s"     %% "http4s-core"           % http4sVersion,
       "org.http4s"     %% "http4s-ember-server"   % http4sVersion,
+      "org.http4s"     %% "http4s-ember-client"   % http4sVersion,
       "eu.timepit"     %% "refined"               % refinedVersion,
       "eu.timepit"     %% "refined-cats"          % refinedVersion,
       "dev.profunktor" %% "redis4cats-effects"    % redis4CatsVersion,

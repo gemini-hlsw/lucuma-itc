@@ -11,6 +11,7 @@ import grackle.Result
 import lucuma.core.enums.Band
 import lucuma.core.math.BrightnessUnits.*
 import lucuma.core.model.SpectralDefinition.BandNormalized
+import lucuma.itc.input.customSed.CustomSed
 import lucuma.odb.graphql.binding.*
 
 import scala.collection.immutable.SortedMap
@@ -22,16 +23,16 @@ object BandNormalizedInput {
     pair.List.map(SortedMap.from(_))
 
   object Integrated {
-    def binding[F[_]: Applicative]: Matcher[F[BandNormalized[Integrated]]] =
+    def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[BandNormalized[Integrated]]] =
       bindingInternal(pairToMap(BandBrightnessInput.Integrated.Binding))
   }
 
   object Surface {
-    def binding[F[_]: Applicative]: Matcher[F[BandNormalized[Surface]]] =
+    def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[BandNormalized[Surface]]] =
       bindingInternal(pairToMap(BandBrightnessInput.Surface.Binding))
   }
 
-  private def bindingInternal[F[_]: Applicative, A](
+  private def bindingInternal[F[_]: Applicative: CustomSed.Resolver, A](
     brightnesses: Matcher[SortedMap[Band, BrightnessMeasure[A]]]
   ): Matcher[F[BandNormalized[A]]] =
     ObjectFieldsBinding.rmap {

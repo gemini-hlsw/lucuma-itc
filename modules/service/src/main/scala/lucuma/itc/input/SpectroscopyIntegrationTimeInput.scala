@@ -10,6 +10,8 @@ import lucuma.itc.SignificantFigures
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 
+import customSed.CustomSed
+
 sealed trait SpectroscopyTimeInput:
   def exposureTimeMode: ExposureTimeMode
   def asterism: List[TargetDataInput]
@@ -31,7 +33,7 @@ case class SpectroscopyIntegrationTimeInput(
 
 object SpectroscopyIntegrationTimeInput:
 
-  def binding[F[_]: Applicative]: Matcher[F[SpectroscopyIntegrationTimeInput]] =
+  def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[SpectroscopyIntegrationTimeInput]] =
     ObjectFieldsBinding.rmap {
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
@@ -57,7 +59,8 @@ case class SpectroscopyIntegrationTimeAndGraphsInput(
 
 object SpectroscopyIntegrationTimeAndGraphsInput:
 
-  def binding[F[_]: Applicative]: Matcher[F[SpectroscopyIntegrationTimeAndGraphsInput]] =
+  def binding[F[_]: Applicative: CustomSed.Resolver]
+    : Matcher[F[SpectroscopyIntegrationTimeAndGraphsInput]] =
     ObjectFieldsBinding.rmap {
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),

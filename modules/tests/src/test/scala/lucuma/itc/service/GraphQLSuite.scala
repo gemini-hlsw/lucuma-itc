@@ -34,27 +34,24 @@ trait GraphQLSuiteBase extends munit.CatsEffectSuite:
 
   def query(query: String, expected: Json): IO[Unit] =
     IO(itcFixture())
-      .flatMap { itc =>
-        itc.orNotFound.run(
-          Request(method = Method.POST, uri = uri"/graphql")
-            .withEntity(Json.obj("query" -> Json.fromString(query)))
-        )
-      }
+      .flatMap: itc =>
+        itc.orNotFound
+          .run:
+            Request(method = Method.POST, uri = uri"/graphql")
+              .withEntity(Json.obj("query" -> Json.fromString(query)))
       .flatMap(_.as[Json])
       .assertEquals(expected)
 
   def query(query: String, variables: String, expected: Json): IO[Unit] =
     IO(itcFixture())
-      .flatMap { itc =>
-        itc.orNotFound.run(
+      .flatMap: itc =>
+        itc.orNotFound.run:
           Request(method = Method.POST, uri = uri"/graphql")
-            .withEntity(
-              Json.obj("query"     -> Json.fromString(query.replace("\\n", "")),
-                       "variables" -> parse(variables).getOrElse(Json.Null)
+            .withEntity:
+              Json.obj(
+                "query"     -> Json.fromString(query.replace("\\n", "")),
+                "variables" -> parse(variables).getOrElse(Json.Null)
               )
-            )
-        )
-      }
       .flatMap(_.as[Json])
       .assertEquals(expected)
 
