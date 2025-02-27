@@ -38,7 +38,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 ThisBuild / scalaVersion        := "3.6.3"
 ThisBuild / crossScalaVersions  := Seq("3.6.3")
 ThisBuild / tlBaseVersion       := "0.27"
-ThisBuild / tlCiReleaseBranches := Seq("master")
+ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -73,10 +73,11 @@ ThisBuild / watchOnTermination := { (action, cmd, times, state) =>
 
 ThisBuild / githubWorkflowBuild +=
   WorkflowStep.Use(
-    UseRef.Public("kamilkisiela", "graphql-inspector", "master"),
+    UseRef.Public("kamilkisiela", "graphql-inspector", "main"),
     name = Some("Validate GraphQL schema changes"),
-    params = Map("schema"        -> "main:modules/service/src/main/resources/graphql/itc.graphql",
-                 "approve-label" -> "expected-breaking-change"
+    params = Map(
+      "schema"        -> "main:modules/service/src/main/resources/graphql/itc.graphql",
+      "approve-label" -> "expected-breaking-change"
     ),
     cond = Some("github.event_name == 'pull_request'")
   )
