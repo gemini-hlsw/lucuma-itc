@@ -22,11 +22,13 @@ import scala.collection.immutable.SortedMap
 trait CustomSedDatResolver[F[_]: Concurrent] extends CustomSed.Resolver[F]:
   protected def datLines(id: CustomSed.Id): F[fs2.Stream[F, String]]
 
-  // delimiters are whitespaces, commas or semicolons and comments (everything from "#" up to next \n).
-  private val Delimiters = "(\\s|,|;|(#[^\\n]*))+"
+  // delimiters are whitespaces, commas or semicolons
+  private val Delimiters = "(\\s|,|;)+"
+  private val EmptyLine  = "\\s*"
+  private val Comment    = "\\s*#.*"
 
   private def parseLine(line: String): Either[String, (Wavelength, PosBigDecimal)] =
-    line.split(Delimiters) match
+    line.split(Delimiters).take(2) match
       case Array(wavelength, density) =>
         val w: Either[String, Wavelength]    =
           wavelength.toDoubleOption
@@ -47,6 +49,8 @@ trait CustomSedDatResolver[F[_]: Concurrent] extends CustomSed.Resolver[F]:
       lines <- datLines(id)
       pairs <-
         lines
+          .filterNot(_.matches(EmptyLine))
+          .filterNot(_.matches(Comment))
           .map(parseLine)
           .evalMap(_.leftMap(new RuntimeException(_)).liftTo[F])
           .compile

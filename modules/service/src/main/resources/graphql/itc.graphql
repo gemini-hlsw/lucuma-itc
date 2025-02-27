@@ -3371,6 +3371,11 @@ input TimingWindowInput {
   end: TimingWindowEndInput
 }
 
+input CustomSedIdInput {
+  programId: ProgramId!
+  attachmentId: AttachmentId!
+}
+
 """
 Un-normalized SED input parameters.  Define one value only.
 """
@@ -3385,7 +3390,7 @@ input UnnormalizedSedInput {
   powerLaw: BigDecimal
   blackBodyTempK: PosInt
   fluxDensities: [FluxDensity!]
-  fluxDensitiesAttachment: AttachmentId
+  fluxDensitiesAttachment: CustomSedIdInput
 }
 
 """

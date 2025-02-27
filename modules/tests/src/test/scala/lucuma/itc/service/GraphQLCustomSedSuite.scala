@@ -139,7 +139,10 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
                   point: {
                     bandNormalized: {
                       sed: {
-                        fluxDensitiesAttachment: "a-1"
+                        fluxDensitiesAttachment: {
+                          programId: "p-1",
+                          attachmentId: "a-1"
+                        }
                       }
                       brightnesses: [{
                         band: R
@@ -250,7 +253,10 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
                   point: {
                     bandNormalized: {
                       sed: {
-                        fluxDensitiesAttachment: "a-999"
+                        fluxDensitiesAttachment: {
+                          programId: "p-1",
+                          attachmentId: "a-999"
+                        }
                       }
                       brightnesses: [{
                         band: R
@@ -319,7 +325,7 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
         {
           "errors": [
             {
-              "message": "Custom SED file for id [a-999] is empty."
+              "message": "Custom SED file for id [CustomSedId(p-1, a-999)] is empty."
             }
           ],
           "data": null
@@ -345,7 +351,10 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
                   point: {
                     bandNormalized: {
                       sed: {
-                        fluxDensitiesAttachment: "a-2"
+                        fluxDensitiesAttachment: {
+                          programId: "p-1",
+                          attachmentId: "a-2"
+                        }
                       }
                       brightnesses: [{
                         band: R

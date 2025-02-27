@@ -40,7 +40,7 @@ object UnnormalizedSedInput {
             BigDecimalBinding.Option("powerLaw", rPowerLaw),
             IntBinding.Option("blackBodyTempK", rBlackBodyTempK),
             FluxDensityInput.Binding.List.Option("fluxDensities", rFluxDensities),
-            AttachmentIdBinding.Option("fluxDensitiesAttachment", rFluxDensitiesAttachment)
+            CustomSedIdInput.Binding.Option("fluxDensitiesAttachment", rFluxDensitiesAttachment)
           ) =>
         (rStellarLibrary,
          rCoolStar,

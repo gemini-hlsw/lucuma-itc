@@ -27,18 +27,20 @@ class CustomSedOdbAttachmentResolver[F[_]: Async: Logger] private (
   authToken:  String
 ) extends CustomSedDatResolver[F]:
 
-  private def getRequest(id: CustomSed.Id): Request[F] =
-    Request(
-      uri = odbBaseUrl / "attachments" / id.show,
-      headers = Headers:
-        Authorization:
-          Credentials.Token(AuthScheme.Bearer, authToken)
-    )
-
   protected def datLines(id: CustomSed.Id): F[fs2.Stream[F, String]] =
-    for _ <- Logger[F].debug(s"Fetching custom SED for id [$id]")
+    val uri: Uri            =
+      odbBaseUrl / "attachment" / id.programId.show / id.attachmentId.show
+    val request: Request[F] =
+      Request(
+        uri = uri,
+        headers = Headers:
+          Authorization:
+            Credentials.Token(AuthScheme.Bearer, authToken)
+      )
+
+    for _ <- Logger[F].info(s"Fetching custom SED for id [$id]: $uri")
     yield client
-      .stream(getRequest(id))
+      .stream(request)
       .flatMap(_.body)
       .through(text.utf8.decode)
       .through(text.lines)
