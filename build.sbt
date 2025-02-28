@@ -30,7 +30,7 @@ val natchezHttp4sVersion        = "0.6.1"
 val pprintVersion               = "0.9.0"
 val redis4CatsVersion           = "1.7.2"
 val refinedVersion              = "0.11.3"
-val slf4jVersion                = "2.0.16"
+val slf4jVersion                = "2.0.17"
 val spireVersion                = "0.18.0"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
