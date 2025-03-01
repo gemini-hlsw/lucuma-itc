@@ -9,6 +9,12 @@ import io.chrisdavenport.keysemaphore.KeySemaphore
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
+/**
+ * Basic cache implementation that will invoke an effect to resolve an absent entry.
+ *
+ * Provides contention so that multiple concurrent requests for the same key are handled in a single
+ * effect.
+ */
 trait EffectfulCache[F[_]: MonadCancelThrow: Trace: Logger, K, V]:
   protected val keySemaphore: KeySemaphore[F, K]
 

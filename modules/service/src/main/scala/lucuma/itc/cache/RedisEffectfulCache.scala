@@ -14,7 +14,7 @@ import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.*
 
-class RedisEffectfulCache[F[_]: MonadCancelThrow: Trace: Logger](
+trait RedisEffectfulCache[F[_]: MonadCancelThrow: Trace: Logger](
   redis:                      StringCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]],
   protected val keySemaphore: KeySemaphore[F, Array[Byte]]
 ) extends BinaryEffectfulCache[F]:
@@ -37,4 +37,4 @@ object RedisEffectfulCache:
     KeySemaphore
       .of[F, Array[Byte]](_ => 1L) // 1 permit per key
       .map: keySemaphore =>
-        new RedisEffectfulCache(redis, keySemaphore)
+        new RedisEffectfulCache(redis, keySemaphore) {}

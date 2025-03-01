@@ -13,6 +13,11 @@ import org.typelevel.log4cats.Logger
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 
+/**
+ * Keys are formed with an optional prefix and a hash of the request.
+ *
+ * Values are stored in binary via boopickle.
+ */
 trait BinaryEffectfulCache[F[_]: MonadCancelThrow: Trace: Logger]
     extends EffectfulCache[F, Array[Byte], Array[Byte]]:
   protected val KeyCharset = Charset.forName("UTF8")
@@ -34,7 +39,7 @@ trait BinaryEffectfulCache[F[_]: MonadCancelThrow: Trace: Logger]
   def writeBinary[K1: Hash, V1: Pickler](key: K1, value: V1, keyPrefix: String = ""): F[Unit] =
     write(keyToBinary(key, keyPrefix), valueToBinary(value))
 
-  def getOrComputeBinary[K1: Hash, V1: Pickler](
+  def getOrInvokeBinary[K1: Hash, V1: Pickler](
     key:       K1,
     effect:    F[V1],
     keyPrefix: String = ""
