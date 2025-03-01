@@ -8,7 +8,7 @@ import cats.*
 import cats.data.NonEmptyChain
 import cats.effect.*
 import cats.syntax.all.*
-import dev.profunktor.redis4cats.RedisCommands
+import dev.profunktor.redis4cats.algebra.StringCommands
 import eu.timepit.refined.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import grackle.*
@@ -52,7 +52,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
   def versions[F[_]: Applicative: Logger](
     environment: ExecutionEnvironment,
-    redis:       RedisCommands[F, Array[Byte], Array[Byte]]
+    redis:       StringCommands[F, Array[Byte], Array[Byte]]
   ): F[Result[ItcVersions]] =
     Result(ItcVersions(version(environment).value, BuildInfo.ocslibHash.some)).pure[F]
 
@@ -80,7 +80,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
   def calculateSpectroscopyIntegrationTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment:     ExecutionEnvironment,
-    redis:           RedisCommands[F, Array[Byte], Array[Byte]],
+    redis:           StringCommands[F, Array[Byte], Array[Byte]],
     itc:             Itc[F]
   )(
     asterismRequest: AsterismSpectroscopyTimeRequest
@@ -104,7 +104,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
   def calculateImagingIntegrationTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
-    redis:       RedisCommands[F, Array[Byte], Array[Byte]],
+    redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
   )(asterismRequest: AsterismImagingTimeRequest): F[Result[IntegrationTimeCalculationResult]] =
     asterismRequest.toTargetRequests
@@ -174,7 +174,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
   def spectroscopyGraphs[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment: ExecutionEnvironment,
-    redis:       RedisCommands[F, Array[Byte], Array[Byte]],
+    redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
   )(asterismRequest: AsterismGraphRequest): F[Result[SpectroscopyGraphsResult]] =
     asterismRequest.toTargetRequests
@@ -217,7 +217,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
   def spectroscopyIntegrationTimeAndGraphs[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
     environment:     ExecutionEnvironment,
-    redis:           RedisCommands[F, Array[Byte], Array[Byte]],
+    redis:           StringCommands[F, Array[Byte], Array[Byte]],
     itc:             Itc[F]
   )(
     asterismRequest: AsterismSpectroscopyTimeRequest,
@@ -253,7 +253,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
   def apply[F[_]: Sync: Logger: Parallel: Trace: CustomSed.Resolver](
     environment: ExecutionEnvironment,
-    redis:       RedisCommands[F, Array[Byte], Array[Byte]],
+    redis:       StringCommands[F, Array[Byte], Array[Byte]],
     itc:         Itc[F]
   ): F[Mapping[F]] =
     loadSchema[F].map { loadedSchema =>

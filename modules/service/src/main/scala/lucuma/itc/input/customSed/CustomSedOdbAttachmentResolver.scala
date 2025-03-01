@@ -8,6 +8,7 @@ import cats.effect.kernel.Async
 import cats.syntax.all.*
 import fs2.io.net.Network
 import fs2.text
+import natchez.Trace
 import org.http4s.AuthScheme
 import org.http4s.Credentials
 import org.http4s.Headers
@@ -17,7 +18,6 @@ import org.http4s.client.Client
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.headers.Authorization
 import org.typelevel.log4cats.Logger
-import natchez.Trace
 
 /**
  * Implementation of `CustomSed.Resolver` that uses a URL to fetch the custom SED.

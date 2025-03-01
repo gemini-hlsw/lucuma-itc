@@ -9,6 +9,7 @@ import cats.*
 import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
+import dev.profunktor.redis4cats.algebra.StringCommands
 import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.*
 import lucuma.itc.service.redis.given
@@ -19,7 +20,6 @@ import org.typelevel.log4cats.Logger
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import scala.concurrent.duration.*
-import dev.profunktor.redis4cats.RedisCommands
 
 /**
  * Methods to check if a values is on the cache and if not retrieve them from old itc and store them
@@ -30,8 +30,9 @@ import dev.profunktor.redis4cats.RedisCommands
  */
 trait ItcCacheOrRemote extends Version:
   val KeyCharset = Charset.forName("UTF8")
-  // Time to live for entries
-  val TTL        = FiniteDuration(10, DAYS)
+  // Time to live for entries. The idea of having such a long TTL is that eviction is based on LRU
+  // and cache size restriction. As such, Redis should be configured to use an LRU eviction policy.
+  val TTL        = FiniteDuration(365, DAYS)
   val VersionKey = "itc:version".getBytes(KeyCharset)
 
   /**
@@ -42,7 +43,7 @@ trait ItcCacheOrRemote extends Version:
     request: A => F[B]
   )(
     prefix:  String,
-    redis:   RedisCommands[F, Array[Byte], Array[Byte]]
+    redis:   StringCommands[F, Array[Byte], Array[Byte]]
   ): F[B] = {
     val hash        = Hash[A].hash(a)
     val redisKeyStr = s"$prefix:$hash"
@@ -50,7 +51,7 @@ trait ItcCacheOrRemote extends Version:
     val L           = Logger[F]
 
     val whenFound: F[Unit] =
-      L.debug(s"$hash found on redis") >> redis.expire(redisKey, TTL).void
+      L.debug(s"$hash found on redis")
 
     val whenMissing: F[B] =
       for
@@ -98,7 +99,7 @@ trait ItcCacheOrRemote extends Version:
     request: TargetGraphRequest
   )(
     itc:     Itc[F],
-    redis:   RedisCommands[F, Array[Byte], Array[Byte]]
+    redis:   StringCommands[F, Array[Byte], Array[Byte]]
   ): F[TargetGraphsCalcResult] =
     cacheOrRemote(request, requestGraphs(itc))("itc:graph:spec", redis)
 
@@ -132,7 +133,7 @@ trait ItcCacheOrRemote extends Version:
     calcRequest: TargetSpectroscopyTimeRequest
   )(
     itc:         Itc[F],
-    redis:       RedisCommands[F, Array[Byte], Array[Byte]]
+    redis:       StringCommands[F, Array[Byte], Array[Byte]]
   ): F[TargetIntegrationTime] =
     cacheOrRemote(calcRequest, requestSpecTimeCalc(itc))(
       "itc:calc:spec",
@@ -162,7 +163,7 @@ trait ItcCacheOrRemote extends Version:
     calcRequest: TargetImagingTimeRequest
   )(
     itc:         Itc[F],
-    redis:       RedisCommands[F, Array[Byte], Array[Byte]]
+    redis:       StringCommands[F, Array[Byte], Array[Byte]]
   ): F[TargetIntegrationTime] =
     cacheOrRemote(calcRequest, requestImgTimeCalc(itc))(
       "itc:calc:img",
@@ -175,7 +176,7 @@ trait ItcCacheOrRemote extends Version:
    * cache
    */
   def checkVersionToPurge[F[_]: MonadThrow: Logger](
-    redis: RedisCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]],
+    redis: StringCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]],
     itc:   Itc[F]
   ): F[Unit] = {
     val L      = Logger[F]
