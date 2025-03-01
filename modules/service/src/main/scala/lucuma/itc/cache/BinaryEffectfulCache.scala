@@ -5,7 +5,7 @@ package lucuma.itc.cache
 
 import boopickle.DefaultBasic.*
 import cats.Hash
-import cats.MonadThrow
+import cats.effect.MonadCancelThrow
 import cats.syntax.all.*
 import natchez.Trace
 import org.typelevel.log4cats.Logger
@@ -13,7 +13,7 @@ import org.typelevel.log4cats.Logger
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 
-trait BinaryEffectfulCache[F[_]: MonadThrow: Trace: Logger]
+trait BinaryEffectfulCache[F[_]: MonadCancelThrow: Trace: Logger]
     extends EffectfulCache[F, Array[Byte], Array[Byte]]:
   protected val KeyCharset = Charset.forName("UTF8")
 

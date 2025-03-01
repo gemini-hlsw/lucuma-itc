@@ -3,16 +3,20 @@
 
 package lucuma.itc.cache
 
-import cats.MonadThrow
+import cats.effect.Async
+import cats.effect.MonadCancelThrow
+import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
 import dev.profunktor.redis4cats.algebra.StringCommands
+import io.chrisdavenport.keysemaphore.KeySemaphore
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.*
 
-class RedisEffectfulCache[F[_]: MonadThrow: Trace: Logger](
-  redis: StringCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]]
+class RedisEffectfulCache[F[_]: MonadCancelThrow: Trace: Logger](
+  redis:                      StringCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]],
+  protected val keySemaphore: KeySemaphore[F, Array[Byte]]
 ) extends BinaryEffectfulCache[F]:
   // Time to live for entries. The idea of having such a long TTL is that eviction is based on LRU
   // and cache size restriction. As such, Redis should be configured to use an LRU eviction policy.
@@ -27,6 +31,10 @@ class RedisEffectfulCache[F[_]: MonadThrow: Trace: Logger](
   override def flush: F[Unit] = redis.flushAll
 
 object RedisEffectfulCache:
-  def apply[F[_]: MonadThrow: Trace: Logger](
+  def apply[F[_]: Async: Trace: Logger](
     redis: StringCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]]
-  ): RedisEffectfulCache[F] = new RedisEffectfulCache(redis)
+  ): F[RedisEffectfulCache[F]] =
+    KeySemaphore
+      .of[F, Array[Byte]](_ => 1L) // 1 permit per key
+      .map: keySemaphore =>
+        new RedisEffectfulCache(redis, keySemaphore)

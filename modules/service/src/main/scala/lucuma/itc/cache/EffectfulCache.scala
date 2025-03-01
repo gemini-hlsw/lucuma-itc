@@ -3,12 +3,15 @@
 
 package lucuma.itc.cache
 
-import cats.MonadThrow
+import cats.effect.MonadCancelThrow
 import cats.syntax.all.*
+import io.chrisdavenport.keysemaphore.KeySemaphore
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
-trait EffectfulCache[F[_]: MonadThrow: Trace: Logger, K, V]:
+trait EffectfulCache[F[_]: MonadCancelThrow: Trace: Logger, K, V]:
+  protected val keySemaphore: KeySemaphore[F, K]
+
   protected val L: Logger[F] = Logger[F]
 
   protected def read(key: K): F[Option[V]]
@@ -30,14 +33,15 @@ trait EffectfulCache[F[_]: MonadThrow: Trace: Logger, K, V]:
             .handleErrorWith(L.error(_)(s"Error writing to cache with key [$key]"))
       yield r
 
-    Trace[F].span("cache-read") {
-      for
-        _          <- Trace[F].put("cache.key" -> key.toString)
-        _          <- L.debug(s"Reading from cache with key [$key]")
-        cacheValue <-
-          read(key)
-            .handleErrorWith: e =>
-              L.error(e)(s"Error reading from cache with key [$key]").as(none)
-        r          <- cacheValue.fold(whenMissing)(whenFound.as(_))
-      yield r
-    }
+    // Make sure we don't invoke effect multiple times while it's already executing.
+    keySemaphore(key).permit.use: _ =>
+      Trace[F].span("cache-read"):
+        for
+          _          <- Trace[F].put("cache.key" -> key.toString)
+          _          <- L.debug(s"Reading from cache with key [$key]")
+          cacheValue <-
+            read(key)
+              .handleErrorWith: e =>
+                L.error(e)(s"Error reading from cache with key [$key]").as(none)
+          r          <- cacheValue.fold(whenMissing)(whenFound.as(_))
+        yield r
