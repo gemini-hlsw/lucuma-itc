@@ -173,7 +173,7 @@ trait ItcCacheOrRemote extends Version:
   /**
    * This method will get the version from the remote itc and compare it with the one on redis. If
    * there is none in redis we just store it If the remote is different than the local flush the
-   * cache
+   * cache.
    */
   def checkVersionToPurge[F[_]: MonadThrow: Logger](
     redis: StringCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]],
