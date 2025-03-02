@@ -240,6 +240,7 @@ private given Encoder[UnnormalizedSED] = (a: UnnormalizedSED) =>
       Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
     case Quasar(s)                  =>
       Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
+    case UserDefinedAttachment(_)   => sys.error("Unsupported")
     case UserDefined(fluxDensities) =>
       Json.obj(
         "UserDefined" -> Json.obj(

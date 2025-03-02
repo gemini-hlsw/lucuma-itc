@@ -15,6 +15,9 @@ given Encoder[UnnormalizedSED] = {
   case UnnormalizedSED.StellarLibrary(s) =>
     Json.obj("stellarLibrary" -> s.asScreamingJson)
 
+  case UnnormalizedSED.UserDefinedAttachment(_) =>
+    sys.error("UserDefinedAttachment not supported yet")
+
   case UnnormalizedSED.CoolStarModel(s) =>
     Json.obj("coolStar" -> s.asScreamingJson)
 
