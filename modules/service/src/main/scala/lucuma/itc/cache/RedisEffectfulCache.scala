@@ -18,15 +18,16 @@ trait RedisEffectfulCache[F[_]: MonadCancelThrow: Trace: Logger](
   redis:                      StringCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]],
   protected val keySemaphore: KeySemaphore[F, Array[Byte]]
 ) extends BinaryEffectfulCache[F]:
-  // Time to live for entries. The idea of having such a long TTL is that eviction is based on LRU
-  // and cache size restriction. As such, Redis should be configured to use an LRU eviction policy.
-  private val TTL = FiniteDuration(365, DAYS)
 
   override protected def read(key: Array[Byte]): F[Option[Array[Byte]]] =
     redis.get(key)
 
-  override protected def write(key: Array[Byte], value: Array[Byte]): F[Unit] =
-    redis.setEx(key, value, TTL)
+  override protected def write(
+    key:   Array[Byte],
+    value: Array[Byte],
+    ttl:   Option[FiniteDuration]
+  ): F[Unit] =
+    ttl.fold(redis.set(key, value))(redis.setEx(key, value, _))
 
   override def flush: F[Unit] = redis.flushAll
 

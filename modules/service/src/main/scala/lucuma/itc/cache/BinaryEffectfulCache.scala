@@ -12,6 +12,7 @@ import org.typelevel.log4cats.Logger
 
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
+import scala.concurrent.duration.FiniteDuration
 
 /**
  * Keys are formed with an optional prefix and a hash of the request.
@@ -36,12 +37,19 @@ trait BinaryEffectfulCache[F[_]: MonadCancelThrow: Trace: Logger]
   def readBinary[K1: Hash, V1: Pickler](key: K1, keyPrefix: String = ""): F[Option[V1]] =
     read(keyToBinary(key, keyPrefix)).flatMap(_.traverse(valueFromBinary))
 
-  def writeBinary[K1: Hash, V1: Pickler](key: K1, value: V1, keyPrefix: String = ""): F[Unit] =
-    write(keyToBinary(key, keyPrefix), valueToBinary(value))
+  def writeBinary[K1: Hash, V1: Pickler](
+    key:       K1,
+    value:     V1,
+    ttl:       Option[FiniteDuration],
+    keyPrefix: String = ""
+  ): F[Unit] =
+    write(keyToBinary(key, keyPrefix), valueToBinary(value), ttl)
 
   def getOrInvokeBinary[K1: Hash, V1: Pickler](
     key:       K1,
     effect:    F[V1],
+    ttl:       Option[FiniteDuration],
     keyPrefix: String = ""
   ): F[V1] =
-    getOrInvoke(keyToBinary(key, keyPrefix), effect.map(valueToBinary)).flatMap(valueFromBinary)
+    getOrInvoke(keyToBinary(key, keyPrefix), effect.map(valueToBinary), ttl)
+      .flatMap(valueFromBinary)

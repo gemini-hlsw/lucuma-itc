@@ -16,12 +16,19 @@ import lucuma.itc.service.requests.*
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
+import scala.concurrent.duration.*
+
 /**
  * Methods to check if a values is on the cache and if not retrieve them from old itc and store them
  * in the cache
  */
 trait ItcCacheOrRemote extends Version:
-  val VersionKey: String = "itc:version"
+  val VersionKey: String                  = "itc:version"
+  // Time to live for entries. The idea of having such a long TTL is that eviction is based on LRU
+  // and cache size restriction. As such, Redis should be configured to use the `volatile-lru`
+  // eviction policy. This will work better than `allkeys-lru` since it will prevent the version
+  // key from being evicted, which will cause the cache to flush.
+  private val TTL: Option[FiniteDuration] = FiniteDuration(365, DAYS).some
 
   private def requestGraphs[F[_]: Functor](
     itc: Itc[F]
@@ -45,7 +52,7 @@ trait ItcCacheOrRemote extends Version:
     itc:     Itc[F],
     cache:   BinaryEffectfulCache[F]
   ): F[TargetGraphsCalcResult] =
-    cache.getOrInvokeBinary(request, requestGraphs(itc)(request), "itc:graph:spec")
+    cache.getOrInvokeBinary(request, requestGraphs(itc)(request), TTL, "itc:graph:spec")
 
   private def timeAndCountModeNotImplemented[F[_]: MonadThrow, A]: F[A] =
     MonadThrow[F].raiseError[A]:
@@ -77,7 +84,12 @@ trait ItcCacheOrRemote extends Version:
     itc:         Itc[F],
     cache:       BinaryEffectfulCache[F]
   ): F[TargetIntegrationTime] =
-    cache.getOrInvokeBinary(calcRequest, requestSpecTimeCalc(itc)(calcRequest), "itc:calc:spec")
+    cache.getOrInvokeBinary(
+      calcRequest,
+      requestSpecTimeCalc(itc)(calcRequest),
+      TTL,
+      "itc:calc:spec"
+    )
 
   private def requestImgTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest
@@ -104,7 +116,7 @@ trait ItcCacheOrRemote extends Version:
     itc:         Itc[F],
     cache:       BinaryEffectfulCache[F]
   ): F[TargetIntegrationTime] =
-    cache.getOrInvokeBinary(calcRequest, requestImgTimeCalc(itc)(calcRequest), "itc:calc:img")
+    cache.getOrInvokeBinary(calcRequest, requestImgTimeCalc(itc)(calcRequest), TTL, "itc:calc:img")
 
   /**
    * This method will get the version from the remote itc and compare it with the one on the cache.
@@ -121,11 +133,12 @@ trait ItcCacheOrRemote extends Version:
       _              <- L.info(s"Current itc data checksum ${BuildInfo.ocslibHash}")
       versionOnCache <- cache.readBinary[String, String](VersionKey)
       _              <- L.info(s"itc data checksum on cache $versionOnCache")
-      _              <- (L.info( // if the version changes flush cache
-                          s"Flush  cache on itc version change, set to ${BuildInfo.ocslibHash}"
-                        ) *> cache.flush)
-                          .whenA(versionOnCache.exists(_ =!= BuildInfo.ocslibHash))
-      _              <- cache.writeBinary(VersionKey, BuildInfo.ocslibHash)
+      _              <-
+        (L.info( // if the version changes or is missing, flush cache
+          s"Flush cache on missing or changed ITC library version, set to [${BuildInfo.ocslibHash}]"
+        ) *> cache.flush)
+          .whenA(versionOnCache.forall(_ =!= BuildInfo.ocslibHash))
+      _              <- cache.writeBinary(VersionKey, BuildInfo.ocslibHash, none)
     yield ()
     result.handleErrorWith(e => L.error(e)("Error doing version check to purge"))
   }

@@ -9,6 +9,8 @@ import io.chrisdavenport.keysemaphore.KeySemaphore
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
+import scala.concurrent.duration.FiniteDuration
+
 /**
  * Basic cache implementation that will invoke an effect to resolve an absent entry.
  *
@@ -22,11 +24,11 @@ trait EffectfulCache[F[_]: MonadCancelThrow: Trace: Logger, K, V]:
 
   protected def read(key: K): F[Option[V]]
 
-  protected def write(key: K, value: V): F[Unit]
+  protected def write(key: K, value: V, ttl: Option[FiniteDuration]): F[Unit]
 
   def flush: F[Unit]
 
-  def getOrInvoke(key: K, effect: F[V]): F[V] =
+  def getOrInvoke(key: K, effect: F[V], ttl: Option[FiniteDuration]): F[V] =
     val whenFound: F[Unit] =
       L.debug(s"Key [$key] found on cache")
 
@@ -35,7 +37,7 @@ trait EffectfulCache[F[_]: MonadCancelThrow: Trace: Logger, K, V]:
         _ <- L.debug(s"Key [$key] not found on cache")
         r <- Trace[F].span("cache-request-call")(effect)
         _ <-
-          write(key, r)
+          write(key, r, ttl)
             .handleErrorWith(L.error(_)(s"Error writing to cache with key [$key]"))
       yield r
 
