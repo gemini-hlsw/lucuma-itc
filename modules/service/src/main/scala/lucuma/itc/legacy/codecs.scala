@@ -5,7 +5,7 @@ package lucuma.itc.legacy
 
 import cats.data.NonEmptyChain
 import cats.syntax.all.*
-import eu.timepit.refined.numeric.Positive
+import eu.timepit.refined.numeric.NonNegative
 import eu.timepit.refined.refineV
 import io.circe.*
 import io.circe.generic.semiauto.*
@@ -470,7 +470,7 @@ given Decoder[ExposureCalculation] = (c: HCursor) =>
         .downField("exposures")
         .as[Int]
         .flatMap:
-          refineV[Positive](_).leftMap(e => DecodingFailure(e, c.downField("exposures").history))
+          refineV[NonNegative](_).leftMap(e => DecodingFailure(e, c.downField("exposures").history))
   yield ExposureCalculation(time, count, sn)
 
 given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
@@ -479,15 +479,13 @@ given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
       .downField("exposureCalculation")
       .success
       .map:
-        _.as[ExposureCalculation]
-          .map(c => IntegrationTimeRemoteResult(NonEmptyChain.one(c)))
-
-  // println(c.value.spaces2)
+        _.as[Option[ExposureCalculation]]
+          .map(c => IntegrationTimeRemoteResult(c))
 
   val img: Decoder.Result[IntegrationTimeRemoteResult] =
     c.downField("ItcImagingResult")
       .downField("exposureCalculation")
-      .as[NonEmptyChain[ExposureCalculation]]
+      .as[Option[ExposureCalculation]]
       .map(c => IntegrationTimeRemoteResult(c))
 
   spec.getOrElse(img)

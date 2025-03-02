@@ -28,6 +28,15 @@ import lucuma.refined.*
 
 object MockItc extends Itc[IO]:
 
+  override def calculateSignalToNoise(
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: NonNegInt
+  ): IO[TargetIntegrationTime] = ???
+
   override def calculateIntegrationTime(
     target:        TargetData,
     atWavelength:  Wavelength,
@@ -86,6 +95,15 @@ object MockItc extends Itc[IO]:
       .pure[IO]
 
 object MockImagingItc extends Itc[IO]:
+
+  override def calculateSignalToNoise(
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: NonNegInt
+  ): IO[TargetIntegrationTime] = ???
 
   override def calculateIntegrationTime(
     target:        TargetData,
@@ -147,6 +165,15 @@ object MockImagingItc extends Itc[IO]:
 
 object EmissionLineMockItc extends Itc[IO]:
 
+  override def calculateSignalToNoise(
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: NonNegInt
+  ): IO[TargetIntegrationTime] = ???
+
   override def calculateIntegrationTime(
     target:        TargetData,
     atWavelength:  Wavelength,
@@ -172,6 +199,15 @@ object EmissionLineMockItc extends Itc[IO]:
     IO.raiseError(CalculationError("Not implemented"))
 
 object FailingMockItc extends Itc[IO]:
+
+  override def calculateSignalToNoise(
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: NonNegInt
+  ): IO[TargetIntegrationTime] = ???
 
   override def calculateIntegrationTime(
     target:        TargetData,

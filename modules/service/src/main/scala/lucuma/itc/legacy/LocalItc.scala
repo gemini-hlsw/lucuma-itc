@@ -31,6 +31,10 @@ case class LocalItc(classLoader: ClassLoader):
     .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
     .getMethod("calculateExposureTime", classOf[String])
 
+  private val calculateSignalToNoiseMethod = classLoader
+    .loadClass("edu.gemini.itc.web.servlets.ItcCalculation")
+    .getMethod("calculateSignalToNoise", classOf[String])
+
   private val LegacyRight    = """Right\((.*)\)""".r
   private val LegacyLeft     = """Left\(([\s\S]*?)\)""".r
   private val LegacyLeftList = """Left\(List\(([\s\S]*?)\)\)""".r
@@ -73,8 +77,32 @@ case class LocalItc(classLoader: ClassLoader):
       .invoke(null, jsonParams) // null as it is a static method
       .asInstanceOf[String]
 
-    // println(jsonParams)
-    // println(res)
+    println(res)
+
+    res match
+      case LegacyRight(result)    =>
+        decode[legacy.IntegrationTimeRemoteResult](result).leftMap { e =>
+          List(e.getMessage())
+        }
+      case LegacyLeft(result)     =>
+        Left(result.split("\n").toList)
+      case LegacyLeftList(result) =>
+        Left(result.split("\n").toList)
+      case m                      =>
+        Left(List(m))
+
+  /**
+   * This method does a call to the method ItcCalculation.calculate via reflection.
+   */
+  def calculateSignalToNoise(
+    jsonParams: String
+  ): Either[List[String], IntegrationTimeRemoteResult] =
+    val res = calculateSignalToNoiseMethod
+      .invoke(null, jsonParams) // null as it is a static method
+      .asInstanceOf[String]
+
+    println(res)
+
     res match
       case LegacyRight(result)    =>
         decode[legacy.IntegrationTimeRemoteResult](result).leftMap { e =>

@@ -158,7 +158,8 @@ object ItcImpl {
                 IntegrationTime(expTime,
                                 NonNegInt.unsafeFrom(r.exposureCount.value),
                                 r.signalToNoise
-                ).pure[F]
+                )
+                  .pure[F]
               )
               .getOrElse:
                 MonadThrow[F].raiseError:
@@ -198,5 +199,64 @@ object ItcImpl {
                  yield result
         yield r
 
+      /**
+       * Compute the exposure time and number of exposures required to achieve the desired
+       * signal-to-noise under the requested conditions. Only for spectroscopy modes.
+       */
+      private def spectroscopySignalToNoise(
+        target:        TargetData,
+        atWavelength:  Wavelength,
+        observingMode: ObservingMode.SpectroscopyMode,
+        constraints:   ItcObservingConditions,
+        exposureTime:  TimeSpan,
+        exposureCount: NonNegInt
+      ): F[TargetIntegrationTime] =
+        import lucuma.itc.legacy.given
+        import lucuma.itc.legacy.*
+
+        val (request, bandOrLine): (Json, Either[Band, Wavelength]) =
+          spectroscopySNParams(
+            target,
+            atWavelength,
+            observingMode,
+            constraints,
+            exposureTime.toMilliseconds.toDouble.milliseconds,
+            exposureCount.value
+          ).leftMap(_.asJson)
+
+        for
+          _ <- L.info(s"Calculate S/N for exp time $exposureTime and count $exposureCount")
+          _ <- L.info(s"Target $target at wavelength $atWavelength")
+          r <- T.span("itc.calctime.spectroscopy-signal-to-noise"):
+                 for
+                   _      <- T.put("itc.query" -> request.spaces2)
+                   _      <- L.info(request.noSpaces) // Request to the legacy itc
+                   a      <- itcLocal.calculateSignalToNoise(request.noSpaces)
+                   result <- convertIntegrationTimeRemoteResult(a, bandOrLine)
+                 yield result
+        yield r
+
+      def calculateSignalToNoise(
+        target:        TargetData,
+        atWavelength:  Wavelength,
+        observingMode: ObservingMode,
+        constraints:   ItcObservingConditions,
+        exposureTime:  TimeSpan,
+        exposureCount: NonNegInt
+      ): F[TargetIntegrationTime] =
+        T.span("calculate-signal-to-noise"):
+          observingMode match
+            case s @ (ObservingMode.SpectroscopyMode.GmosNorth(_, _, _, _, _, _) |
+                ObservingMode.SpectroscopyMode.GmosSouth(_, _, _, _, _, _)) =>
+              spectroscopySignalToNoise(target,
+                                        atWavelength,
+                                        s,
+                                        constraints,
+                                        exposureTime,
+                                        exposureCount
+              )
+            case _ =>
+              MonadThrow[F].raiseError:
+                CalculationError(s"Imaginng mode not supported for signal-to-noise calculation")
     }
 }

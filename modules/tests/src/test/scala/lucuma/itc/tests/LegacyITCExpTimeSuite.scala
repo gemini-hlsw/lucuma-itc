@@ -70,6 +70,7 @@ class LegacyITCExpTimeSuite extends FunSuite with CommonITCSuite:
     calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
       exposureCount = 10,
       exposureDuration = 3.seconds,
+      wavelengthAt = Wavelength.decimalNanometers.getOption(610).get,
       coadds = None,
       sourceFraction = 1.0,
       ditherOffset = Angle.Angle0

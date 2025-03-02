@@ -67,7 +67,7 @@ trait ItcCacheOrRemote extends Version:
     calcRequest: TargetSpectroscopyTimeRequest
   ): F[TargetIntegrationTime] =
     calcRequest.exposureTimeMode match
-      case ExposureTimeMode.SignalToNoiseMode(value, at) =>
+      case ExposureTimeMode.SignalToNoiseMode(value, at)      =>
         itc
           .calculateIntegrationTime(
             calcRequest.target,
@@ -76,8 +76,16 @@ trait ItcCacheOrRemote extends Version:
             calcRequest.constraints,
             value
           )
-      case ExposureTimeMode.TimeAndCountMode(_, _, _)    =>
-        timeAndCountModeNotImplemented
+      case ExposureTimeMode.TimeAndCountMode(time, count, at) =>
+        itc
+          .calculateSignalToNoise(
+            calcRequest.target,
+            at,
+            calcRequest.specMode,
+            calcRequest.constraints,
+            time,
+            count
+          )
 
   /**
    * Request exposure time calculation for spectroscopy

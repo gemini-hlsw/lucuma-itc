@@ -5,7 +5,7 @@ package lucuma.itc.legacy
 
 import cats.data.NonEmptyChain
 import cats.syntax.all.*
-import eu.timepit.refined.types.numeric.PosInt
+import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.math.SignalToNoise
 import lucuma.itc.ItcGraphGroup
 
@@ -20,8 +20,8 @@ case class GraphsRemoteResult(
 
 case class ExposureCalculation(
   exposureTime:  Double,
-  exposureCount: PosInt,
+  exposureCount: NonNegInt,
   signalToNoise: SignalToNoise
 )
 
-case class IntegrationTimeRemoteResult(exposureCalculation: NonEmptyChain[ExposureCalculation])
+case class IntegrationTimeRemoteResult(exposureCalculation: Option[ExposureCalculation])
