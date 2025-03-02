@@ -10,6 +10,7 @@ import lucuma.core.model.Program
 import lucuma.graphql.routes.GraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.Itc
+import lucuma.itc.cache.RedisEffectfulCache
 import lucuma.itc.input.customSed.CustomSed
 import lucuma.itc.input.customSed.CustomSed.Id
 import lucuma.itc.input.customSed.CustomSedDatResolver
@@ -53,13 +54,11 @@ given CustomSed.Resolver[IO] = new CustomSedDatResolver[IO] {
 def routesForWsb(
   itc: Itc[IO]
 )(using Logger[IO], Trace[IO]): IO[WebSocketBuilder2[IO] => HttpRoutes[IO]] =
-  ItcMapping[IO](
-    ExecutionEnvironment.Local,
-    new NoOpRedis[IO, Array[Byte], Array[Byte]](),
-    itc
-  ).map: itcMap =>
-    (wsb: WebSocketBuilder2[IO]) =>
-      Routes.forService(_ => IO.pure(GraphQLService(itcMap).some), wsb)
+  for
+    cache  <- RedisEffectfulCache[IO](new NoOpRedis[IO, Array[Byte], Array[Byte]]())
+    itcMap <- ItcMapping[IO](ExecutionEnvironment.Local, cache, itc)
+  yield (wsb: WebSocketBuilder2[IO]) =>
+    Routes.forService(_ => IO.pure(GraphQLService(itcMap).some), wsb)
 
 def routes(itc: Itc[IO])(using Logger[IO], Trace[IO]): IO[HttpRoutes[IO]] =
   for

@@ -7,7 +7,9 @@ import cats.Applicative
 import cats.ApplicativeThrow
 import cats.syntax.applicative.*
 import cats.syntax.option.*
+import dev.profunktor.redis4cats.algebra.Flush
 import dev.profunktor.redis4cats.algebra.StringCommands
+import dev.profunktor.redis4cats.effects.FlushMode
 import dev.profunktor.redis4cats.effects.GetExArg
 import dev.profunktor.redis4cats.effects.SetArgs
 import io.lettuce.core.RedisFuture
@@ -15,7 +17,7 @@ import io.lettuce.core.cluster.api.async.RedisClusterAsyncCommands
 
 import scala.concurrent.duration.*
 
-class NoOpRedis[F[_]: ApplicativeThrow, K, V] extends StringCommands[F, K, V] {
+class NoOpRedis[F[_]: ApplicativeThrow, K, V] extends StringCommands[F, K, V] with Flush[F, K] {
   override def getEx(key: K, getExArg: GetExArg): F[Option[V]] =
     none.pure[F]
 
@@ -61,4 +63,13 @@ class NoOpRedis[F[_]: ApplicativeThrow, K, V] extends StringCommands[F, K, V] {
 
   override def append(key: K, value: V): F[Unit] = Applicative[F].unit
 
+  override def flushAll: F[Unit] = Applicative[F].unit
+
+  override def flushAll(mode: FlushMode): F[Unit] = Applicative[F].unit
+
+  override def flushDb: F[Unit] = Applicative[F].unit
+
+  override def flushDb(mode: FlushMode): F[Unit] = Applicative[F].unit
+
+  override def keys(key: K): F[List[K]] = List.empty.pure[F]
 }

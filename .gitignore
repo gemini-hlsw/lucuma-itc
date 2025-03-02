@@ -14,3 +14,4 @@ lib
 .direnv
 .idea
 node_modules
+sbt-launch.jar

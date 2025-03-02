@@ -30,7 +30,7 @@ redis server used for caching. For example: `REDISCLOUD_URL = "redis://localhost
 ## Caching
 
 ITC calculations are relatively expensive and they are pure (a given input always produces the same output)
-the lucuma ITC server uses redis to store the results linking them from the request parameters to the results
+the lucuma ITC server uses redis to store the results linking them from the request parameters to the results.
 
 The cache design is optimized to use minimal space given some of the responses (graphs) are fairly large.
 We are also assuming we'll never need to go inside the cached data to edit the data and we can
@@ -44,10 +44,19 @@ A few diferent encodings were tested to reduce size. Here are some measurement
 * Compressed json: 589896
 * Boopickle: 262216
 
+Make sure Redis is configured to use the `volatile-lru` eviction policy. This allows us to use it as a cache 
+for keys stored with a TTL, which is what we do here, while keeping a permanent entry for the version key.
+If the version key is missing or changes, the cache is flushed.
+
+In Heroku's "Redis Cloud" add-on, `volatile-lru` is the default at the time of writing of this, but it should
+be verified. This can be configured under `Configuration`/`Durability`/`Data eviction policy`:
+
+![Heroku Redis Cloud volatility configuration](heroku-redis-volatility.png)
+
 ## Cache flushing
 
-The only reason for the remote values to be stale is if the old itc changes (happens not very often)
-`lucuma-itc` will check on startup and verify if the itc data has changed. If so it will flush the whole cache
+The only reason for the remote values to be stale is if the old ITC changes (happens not very often).
+`lucuma-itc` will check on startup and verify if the ITC version has changed. If so it will flush the whole cache.
 
 ## `git lfs` and Legacy ITC Code
 

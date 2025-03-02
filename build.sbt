@@ -17,7 +17,7 @@ val grackleVersion              = "0.23.0"
 val graphQLRoutesVersion        = "0.8.17"
 val http4sVersion               = "0.23.30"
 val http4sJdkHttpClientVersion  = "0.10.0"
-val kindProjectorVersion        = "0.13.2"
+val keySemaphoreVersion         = "0.3.0-M1"
 val kittensVersion              = "3.4.0"
 val log4catsVersion             = "2.7.0"
 val lucumaCoreVersion           = "0.115.3"
@@ -124,30 +124,31 @@ lazy val service = project
       "ODB_BASE_URL"   -> "https://lucuma-postgres-odb-dev.herokuapp.com"
     ),
     libraryDependencies ++= Seq(
-      "org.typelevel"  %% "grackle-core"          % grackleVersion,
-      "org.typelevel"  %% "grackle-generic"       % grackleVersion,
-      "org.typelevel"  %% "grackle-circe"         % grackleVersion,
-      "edu.gemini"     %% "lucuma-graphql-routes" % graphQLRoutesVersion,
-      "org.tpolecat"   %% "natchez-honeycomb"     % natchezVersion,
-      "org.tpolecat"   %% "natchez-log"           % natchezVersion,
-      "org.tpolecat"   %% "natchez-http4s"        % natchezHttp4sVersion,
-      "co.fs2"         %% "fs2-core"              % fs2Version,
-      "edu.gemini"     %% "lucuma-core"           % lucumaCoreVersion,
-      "org.typelevel"  %% "cats-core"             % catsVersion,
-      "org.typelevel"  %% "cats-effect"           % catsEffectVersion,
-      "is.cir"         %% "ciris"                 % cirisVersion,
-      "org.typelevel"  %% "log4cats-slf4j"        % log4catsVersion,
-      "org.slf4j"       % "slf4j-simple"          % slf4jVersion,
-      "org.http4s"     %% "http4s-core"           % http4sVersion,
-      "org.http4s"     %% "http4s-ember-server"   % http4sVersion,
-      "org.http4s"     %% "http4s-ember-client"   % http4sVersion,
-      "eu.timepit"     %% "refined"               % refinedVersion,
-      "eu.timepit"     %% "refined-cats"          % refinedVersion,
-      "dev.profunktor" %% "redis4cats-effects"    % redis4CatsVersion,
-      "dev.profunktor" %% "redis4cats-log4cats"   % redis4CatsVersion,
-      "com.lihaoyi"    %% "pprint"                % pprintVersion,
-      "io.suzaku"      %% "boopickle"             % boopickleVersion,
-      "org.typelevel"  %% "munit-cats-effect"     % munitCatsEffectVersion % Test
+      "org.typelevel"     %% "grackle-core"          % grackleVersion,
+      "org.typelevel"     %% "grackle-generic"       % grackleVersion,
+      "org.typelevel"     %% "grackle-circe"         % grackleVersion,
+      "edu.gemini"        %% "lucuma-graphql-routes" % graphQLRoutesVersion,
+      "org.tpolecat"      %% "natchez-honeycomb"     % natchezVersion,
+      "org.tpolecat"      %% "natchez-log"           % natchezVersion,
+      "org.tpolecat"      %% "natchez-http4s"        % natchezHttp4sVersion,
+      "co.fs2"            %% "fs2-core"              % fs2Version,
+      "edu.gemini"        %% "lucuma-core"           % lucumaCoreVersion,
+      "org.typelevel"     %% "cats-core"             % catsVersion,
+      "org.typelevel"     %% "cats-effect"           % catsEffectVersion,
+      "is.cir"            %% "ciris"                 % cirisVersion,
+      "org.typelevel"     %% "log4cats-slf4j"        % log4catsVersion,
+      "org.slf4j"          % "slf4j-simple"          % slf4jVersion,
+      "org.http4s"        %% "http4s-core"           % http4sVersion,
+      "org.http4s"        %% "http4s-ember-server"   % http4sVersion,
+      "org.http4s"        %% "http4s-ember-client"   % http4sVersion,
+      "eu.timepit"        %% "refined"               % refinedVersion,
+      "eu.timepit"        %% "refined-cats"          % refinedVersion,
+      "dev.profunktor"    %% "redis4cats-effects"    % redis4CatsVersion,
+      "dev.profunktor"    %% "redis4cats-log4cats"   % redis4CatsVersion,
+      "com.lihaoyi"       %% "pprint"                % pprintVersion,
+      "io.suzaku"         %% "boopickle"             % boopickleVersion,
+      "io.chrisdavenport" %% "keysemaphore"          % keySemaphoreVersion,
+      "org.typelevel"     %% "munit-cats-effect"     % munitCatsEffectVersion % Test
     ),
     buildInfoKeys         := Seq[BuildInfoKey](
       scalaVersion,
