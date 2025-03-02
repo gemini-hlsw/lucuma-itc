@@ -45,7 +45,11 @@ A few diferent encodings were tested to reduce size. Here are some measurement
 * Boopickle: 262216
 
 Make sure Redis is configured to use an LRU eviction policy, since this the optimal setting when
-using it as a cache.
+using it as a cache. In Heroku's "Redis Cloud" add-on, this can be configured under 
+`Configuration`/`Durability`/`Data eviction policy`, where it should be set to `allkeys-lru` (preferred)
+or `volatile-lru` (which is the default):
+
+![Heroku Redis Cloud volatility configuration](heroku-redis-volatility.png)
 
 ## Cache flushing
 
