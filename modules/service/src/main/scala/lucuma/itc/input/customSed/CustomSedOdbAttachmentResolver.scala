@@ -18,6 +18,7 @@ import org.http4s.client.Client
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.headers.Authorization
 import org.typelevel.log4cats.Logger
+import lucuma.core.model.Attachment
 
 /**
  * Implementation of `CustomSed.Resolver` that uses a URL to fetch the custom SED.
@@ -28,10 +29,10 @@ class CustomSedOdbAttachmentResolver[F[_]: Async: Logger: Trace] private (
   authToken:  String
 ) extends CustomSedDatResolver[F]:
 
-  protected def datLines(id: CustomSed.Id): F[fs2.Stream[F, String]] =
+  protected def datLines(id: Attachment.Id): F[fs2.Stream[F, String]] =
     Trace[F].span("custom-sed-attachment-resolver"):
       val uri: Uri            =
-        odbBaseUrl / "attachment" / id.programId.show / id.attachmentId.show
+        odbBaseUrl / "attachment" / id.show
       val request: Request[F] =
         Request(
           uri = uri,

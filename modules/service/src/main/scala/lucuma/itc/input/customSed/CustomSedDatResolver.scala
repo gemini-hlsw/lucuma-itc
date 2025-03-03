@@ -11,6 +11,7 @@ import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.math.Wavelength
 
 import scala.collection.immutable.SortedMap
+import lucuma.core.model.Attachment
 
 /**
  * Implementation of `CustomSed.Resolver` that parses a `dat` file, consisting of lines of the form
@@ -20,7 +21,7 @@ import scala.collection.immutable.SortedMap
  * file.
  */
 trait CustomSedDatResolver[F[_]: Concurrent] extends CustomSed.Resolver[F]:
-  protected def datLines(id: CustomSed.Id): F[fs2.Stream[F, String]]
+  protected def datLines(id: Attachment.Id): F[fs2.Stream[F, String]]
 
   // delimiters are whitespaces, commas or semicolons
   private val Delimiters = "(\\s|,|;)+"
@@ -44,7 +45,7 @@ trait CustomSedDatResolver[F[_]: Concurrent] extends CustomSed.Resolver[F]:
       case _                          =>
         Left(s"Invalid line in custom SED: [$line].")
 
-  def resolve(id: CustomSed.Id): F[NonEmptyMap[Wavelength, PosBigDecimal]] =
+  def resolve(id: Attachment.Id): F[NonEmptyMap[Wavelength, PosBigDecimal]] =
     for
       lines <- datLines(id)
       pairs <-

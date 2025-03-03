@@ -7,14 +7,10 @@ import cats.data.NonEmptyMap
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.math.Wavelength
 import lucuma.core.model.Attachment
-import lucuma.core.model.Program
 
 object CustomSed:
-  case class Id(programId: Program.Id, attachmentId: Attachment.Id):
-    override def toString: String = s"CustomSedId($programId, $attachmentId)"
-
   trait Resolver[F[_]]:
-    def resolve(id: Id): F[NonEmptyMap[Wavelength, PosBigDecimal]]
+    def resolve(id: Attachment.Id): F[NonEmptyMap[Wavelength, PosBigDecimal]]
 
   object Resolver:
     def apply[F[_]](using r: Resolver[F]): Resolver[F] = r
