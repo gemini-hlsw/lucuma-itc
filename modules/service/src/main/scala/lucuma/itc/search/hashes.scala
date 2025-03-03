@@ -14,6 +14,7 @@ import lucuma.core.enums.GmosAmpReadMode
 import lucuma.core.math.Redshift
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
+import lucuma.core.model.Attachment
 import lucuma.core.model.NonNegDuration
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.sequence.gmos.GmosCcdMode
@@ -38,3 +39,4 @@ given Hash[GmosAmpCount]    = Hash.by(_.tag)
 given Hash[GmosAmpGain]     = Hash.by(_.tag)
 given Hash[GmosAmpReadMode] = Hash.by(_.tag)
 given Hash[GmosCcdMode]     = Hash.by(x => (x.xBin, x.yBin, x.ampCount, x.ampGain, x.ampReadMode))
+given Hash[Attachment.Id]   = Hash.by(_.value)

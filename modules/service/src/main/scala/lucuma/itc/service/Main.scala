@@ -21,6 +21,7 @@ import lucuma.graphql.routes.Routes
 import lucuma.itc.ItcImpl
 import lucuma.itc.cache.RedisEffectfulCache
 import lucuma.itc.input.customSed.CustomSed
+import lucuma.itc.input.customSed.CustomSedCachedResolver
 import lucuma.itc.input.customSed.CustomSedOdbAttachmentResolver
 import lucuma.itc.legacy.FLocalItc
 import lucuma.itc.legacy.LocalItc
@@ -56,6 +57,7 @@ import scala.util.Try
 object Main extends IOApp with ItcCacheOrRemote {
   val ServiceName     = "lucuma-itc"
   val DefaultCacheTTL = 6.hours
+  val CustomSedTTL    = 1.minute
 
   override protected def blockedThreadDetectionEnabled = true
 
@@ -124,13 +126,13 @@ object Main extends IOApp with ItcCacheOrRemote {
     itc: LocalItc
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
-      itc                         <- Resource.eval(ItcImpl.build(FLocalItc[F](itc)).pure[F])
-      redis                       <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
-      cache                       <- Resource.eval(RedisEffectfulCache[F](redis))
-      _                           <- Resource.eval(checkVersionToPurge[F](cache, itc))
-      given CustomSed.Resolver[F] <-
-        CustomSedOdbAttachmentResolver[F](cfg.odbBaseUrl, cfg.odbServiceToken)
-      mapping                     <- Resource.eval(ItcMapping[F](cfg.environment, cache, itc))
+      itc                        <- Resource.eval(ItcImpl.build(FLocalItc[F](itc)).pure[F])
+      redis                      <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
+      cache                      <- Resource.eval(RedisEffectfulCache[F](redis))
+      _                          <- Resource.eval(checkVersionToPurge[F](cache, itc))
+      customSedResolver          <- CustomSedOdbAttachmentResolver[F](cfg.odbBaseUrl, cfg.odbServiceToken)
+      given CustomSed.Resolver[F] = CustomSedCachedResolver(customSedResolver, cache, CustomSedTTL)
+      mapping                    <- Resource.eval(ItcMapping[F](cfg.environment, cache, itc))
     yield wsb =>
       // Routes for the ITC GraphQL service
       NatchezMiddleware.server:

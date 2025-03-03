@@ -3,9 +3,10 @@
 
 package lucuma.itc.service.redis
 
-import _root_.cats.data.Chain
 import boopickle.DefaultBasic.*
+import cats.data.Chain
 import cats.data.NonEmptyChain
+import cats.data.NonEmptyMap
 import eu.timepit.refined.*
 import eu.timepit.refined.api.*
 import lucuma.core.data.Zipper
@@ -15,6 +16,7 @@ import lucuma.core.util.Enumerated
 import lucuma.core.util.TimeSpan
 import lucuma.itc.*
 
+import scala.collection.immutable.SortedMap
 import scala.concurrent.duration.*
 
 // --------------------------------------------------
@@ -22,7 +24,7 @@ import scala.concurrent.duration.*
 // The data is further gzipped
 // --------------------------------------------------
 
-given picklerRefined[A: Pickler, B](using Validate[A, B]): Pickler[A Refined B] =
+given [A: Pickler, B](using Validate[A, B]): Pickler[A Refined B] =
   new Pickler[A Refined B] {
     override def pickle(a: A Refined B)(using state: PickleState): Unit = {
       state.pickle(a.value)
@@ -34,13 +36,19 @@ given picklerRefined[A: Pickler, B](using Validate[A, B]): Pickler[A Refined B] 
     }
   }
 
-given picklerEnumerated[A: Enumerated]: Pickler[A] =
+given [A: Enumerated]: Pickler[A] =
   transformPickler((a: String) => Enumerated[A].fromTag(a).getOrElse(sys.error("Cannot unpickle")))(
     Enumerated[A].tag(_)
   )
 
-given picklerNonEmptyList[A: Pickler]: Pickler[NonEmptyChain[A]] =
+given [A: Pickler]: Pickler[NonEmptyChain[A]] =
   transformPickler(Chain.fromSeq[A].andThen(NonEmptyChain.fromChainUnsafe[A]))(_.toChain.toList)
+
+given [K: Pickler: Ordering, V: Pickler]: Pickler[SortedMap[K, V]] =
+  transformPickler((m: Map[K, V]) => SortedMap.from(m))(_.toMap)
+
+given [K: Pickler: Ordering, V: Pickler]: Pickler[NonEmptyMap[K, V]] =
+  transformPickler(NonEmptyMap.fromMapUnsafe[K, V])(_.toSortedMap)
 
 given Pickler[ItcSeries]      =
   transformPickler(Function.tupled(ItcSeries.apply))(x => (x.title, x.seriesType, x.data))
