@@ -139,10 +139,7 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
                   point: {
                     bandNormalized: {
                       sed: {
-                        fluxDensitiesAttachment: {
-                          programId: "p-1",
-                          attachmentId: "a-1"
-                        }
+                        fluxDensitiesAttachment: "a-1"
                       }
                       brightnesses: [{
                         band: R
@@ -253,10 +250,7 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
                   point: {
                     bandNormalized: {
                       sed: {
-                        fluxDensitiesAttachment: {
-                          programId: "p-1",
-                          attachmentId: "a-999"
-                        }
+                        fluxDensitiesAttachment: "a-999"
                       }
                       brightnesses: [{
                         band: R
@@ -351,10 +345,7 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
                   point: {
                     bandNormalized: {
                       sed: {
-                        fluxDensitiesAttachment: {
-                          programId: "p-1",
-                          attachmentId: "a-2"
-                        }
+                        fluxDensitiesAttachment: "a-2"
                       }
                       brightnesses: [{
                         band: R

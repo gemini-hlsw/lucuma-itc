@@ -3,14 +3,11 @@
 
 package lucuma.itc.input
 
-import cats.Applicative
 import cats.syntax.all.*
 import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.SignificantFigures
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
-
-import customSed.CustomSed
 
 sealed trait SpectroscopyTimeInput:
   def exposureTimeMode: ExposureTimeMode
@@ -33,21 +30,16 @@ case class SpectroscopyIntegrationTimeInput(
 
 object SpectroscopyIntegrationTimeInput:
 
-  def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[SpectroscopyIntegrationTimeInput]] =
-    ObjectFieldsBinding.rmap {
+  val Binding: Matcher[SpectroscopyIntegrationTimeInput] =
+    ObjectFieldsBinding.rmap:
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
-            TargetDataInput.binding.List("asterism", asterism),
+            TargetDataInput.Binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
-            InstrumentModesInput.binding("mode", mode)
+            InstrumentModesInput.Binding("mode", mode)
           ) =>
-        (exposureTimeMode.map(_.pure[F]),
-         asterism.map(_.sequence),
-         constraints.map(_.pure[F]),
-         mode.map(_.pure[F])
-        )
-          .parMapN((_, _, _, _).mapN(apply))
-    }
+        (exposureTimeMode, asterism, constraints, mode)
+          .parMapN(apply)
 
 case class SpectroscopyIntegrationTimeAndGraphsInput(
   exposureTimeMode:   ExposureTimeMode,
@@ -59,20 +51,13 @@ case class SpectroscopyIntegrationTimeAndGraphsInput(
 
 object SpectroscopyIntegrationTimeAndGraphsInput:
 
-  def binding[F[_]: Applicative: CustomSed.Resolver]
-    : Matcher[F[SpectroscopyIntegrationTimeAndGraphsInput]] =
-    ObjectFieldsBinding.rmap {
+  val Binding: Matcher[SpectroscopyIntegrationTimeAndGraphsInput] =
+    ObjectFieldsBinding.rmap:
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
-            TargetDataInput.binding.List("asterism", asterism),
+            TargetDataInput.Binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
-            InstrumentModesInput.binding("mode", mode),
-            SignificantFiguresInput.binding.Option("significantFigures", significantFigures)
+            InstrumentModesInput.Binding("mode", mode),
+            SignificantFiguresInput.Binding.Option("significantFigures", significantFigures)
           ) =>
-        (exposureTimeMode.map(_.pure[F]),
-         asterism.map(_.sequence),
-         constraints.map(_.pure[F]),
-         mode.map(_.pure[F]),
-         significantFigures.map(_.pure[F])
-        ).parMapN((_, _, _, _, _).mapN(apply))
-    }
+        (exposureTimeMode, asterism, constraints, mode, significantFigures).parMapN(apply)

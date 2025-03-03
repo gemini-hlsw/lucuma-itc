@@ -17,6 +17,7 @@ import natchez.Trace
 import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.*
+import lucuma.itc.input.customSed.CustomSed
 
 /**
  * Methods to check if a values is on the cache and if not retrieve them from old itc and store them
@@ -46,13 +47,16 @@ trait ItcCacheOrRemote extends Version:
   /**
    * Request a graph
    */
-  def graphsFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
+  def graphsFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock: CustomSed.Resolver](
     request: TargetGraphRequest
   )(
     itc:     Itc[F],
     cache:   BinaryEffectfulCache[F]
   ): F[TargetGraphsCalcResult] =
-    cache.getOrInvokeBinary(request, requestGraphs(itc)(request), TTL, "itc:graph:spec")
+    CustomSed // We must resolve CustomSed before caching.
+      .resolveTargetGraphRequest(request)
+      .flatMap: r =>
+        cache.getOrInvokeBinary(r, requestGraphs(itc)(r), TTL, "itc:graph:spec")
 
   private def timeAndCountModeNotImplemented[F[_]: MonadThrow, A]: F[A] =
     MonadThrow[F].raiseError[A]:
@@ -78,18 +82,16 @@ trait ItcCacheOrRemote extends Version:
   /**
    * Request exposure time calculation for spectroscopy
    */
-  def specTimeFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
+  def specTimeFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock: CustomSed.Resolver](
     calcRequest: TargetSpectroscopyTimeRequest
   )(
     itc:         Itc[F],
     cache:       BinaryEffectfulCache[F]
   ): F[TargetIntegrationTime] =
-    cache.getOrInvokeBinary(
-      calcRequest,
-      requestSpecTimeCalc(itc)(calcRequest),
-      TTL,
-      "itc:calc:spec"
-    )
+    CustomSed // We must resolve CustomSed before caching.
+      .resolveTargetSpectroscopyTimeRequest(calcRequest)
+      .flatMap: r =>
+        cache.getOrInvokeBinary(r, requestSpecTimeCalc(itc)(r), TTL, "itc:calc:spec")
 
   private def requestImgTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest
@@ -110,13 +112,16 @@ trait ItcCacheOrRemote extends Version:
   /**
    * Request exposure time calculation for imaging
    */
-  def imgTimeFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock](
+  def imgTimeFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock: CustomSed.Resolver](
     calcRequest: TargetImagingTimeRequest
   )(
     itc:         Itc[F],
     cache:       BinaryEffectfulCache[F]
   ): F[TargetIntegrationTime] =
-    cache.getOrInvokeBinary(calcRequest, requestImgTimeCalc(itc)(calcRequest), TTL, "itc:calc:img")
+    CustomSed // We must resolve CustomSed before caching.
+      .resolveTargetImagingTimeRequest(calcRequest)
+      .flatMap: r =>
+        cache.getOrInvokeBinary(r, requestImgTimeCalc(itc)(r), TTL, "itc:calc:img")
 
   /**
    * This method will get the version from the remote itc and compare it with the one on the cache.

@@ -9,9 +9,9 @@ import cats.effect.Concurrent
 import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.math.Wavelength
+import lucuma.core.model.Attachment
 
 import scala.collection.immutable.SortedMap
-import lucuma.core.model.Attachment
 
 /**
  * Implementation of `CustomSed.Resolver` that parses a `dat` file, consisting of lines of the form

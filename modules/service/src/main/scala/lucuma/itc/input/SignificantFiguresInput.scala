@@ -8,16 +8,13 @@ import eu.timepit.refined.types.numeric.PosInt
 import lucuma.itc.SignificantFigures
 import lucuma.odb.graphql.binding.*
 
-object SignificantFiguresInput {
+object SignificantFiguresInput:
 
-  def binding: Matcher[SignificantFigures] =
-    ObjectFieldsBinding.rmap {
+  val Binding: Matcher[SignificantFigures] =
+    ObjectFieldsBinding.rmap:
       case List(
             PosIntBinding.Option("xAxis", xAxis),
             PosIntBinding.Option("yAxis", yAxis),
             PosIntBinding.Option("ccd", ccd)
           ) =>
         (xAxis, yAxis, ccd).parMapN(SignificantFigures.apply)
-    }
-
-}

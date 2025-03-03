@@ -5,7 +5,6 @@ package lucuma.odb.graphql
 package input
 package sourceprofile
 
-import cats.Applicative
 import cats.data.NonEmptyMap
 import cats.syntax.all.*
 import coulomb.Quantity
@@ -26,7 +25,7 @@ object UnnormalizedSedInput {
   val HiiRegionSpectrum: Matcher[HIIRegionSpectrum]                  = enumeratedBinding
   val PlanetaryNebulaSpectrum: Matcher[PlanetaryNebulaSpectrum]      = enumeratedBinding
 
-  def binding[F[_]: Applicative]: Matcher[F[UnnormalizedSED]] =
+  val Binding: Matcher[UnnormalizedSED] =
     ObjectFieldsBinding.rmap {
       case List(
             StellarLibrarySpectrumBinding.Option("stellarLibrary", rStellarLibrary),
@@ -54,31 +53,31 @@ object UnnormalizedSedInput {
          rFluxDensitiesAttachment
         ).parTupled.flatMap {
           case (Some(v), None, None, None, None, None, None, None, None, None, None) =>
-            Result(UnnormalizedSED.StellarLibrary(v).pure[F])
+            Result(UnnormalizedSED.StellarLibrary(v))
           case (None, Some(v), None, None, None, None, None, None, None, None, None) =>
-            Result(UnnormalizedSED.CoolStarModel(v).pure[F])
+            Result(UnnormalizedSED.CoolStarModel(v))
           case (None, None, Some(v), None, None, None, None, None, None, None, None) =>
-            Result(UnnormalizedSED.Galaxy(v).pure[F])
+            Result(UnnormalizedSED.Galaxy(v))
           case (None, None, None, Some(v), None, None, None, None, None, None, None) =>
-            Result(UnnormalizedSED.Planet(v).pure[F])
+            Result(UnnormalizedSED.Planet(v))
           case (None, None, None, None, Some(v), None, None, None, None, None, None) =>
-            Result(UnnormalizedSED.Quasar(v).pure[F])
+            Result(UnnormalizedSED.Quasar(v))
           case (None, None, None, None, None, Some(v), None, None, None, None, None) =>
-            Result(UnnormalizedSED.HIIRegion(v).pure[F])
+            Result(UnnormalizedSED.HIIRegion(v))
           case (None, None, None, None, None, None, Some(v), None, None, None, None) =>
-            Result(UnnormalizedSED.PlanetaryNebula(v).pure[F])
+            Result(UnnormalizedSED.PlanetaryNebula(v))
           case (None, None, None, None, None, None, None, Some(v), None, None, None) =>
-            Result(UnnormalizedSED.PowerLaw(v).pure[F])
+            Result(UnnormalizedSED.PowerLaw(v))
           case (None, None, None, None, None, None, None, None, Some(v), None, None) =>
             numeric.PosInt.from(v) match
               case Left(err)  => Result.failure(err)
-              case Right(pbd) => Result(UnnormalizedSED.BlackBody(Quantity(pbd)).pure[F])
+              case Right(pbd) => Result(UnnormalizedSED.BlackBody(Quantity(pbd)))
           case (None, None, None, None, None, None, None, None, None, Some(v), None) =>
             v match
               case Nil    => Result.failure("fluxDensities cannot be empty")
-              case h :: t => Result(UnnormalizedSED.UserDefined(NonEmptyMap.of(h, t*)).pure[F])
+              case h :: t => Result(UnnormalizedSED.UserDefined(NonEmptyMap.of(h, t*)))
           case (None, None, None, None, None, None, None, None, None, None, Some(v)) =>
-            Result(UnnormalizedSED.UserDefinedAttachment(v).pure[F])
+            Result(UnnormalizedSED.UserDefinedAttachment(v))
           case _                                                                     =>
             Result.failure:
               "Exactly one of stellarLibrary, coolStar, galaxy, planet, quasar, hiiRegion, planetaryNebula, powerLaw, blackBodyTempK, fluxDensities, fluxDensitiesAttachment must be specified."
