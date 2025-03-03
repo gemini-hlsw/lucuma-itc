@@ -5,12 +5,10 @@ package lucuma.odb.graphql
 package input
 package sourceprofile
 
-import cats.Applicative
 import cats.syntax.all.*
 import grackle.Result
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SourceProfile.*
-import lucuma.itc.input.customSed.CustomSed
 import lucuma.odb.graphql.binding.*
 
 object SourceProfileInput {
@@ -36,18 +34,17 @@ object SourceProfileInput {
           "Not a gaussian source.  To change profile type, please provide a full definition."
   }
 
-  def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[SourceProfile]] =
-    ObjectFieldsBinding.rmap {
+  val Binding: Matcher[SourceProfile] =
+    ObjectFieldsBinding.rmap:
       case List(
-            SpectralDefinitionInput.Integrated.binding.Option("point", rPoint),
-            SpectralDefinitionInput.Surface.binding.Option("uniform", rUniform),
-            GaussianInput.binding.Option("gaussian", rGaussian)
+            SpectralDefinitionInput.Integrated.Binding.Option("point", rPoint),
+            SpectralDefinitionInput.Surface.Binding.Option("uniform", rUniform),
+            GaussianInput.Binding.Option("gaussian", rGaussian)
           ) =>
         (rPoint, rUniform, rGaussian).parTupled.flatMap {
-          case (Some(point), None, None)    => Result(point.map(Point(_)))
-          case (None, Some(uniform), None)  => Result(uniform.map(Uniform(_)))
-          case (None, None, Some(gaussian)) => Result(gaussian.widen)
+          case (Some(point), None, None)    => Result(Point(point))
+          case (None, Some(uniform), None)  => Result(Uniform(uniform))
+          case (None, None, Some(gaussian)) => Result(gaussian)
           case _                            => Result.failure("Expected exactly one of point, uniform, or gaussian.")
         }
-    }
 }

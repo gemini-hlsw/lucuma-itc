@@ -6,13 +6,11 @@ package lucuma.itc.tests
 import cats.effect.IO
 import cats.syntax.option.*
 import lucuma.core.model.Attachment
-import lucuma.core.model.Program
 import lucuma.graphql.routes.GraphQLService
 import lucuma.graphql.routes.Routes
 import lucuma.itc.Itc
 import lucuma.itc.cache.RedisEffectfulCache
 import lucuma.itc.input.customSed.CustomSed
-import lucuma.itc.input.customSed.CustomSed.Id
 import lucuma.itc.input.customSed.CustomSedDatResolver
 import lucuma.itc.service.ItcMapping
 import lucuma.itc.service.config.ExecutionEnvironment
@@ -30,10 +28,10 @@ def app(
   }
 
 given CustomSed.Resolver[IO] = new CustomSedDatResolver[IO] {
-  val DummyId   = CustomSed.Id(Program.Id.fromLong(1).get, Attachment.Id.fromLong(1).get)
-  val InvalidId = CustomSed.Id(Program.Id.fromLong(1).get, Attachment.Id.fromLong(2).get)
+  val DummyId   = Attachment.Id.fromLong(1).get
+  val InvalidId = Attachment.Id.fromLong(2).get
 
-  override protected def datLines(id: Id): IO[fs2.Stream[IO, String]] =
+  override protected def datLines(id: Attachment.Id): IO[fs2.Stream[IO, String]] =
     IO:
       id match
         case DummyId   =>

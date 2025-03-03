@@ -3,13 +3,10 @@
 
 package lucuma.itc.input
 
-import cats.Applicative
 import cats.syntax.all.*
 import lucuma.core.model.ExposureTimeMode
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
-
-import customSed.CustomSed
 
 case class ImagingIntegrationTimeInput(
   exposureTimeMode: ExposureTimeMode,
@@ -20,18 +17,13 @@ case class ImagingIntegrationTimeInput(
 
 object ImagingIntegrationTimeInput:
 
-  def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[ImagingIntegrationTimeInput]] =
-    ObjectFieldsBinding.rmap {
+  val Binding: Matcher[ImagingIntegrationTimeInput] =
+    ObjectFieldsBinding.rmap:
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
-            TargetDataInput.binding.List("asterism", asterism),
+            TargetDataInput.Binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
-            InstrumentModesInput.binding("mode", mode)
+            InstrumentModesInput.Binding("mode", mode)
           ) =>
-        (exposureTimeMode.map(_.pure[F]),
-         asterism.map(_.sequence),
-         constraints.map(_.pure[F]),
-         mode.map(_.pure[F])
-        )
-          .parMapN((_, _, _, _).mapN(apply))
-    }
+        (exposureTimeMode, asterism, constraints, mode)
+          .parMapN(apply)

@@ -9,10 +9,10 @@ import lucuma.odb.graphql.input.*
 
 trait InstrumentModesInput
 
-object InstrumentModesInput {
+object InstrumentModesInput:
 
-  def binding: Matcher[InstrumentModesInput] =
-    ObjectFieldsBinding.rmap {
+  val Binding: Matcher[InstrumentModesInput] =
+    ObjectFieldsBinding.rmap:
       case List(
             GmosNSpectroscopyInput.binding.Option("gmosNSpectroscopy", gmosNSpectroscopy),
             GmosSSpectroscopyInput.binding.Option("gmosSSpectroscopy", gmosSSpectroscopy),
@@ -27,6 +27,3 @@ object InstrumentModesInput {
                       gmosSImaging      -> "gmosSImaging"
             )
         }
-    }
-
-}

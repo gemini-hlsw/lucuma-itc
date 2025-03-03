@@ -8,6 +8,7 @@ import cats.effect.kernel.Async
 import cats.syntax.all.*
 import fs2.io.net.Network
 import fs2.text
+import lucuma.core.model.Attachment
 import natchez.Trace
 import org.http4s.AuthScheme
 import org.http4s.Credentials
@@ -28,10 +29,10 @@ class CustomSedOdbAttachmentResolver[F[_]: Async: Logger: Trace] private (
   authToken:  String
 ) extends CustomSedDatResolver[F]:
 
-  protected def datLines(id: CustomSed.Id): F[fs2.Stream[F, String]] =
+  protected def datLines(id: Attachment.Id): F[fs2.Stream[F, String]] =
     Trace[F].span("custom-sed-attachment-resolver"):
       val uri: Uri            =
-        odbBaseUrl / "attachment" / id.programId.show / id.attachmentId.show
+        odbBaseUrl / "attachment" / id.show
       val request: Request[F] =
         Request(
           uri = uri,

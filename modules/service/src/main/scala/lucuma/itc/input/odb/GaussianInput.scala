@@ -5,25 +5,23 @@ package lucuma.odb.graphql
 package input
 package sourceprofile
 
-import cats.Applicative
 import cats.syntax.all.*
 import grackle.Result
 import lucuma.core.model.SourceProfile
-import lucuma.itc.input.customSed.CustomSed
 import lucuma.odb.graphql.binding.*
 
 object GaussianInput {
 
-  def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[SourceProfile.Gaussian]] =
+  val Binding: Matcher[SourceProfile.Gaussian] =
     ObjectFieldsBinding.rmap {
       case List(
             AngleInput.Binding.Option("fwhm", rFwhm),
-            SpectralDefinitionInput.Integrated.binding
+            SpectralDefinitionInput.Integrated.Binding
               .Option("spectralDefinition", rSpectralDefinition)
           ) =>
         (rFwhm, rSpectralDefinition).parTupled.flatMap {
           case (Some(fwhm), Some(spectralDefinition)) =>
-            Result(spectralDefinition.map(SourceProfile.Gaussian(fwhm, _)))
+            Result(SourceProfile.Gaussian(fwhm, spectralDefinition))
           case _                                      =>
             Result.failure("Both fwhm and spectralDefinition must be provided on creation")
         }

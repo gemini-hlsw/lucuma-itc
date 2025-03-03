@@ -5,17 +5,15 @@ package lucuma.odb.graphql
 package input
 package sourceprofile
 
-import cats.Applicative
 import cats.syntax.all.*
 import grackle.Result
 import lucuma.core.math.BrightnessUnits.*
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.SpectralDefinition.EmissionLines
-import lucuma.itc.input.customSed.CustomSed
 import lucuma.odb.graphql.binding.*
 
-object SpectralDefinitionInput {
+object SpectralDefinitionInput:
 
   implicit class SpectralDefinitionProjections[A](self: SpectralDefinition[A]) {
     def bandNormalized = self match
@@ -28,34 +26,32 @@ object SpectralDefinitionInput {
   }
 
   object Integrated {
-    def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[SpectralDefinition[Integrated]]] =
-      bindingInternal[F, Integrated](
-        BandNormalizedInput.Integrated.binding,
+    val Binding: Matcher[SpectralDefinition[Integrated]] =
+      bindingInternal[Integrated](
+        BandNormalizedInput.Integrated.Binding,
         EmissionLinesInput.Integrated.Binding
       )
   }
 
   object Surface {
-    def binding[F[_]: Applicative: CustomSed.Resolver]: Matcher[F[SpectralDefinition[Surface]]] =
-      bindingInternal[F, Surface](
-        BandNormalizedInput.Surface.binding,
+    val Binding: Matcher[SpectralDefinition[Surface]] =
+      bindingInternal[Surface](
+        BandNormalizedInput.Surface.Binding,
         EmissionLinesInput.Surface.Binding
       )
   }
 
-  private def bindingInternal[F[_]: Applicative: CustomSed.Resolver, A](
-    bandNormalized: Matcher[F[BandNormalized[A]]],
+  private def bindingInternal[A](
+    bandNormalized: Matcher[BandNormalized[A]],
     emissionLines:  Matcher[EmissionLines[A]]
-  ): Matcher[F[SpectralDefinition[A]]] =
-    ObjectFieldsBinding.rmap {
+  ): Matcher[SpectralDefinition[A]] =
+    ObjectFieldsBinding.rmap:
       case List(
             bandNormalized.Option("bandNormalized", rBandNormalized),
             emissionLines.Option("emissionLines", rEmissionLines)
           ) =>
         (rBandNormalized, rEmissionLines).parTupled.flatMap {
-          case (Some(bandNormalized), None) => Result(bandNormalized.widen)
-          case (None, Some(emissionLines))  => Result(emissionLines.pure[F])
+          case (Some(bandNormalized), None) => Result(bandNormalized)
+          case (None, Some(emissionLines))  => Result(emissionLines)
           case _                            => Result.failure("Expected exactly one of bandNormalized or emissionLines.")
         }
-    }
-}

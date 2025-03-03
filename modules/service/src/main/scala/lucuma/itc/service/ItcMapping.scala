@@ -77,7 +77,9 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       f.handleError: t =>
         Result.failure(Problem(t.getMessage))
 
-  def calculateSpectroscopyIntegrationTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+  def calculateSpectroscopyIntegrationTime[F[
+    _
+  ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
     environment:     ExecutionEnvironment,
     cache:           BinaryEffectfulCache[F],
     itc:             Itc[F]
@@ -101,7 +103,9 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           .error(t):
             s"Error calculating spectroscopy integration time for input: $asterismRequest"
 
-  def calculateImagingIntegrationTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+  def calculateImagingIntegrationTime[F[
+    _
+  ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
     environment: ExecutionEnvironment,
     cache:       BinaryEffectfulCache[F],
     itc:         Itc[F]
@@ -171,7 +175,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     )
   }
 
-  def spectroscopyGraphs[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+  def spectroscopyGraphs[F[_]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
     environment: ExecutionEnvironment,
     cache:       BinaryEffectfulCache[F],
     itc:         Itc[F]
@@ -214,7 +218,9 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     )
   }
 
-  def spectroscopyIntegrationTimeAndGraphs[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+  def spectroscopyIntegrationTimeAndGraphs[F[
+    _
+  ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
     environment:     ExecutionEnvironment,
     cache:           BinaryEffectfulCache[F],
     itc:             Itc[F]
@@ -276,42 +282,37 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                 RootEffect.computeEncodable("versions")((_, _) => versions(environment)),
                 RootEffect.computeEncodable("spectroscopyIntegrationTime") { (_, env) =>
                   env
-                    .getR[F[SpectroscopyIntegrationTimeInput]]("input")
-                    .flatTraverse(_.map(AsterismSpectroscopyTimeRequest.fromInput))
-                    .flatMap:
-                      _.flatTraverse:
-                        calculateSpectroscopyIntegrationTime(environment, cache, itc)
+                    .getR[SpectroscopyIntegrationTimeInput]("input")
+                    .flatMap(AsterismSpectroscopyTimeRequest.fromInput)
+                    .flatTraverse:
+                      calculateSpectroscopyIntegrationTime[F](environment, cache, itc)
                     .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("imagingIntegrationTime") { (_, env) =>
                   env
-                    .getR[F[ImagingIntegrationTimeInput]]("input")
-                    .flatTraverse(_.map(AsterismImagingTimeRequest.fromInput))
-                    .flatMap:
-                      _.flatTraverse:
-                        calculateImagingIntegrationTime(environment, cache, itc)
+                    .getR[ImagingIntegrationTimeInput]("input")
+                    .flatMap(AsterismImagingTimeRequest.fromInput)
+                    .flatTraverse:
+                      calculateImagingIntegrationTime(environment, cache, itc)
                     .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("spectroscopyGraphs") { (_, env) =>
                   env
-                    .getR[F[SpectroscopyGraphsInput]]("input")
-                    .flatTraverse(_.map(AsterismGraphRequest.fromInput))
-                    .flatMap:
-                      _.flatTraverse:
-                        spectroscopyGraphs(environment, cache, itc)
+                    .getR[SpectroscopyGraphsInput]("input")
+                    .flatMap(AsterismGraphRequest.fromInput)
+                    .flatTraverse:
+                      spectroscopyGraphs(environment, cache, itc)
                     .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("spectroscopyIntegrationTimeAndGraphs") { (_, env) =>
                   env
-                    .getR[F[SpectroscopyIntegrationTimeAndGraphsInput]]("input")
-                    .flatTraverse:
-                      _.map: input =>
-                        AsterismSpectroscopyTimeRequest
-                          .fromInput(input)
-                          .map((_, input.significantFigures))
-                    .flatMap:
-                      _.flatTraverse: (tr, fig) =>
-                        spectroscopyIntegrationTimeAndGraphs(environment, cache, itc)(tr, fig)
+                    .getR[SpectroscopyIntegrationTimeAndGraphsInput]("input")
+                    .flatMap: input =>
+                      AsterismSpectroscopyTimeRequest
+                        .fromInput(input)
+                        .map((_, input.significantFigures))
+                    .flatTraverse: (tr, fig) =>
+                      spectroscopyIntegrationTimeAndGraphs(environment, cache, itc)(tr, fig)
                     .toGraphQLErrors
                 }
               )
@@ -329,22 +330,22 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           SelectElaborator {
             case (QueryType,
                   "spectroscopyIntegrationTime",
-                  List(SpectroscopyIntegrationTimeInput.binding("input", input))
+                  List(SpectroscopyIntegrationTimeInput.Binding("input", input))
                 ) =>
               handle(input)
             case (QueryType,
                   "imagingIntegrationTime",
-                  List(ImagingIntegrationTimeInput.binding("input", input))
+                  List(ImagingIntegrationTimeInput.Binding("input", input))
                 ) =>
               handle(input)
             case (QueryType,
                   "spectroscopyGraphs",
-                  List(SpectroscopyGraphsInput.binding("input", input))
+                  List(SpectroscopyGraphsInput.Binding("input", input))
                 ) =>
               handle(input)
             case (QueryType,
                   "spectroscopyIntegrationTimeAndGraphs",
-                  List(SpectroscopyIntegrationTimeAndGraphsInput.binding("input", input))
+                  List(SpectroscopyIntegrationTimeAndGraphsInput.Binding("input", input))
                 ) =>
               handle(input)
           }
