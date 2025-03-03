@@ -10,8 +10,8 @@ import lucuma.core.math.Redshift
 import lucuma.core.math.Wavelength
 import lucuma.core.model.SourceProfile
 import lucuma.itc.search.hashes.given
-import monocle.Lens
 import monocle.Focus
+import monocle.Lens
 
 case class TargetData(
   sourceProfile: SourceProfile,

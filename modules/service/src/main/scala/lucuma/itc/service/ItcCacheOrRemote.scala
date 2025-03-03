@@ -11,13 +11,13 @@ import cats.syntax.all.*
 import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.*
 import lucuma.itc.cache.BinaryEffectfulCache
+import lucuma.itc.input.customSed.CustomSed
 import lucuma.itc.service.redis.given
 import lucuma.itc.service.requests.*
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.*
-import lucuma.itc.input.customSed.CustomSed
 
 /**
  * Methods to check if a values is on the cache and if not retrieve them from old itc and store them

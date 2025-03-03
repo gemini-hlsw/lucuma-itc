@@ -319,10 +319,31 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
         {
           "errors": [
             {
-              "message": "Custom SED file for id [CustomSedId(p-1, a-999)] is empty."
+              "message" : "Error calculating ITC: Custom SED file for id [a-999] is empty.",
+              "extensions" : {
+                "targetIndex" : 0,
+                "error" : {
+                  "wellHalfFilledSeconds" : null,
+                  "errorCode" : "GENERAL",
+                  "message" : "Error calculating ITC: Custom SED file for id [a-999] is empty."
+                }
+              }
             }
           ],
-          "data": null
+          "data": {
+            "spectroscopyIntegrationTime" : {
+              "mode" : {
+                "instrument" : "GMOS_NORTH",
+                "params" : {
+                  "grating" : "B1200_G5301"
+                },
+                "centralWavelength" : {
+                  "nanometers" : 60.000
+                }
+              },
+              "brightest" : null
+            }
+          }
         }
         """
     )
@@ -414,10 +435,31 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
         {
           "errors": [
             {
-              "message": "Invalid wavelength in custom SED: [someText].Invalid density in custom SED: [someOtherText]."
+              "message" : "Error calculating ITC: Invalid wavelength in custom SED: [someText].Invalid density in custom SED: [someOtherText].",
+              "extensions" : {
+                "targetIndex" : 0,
+                "error" : {
+                  "wellHalfFilledSeconds" : null,
+                  "errorCode" : "GENERAL",
+                  "message" : "Error calculating ITC: Invalid wavelength in custom SED: [someText].Invalid density in custom SED: [someOtherText]."
+                }
+              }
             }
           ],
-          "data": null
+          "data": {
+            "spectroscopyIntegrationTime" : {
+              "mode" : {
+                "instrument" : "GMOS_NORTH",
+                "params" : {
+                  "grating" : "B1200_G5301"
+                },
+                "centralWavelength" : {
+                  "nanometers" : 60.000
+                }
+              },
+              "brightest" : null
+            }
+          }
         }
         """
     )

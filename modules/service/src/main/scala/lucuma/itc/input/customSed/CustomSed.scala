@@ -3,22 +3,22 @@
 
 package lucuma.itc.input.customSed
 
+import cats.Applicative
+import cats.Monad
+import cats.Parallel
 import cats.data.NonEmptyMap
+import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.math.Wavelength
 import lucuma.core.model.Attachment
-import lucuma.itc.search.TargetData
 import lucuma.core.model.SourceProfile
-import lucuma.core.model.SpectralDefinition.BandNormalized
-import cats.syntax.all.*
 import lucuma.core.model.SpectralDefinition
+import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED
+import lucuma.itc.search.TargetData
 import lucuma.itc.service.requests.TargetGraphRequest
-import lucuma.itc.service.requests.TargetSpectroscopyTimeRequest
 import lucuma.itc.service.requests.TargetImagingTimeRequest
-import cats.Parallel
-import cats.Applicative
-import cats.Monad
+import lucuma.itc.service.requests.TargetSpectroscopyTimeRequest
 
 object CustomSed:
   trait Resolver[F[_]]:
