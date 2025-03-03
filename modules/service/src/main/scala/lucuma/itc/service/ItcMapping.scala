@@ -77,7 +77,9 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       f.handleError: t =>
         Result.failure(Problem(t.getMessage))
 
-  def calculateSpectroscopyIntegrationTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+  def calculateSpectroscopyIntegrationTime[F[
+    _
+  ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
     environment:     ExecutionEnvironment,
     cache:           BinaryEffectfulCache[F],
     itc:             Itc[F]
@@ -101,7 +103,9 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           .error(t):
             s"Error calculating spectroscopy integration time for input: $asterismRequest"
 
-  def calculateImagingIntegrationTime[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+  def calculateImagingIntegrationTime[F[
+    _
+  ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
     environment: ExecutionEnvironment,
     cache:       BinaryEffectfulCache[F],
     itc:         Itc[F]
@@ -171,7 +175,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     )
   }
 
-  def spectroscopyGraphs[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+  def spectroscopyGraphs[F[_]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
     environment: ExecutionEnvironment,
     cache:       BinaryEffectfulCache[F],
     itc:         Itc[F]
@@ -214,7 +218,9 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     )
   }
 
-  def spectroscopyIntegrationTimeAndGraphs[F[_]: MonadThrow: Logger: Parallel: Trace: Clock](
+  def spectroscopyIntegrationTimeAndGraphs[F[
+    _
+  ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
     environment:     ExecutionEnvironment,
     cache:           BinaryEffectfulCache[F],
     itc:             Itc[F]

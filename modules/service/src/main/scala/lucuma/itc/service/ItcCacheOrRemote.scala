@@ -47,7 +47,7 @@ trait ItcCacheOrRemote extends Version:
   /**
    * Request a graph
    */
-  def graphsFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock: CustomSed.Resolver](
+  def graphsFromCacheOrRemote[F[_]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
     request: TargetGraphRequest
   )(
     itc:     Itc[F],
@@ -82,7 +82,9 @@ trait ItcCacheOrRemote extends Version:
   /**
    * Request exposure time calculation for spectroscopy
    */
-  def specTimeFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock: CustomSed.Resolver](
+  def specTimeFromCacheOrRemote[F[
+    _
+  ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
     calcRequest: TargetSpectroscopyTimeRequest
   )(
     itc:         Itc[F],
@@ -112,7 +114,9 @@ trait ItcCacheOrRemote extends Version:
   /**
    * Request exposure time calculation for imaging
    */
-  def imgTimeFromCacheOrRemote[F[_]: MonadThrow: Logger: Trace: Clock: CustomSed.Resolver](
+  def imgTimeFromCacheOrRemote[
+    F[_]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver
+  ](
     calcRequest: TargetImagingTimeRequest
   )(
     itc:         Itc[F],

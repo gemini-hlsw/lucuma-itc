@@ -10,13 +10,15 @@ import lucuma.core.model.Attachment
 import lucuma.itc.search.TargetData
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
-import cats.Monad
 import cats.syntax.all.*
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.itc.service.requests.TargetGraphRequest
 import lucuma.itc.service.requests.TargetSpectroscopyTimeRequest
 import lucuma.itc.service.requests.TargetImagingTimeRequest
+import cats.Parallel
+import cats.Applicative
+import cats.Monad
 
 object CustomSed:
   trait Resolver[F[_]]:
@@ -25,85 +27,35 @@ object CustomSed:
   object Resolver:
     def apply[F[_]](using r: Resolver[F]): Resolver[F] = r
 
-  def resolveTargetData[F[_]: Monad: Resolver]: TargetData => F[TargetData] =
-    case TargetData(
-          SourceProfile.Point(
-            SpectralDefinition.BandNormalized(
-              Some(UnnormalizedSED.UserDefinedAttachment(id)),
-              brightnesses
-            )
-          ),
-          redshift
-        ) =>
-      Resolver[F]
-        .resolve(id)
-        .map: customSed =>
-          TargetData(
-            SourceProfile.Point(
-              SpectralDefinition.BandNormalized(
-                Some(UnnormalizedSED.UserDefined(customSed)),
-                brightnesses
-              )
-            ),
-            redshift
-          )
-    case TargetData(
-          SourceProfile.Uniform(
-            SpectralDefinition.BandNormalized(
-              Some(UnnormalizedSED.UserDefinedAttachment(id)),
-              brightnesses
-            )
-          ),
-          redshift
-        ) =>
-      Resolver[F]
-        .resolve(id)
-        .map: customSed =>
-          TargetData(
-            SourceProfile.Uniform(
-              SpectralDefinition.BandNormalized(
-                Some(UnnormalizedSED.UserDefined(customSed)),
-                brightnesses
-              )
-            ),
-            redshift
-          )
-    case TargetData(
-          SourceProfile.Gaussian(
-            fwhm,
-            SpectralDefinition.BandNormalized(
-              Some(UnnormalizedSED.UserDefinedAttachment(id)),
-              brightnesses
-            )
-          ),
-          redshift
-        ) =>
-      Resolver[F]
-        .resolve(id)
-        .map: customSed =>
-          TargetData(
-            SourceProfile.Gaussian(
-              fwhm,
-              SpectralDefinition.BandNormalized(
-                Some(UnnormalizedSED.UserDefined(customSed)),
-                brightnesses
-              )
-            ),
-            redshift
-          )
-    case other => other.pure[F]
+  private def resolveUnnormalizedSed[F[_]: Applicative: Resolver]
+    : UnnormalizedSED => F[UnnormalizedSED] =
+    case UnnormalizedSED.UserDefinedAttachment(id) =>
+      Resolver[F].resolve(id).map(UnnormalizedSED.UserDefined(_))
+    case other                                     => other.pure[F]
 
-  def resolveTargetGraphRequest[F[_]: Monad: Resolver]
+  def resolveTargetData[F[_]: Monad: Parallel: Resolver]: TargetData => F[TargetData] =
+    TargetData.sourceProfile
+      .andThen(SourceProfile.integratedBandNormalizedSpectralDefinition)
+      .andThen(BandNormalized.sed.some)
+      .parModifyF(resolveUnnormalizedSed)
+      .andThen:
+        _.flatMap:
+          TargetData.sourceProfile
+            .andThen(SourceProfile.surfaceBandNormalizedSpectralDefinition)
+            .andThen(BandNormalized.sed.some)
+            .parModifyF(resolveUnnormalizedSed)
+
+  def resolveTargetGraphRequest[F[_]: Monad: Parallel: Resolver]
     : TargetGraphRequest => F[TargetGraphRequest] =
     case TargetGraphRequest(targetData, parameters) =>
       resolveTargetData(targetData).map(TargetGraphRequest(_, parameters))
 
-  def resolveTargetSpectroscopyTimeRequest[F[_]: Monad: Resolver]
+  def resolveTargetSpectroscopyTimeRequest[F[_]: Monad: Parallel: Resolver]
     : TargetSpectroscopyTimeRequest => F[TargetSpectroscopyTimeRequest] =
     case TargetSpectroscopyTimeRequest(targetData, parameters) =>
       resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters))
 
-  def resolveTargetImagingTimeRequest[F[_]: Monad: Resolver]
+  def resolveTargetImagingTimeRequest[F[_]: Monad: Parallel: Resolver]
     : TargetImagingTimeRequest => F[TargetImagingTimeRequest] =
     case TargetImagingTimeRequest(targetData, parameters) =>
       resolveTargetData(targetData).map(TargetImagingTimeRequest(_, parameters))
