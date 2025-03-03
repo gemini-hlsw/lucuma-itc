@@ -5,7 +5,6 @@ package lucuma.itc.client.json
 
 import io.circe.Json
 import io.circe.syntax.*
-import lucuma.core.syntax.enumerated.*
 import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
 
@@ -13,7 +12,7 @@ trait JsonOps {
 
   extension [A: Enumerated](a: A)
     def asScreamingJson: Json =
-      a.tag.toScreamingSnakeCase.asJson
+      Enumerated[A].tag(a).toScreamingSnakeCase.asJson
 
 }
 
