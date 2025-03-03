@@ -35,7 +35,7 @@ object MockItc extends Itc[IO]:
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
     exposureCount: NonNegInt
-  ): IO[TargetIntegrationTime] = ???
+  ): IO[TargetSignalToNoise] = ???
 
   override def calculateIntegrationTime(
     target:        TargetData,
@@ -103,7 +103,7 @@ object MockImagingItc extends Itc[IO]:
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
     exposureCount: NonNegInt
-  ): IO[TargetIntegrationTime] = ???
+  ): IO[TargetSignalToNoise] = ???
 
   override def calculateIntegrationTime(
     target:        TargetData,
@@ -172,7 +172,7 @@ object EmissionLineMockItc extends Itc[IO]:
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
     exposureCount: NonNegInt
-  ): IO[TargetIntegrationTime] = ???
+  ): IO[TargetSignalToNoise] = ???
 
   override def calculateIntegrationTime(
     target:        TargetData,
@@ -207,7 +207,7 @@ object FailingMockItc extends Itc[IO]:
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
     exposureCount: NonNegInt
-  ): IO[TargetIntegrationTime] = ???
+  ): IO[TargetSignalToNoise] = ???
 
   override def calculateIntegrationTime(
     target:        TargetData,

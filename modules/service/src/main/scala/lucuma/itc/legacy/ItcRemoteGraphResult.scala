@@ -7,6 +7,7 @@ import cats.data.NonEmptyChain
 import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.Wavelength
 import lucuma.itc.ItcGraphGroup
 
 case class GraphsRemoteResult(
@@ -24,4 +25,11 @@ case class ExposureCalculation(
   signalToNoise: SignalToNoise
 )
 
+case class SignalToNoiseAt(
+  wavelength: Wavelength,
+  single:     SignalToNoise,
+  total:      SignalToNoise
+)
+
 case class IntegrationTimeRemoteResult(exposureCalculation: Option[ExposureCalculation])
+case class SignalToNoiseRemoteResult(signalToNoiseAt: SignalToNoiseAt)

@@ -20,6 +20,7 @@ import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.legacy.FLocalItc
 import lucuma.itc.legacy.IntegrationTimeRemoteResult
+import lucuma.itc.legacy.SignalToNoiseRemoteResult
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetData
 import natchez.Trace
@@ -167,6 +168,16 @@ object ItcImpl {
           .map: ccdTimes =>
             TargetIntegrationTime(Zipper.of(ccdTimes.head, ccdTimes.tail.toList*), bandOrLine)
 
+      private def convertSignalToNoiseRemoteResult(
+        r:          SignalToNoiseRemoteResult,
+        bandOrLine: Either[Band, Wavelength]
+      ): F[TargetSignalToNoise] =
+        TargetSignalToNoise(r.signalToNoiseAt.wavelength,
+                            r.signalToNoiseAt.single,
+                            r.signalToNoiseAt.total,
+                            bandOrLine
+        ).pure[F]
+
       /**
        * Compute the exposure time and number of exposures required to achieve the desired
        * signal-to-noise under the requested conditions. Only for spectroscopy modes
@@ -210,7 +221,7 @@ object ItcImpl {
         constraints:   ItcObservingConditions,
         exposureTime:  TimeSpan,
         exposureCount: NonNegInt
-      ): F[TargetIntegrationTime] =
+      ): F[TargetSignalToNoise] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
@@ -232,7 +243,7 @@ object ItcImpl {
                    _      <- T.put("itc.query" -> request.spaces2)
                    _      <- L.info(request.noSpaces) // Request to the legacy itc
                    a      <- itcLocal.calculateSignalToNoise(request.noSpaces)
-                   result <- convertIntegrationTimeRemoteResult(a, bandOrLine)
+                   result <- convertSignalToNoiseRemoteResult(a, bandOrLine)
                  yield result
         yield r
 
@@ -243,7 +254,7 @@ object ItcImpl {
         constraints:   ItcObservingConditions,
         exposureTime:  TimeSpan,
         exposureCount: NonNegInt
-      ): F[TargetIntegrationTime] =
+      ): F[TargetSignalToNoise] =
         T.span("calculate-signal-to-noise"):
           observingMode match
             case s @ (ObservingMode.SpectroscopyMode.GmosNorth(_, _, _, _, _, _) |

@@ -15,10 +15,13 @@ import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED
+import lucuma.core.model.ExposureTimeMode.SignalToNoiseMode
+import lucuma.core.model.ExposureTimeMode.TimeAndCountMode
 import lucuma.itc.search.TargetData
 import lucuma.itc.service.requests.TargetGraphRequest
 import lucuma.itc.service.requests.TargetImagingTimeRequest
 import lucuma.itc.service.requests.TargetSpectroscopyTimeRequest
+import lucuma.itc.service.requests.SpectroscopyTimeParameters
 
 object CustomSed:
   trait Resolver[F[_]]:
@@ -51,9 +54,20 @@ object CustomSed:
       resolveTargetData(targetData).map(TargetGraphRequest(_, parameters))
 
   def resolveTargetSpectroscopyTimeRequest[F[_]: Monad: Parallel: Resolver]
-    : TargetSpectroscopyTimeRequest => F[TargetSpectroscopyTimeRequest] =
-    case TargetSpectroscopyTimeRequest(targetData, parameters) =>
-      resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters))
+    : TargetSpectroscopyTimeRequest => F[(TargetSpectroscopyTimeRequest, SignalToNoiseMode)] =
+    case TargetSpectroscopyTimeRequest(
+          targetData,
+          parameters @ SpectroscopyTimeParameters(m @ SignalToNoiseMode(_, _), _, _)
+        ) =>
+      resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters)).tupleRight(m)
+
+  def resolveTargetSpectroscopySNRequest[F[_]: Monad: Parallel: Resolver]
+    : TargetSpectroscopyTimeRequest => F[(TargetSpectroscopyTimeRequest, TimeAndCountMode)] =
+    case TargetSpectroscopyTimeRequest(
+          targetData,
+          parameters @ SpectroscopyTimeParameters(m @ TimeAndCountMode(_, _, _), _, _)
+        ) =>
+      resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters)).tupleRight(m)
 
   def resolveTargetImagingTimeRequest[F[_]: Monad: Parallel: Resolver]
     : TargetImagingTimeRequest => F[TargetImagingTimeRequest] =

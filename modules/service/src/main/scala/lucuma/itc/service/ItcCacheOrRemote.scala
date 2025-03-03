@@ -63,29 +63,32 @@ trait ItcCacheOrRemote extends Version:
       UnsupportedOperationException:
         "'Time And Count' exposure time mode is not yet implemented."
 
+  private def requestSpecSNCalc[F[_]: MonadThrow](itc: Itc[F])(
+    calcRequest: TargetSpectroscopyTimeRequest,
+    mode:        ExposureTimeMode.TimeAndCountMode
+  ): F[TargetSignalToNoise] =
+    itc
+      .calculateSignalToNoise(
+        calcRequest.target,
+        mode.at,
+        calcRequest.specMode,
+        calcRequest.constraints,
+        mode.time,
+        mode.count
+      )
+
   private def requestSpecTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
-    calcRequest: TargetSpectroscopyTimeRequest
+    calcRequest: TargetSpectroscopyTimeRequest,
+    mode:        ExposureTimeMode.SignalToNoiseMode
   ): F[TargetIntegrationTime] =
-    calcRequest.exposureTimeMode match
-      case ExposureTimeMode.SignalToNoiseMode(value, at)      =>
-        itc
-          .calculateIntegrationTime(
-            calcRequest.target,
-            at,
-            calcRequest.specMode,
-            calcRequest.constraints,
-            value
-          )
-      case ExposureTimeMode.TimeAndCountMode(time, count, at) =>
-        itc
-          .calculateSignalToNoise(
-            calcRequest.target,
-            at,
-            calcRequest.specMode,
-            calcRequest.constraints,
-            time,
-            count
-          )
+    itc
+      .calculateIntegrationTime(
+        calcRequest.target,
+        mode.at,
+        calcRequest.specMode,
+        calcRequest.constraints,
+        mode.value
+      )
 
   /**
    * Request exposure time calculation for spectroscopy
@@ -100,8 +103,24 @@ trait ItcCacheOrRemote extends Version:
   ): F[TargetIntegrationTime] =
     CustomSed // We must resolve CustomSed before caching.
       .resolveTargetSpectroscopyTimeRequest(calcRequest)
-      .flatMap: r =>
-        cache.getOrInvokeBinary(r, requestSpecTimeCalc(itc)(r), TTL, "itc:calc:spec")
+      .flatMap: (r, m) =>
+        cache.getOrInvokeBinary(r, requestSpecTimeCalc(itc)(r, m), TTL, "itc:calc:spec")
+
+  /**
+   * Request signal to noise calculation for spectroscopy
+   */
+  def spechSNFromCacheOrRemote[F[
+    _
+  ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
+    calcRequest: TargetSpectroscopyTimeRequest
+  )(
+    itc:         Itc[F],
+    cache:       BinaryEffectfulCache[F]
+  ): F[TargetSignalToNoise] =
+    CustomSed // We must resolve CustomSed before caching.
+      .resolveTargetSpectroscopySNRequest(calcRequest)
+      .flatMap: (r, m) =>
+        cache.getOrInvokeBinary(r, requestSpecSNCalc(itc)(r, m), TTL, "itc:calc:specsn")
 
   private def requestImgTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest

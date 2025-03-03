@@ -42,7 +42,7 @@ case class FLocalItc[F[_]: Async](itcLocal: LocalItc):
         }
     }
 
-  def calculateSignalToNoise(jsonParams: String): F[IntegrationTimeRemoteResult] =
+  def calculateSignalToNoise(jsonParams: String): F[SignalToNoiseRemoteResult] =
     (F.cede *> F.delay(itcLocal.calculateSignalToNoise(jsonParams)).guarantee(F.cede)).flatMap {
       case Right(result) => F.pure(result)
       case Left(msg)     =>

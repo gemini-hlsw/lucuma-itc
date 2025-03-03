@@ -81,7 +81,7 @@ case class LocalItc(classLoader: ClassLoader):
 
     res match
       case LegacyRight(result)    =>
-        decode[legacy.IntegrationTimeRemoteResult](result).leftMap { e =>
+        decode[IntegrationTimeRemoteResult](result).leftMap { e =>
           List(e.getMessage())
         }
       case LegacyLeft(result)     =>
@@ -96,7 +96,7 @@ case class LocalItc(classLoader: ClassLoader):
    */
   def calculateSignalToNoise(
     jsonParams: String
-  ): Either[List[String], IntegrationTimeRemoteResult] =
+  ): Either[List[String], SignalToNoiseRemoteResult] =
     val res = calculateSignalToNoiseMethod
       .invoke(null, jsonParams) // null as it is a static method
       .asInstanceOf[String]
@@ -105,7 +105,7 @@ case class LocalItc(classLoader: ClassLoader):
 
     res match
       case LegacyRight(result)    =>
-        decode[legacy.IntegrationTimeRemoteResult](result).leftMap { e =>
+        decode[SignalToNoiseRemoteResult](result).leftMap { e =>
           List(e.getMessage())
         }
       case LegacyLeft(result)     =>

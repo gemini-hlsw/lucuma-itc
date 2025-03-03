@@ -67,6 +67,20 @@ given Encoder[Wavelength] = w =>
   Json.fromString:
     s"${Wavelength.decimalNanometers.reverseGet(w)} nm"
 
+given Decoder[Wavelength] = w =>
+  val key: String = w.keys.flatMap(_.headOption).orEmpty
+  Decoder
+    .decodeBigDecimal(w)
+    .flatMap(w =>
+      Wavelength.decimalNanometers
+        .getOption(w)
+        .toRight(
+          DecodingFailure(s"Invalid wavelength value no enum value matched for $w",
+                          List(CursorOp.Field(key))
+          )
+        )
+    )
+
 private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.GmosNorth] =
   new Encoder[ObservingMode.SpectroscopyMode.GmosNorth] {
     def apply(a: ObservingMode.SpectroscopyMode.GmosNorth): Json =
@@ -449,21 +463,23 @@ given Decoder[GraphsRemoteResult] = (c: HCursor) =>
                 .as[NonEmptyChain[ItcRemoteCcd]]
   yield GraphsRemoteResult(ccd, graphs)
 
+given Decoder[SignalToNoise] = (c: HCursor) =>
+  c
+    .as[BigDecimal]
+    .flatMap: s =>
+      SignalToNoise.FromBigDecimalRounding
+        .getOption(s)
+        .filter(_.toBigDecimal > BigDecimal(0))
+        .toRight:
+          DecodingFailure(
+            s"Invalid S/N value computed: $s",
+            c.downField("signalToNoise").history
+          )
+
 given Decoder[ExposureCalculation] = (c: HCursor) =>
   for
     sn    <- // We attempt decoding and validating S/N first
-      c
-        .downField("signalToNoise")
-        .as[BigDecimal]
-        .flatMap: s =>
-          SignalToNoise.FromBigDecimalRounding
-            .getOption(s)
-            .filter(_.toBigDecimal > BigDecimal(0))
-            .toRight:
-              DecodingFailure(
-                s"Invalid S/N value computed: $s",
-                c.downField("signalToNoise").history
-              )
+      c.downField("signalToNoise").as[SignalToNoise]
     time  <- c.downField("exposureTime").as[Double]
     count <-
       c
@@ -472,6 +488,13 @@ given Decoder[ExposureCalculation] = (c: HCursor) =>
         .flatMap:
           refineV[NonNegative](_).leftMap(e => DecodingFailure(e, c.downField("exposures").history))
   yield ExposureCalculation(time, count, sn)
+
+given Decoder[SignalToNoiseAt] = (c: HCursor) =>
+  for
+    wv     <- c.downField("wavelengthh").as[Wavelength]
+    single <- c.downField("single").as[SignalToNoise]
+    total  <- c.downField("final").as[SignalToNoise]
+  yield SignalToNoiseAt(wv, single, total)
 
 given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
   val spec: Option[Decoder.Result[IntegrationTimeRemoteResult]] =
@@ -487,5 +510,22 @@ given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
       .downField("exposureCalculation")
       .as[Option[ExposureCalculation]]
       .map(c => IntegrationTimeRemoteResult(c))
+
+  spec.getOrElse(img)
+
+given Decoder[SignalToNoiseRemoteResult] = (c: HCursor) =>
+  val spec: Option[Decoder.Result[SignalToNoiseRemoteResult]] =
+    c.downField("ItcSpectroscopyResult")
+      .downField("signalToNoiseAt")
+      .success
+      .map:
+        _.as[SignalToNoiseAt]
+          .map(c => SignalToNoiseRemoteResult(c))
+
+  val img: Decoder.Result[SignalToNoiseRemoteResult] =
+    c.downField("ItcImagingResult")
+      .downField("signalToNiseAt")
+      .as[SignalToNoiseAt]
+      .map(c => SignalToNoiseRemoteResult(c))
 
   spec.getOrElse(img)
