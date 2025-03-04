@@ -10,15 +10,15 @@ import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.encoders.given
 import lucuma.itc.search.ObservingMode
 
-case class SpectroscopyResult(
+case class CalculationResult(
   versions:         ItcVersions,
   mode:             ObservingMode,
   targetTimes:      AsterismIntegrationTimeOutcomes,
   exposureTimeMode: ExposureTimeMode
 )
 
-object SpectroscopyResult:
-  given Encoder[SpectroscopyResult] = r =>
+object CalculationResult:
+  given Encoder[CalculationResult] = r =>
     Json
       .obj(
         "versions"         -> r.versions.asJson,

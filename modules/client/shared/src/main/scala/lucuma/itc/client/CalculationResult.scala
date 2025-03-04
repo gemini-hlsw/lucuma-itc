@@ -13,19 +13,19 @@ import lucuma.itc.Error
 import lucuma.itc.ItcVersions
 import lucuma.itc.client.json.decoders.given
 
-case class SpectroscopyResult(
+case class CalculationResult(
   versions:    ItcVersions,
   targetTimes: AsterismIntegrationTimeOutcomes
 ) derives Eq
 
-object SpectroscopyResult:
-  given Decoder[SpectroscopyResult] with
-    def apply(c: HCursor): Decoder.Result[SpectroscopyResult] =
+object CalculationResult:
+  given Decoder[CalculationResult] with
+    def apply(c: HCursor): Decoder.Result[CalculationResult] =
       for
         v <- c.downField("versions").as[ItcVersions]
         t <- c.downField("targetTimes").as[AsterismIntegrationTimeOutcomes]
-      yield SpectroscopyResult(v, t)
+      yield CalculationResult(v, t)
 
-  given Eq[SpectroscopyResult] with
-    def eqv(x: SpectroscopyResult, y: SpectroscopyResult): Boolean =
+  given Eq[CalculationResult] with
+    def eqv(x: CalculationResult, y: CalculationResult): Boolean =
       x.versions === y.versions && x.targetTimes === y.targetTimes

@@ -81,7 +81,7 @@ class WiringSuite extends ClientSuite {
   test("ItcClient spectroscopy basic wiring and sanity check") {
     spectroscopy(
       WiringSuite.SpectroscopyInputData,
-      SpectroscopyResult(
+      CalculationResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -100,7 +100,7 @@ class WiringSuite extends ClientSuite {
   test("ItcClient imaging basic wiring and sanity check") {
     imaging(
       WiringSuite.ImagingInputData,
-      SpectroscopyResult(
+      CalculationResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -172,7 +172,7 @@ class WiringSuite extends ClientSuite {
   test("ItcClient spectroscopy with emission lines basic wiring and sanity check") {
     spectroscopyEmissionLines(
       WiringSuite.SpectroscopyEmissionLinesInput,
-      SpectroscopyResult(
+      CalculationResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some

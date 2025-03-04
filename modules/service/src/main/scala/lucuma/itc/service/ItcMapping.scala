@@ -19,7 +19,7 @@ import lucuma.core.math.SignalToNoise
 import lucuma.core.util.TimeSpan
 import lucuma.itc.*
 import lucuma.itc.ItcVersions
-import lucuma.itc.SpectroscopyResult
+import lucuma.itc.CalculationResult
 import lucuma.itc.cache.BinaryEffectfulCache
 import lucuma.itc.encoders.given
 import lucuma.itc.input.*
@@ -63,8 +63,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   private def errorToProblem(error: Error, targetIndex: Int): Problem =
     Problem(error.message, extensions = ErrorExtension(targetIndex, error).asJsonObject.some)
 
-  extension (timeResult: SpectroscopyResult)
-    private def toResult: Result[SpectroscopyResult] =
+  extension (timeResult: CalculationResult)
+    private def toResult: Result[CalculationResult] =
       timeResult.targetTimes.collectErrors.fold(Result.success(timeResult)): errors =>
         Result.Warning(errors.map(errorToProblem), timeResult)
 
@@ -86,7 +86,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     itc:             Itc[F]
   )(
     asterismRequest: AsterismSpectroscopyTimeRequest
-  ): F[Result[SpectroscopyResult]] =
+  ): F[Result[CalculationResult]] =
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetSpectroscopyTimeRequest) =>
         specTimeFromCacheOrRemote(targetRequest)(itc, cache).attempt
@@ -94,7 +94,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             TargetIntegrationTimeOutcome:
               result.leftMap(buildError)
       .map: (targetOutcomes: NonEmptyChain[TargetIntegrationTimeOutcome]) =>
-        SpectroscopyResult(
+        CalculationResult(
           ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
           asterismRequest.specMode,
           AsterismIntegrationTimeOutcomes(targetOutcomes),
@@ -111,7 +111,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     environment: ExecutionEnvironment,
     cache:       BinaryEffectfulCache[F],
     itc:         Itc[F]
-  )(asterismRequest: AsterismImagingTimeRequest): F[Result[SpectroscopyResult]] =
+  )(asterismRequest: AsterismImagingTimeRequest): F[Result[CalculationResult]] =
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetImagingTimeRequest) =>
         imgTimeFromCacheOrRemote(targetRequest)(itc, cache).attempt
@@ -127,7 +127,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                         .focusIndex(1) // For gmos focus on the second CCD
                         .getOrElse(integrationTime)
       .map: (targetOutcomes: NonEmptyChain[TargetIntegrationTimeOutcome]) =>
-        SpectroscopyResult(
+        CalculationResult(
           ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
           asterismRequest.imagingMode,
           AsterismIntegrationTimeOutcomes(targetOutcomes),
@@ -232,7 +232,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     figures:         Option[SignificantFigures]
   ): F[Result[SpectroscopyTimeAndGraphsResult]] =
     ResultT(calculateSpectroscopyIntegrationTime(environment, cache, itc)(asterismRequest))
-      .flatMap: (specTimeResults: SpectroscopyResult) =>
+      .flatMap: (specTimeResults: CalculationResult) =>
         specTimeResults.targetTimes.partitionErrors
           .bimap(
             // If there was an error computing integration times, we cannot compute the graphs
