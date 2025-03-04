@@ -18,8 +18,8 @@ import lucuma.core.enums.{ExecutionEnvironment as _, *}
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.TimeSpan
 import lucuma.itc.*
-import lucuma.itc.ItcVersions
 import lucuma.itc.CalculationResult
+import lucuma.itc.ItcVersions
 import lucuma.itc.cache.BinaryEffectfulCache
 import lucuma.itc.encoders.given
 import lucuma.itc.input.*
@@ -89,7 +89,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   ): F[Result[CalculationResult]] =
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetSpectroscopyTimeRequest) =>
-        specTimeFromCacheOrRemote(targetRequest)(itc, cache).attempt
+        spectroscopyFromCacheOrRemote(targetRequest)(itc, cache).attempt
           .map: (result: Either[Throwable, TargetIntegrationTime]) =>
             TargetIntegrationTimeOutcome:
               result.leftMap(buildError)
@@ -114,7 +114,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   )(asterismRequest: AsterismImagingTimeRequest): F[Result[CalculationResult]] =
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetImagingTimeRequest) =>
-        imgTimeFromCacheOrRemote(targetRequest)(itc, cache).attempt
+        imagingFromCacheOrRemote(targetRequest)(itc, cache).attempt
           .map: (result: Either[Throwable, TargetIntegrationTime]) =>
             TargetIntegrationTimeOutcome:
               result

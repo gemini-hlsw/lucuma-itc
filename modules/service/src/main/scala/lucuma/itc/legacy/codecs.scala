@@ -491,7 +491,7 @@ given Decoder[ExposureCalculation] = (c: HCursor) =>
 
 given Decoder[SignalToNoiseAt] = (c: HCursor) =>
   for
-    wv     <- c.downField("wavelengthh").as[Wavelength]
+    wv     <- c.downField("wavelength").as[Wavelength]
     single <- c.downField("single").as[SignalToNoise]
     total  <- c.downField("final").as[SignalToNoise]
   yield SignalToNoiseAt(wv, single, total)

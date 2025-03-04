@@ -99,10 +99,9 @@ def spectroscopyExposureTimeParams(
           ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
             sigma = sigma.toBigDecimal.toDouble,
             coadds = None,
-            wavelength = atWavelength,
+            wavelengthAt = atWavelength,
             sourceFraction = 1.0,
-            ditherOffset = Angle.Angle0,
-            wavelengthAt = atWavelength
+            ditherOffset = Angle.Angle0
           ),
         analysisMethod = observingMode.analysisMethod
       ),

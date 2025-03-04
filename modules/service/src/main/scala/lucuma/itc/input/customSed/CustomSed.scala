@@ -12,7 +12,6 @@ import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.math.Wavelength
 import lucuma.core.model.Attachment
-import lucuma.core.model.ExposureTimeMode.SignalToNoiseMode
 import lucuma.core.model.ExposureTimeMode.TimeAndCountMode
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
@@ -55,13 +54,9 @@ object CustomSed:
       resolveTargetData(targetData).map(TargetGraphRequest(_, parameters))
 
   def resolveTargetSpectroscopyTimeRequest[F[_]: MonadThrow: Parallel: Resolver]
-    : TargetSpectroscopyTimeRequest => F[(TargetSpectroscopyTimeRequest, SignalToNoiseMode)] =
-    case TargetSpectroscopyTimeRequest(
-          targetData,
-          parameters @ SpectroscopyTimeParameters(m @ SignalToNoiseMode(_, _), _, _)
-        ) =>
-      resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters)).tupleRight(m)
-    case _ => MonadThrow[F].raiseError(new RuntimeException("Only SignalToNoiseMode is supported"))
+    : TargetSpectroscopyTimeRequest => F[TargetSpectroscopyTimeRequest] =
+    case TargetSpectroscopyTimeRequest(targetData, parameters) =>
+      resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters))
 
   def resolveTargetSpectroscopySNRequest[F[_]: MonadThrow: Parallel: Resolver]
     : TargetSpectroscopyTimeRequest => F[(TargetSpectroscopyTimeRequest, TimeAndCountMode)] =

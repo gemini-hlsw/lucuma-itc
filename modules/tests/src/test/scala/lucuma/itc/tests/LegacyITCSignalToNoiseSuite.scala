@@ -36,13 +36,15 @@ import lucuma.itc.search.TargetData
 import munit.FunSuite
 
 import scala.collection.immutable.SortedMap
+import scala.concurrent.duration.*
 
 /**
  * This is a unit test mostly to ensure all possible combination of params can be parsed by the
  * legacy ITC (Note that the ITC may still return an error but we want to ensure it can parse the
  * values
  */
-class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
+class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
+  override def munitTimeout: Duration = 5.minute
 
   val sourceDefinition = ItcSourceDefinition(
     TargetData(
@@ -68,8 +70,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
 
   val obs = ItcObservationDetails(
     calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
-      sigma = 1,
-      wavelength = Wavelength.decimalNanometers.getOption(600).get,
+      sigma = 100,
       wavelengthAt = Wavelength.decimalNanometers.getOption(610).get,
       coadds = None,
       sourceFraction = 1.0,
@@ -116,7 +117,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
       gmosN
     )
 
-  test("image quality"):
+  test("image quality".tag(LegacyITCTest)):
     Enumerated[ImageQuality].all.foreach: iq =>
       assert(
         localItc
@@ -124,7 +125,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
           .isRight
       )
 
-  test("cloud extinction".tag(LocalOnly)):
+  test("cloud extinction".tag(LegacyITCTest)):
     Enumerated[CloudExtinction].all.foreach: ce =>
       assert(
         localItc
@@ -132,7 +133,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
           .isRight
       )
 
-  test("water vapor".tag(LocalOnly)):
+  test("water vapor".tag(LegacyITCTest)):
     Enumerated[WaterVapor].all.foreach: wv =>
       assert(
         localItc
@@ -140,7 +141,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
           .isRight
       )
 
-  test("sky background".tag(LocalOnly)):
+  test("sky background".tag(LegacyITCTest)):
     Enumerated[SkyBackground].all.foreach: sb =>
       assert(
         localItc
@@ -179,7 +180,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
       ItcInstrumentDetails(c)
     )
 
-  test("gmos north grating".tag(LocalOnly)):
+  test("gmos north grating".tag(LegacyITCTest)):
     Enumerated[GmosNorthGrating].all.foreach: d =>
       assert(
         localItc
@@ -187,13 +188,13 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
           .isRight
       )
 
-  test("gmos north filter".tag(LocalOnly)):
+  test("gmos north filter".tag(LegacyITCTest)):
     Enumerated[GmosNorthFilter].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodyConf(gnConf.copy(filter = f.some)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  test("gmos north fpu".tag(LocalOnly)):
+  test("gmos north fpu".tag(LegacyITCTest)):
     Enumerated[GmosNorthFpu].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(
@@ -217,7 +218,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
     GmosRoi.FullFrame.some
   )
 
-  test("gmos south grating".tag(LocalOnly)):
+  test("gmos south grating".tag(LegacyITCTest)):
     Enumerated[GmosSouthGrating].all.foreach: d =>
       assert(
         localItc
@@ -225,13 +226,13 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
           .isRight
       )
 
-  test("gmos south filter".tag(LocalOnly)):
+  test("gmos south filter".tag(LegacyITCTest)):
     Enumerated[GmosSouthFilter].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodyConf(gsConf.copy(filter = f.some)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  test("gmos south fpu".tag(LocalOnly)):
+  test("gmos south fpu".tag(LegacyITCTest)):
     Enumerated[GmosSouthFpu].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(
@@ -241,7 +242,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
         )
       assert(result.fold(allowedErrors, _ => true))
 
-  test("gmos south filter".tag(LocalOnly)):
+  test("gmos south filter".tag(LegacyITCTest)):
     Enumerated[GmosSouthFilter].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodyConf(gsConf.copy(filter = f.some)).asJson.noSpaces)
@@ -262,43 +263,43 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
       gmosN
     )
 
-  test("stellar library spectrum".tag(LocalOnly)):
+  test("stellar library spectrum".tag(LegacyITCTest)):
     Enumerated[StellarLibrarySpectrum].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodySED(UnnormalizedSED.StellarLibrary(f)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  test("cool star".tag(LocalOnly)):
+  test("cool star".tag(LegacyITCTest)):
     Enumerated[CoolStarTemperature].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodySED(UnnormalizedSED.CoolStarModel(f)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  test("galaxy spectrum".tag(LocalOnly)):
+  test("galaxy spectrum".tag(LegacyITCTest)):
     Enumerated[GalaxySpectrum].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodySED(UnnormalizedSED.Galaxy(f)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  test("planet spectrum".tag(LocalOnly)):
+  test("planet spectrum".tag(LegacyITCTest)):
     Enumerated[PlanetSpectrum].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodySED(UnnormalizedSED.Planet(f)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  test("quasar spectrum".tag(LocalOnly)):
+  test("quasar spectrum".tag(LegacyITCTest)):
     Enumerated[QuasarSpectrum].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodySED(UnnormalizedSED.Quasar(f)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  test("hii region spectrum".tag(LocalOnly)):
+  test("hii region spectrum".tag(LegacyITCTest)):
     Enumerated[HIIRegionSpectrum].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodySED(UnnormalizedSED.HIIRegion(f)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  test("planetary nebula spectrum".tag(LocalOnly)):
+  test("planetary nebula spectrum".tag(LegacyITCTest)):
     Enumerated[PlanetaryNebulaSpectrum].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodySED(UnnormalizedSED.PlanetaryNebula(f)).asJson.noSpaces)
@@ -319,7 +320,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
       gmosN
     )
 
-  test("brightness integrated units".tag(LocalOnly)):
+  test("brightness integrated units".tag(LegacyITCTest)):
     Brightness.Integrated.all.toList.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(
@@ -327,7 +328,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
         )
       assert(result.fold(allowedErrors, _ => true))
 
-  test("user defined SED".tag(LocalOnly)) {
+  test("user defined SED".tag(LegacyITCTest)) {
     val userDefinedFluxDensities = NonEmptyMap.of(
       Wavelength.decimalNanometers.getOption(500).get -> PosBigDecimal.unsafeFrom(1.0),
       Wavelength.decimalNanometers.getOption(600).get -> PosBigDecimal.unsafeFrom(2.0),
@@ -360,7 +361,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
       gmosN
     )
 
-  test("surface units".tag(LocalOnly)):
+  test("surface units".tag(LegacyITCTest)):
     Brightness.Surface.all.toList.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(
@@ -387,7 +388,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
       gmosN
     )
 
-  test("gaussian units".tag(LocalOnly)):
+  test("gaussian units".tag(LegacyITCTest)):
     Brightness.Integrated.all.toList.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(
@@ -420,7 +421,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCSuite:
       gmosN
     )
 
-  test("power law".tag(LocalOnly)):
+  test("power law".tag(LegacyITCTest)):
     List(-10, 0, 10, 100).foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodyPowerLaw(f).asJson.noSpaces)

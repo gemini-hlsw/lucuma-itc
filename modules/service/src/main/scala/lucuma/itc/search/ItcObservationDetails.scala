@@ -65,14 +65,13 @@ object ItcObservationDetails {
               "exposureTime"   -> a.exposureDuration.toDoubleSeconds.asJson,
               "sourceFraction" -> a.sourceFraction.asJson,
               "offset"         -> Angle.signedDecimalArcseconds.get(a.ditherOffset).asJson,
-              "at"             -> a.wavelengthAt.nm.value.value.asJson
+              "wavelengthAt"   -> a.wavelengthAt.nm.value.value.asJson
             )
           }
       }
 
       case class SpectroscopyWithSNAt(
         sigma:          Double,
-        wavelength:     Wavelength,
         coadds:         Option[Int],
         sourceFraction: Double,
         ditherOffset:   Angle,
@@ -84,11 +83,10 @@ object ItcObservationDetails {
           Encoder.instance { a =>
             Json.obj(
               "sigma"          -> a.sigma.asJson,
-              "wavelength"     -> a.wavelength.toNanometers.value.value.asJson,
               "coadds"         -> a.coadds.asJson,
               "sourceFraction" -> a.sourceFraction.asJson,
               "offset"         -> Angle.signedDecimalArcseconds.get(a.ditherOffset).asJson,
-              "at"             -> a.wavelengthAt.nm.value.value.asJson
+              "wavelengthAt"   -> a.wavelengthAt.nm.value.value.asJson
             )
           }
       }

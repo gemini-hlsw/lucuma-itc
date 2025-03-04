@@ -173,10 +173,11 @@ object ItcImpl {
         bandOrLine: Either[Band, Wavelength]
       ): F[TargetSignalToNoise] =
         TargetSignalToNoise(r.signalToNoiseAt.wavelength,
-                            r.signalToNoiseAt.single,
-                            r.signalToNoiseAt.total,
+                            SingleSN(r.signalToNoiseAt.single),
+                            FinalSN(r.signalToNoiseAt.total),
                             bandOrLine
-        ).pure[F]
+        )
+          .pure[F]
 
       /**
        * Compute the exposure time and number of exposures required to achieve the desired
@@ -221,7 +222,7 @@ object ItcImpl {
         constraints:   ItcObservingConditions,
         exposureTime:  TimeSpan,
         exposureCount: NonNegInt
-      ): F[TargetSignalToNoise] =
+      ): F[TargetIntegrationTime] =
         import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
@@ -245,7 +246,10 @@ object ItcImpl {
                    a      <- itcLocal.calculateSignalToNoise(request.noSpaces)
                    result <- convertSignalToNoiseRemoteResult(a, bandOrLine)
                  yield result
-        yield r
+        yield TargetIntegrationTime(
+          Zipper.of(IntegrationTime(exposureTime, exposureCount, r._3.value)),
+          bandOrLine
+        )
 
       def calculateSignalToNoise(
         target:        TargetData,
@@ -254,7 +258,7 @@ object ItcImpl {
         constraints:   ItcObservingConditions,
         exposureTime:  TimeSpan,
         exposureCount: NonNegInt
-      ): F[TargetSignalToNoise] =
+      ): F[TargetIntegrationTime] =
         T.span("calculate-signal-to-noise"):
           observingMode match
             case s @ (ObservingMode.SpectroscopyMode.GmosNorth(_, _, _, _, _, _) |

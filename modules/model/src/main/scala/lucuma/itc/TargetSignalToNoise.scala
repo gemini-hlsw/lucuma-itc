@@ -13,8 +13,8 @@ import lucuma.itc.encoders.given
 
 case class TargetSignalToNoise(
   wavelength: Wavelength,
-  single:     SignalToNoise,
-  total:      SignalToNoise,
+  single:     SingleSN,
+  total:      FinalSN,
   bandOrLine: Either[Band, Wavelength]
 )
 

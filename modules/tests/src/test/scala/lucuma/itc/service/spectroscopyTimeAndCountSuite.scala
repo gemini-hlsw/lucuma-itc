@@ -10,17 +10,20 @@ import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcObservingConditions
 
-class spectroscopySuite extends GraphQLSuite {
+class spectroscopyTimeAndCountSuite extends GraphQLSuite:
 
-  test("gmos north case") {
+  test("gmos north case"):
     query(
       """
         query {
           spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
-                at: { nanometers: 60 }
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
+                at: { nanometers: 600 }
               }
             },
             asterism: [
@@ -87,8 +90,11 @@ class spectroscopySuite extends GraphQLSuite {
               }
             }
             exposureTimeMode {
-              signalToNoise {
-                value
+              timeAndCount {
+                time {
+                  seconds
+                }
+                count
                 at {
                   nanometers
                 }
@@ -120,9 +126,12 @@ class spectroscopySuite extends GraphQLSuite {
                 }
               },
               "exposureTimeMode": {
-                "signalToNoise": {
-                  "value": 2,
-                  "at": { "nanometers": 60.000 }
+                "timeAndCount": {
+                  "time": {
+                    "seconds": 2
+                  },
+                  "count": 3,
+                  "at": { "nanometers": 600.000 }
                 }
               },
               "brightest": {
@@ -139,16 +148,18 @@ class spectroscopySuite extends GraphQLSuite {
         }
         """
     )
-  }
 
-  test("gmos south case") {
+  test("gmos south case"):
     query(
       """
         query {
           spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -217,8 +228,11 @@ class spectroscopySuite extends GraphQLSuite {
                 }
               }
               exposureTimeMode {
-                signalToNoise {
-                  value
+                timeAndCount {
+                  time {
+                    seconds
+                  }
+                  count
                   at {
                     nanometers
                   }
@@ -249,8 +263,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 },
                 "exposureTimeMode": {
-                  "signalToNoise": {
-                    "value": 2,
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
                     "at": { "nanometers": 60.000 }
                   }
                 },
@@ -267,9 +284,8 @@ class spectroscopySuite extends GraphQLSuite {
         }
         """
     )
-  }
 
-  test("gmos north case with variables") {
+  test("gmos north case with variables"):
     query(
       """
         query($spectroscopy: SpectroscopyInput) {\n          spectroscopy(input: $spectroscopy) {\n            mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n        }\n
@@ -278,8 +294,11 @@ class spectroscopySuite extends GraphQLSuite {
         {
           "spectroscopy" : {
             "exposureTimeMode": {
-              "signalToNoise": {
-                "value": 2,
+              "timeAndCount": {
+                "time": {
+                  "seconds": 2
+                },
+                "count": 3,
                 "at": { "nanometers": "600" }
               }
             },
@@ -348,7 +367,6 @@ class spectroscopySuite extends GraphQLSuite {
         }
         """
     )
-  }
 
   val allConditions =
     for {
@@ -366,15 +384,18 @@ class spectroscopySuite extends GraphQLSuite {
     2
   )
 
-  test("iterate over conditions") {
+  test("iterate over conditions"):
     allConditions.traverse { c =>
       query(
         s"""
         query {
           spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -442,8 +463,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 }
                 exposureTimeMode {
-                  signalToNoise {
-                    value
+                  timeAndCount {
+                    time {
+                      seconds
+                    }
+                    count
                     at {
                       nanometers
                     }
@@ -475,8 +499,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 },
                 "exposureTimeMode": {
-                  "signalToNoise": {
-                    "value": 2,
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
                     "at": { "nanometers": 60.000 }
                   }
                 },
@@ -494,16 +521,18 @@ class spectroscopySuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("Bad airmass") {
+  test("Bad airmass"):
     query(
       """
         query {
           spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -571,8 +600,11 @@ class spectroscopySuite extends GraphQLSuite {
                 }
               }
               exposureTimeMode {
-                signalToNoise {
-                  value
+                timeAndCount {
+                  time {
+                    seconds
+                  }
+                  count
                   at {
                     nanometers
                   }
@@ -600,17 +632,19 @@ class spectroscopySuite extends GraphQLSuite {
         }
         """
     )
-  }
 
-  test("gmosN_gratings") {
+  test("gmosN_gratings"):
     Enumerated[GmosNorthGrating].all.traverse { d =>
       query(
         s"""
         query {
           spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -678,8 +712,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 }
                 exposureTimeMode {
-                  signalToNoise {
-                    value
+                  timeAndCount {
+                    time {
+                      seconds
+                    }
+                    count
                     at {
                       nanometers
                     }
@@ -711,8 +748,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 },
                 "exposureTimeMode": {
-                  "signalToNoise": {
-                    "value": 2,
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
                     "at": { "nanometers": 60.000 }
                   }
                 },
@@ -730,17 +770,19 @@ class spectroscopySuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("gmosS_gratings") {
+  test("gmosS_gratings"):
     Enumerated[GmosSouthGrating].all.traverse { d =>
       query(
         s"""
         query {
           spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -813,8 +855,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 }
                 exposureTimeMode {
-                  signalToNoise {
-                    value
+                  timeAndCount {
+                    time {
+                      seconds
+                    }
+                    count
                     at {
                       nanometers
                     }
@@ -846,8 +891,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 },
                 "exposureTimeMode": {
-                  "signalToNoise": {
-                    "value": 2,
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
                     "at": { "nanometers": 60.000 }
                   }
                 },
@@ -865,17 +913,19 @@ class spectroscopySuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("gmosN_fpu") {
+  test("gmosN_fpu"):
     Enumerated[GmosNorthFpu].all.traverse { d =>
       query(
         s"""
           query {
             spectroscopy(input: {
               exposureTimeMode: {
-                signalToNoise: {
-                  value: 2,
+                timeAndCount: {
+                  time: {
+                    seconds: 2
+                  },
+                  count: 3,
                   at: { nanometers: 60 }
                 }
               },
@@ -950,8 +1000,11 @@ class spectroscopySuite extends GraphQLSuite {
                     }
                   }
                   exposureTimeMode {
-                    signalToNoise {
-                      value
+                    timeAndCount {
+                      time {
+                        seconds
+                      }
+                      count
                       at {
                         nanometers
                       }
@@ -985,8 +1038,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 },
                 "exposureTimeMode": {
-                  "signalToNoise": {
-                    "value": 2,
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
                     "at": { "nanometers": 60.000 }
                   }
                 },
@@ -1004,17 +1060,19 @@ class spectroscopySuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("gmosS_fpu") {
+  test("gmosS_fpu"):
     Enumerated[GmosSouthFpu].all.filter(_ =!= GmosSouthFpu.Bhros).traverse { d =>
       query(
         s"""
         query {
           spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -1084,8 +1142,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 }
                 exposureTimeMode {
-                  signalToNoise {
-                    value
+                  timeAndCount {
+                    time {
+                      seconds
+                    }
+                    count
                     at {
                       nanometers
                     }
@@ -1119,8 +1180,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 },
                 "exposureTimeMode": {
-                  "signalToNoise": {
-                    "value": 2,
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
                     "at": { "nanometers": 60.000 }
                   }
                 },
@@ -1138,17 +1202,19 @@ class spectroscopySuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("gmosN_filter") {
+  test("gmosN_filter"):
     Enumerated[GmosNorthFilter].all.traverse { d =>
       query(
         s"""
         query {
           spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -1216,8 +1282,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 }
                 exposureTimeMode {
-                  signalToNoise {
-                    value
+                  timeAndCount {
+                    time {
+                      seconds
+                    }
+                    count
                     at {
                       nanometers
                     }
@@ -1249,8 +1318,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 },
                 "exposureTimeMode": {
-                  "signalToNoise": {
-                    "value": 2,
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
                     "at": { "nanometers": 60.000 }
                   }
                 },
@@ -1268,17 +1340,19 @@ class spectroscopySuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("gmosS_filter") {
+  test("gmosS_filter"):
     Enumerated[GmosSouthFilter].all.traverse { d =>
       query(
         s"""
         query {
           spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -1346,8 +1420,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 }
                 exposureTimeMode {
-                  signalToNoise {
-                    value
+                  timeAndCount {
+                    time {
+                      seconds
+                    }
+                    count
                     at {
                       nanometers
                     }
@@ -1379,8 +1456,11 @@ class spectroscopySuite extends GraphQLSuite {
                   }
                 },
                 "exposureTimeMode": {
-                  "signalToNoise": {
-                    "value": 2,
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
                     "at": { "nanometers": 60.000 }
                   }
                 },
@@ -1398,16 +1478,18 @@ class spectroscopySuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("multiple targets") {
+  test("multiple targets"):
     query(
       """
         query {
           spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -1494,8 +1576,11 @@ class spectroscopySuite extends GraphQLSuite {
               }
             }
             exposureTimeMode {
-              signalToNoise {
-                value
+              timeAndCount {
+                time {
+                  seconds
+                }
+                count
                 at {
                   nanometers
                 }
@@ -1530,8 +1615,11 @@ class spectroscopySuite extends GraphQLSuite {
                 }
               },
               "exposureTimeMode": {
-                "signalToNoise": {
-                  "value": 2,
+                "timeAndCount": {
+                  "time": {
+                    "seconds": 2
+                  },
+                  "count": 3,
                   "at": { "nanometers": 60.000 }
                 }
               },
@@ -1561,5 +1649,3 @@ class spectroscopySuite extends GraphQLSuite {
         }
         """
     )
-  }
-}
