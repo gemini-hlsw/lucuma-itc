@@ -5,23 +5,24 @@ package lucuma.itc.input.customSed
 
 import cats.Applicative
 import cats.Monad
+import cats.MonadThrow
 import cats.Parallel
 import cats.data.NonEmptyMap
 import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.math.Wavelength
 import lucuma.core.model.Attachment
+import lucuma.core.model.ExposureTimeMode.SignalToNoiseMode
+import lucuma.core.model.ExposureTimeMode.TimeAndCountMode
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED
-import lucuma.core.model.ExposureTimeMode.SignalToNoiseMode
-import lucuma.core.model.ExposureTimeMode.TimeAndCountMode
 import lucuma.itc.search.TargetData
+import lucuma.itc.service.requests.SpectroscopyTimeParameters
 import lucuma.itc.service.requests.TargetGraphRequest
 import lucuma.itc.service.requests.TargetImagingTimeRequest
 import lucuma.itc.service.requests.TargetSpectroscopyTimeRequest
-import lucuma.itc.service.requests.SpectroscopyTimeParameters
 
 object CustomSed:
   trait Resolver[F[_]]:
@@ -53,21 +54,23 @@ object CustomSed:
     case TargetGraphRequest(targetData, parameters) =>
       resolveTargetData(targetData).map(TargetGraphRequest(_, parameters))
 
-  def resolveTargetSpectroscopyTimeRequest[F[_]: Monad: Parallel: Resolver]
+  def resolveTargetSpectroscopyTimeRequest[F[_]: MonadThrow: Parallel: Resolver]
     : TargetSpectroscopyTimeRequest => F[(TargetSpectroscopyTimeRequest, SignalToNoiseMode)] =
     case TargetSpectroscopyTimeRequest(
           targetData,
           parameters @ SpectroscopyTimeParameters(m @ SignalToNoiseMode(_, _), _, _)
         ) =>
       resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters)).tupleRight(m)
+    case _ => MonadThrow[F].raiseError(new RuntimeException("Only SignalToNoiseMode is supported"))
 
-  def resolveTargetSpectroscopySNRequest[F[_]: Monad: Parallel: Resolver]
+  def resolveTargetSpectroscopySNRequest[F[_]: MonadThrow: Parallel: Resolver]
     : TargetSpectroscopyTimeRequest => F[(TargetSpectroscopyTimeRequest, TimeAndCountMode)] =
     case TargetSpectroscopyTimeRequest(
           targetData,
           parameters @ SpectroscopyTimeParameters(m @ TimeAndCountMode(_, _, _), _, _)
         ) =>
       resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters)).tupleRight(m)
+    case _ => MonadThrow[F].raiseError(new RuntimeException("Only TimeAndCountMode is supported"))
 
   def resolveTargetImagingTimeRequest[F[_]: Monad: Parallel: Resolver]
     : TargetImagingTimeRequest => F[TargetImagingTimeRequest] =

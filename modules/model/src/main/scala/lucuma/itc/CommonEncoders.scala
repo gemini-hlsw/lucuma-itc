@@ -15,8 +15,8 @@ import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength
-import lucuma.core.util.TimeSpan
 import lucuma.core.model.ExposureTimeMode
+import lucuma.core.util.TimeSpan
 
 type Nanosecond  = Nano * Second
 type Microsecond = Micro * Second

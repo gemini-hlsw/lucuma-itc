@@ -7,9 +7,9 @@ import cats.syntax.either.*
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength
+import lucuma.core.model.ExposureTimeMode
 import lucuma.core.util.TimeSpan
 import lucuma.itc.client.*
-import lucuma.core.model.ExposureTimeMode
 
 // Decoders for the client don't need to be as generic as the ones for the server.
 object encoders:

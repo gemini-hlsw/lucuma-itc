@@ -6,10 +6,10 @@ package lucuma.itc
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
-import lucuma.core.math.Wavelength
-import lucuma.core.math.SignalToNoise
-import lucuma.itc.encoders.given
 import lucuma.core.enums.Band
+import lucuma.core.math.SignalToNoise
+import lucuma.core.math.Wavelength
+import lucuma.itc.encoders.given
 
 case class TargetSignalToNoise(
   wavelength: Wavelength,

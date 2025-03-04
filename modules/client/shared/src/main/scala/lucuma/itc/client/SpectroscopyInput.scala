@@ -11,9 +11,9 @@ import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ExposureTimeMode
+import lucuma.itc.client.json.encoders.given
 import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
-import lucuma.itc.client.json.encoders.given
 
 case class SpectroscopyParameters(
   exposureTimeMode: ExposureTimeMode,

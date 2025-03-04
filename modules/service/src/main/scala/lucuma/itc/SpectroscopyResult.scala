@@ -6,9 +6,9 @@ package lucuma.itc
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
-import lucuma.itc.search.ObservingMode
-import lucuma.itc.encoders.given
 import lucuma.core.model.ExposureTimeMode
+import lucuma.itc.encoders.given
+import lucuma.itc.search.ObservingMode
 
 case class SpectroscopyResult(
   versions:         ItcVersions,

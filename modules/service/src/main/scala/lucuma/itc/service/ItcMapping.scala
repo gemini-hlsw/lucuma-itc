@@ -333,10 +333,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           SelectElaborator {
             case (QueryType, "spectroscopy", List(SpectroscopyInput.Binding("input", input))) =>
               handle(input)
-            case (QueryType,
-                  "imaging",
-                  List(ImagingInput.Binding("input", input))
-                ) =>
+            case (QueryType, "imaging", List(ImagingInput.Binding("input", input)))           =>
               handle(input)
             case (QueryType,
                   "spectroscopyGraphs",
