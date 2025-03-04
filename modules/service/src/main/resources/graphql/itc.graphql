@@ -14667,15 +14667,15 @@ type Query {
 
   # Given an instrument and a spectroscopy mode,
   # return the integration time and the estimated S/N for the given targets.
-  spectroscopyIntegrationTime(
-    input: SpectroscopyIntegrationTimeInput!
-  ): IntegrationTimeCalculationResult!
+  spectroscopy(
+    input: SpectroscopyInput!
+  ): SpectroscopyResult!
 
   # Given an instrument and an imaging mode,
   # return the integration time and the estimated S/N for the given targets.
   imagingIntegrationTime(
-    input: ImagingIntegrationTimeInput!
-  ): IntegrationTimeCalculationResult!
+    input: ImagingInput!
+  ): SpectroscopyResult!
 
   # Given an instrument and a mode, return the graph data for the given targets.
   # Values are rounded to limit the size of the response.
@@ -14812,7 +14812,7 @@ input InstrumentModesInput {
 }
 
 # Params for spectroscopy integration time calculation
-input SpectroscopyIntegrationTimeInput {
+input SpectroscopyInput {
 
   # Exposure time mode.
   exposureTimeMode: ExposureTimeModeInput!
@@ -14836,7 +14836,7 @@ input TargetInput {
 }
 
 # Params for imaging integration time calculation
-input ImagingIntegrationTimeInput {
+input ImagingInput {
 
   # Exposure time mode.
   exposureTimeMode: ExposureTimeModeInput!
@@ -14917,7 +14917,7 @@ type IntegrationTime {
   signalToNoise: SignalToNoise!
 }
 
-type IntegrationTimeCalculationResult {
+type SpectroscopyResult {
   # server and data versions
   versions: ItcVersions!
 

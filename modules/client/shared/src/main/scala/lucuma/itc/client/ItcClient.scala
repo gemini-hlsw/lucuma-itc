@@ -11,6 +11,7 @@ import clue.http4s.Http4sHttpClient
 import clue.syntax.*
 import io.circe.syntax.*
 import lucuma.itc.ItcVersions
+import lucuma.itc.client.SpectroscopyResult
 import org.http4s.Uri
 import org.http4s.client.Client
 import org.typelevel.log4cats.Logger
@@ -20,14 +21,14 @@ import org.typelevel.log4cats.Logger
  */
 trait ItcClient[F[_]] {
   def spectroscopy(
-    input:    SpectroscopyIntegrationTimeInput,
+    input:    SpectroscopyInput,
     useCache: Boolean = true
-  ): F[IntegrationTimeResult]
+  ): F[SpectroscopyResult]
 
   def imaging(
-    input:    ImagingIntegrationTimeInput,
+    input:    ImagingInput,
     useCache: Boolean = true
-  ): F[IntegrationTimeResult]
+  ): F[SpectroscopyResult]
 
   def spectroscopyGraphs(
     input:    SpectroscopyGraphsInput,
@@ -50,8 +51,8 @@ object ItcClient {
     client: Client[F]
   ): F[ItcClient[F]] =
     for
-      specCache         <- ItcCache.simple[F, SpectroscopyIntegrationTimeInput, IntegrationTimeResult]
-      imgCache          <- ItcCache.simple[F, ImagingIntegrationTimeInput, IntegrationTimeResult]
+      specCache         <- ItcCache.simple[F, SpectroscopyInput, SpectroscopyResult]
+      imgCache          <- ItcCache.simple[F, ImagingInput, SpectroscopyResult]
       graphCache        <-
         ItcCache.simple[F, SpectroscopyGraphsInput, SpectroscopyGraphsResult]
       timeAndGraphCache <-
@@ -63,11 +64,11 @@ object ItcClient {
     yield new ItcClient[F] {
 
       override def spectroscopy(
-        input:    SpectroscopyIntegrationTimeInput,
+        input:    SpectroscopyInput,
         useCache: Boolean = true
-      ): F[IntegrationTimeResult] = {
+      ): F[SpectroscopyResult] = {
 
-        val callOut: F[IntegrationTimeResult] =
+        val callOut: F[SpectroscopyResult] =
           http
             .request(SpectroscopyIntegrationTime)
             .withInput(input)
@@ -82,11 +83,11 @@ object ItcClient {
       }
 
       override def imaging(
-        input:    ImagingIntegrationTimeInput,
+        input:    ImagingInput,
         useCache: Boolean = true
-      ): F[IntegrationTimeResult] = {
+      ): F[SpectroscopyResult] = {
 
-        val callOut: F[IntegrationTimeResult] =
+        val callOut: F[SpectroscopyResult] =
           http
             .request(ImagingIntegrationTime)
             .withInput(input)

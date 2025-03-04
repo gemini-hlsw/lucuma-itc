@@ -11,7 +11,7 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -96,7 +96,7 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params": {
@@ -126,7 +126,7 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -207,7 +207,7 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params": {
@@ -237,7 +237,7 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -331,7 +331,7 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
             }
           ],
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params" : {
@@ -353,7 +353,7 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -447,7 +447,7 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
             }
           ],
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params" : {

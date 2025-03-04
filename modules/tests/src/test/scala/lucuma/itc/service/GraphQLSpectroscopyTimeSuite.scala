@@ -16,7 +16,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -101,7 +101,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params": {
@@ -131,7 +131,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -216,7 +216,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
                   "params": {
@@ -244,7 +244,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
   test("gmos north case with variables") {
     query(
       """
-        query($spectroscopy: SpectroscopyIntegrationTimeInput) {\n          spectroscopyIntegrationTime(input: $spectroscopy) {\n            mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n        }\n
+        query($spectroscopy: SpectroscopyInput) {\n          spectroscopy(input: $spectroscopy) {\n            mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n        }\n
       """,
       """
         {
@@ -310,7 +310,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_NORTH"
@@ -343,7 +343,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -427,7 +427,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
@@ -458,7 +458,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -557,7 +557,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -641,7 +641,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
@@ -673,7 +673,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -762,7 +762,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
@@ -794,7 +794,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       query(
         s"""
           query {
-            spectroscopyIntegrationTime(input: {
+            spectroscopy(input: {
               exposureTimeMode: {
                 signalToNoise: {
                   value: 2,
@@ -885,7 +885,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
@@ -919,7 +919,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -1005,7 +1005,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
@@ -1039,7 +1039,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -1123,7 +1123,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
@@ -1155,7 +1155,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       query(
         s"""
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -1239,7 +1239,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
@@ -1270,7 +1270,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -1377,7 +1377,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params": {

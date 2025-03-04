@@ -80,8 +80,8 @@ class WiringSuite extends ClientSuite {
 
   test("ItcClient spectroscopy basic wiring and sanity check") {
     spectroscopy(
-      WiringSuite.SpectroscopyInput,
-      IntegrationTimeResult(
+      WiringSuite.SpectroscopyInputParam,
+      SpectroscopyResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -99,8 +99,8 @@ class WiringSuite extends ClientSuite {
 
   test("ItcClient imaging basic wiring and sanity check") {
     imaging(
-      WiringSuite.ImagingInput,
-      IntegrationTimeResult(
+      WiringSuite.ImagingInputData,
+      SpectroscopyResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -172,7 +172,7 @@ class WiringSuite extends ClientSuite {
   test("ItcClient spectroscopy with emission lines basic wiring and sanity check") {
     spectroscopyEmissionLines(
       WiringSuite.SpectroscopyEmissionLinesInput,
-      IntegrationTimeResult(
+      SpectroscopyResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -191,8 +191,8 @@ class WiringSuite extends ClientSuite {
 
 object WiringSuite {
 
-  val SpectroscopyInput: SpectroscopyIntegrationTimeInput =
-    SpectroscopyIntegrationTimeInput(
+  val SpectroscopyInputParam: SpectroscopyInput =
+    SpectroscopyInput(
       SpectroscopyIntegrationTimeParameters(
         ExposureTimeMode.SignalToNoiseMode(
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
@@ -239,9 +239,9 @@ object WiringSuite {
       )
     )
 
-  val ImagingInput: ImagingIntegrationTimeInput =
-    ImagingIntegrationTimeInput(
-      ImagingIntegrationTimeParameters(
+  val ImagingInputData: ImagingInput =
+    ImagingInput(
+      ImagingParameters(
         ExposureTimeMode.SignalToNoiseMode(
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
           Wavelength.Min
@@ -325,8 +325,8 @@ object WiringSuite {
       )
     )
 
-  val SpectroscopyEmissionLinesInput: SpectroscopyIntegrationTimeInput =
-    SpectroscopyIntegrationTimeInput(
+  val SpectroscopyEmissionLinesInput: SpectroscopyInput =
+    SpectroscopyInput(
       SpectroscopyIntegrationTimeParameters(
         ExposureTimeMode.SignalToNoiseMode(
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),

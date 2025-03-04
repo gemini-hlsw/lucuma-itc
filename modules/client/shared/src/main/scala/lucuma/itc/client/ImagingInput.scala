@@ -15,15 +15,15 @@ import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
 import lucuma.itc.encoders.given
 
-case class ImagingIntegrationTimeParameters(
+case class ImagingParameters(
   exposureTimeMode: ExposureTimeMode,
   constraints:      ConstraintSet,
   mode:             InstrumentMode
 ) derives Eq
 
-object ImagingIntegrationTimeParameters {
-  given Encoder[ImagingIntegrationTimeParameters] with
-    def apply(a: ImagingIntegrationTimeParameters): Json =
+object ImagingParameters {
+  given Encoder[ImagingParameters] with
+    def apply(a: ImagingParameters): Json =
       Json
         .obj(
           "exposureTimeMode" -> a.exposureTimeMode.asJson,
@@ -33,15 +33,15 @@ object ImagingIntegrationTimeParameters {
         .dropNullValues
 }
 
-final case class ImagingIntegrationTimeInput(
-  parameters: ImagingIntegrationTimeParameters,
+final case class ImagingInput(
+  parameters: ImagingParameters,
   asterism:   NonEmptyList[TargetInput]
 ) derives Eq:
   export parameters.*
 
-object ImagingIntegrationTimeInput {
+object ImagingInput {
 
-  given Encoder[ImagingIntegrationTimeInput] with
-    def apply(a: ImagingIntegrationTimeInput): Json =
+  given Encoder[ImagingInput] with
+    def apply(a: ImagingInput): Json =
       Json.obj("asterism" -> a.asterism.asJson).deepMerge(a.parameters.asJson)
 }

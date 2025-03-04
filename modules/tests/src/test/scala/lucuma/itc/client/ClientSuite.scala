@@ -60,8 +60,8 @@ trait ClientSuite extends CatsEffectSuite {
   private val emissionLineClient: Resource[IO, ItcClient[IO]]   = itcClient(emissionLineFixture)
 
   def spectroscopy(
-    in:       SpectroscopyIntegrationTimeInput,
-    expected: Either[String, IntegrationTimeResult]
+    in:       SpectroscopyInput,
+    expected: Either[String, SpectroscopyResult]
   ): IO[Unit] =
     bandNormalizedClient.use:
       _.spectroscopy(in).attempt
@@ -69,8 +69,8 @@ trait ClientSuite extends CatsEffectSuite {
         .assertEquals(expected)
 
   def imaging(
-    in:       ImagingIntegrationTimeInput,
-    expected: Either[String, IntegrationTimeResult]
+    in:       ImagingInput,
+    expected: Either[String, SpectroscopyResult]
   ): IO[Unit] =
     bandNormalizedClient.use:
       _.imaging(in).attempt
@@ -95,8 +95,8 @@ trait ClientSuite extends CatsEffectSuite {
         .assertEquals(expected)
 
   def spectroscopyEmissionLines(
-    in:       SpectroscopyIntegrationTimeInput,
-    expected: Either[String, IntegrationTimeResult]
+    in:       SpectroscopyInput,
+    expected: Either[String, SpectroscopyResult]
   ): IO[Unit] =
     emissionLineClient.use:
       _.spectroscopy(in).attempt

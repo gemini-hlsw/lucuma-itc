@@ -14,8 +14,8 @@ import lucuma.itc.ItcVersions
 import lucuma.itc.client.json.decoders.given
 
 object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
-  type Data      = IntegrationTimeResult
-  type Variables = SpectroscopyIntegrationTimeInput
+  type Data      = SpectroscopyResult
+  type Variables = SpectroscopyInput
 
   override val document: String =
     """
@@ -50,8 +50,8 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
         }
       }
 
-      query Spectroscopy($spec: SpectroscopyIntegrationTimeInput!) {
-        spectroscopyIntegrationTime(input: $spec) {
+      query Spectroscopy($spec: SpectroscopyInput!) {
+        spectroscopy(input: $spec) {
           versions {
             serverVersion
             dataVersion
@@ -65,19 +65,19 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
     """
 
   override val varEncoder: Encoder.AsObject[Variables] =
-    Encoder.AsObject.instance[SpectroscopyIntegrationTimeInput] { input =>
+    Encoder.AsObject.instance[SpectroscopyInput] { input =>
       JsonObject(
-        "spec" -> Encoder[SpectroscopyIntegrationTimeInput].apply(input)
+        "spec" -> Encoder[SpectroscopyInput].apply(input)
       )
     }
 
-  override val dataDecoder: Decoder[IntegrationTimeResult] =
-    (c: HCursor) => c.downField("spectroscopyIntegrationTime").as[IntegrationTimeResult]
+  override val dataDecoder: Decoder[SpectroscopyResult] =
+    (c: HCursor) => c.downField("spectroscopy").as[SpectroscopyResult]
 }
 
 object ImagingIntegrationTime extends GraphQLOperation[Unit] {
-  type Data      = IntegrationTimeResult
-  type Variables = ImagingIntegrationTimeInput
+  type Data      = SpectroscopyResult
+  type Variables = ImagingInput
 
   override val document: String =
     """
@@ -112,7 +112,7 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
         }
       }
 
-      query Imaging($spec: ImagingIntegrationTimeInput!) {
+      query Imaging($spec: ImagingInput!) {
         imagingIntegrationTime(input: $spec) {
           versions {
             serverVersion
@@ -127,14 +127,14 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
     """
 
   override val varEncoder: Encoder.AsObject[Variables] =
-    Encoder.AsObject.instance[ImagingIntegrationTimeInput] { input =>
+    Encoder.AsObject.instance[ImagingInput] { input =>
       JsonObject(
-        "spec" -> Encoder[ImagingIntegrationTimeInput].apply(input)
+        "spec" -> Encoder[ImagingInput].apply(input)
       )
     }
 
-  override val dataDecoder: Decoder[IntegrationTimeResult] =
-    (c: HCursor) => c.downField("imagingIntegrationTime").as[IntegrationTimeResult]
+  override val dataDecoder: Decoder[SpectroscopyResult] =
+    (c: HCursor) => c.downField("imagingIntegrationTime").as[SpectroscopyResult]
 }
 
 object SpectroscopyGraphsQuery extends GraphQLOperation[Unit] {

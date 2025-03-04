@@ -33,14 +33,14 @@ object SpectroscopyIntegrationTimeParameters {
         .dropNullValues
 }
 
-case class SpectroscopyIntegrationTimeInput(
+case class SpectroscopyInput(
   parameters: SpectroscopyIntegrationTimeParameters,
   asterism:   NonEmptyList[TargetInput]
 ) derives Eq:
   export parameters.*
 
-object SpectroscopyIntegrationTimeInput {
-  given Encoder[SpectroscopyIntegrationTimeInput] with
-    def apply(a: SpectroscopyIntegrationTimeInput): Json =
+object SpectroscopyInput {
+  given Encoder[SpectroscopyInput] with
+    def apply(a: SpectroscopyInput): Json =
       Json.obj("asterism" -> a.asterism.asJson).deepMerge(a.parameters.asJson)
 }

@@ -49,7 +49,7 @@ object ItcImpl {
           observingMode match
             case s @ (ObservingMode.SpectroscopyMode.GmosNorth(_, _, _, _, _, _) |
                 ObservingMode.SpectroscopyMode.GmosSouth(_, _, _, _, _, _)) =>
-              spectroscopyIntegrationTime(target, atWavelength, s, constraints, signalToNoise)
+              spectroscopy(target, atWavelength, s, constraints, signalToNoise)
             case i @ (
                   ObservingMode.ImagingMode.GmosNorth(_, _) |
                   ObservingMode.ImagingMode.GmosSouth(_, _)
@@ -115,7 +115,7 @@ object ItcImpl {
        * Compute the exposure time and number of exposures required to achieve the desired
        * signal-to-noise under the requested conditions. Only for spectroscopy modes.
        */
-      private def spectroscopyIntegrationTime(
+      private def spectroscopy(
         target:        TargetData,
         atWavelength:  Wavelength,
         observingMode: ObservingMode.SpectroscopyMode,

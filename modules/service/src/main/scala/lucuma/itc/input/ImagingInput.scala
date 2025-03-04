@@ -8,16 +8,16 @@ import lucuma.core.model.ExposureTimeMode
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
 
-case class ImagingIntegrationTimeInput(
+case class ImagingInput(
   exposureTimeMode: ExposureTimeMode,
   asterism:         List[TargetDataInput],
   constraints:      ConstraintSetInput,
   mode:             InstrumentModesInput
 )
 
-object ImagingIntegrationTimeInput:
+object ImagingInput:
 
-  val Binding: Matcher[ImagingIntegrationTimeInput] =
+  val Binding: Matcher[ImagingInput] =
     ObjectFieldsBinding.rmap:
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),

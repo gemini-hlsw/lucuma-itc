@@ -21,16 +21,16 @@ object SpectroscopyTimeInput:
   ): (ExposureTimeMode, List[TargetDataInput], ConstraintSetInput, InstrumentModesInput) =
     (arg.exposureTimeMode, arg.asterism, arg.constraints, arg.mode)
 
-case class SpectroscopyIntegrationTimeInput(
+case class SpectroscopyInput(
   exposureTimeMode: ExposureTimeMode,
   asterism:         List[TargetDataInput],
   constraints:      ConstraintSetInput,
   mode:             InstrumentModesInput
 ) extends SpectroscopyTimeInput
 
-object SpectroscopyIntegrationTimeInput:
+object SpectroscopyInput:
 
-  val Binding: Matcher[SpectroscopyIntegrationTimeInput] =
+  val Binding: Matcher[SpectroscopyInput] =
     ObjectFieldsBinding.rmap:
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
