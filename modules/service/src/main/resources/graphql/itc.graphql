@@ -14673,7 +14673,7 @@ type Query {
 
   # Given an instrument and an imaging mode,
   # return the integration time and the estimated S/N for the given targets.
-  imagingIntegrationTime(
+  imaging(
     input: ImagingInput!
   ): SpectroscopyResult!
 

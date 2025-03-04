@@ -113,7 +113,7 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
       }
 
       query Imaging($spec: ImagingInput!) {
-        imagingIntegrationTime(input: $spec) {
+        imaging(input: $spec) {
           versions {
             serverVersion
             dataVersion
@@ -134,7 +134,7 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
     }
 
   override val dataDecoder: Decoder[SpectroscopyResult] =
-    (c: HCursor) => c.downField("imagingIntegrationTime").as[SpectroscopyResult]
+    (c: HCursor) => c.downField("imaging").as[SpectroscopyResult]
 }
 
 object SpectroscopyGraphsQuery extends GraphQLOperation[Unit] {

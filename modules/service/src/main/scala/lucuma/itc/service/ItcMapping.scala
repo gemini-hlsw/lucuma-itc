@@ -291,7 +291,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                       calculateSpectroscopyIntegrationTime[F](environment, cache, itc)
                     .toGraphQLErrors
                 },
-                RootEffect.computeEncodable("imagingIntegrationTime") { (_, env) =>
+                RootEffect.computeEncodable("imaging") { (_, env) =>
                   env
                     .getR[ImagingInput]("input")
                     .flatMap(AsterismImagingTimeRequest.fromInput)
@@ -334,7 +334,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             case (QueryType, "spectroscopy", List(SpectroscopyInput.Binding("input", input))) =>
               handle(input)
             case (QueryType,
-                  "imagingIntegrationTime",
+                  "imaging",
                   List(ImagingInput.Binding("input", input))
                 ) =>
               handle(input)

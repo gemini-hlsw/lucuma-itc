@@ -11,7 +11,7 @@ class imagingSuite extends GraphImagingQLSuite {
     query(
       """
         query {
-          imagingIntegrationTime(input: {
+          imaging(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 600,
@@ -130,7 +130,7 @@ class imagingSuite extends GraphImagingQLSuite {
       json"""
         {
           "data": {
-            "imagingIntegrationTime" : {
+            "imaging" : {
               "mode" : {
                 "__typename" : "ImagingMode",
                 "instrument" : "GMOS_NORTH",
