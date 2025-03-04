@@ -5,7 +5,7 @@ package lucuma.itc.service
 
 import io.circe.literal.*
 
-class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
+class imagingSuite extends GraphImagingQLSuite {
 
   test("gmos north case") {
     query(
@@ -100,6 +100,14 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
                 }
               }
             }
+            exposureTimeMode {
+              signalToNoise {
+                value
+                at {
+                  picometers
+                }
+              }
+            }
             brightest {
               all {
                 exposureCount
@@ -128,6 +136,12 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
                 "instrument" : "GMOS_NORTH",
                 "params": {
                   "filter": "G_PRIME"
+                }
+              },
+              "exposureTimeMode": {
+                "signalToNoise": {
+                  "value": 600,
+                  "at": { "picometers": 530000 }
                 }
               },
               "brightest" : {

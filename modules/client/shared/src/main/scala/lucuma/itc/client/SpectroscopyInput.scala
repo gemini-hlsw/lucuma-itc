@@ -13,17 +13,17 @@ import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
-import lucuma.itc.encoders.given
+import lucuma.itc.client.json.encoders.given
 
-case class SpectroscopyIntegrationTimeParameters(
+case class SpectroscopyParameters(
   exposureTimeMode: ExposureTimeMode,
   constraints:      ConstraintSet,
   mode:             InstrumentMode
 ) derives Eq
 
-object SpectroscopyIntegrationTimeParameters {
-  given Encoder[SpectroscopyIntegrationTimeParameters] with
-    def apply(a: SpectroscopyIntegrationTimeParameters): Json =
+object SpectroscopyParameters {
+  given Encoder[SpectroscopyParameters] with
+    def apply(a: SpectroscopyParameters): Json =
       Json
         .obj(
           "exposureTimeMode" -> a.exposureTimeMode.asJson,
@@ -34,7 +34,7 @@ object SpectroscopyIntegrationTimeParameters {
 }
 
 case class SpectroscopyInput(
-  parameters: SpectroscopyIntegrationTimeParameters,
+  parameters: SpectroscopyParameters,
   asterism:   NonEmptyList[TargetInput]
 ) derives Eq:
   export parameters.*

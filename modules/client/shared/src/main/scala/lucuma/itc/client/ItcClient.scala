@@ -11,7 +11,6 @@ import clue.http4s.Http4sHttpClient
 import clue.syntax.*
 import io.circe.syntax.*
 import lucuma.itc.ItcVersions
-import lucuma.itc.client.SpectroscopyResult
 import org.http4s.Uri
 import org.http4s.client.Client
 import org.typelevel.log4cats.Logger

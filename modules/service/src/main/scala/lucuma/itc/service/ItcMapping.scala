@@ -97,7 +97,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
         SpectroscopyResult(
           ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
           asterismRequest.specMode,
-          AsterismIntegrationTimeOutcomes(targetOutcomes)
+          AsterismIntegrationTimeOutcomes(targetOutcomes),
+          asterismRequest.exposureTimeMode
         ).toResult
       .onError: t =>
         Logger[F]
@@ -129,7 +130,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
         SpectroscopyResult(
           ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
           asterismRequest.imagingMode,
-          AsterismIntegrationTimeOutcomes(targetOutcomes)
+          AsterismIntegrationTimeOutcomes(targetOutcomes),
+          asterismRequest.exposureTimeMode
         ).toResult
       .onError: t =>
         Logger[F]

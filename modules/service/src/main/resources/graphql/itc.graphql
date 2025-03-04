@@ -14924,6 +14924,9 @@ type SpectroscopyResult {
   # queried mode
   mode: ITCObservingMode!
 
+  # exposure time mode
+  exposureTimeMode: ExposureTimeMode!
+
   # ITC results for each target
   targetTimes: [TargetIntegrationTimeOutcome!]!
 

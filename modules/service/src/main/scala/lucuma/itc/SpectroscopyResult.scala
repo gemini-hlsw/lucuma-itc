@@ -7,20 +7,24 @@ import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
 import lucuma.itc.search.ObservingMode
+import lucuma.itc.encoders.given
+import lucuma.core.model.ExposureTimeMode
 
 case class SpectroscopyResult(
-  versions:    ItcVersions,
-  mode:        ObservingMode,
-  targetTimes: AsterismIntegrationTimeOutcomes
+  versions:         ItcVersions,
+  mode:             ObservingMode,
+  targetTimes:      AsterismIntegrationTimeOutcomes,
+  exposureTimeMode: ExposureTimeMode
 )
 
 object SpectroscopyResult:
   given Encoder[SpectroscopyResult] = r =>
     Json
       .obj(
-        "versions"       -> r.versions.asJson,
-        "mode"           -> r.mode.asJson,
-        "targetTimes"    -> r.targetTimes.asJson,
-        "brightestIndex" -> r.targetTimes.brightestIndex.asJson,
-        "brightest"      -> r.targetTimes.brightest.asJson
+        "versions"         -> r.versions.asJson,
+        "mode"             -> r.mode.asJson,
+        "exposureTimeMode" -> r.exposureTimeMode.asJson,
+        "targetTimes"      -> r.targetTimes.asJson,
+        "brightestIndex"   -> r.targetTimes.brightestIndex.asJson,
+        "brightest"        -> r.targetTimes.brightest.asJson
       )

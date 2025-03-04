@@ -10,7 +10,7 @@ import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcObservingConditions
 
-class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
+class spectroscopySuite extends GraphQLSuite {
 
   test("gmos north case") {
     query(
@@ -86,6 +86,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                 }
               }
             }
+            exposureTimeMode {
+              signalToNoise {
+                value
+                at {
+                  nanometers
+                }
+              }
+            }
             brightest {
               selected {
                 exposureCount
@@ -109,6 +117,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                 },
                 "centralWavelength" : {
                   "nanometers" : 60.000
+                }
+              },
+              "exposureTimeMode": {
+                "signalToNoise": {
+                  "value": 2,
+                  "at": { "nanometers": 60.000 }
                 }
               },
               "brightest": {
@@ -202,6 +216,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   }
                 }
               }
+              exposureTimeMode {
+                signalToNoise {
+                  value
+                  at {
+                    nanometers
+                  }
+                }
+              }
               brightest {
                 selected {
                   exposureCount
@@ -224,6 +246,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   },
                   "centralWavelength" : {
                     "nanometers" : 60.000
+                  }
+                },
+                "exposureTimeMode": {
+                  "signalToNoise": {
+                    "value": 2,
+                    "at": { "nanometers": 60.000 }
                   }
                 },
                 "brightest": {
@@ -413,6 +441,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
+                exposureTimeMode {
+                  signalToNoise {
+                    value
+                    at {
+                      nanometers
+                    }
+                  }
+                }
                 brightest {
                   selected {
                     exposureCount
@@ -436,6 +472,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   },
                   "centralWavelength" : {
                     "nanometers" : 60.000
+                  }
+                },
+                "exposureTimeMode": {
+                  "signalToNoise": {
+                    "value": 2,
+                    "at": { "nanometers": 60.000 }
                   }
                 },
                 "brightest": {
@@ -524,6 +566,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                   centralWavelength {
+                    nanometers
+                  }
+                }
+              }
+              exposureTimeMode {
+                signalToNoise {
+                  value
+                  at {
                     nanometers
                   }
                 }
@@ -627,6 +677,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
+                exposureTimeMode {
+                  signalToNoise {
+                    value
+                    at {
+                      nanometers
+                    }
+                  }
+                }
                 brightest {
                   selected {
                     exposureCount
@@ -650,6 +708,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   },
                   "centralWavelength" : {
                     "nanometers" : 60.000
+                  }
+                },
+                "exposureTimeMode": {
+                  "signalToNoise": {
+                    "value": 2,
+                    "at": { "nanometers": 60.000 }
                   }
                 },
                 "brightest": {
@@ -748,6 +812,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
+                exposureTimeMode {
+                  signalToNoise {
+                    value
+                    at {
+                      nanometers
+                    }
+                  }
+                }
                 brightest {
                   selected {
                     exposureCount
@@ -770,7 +842,13 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     "grating": ${d.tag.toScreamingSnakeCase}
                   },
                   "centralWavelength" : {
-                    "nanometers" : 60.00
+                    "nanometers" : 60.000
+                  }
+                },
+                "exposureTimeMode": {
+                  "signalToNoise": {
+                    "value": 2,
+                    "at": { "nanometers": 60.000 }
                   }
                 },
                 "brightest": {
@@ -871,6 +949,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                       }
                     }
                   }
+                  exposureTimeMode {
+                    signalToNoise {
+                      value
+                      at {
+                        nanometers
+                      }
+                    }
+                  }
                   brightest {
                     selected {
                       exposureCount
@@ -895,7 +981,13 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   },
                   "centralWavelength" : {
-                    "nanometers" : 60.00
+                    "nanometers" : 60.000
+                  }
+                },
+                "exposureTimeMode": {
+                  "signalToNoise": {
+                    "value": 2,
+                    "at": { "nanometers": 60.000 }
                   }
                 },
                 "brightest": {
@@ -991,6 +1083,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
+                exposureTimeMode {
+                  signalToNoise {
+                    value
+                    at {
+                      nanometers
+                    }
+                  }
+                }
                 brightest {
                   selected {
                     exposureCount
@@ -1015,7 +1115,13 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   },
                   "centralWavelength" : {
-                    "nanometers" : 60.00
+                    "nanometers" : 60.000
+                  }
+                },
+                "exposureTimeMode": {
+                  "signalToNoise": {
+                    "value": 2,
+                    "at": { "nanometers": 60.000 }
                   }
                 },
                 "brightest": {
@@ -1109,6 +1215,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
+                exposureTimeMode {
+                  signalToNoise {
+                    value
+                    at {
+                      nanometers
+                    }
+                  }
+                }
                 brightest {
                   selected {
                       exposureCount
@@ -1132,6 +1246,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   },
                   "centralWavelength" : {
                     "nanometers" : 60.000
+                  }
+                },
+                "exposureTimeMode": {
+                  "signalToNoise": {
+                    "value": 2,
+                    "at": { "nanometers": 60.000 }
                   }
                 },
                 "brightest": {
@@ -1225,6 +1345,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
+                exposureTimeMode {
+                  signalToNoise {
+                    value
+                    at {
+                      nanometers
+                    }
+                  }
+                }
                 brightest {
                   selected {
                       exposureCount
@@ -1248,6 +1376,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   },
                   "centralWavelength" : {
                     "nanometers" : 60.000
+                  }
+                },
+                "exposureTimeMode": {
+                  "signalToNoise": {
+                    "value": 2,
+                    "at": { "nanometers": 60.000 }
                   }
                 },
                 "brightest": {
@@ -1359,6 +1493,14 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                 }
               }
             }
+            exposureTimeMode {
+              signalToNoise {
+                value
+                at {
+                  nanometers
+                }
+              }
+            }
             targetTimes {
               ...on TargetIntegrationTime {
                 selected {
@@ -1385,6 +1527,12 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                 },
                 "centralWavelength" : {
                   "nanometers" : 600.000
+                }
+              },
+              "exposureTimeMode": {
+                "signalToNoise": {
+                  "value": 2,
+                  "at": { "nanometers": 60.000 }
                 }
               },
               "targetTimes": [

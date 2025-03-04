@@ -22,18 +22,18 @@ trait ArbIntegrationTimeInput {
     Arbitrary:
       arbitrary[List[A]].suchThat(_.nonEmpty).map(NonEmptyList.fromListUnsafe)
 
-  given Arbitrary[SpectroscopyIntegrationTimeParameters] =
+  given Arbitrary[SpectroscopyParameters] =
     Arbitrary:
       for
         ex <- arbitrary[ExposureTimeMode]
         cs <- arbitrary[ConstraintSet]
         im <- arbitrary[InstrumentMode]
-      yield SpectroscopyIntegrationTimeParameters(ex, cs, im)
+      yield SpectroscopyParameters(ex, cs, im)
 
   given Arbitrary[SpectroscopyInput] =
     Arbitrary:
       for
-        pars <- arbitrary[SpectroscopyIntegrationTimeParameters]
+        pars <- arbitrary[SpectroscopyParameters]
         ast  <- arbitrary[NonEmptyList[TargetInput]]
       yield SpectroscopyInput(pars, ast)
 

@@ -80,7 +80,7 @@ class WiringSuite extends ClientSuite {
 
   test("ItcClient spectroscopy basic wiring and sanity check") {
     spectroscopy(
-      WiringSuite.SpectroscopyInputParam,
+      WiringSuite.SpectroscopyInputData,
       SpectroscopyResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
@@ -191,9 +191,9 @@ class WiringSuite extends ClientSuite {
 
 object WiringSuite {
 
-  val SpectroscopyInputParam: SpectroscopyInput =
+  val SpectroscopyInputData: SpectroscopyInput =
     SpectroscopyInput(
-      SpectroscopyIntegrationTimeParameters(
+      SpectroscopyParameters(
         ExposureTimeMode.SignalToNoiseMode(
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
           Wavelength.Min
@@ -327,7 +327,7 @@ object WiringSuite {
 
   val SpectroscopyEmissionLinesInput: SpectroscopyInput =
     SpectroscopyInput(
-      SpectroscopyIntegrationTimeParameters(
+      SpectroscopyParameters(
         ExposureTimeMode.SignalToNoiseMode(
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
           Wavelength.Min
