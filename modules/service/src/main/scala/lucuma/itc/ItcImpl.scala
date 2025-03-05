@@ -20,7 +20,6 @@ import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.legacy.FLocalItc
 import lucuma.itc.legacy.IntegrationTimeRemoteResult
-import lucuma.itc.legacy.SignalToNoiseRemoteResult
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetData
 import natchez.Trace
@@ -37,6 +36,9 @@ object ItcImpl {
     new Itc[F] {
       val L = Logger[F]
       val T = Trace[F]
+
+      private def fromLegacy(sn: lucuma.itc.legacy.SignalToNoiseAt): SignalToNoiseAt =
+        SignalToNoiseAt(sn.wavelength, sn.single, sn.total)
 
       def calculateIntegrationTime(
         target:        TargetData,
@@ -151,33 +153,23 @@ object ItcImpl {
         r:          IntegrationTimeRemoteResult,
         bandOrLine: Either[Band, Wavelength]
       ): F[TargetIntegrationTime] =
-        r.exposureCalculation
+        println(s"/////////// ${r.exposureCalculation}")
+        val tgts = r.exposureCalculation
           .traverse: r =>
             TimeSpan
               .fromSeconds(r.exposureTime)
               .map(expTime =>
-                IntegrationTime(expTime,
-                                NonNegInt.unsafeFrom(r.exposureCount.value),
-                                r.signalToNoise
-                )
+                IntegrationTime(expTime, NonNegInt.unsafeFrom(r.exposureCount.value))
                   .pure[F]
               )
               .getOrElse:
                 MonadThrow[F].raiseError:
                   CalculationError(s"Negative exposure time ${r.exposureTime}")
           .map: ccdTimes =>
-            TargetIntegrationTime(Zipper.of(ccdTimes.head, ccdTimes.tail.toList*), bandOrLine)
-
-      private def convertSignalToNoiseRemoteResult(
-        r:          SignalToNoiseRemoteResult,
-        bandOrLine: Either[Band, Wavelength]
-      ): F[TargetSignalToNoise] =
-        TargetSignalToNoise(r.signalToNoiseAt.wavelength,
-                            SingleSN(r.signalToNoiseAt.single),
-                            FinalSN(r.signalToNoiseAt.total),
-                            bandOrLine
-        )
-          .pure[F]
+            println(s"CCD times $ccdTimes")
+            Zipper.of(ccdTimes.head, ccdTimes.tail.toList*)
+        println(s"//////////////// ${tgts}")
+        tgts.map(tgts => TargetIntegrationTime(tgts, bandOrLine, r.signalToNoiseAt.map(fromLegacy)))
 
       /**
        * Compute the exposure time and number of exposures required to achieve the desired
@@ -244,12 +236,11 @@ object ItcImpl {
                    _      <- T.put("itc.query" -> request.spaces2)
                    _      <- L.info(request.noSpaces) // Request to the legacy itc
                    a      <- itcLocal.calculateSignalToNoise(request.noSpaces)
-                   result <- convertSignalToNoiseRemoteResult(a, bandOrLine)
+                   result <- {
+                     println(s"MMMMMMM $a"); convertIntegrationTimeRemoteResult(a, bandOrLine)
+                   }
                  yield result
-        yield TargetIntegrationTime(
-          Zipper.of(IntegrationTime(exposureTime, exposureCount, r._3.value)),
-          bandOrLine
-        )
+        yield r
 
       def calculateSignalToNoise(
         target:        TargetData,

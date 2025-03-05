@@ -6,25 +6,22 @@ package lucuma.itc
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
-import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.itc.encoders.given
 
-case class TargetSignalToNoise(
+case class SignalToNoiseAt(
   wavelength: Wavelength,
   single:     SingleSN,
-  total:      FinalSN,
-  bandOrLine: Either[Band, Wavelength]
+  total:      FinalSN
 )
 
-object TargetSignalToNoise:
-  given Encoder[TargetSignalToNoise] = t =>
+object SignalToNoiseAt:
+  given Encoder[SignalToNoiseAt] = t =>
     Json
       .obj(
-        "band"         -> t.bandOrLine.left.toOption.asJson,
-        "emissionLine" -> t.bandOrLine.toOption.asJson,
-        "wavelength"   -> t.wavelength.asJson,
-        "single"       -> t.single.asJson,
-        "final"        -> t.total.asJson
+        "wavelength" -> t.wavelength.asJson,
+        "single"     -> t.single.asJson,
+        "total"      -> t.total.asJson
       )
+

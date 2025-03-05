@@ -9,6 +9,8 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.itc.ItcGraphGroup
+import lucuma.itc.SingleSN
+import lucuma.itc.FinalSN
 
 case class GraphsRemoteResult(
   ccds:   NonEmptyChain[ItcRemoteCcd],
@@ -27,9 +29,13 @@ case class ExposureCalculation(
 
 case class SignalToNoiseAt(
   wavelength: Wavelength,
-  single:     SignalToNoise,
-  total:      SignalToNoise
+  single:     SingleSN,
+  total:      FinalSN
 )
 
-case class IntegrationTimeRemoteResult(exposureCalculation: Option[ExposureCalculation])
-case class SignalToNoiseRemoteResult(signalToNoiseAt: SignalToNoiseAt)
+case class IntegrationTimeRemoteResult(
+  exposureCalculation: Option[ExposureCalculation],
+  signalToNoiseAt:     Option[
+    SignalToNoiseAt
+  ] // In principle this should not be null, but you could still use a wv outside the rang of a ccd. Rather than giving a zero SN, we just don't return anything.
+)

@@ -70,13 +70,15 @@ import lucuma.refined.*
 
 import java.time.Instant
 import scala.collection.immutable.SortedMap
+import lucuma.itc.SignalToNoiseAt
 
 class WiringSuite extends ClientSuite {
   val selected = IntegrationTime(
     TimeSpan.FromString.getOption("PT1S").get,
-    NonNegInt.unsafeFrom(10),
-    SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
+    NonNegInt.unsafeFrom(10)
   )
+
+  val atWavelength = Wavelength.fromIntNanometers(600).get
 
   test("ItcClient spectroscopy basic wiring and sanity check") {
     spectroscopy(
@@ -91,7 +93,11 @@ class WiringSuite extends ClientSuite {
             TargetIntegrationTimeOutcome:
               TargetIntegrationTime(
                 Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R.asLeft
+                Band.R.asLeft,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
               ).asRight
       ).asRight
     )
@@ -110,7 +116,11 @@ class WiringSuite extends ClientSuite {
             TargetIntegrationTimeOutcome:
               TargetIntegrationTime(
                 Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R.asLeft
+                Band.R.asLeft,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
               ).asRight
       ).asRight
     )
@@ -182,7 +192,11 @@ class WiringSuite extends ClientSuite {
             TargetIntegrationTimeOutcome:
               TargetIntegrationTime(
                 Zipper.fromNel(NonEmptyList.one(selected)),
-                Wavelength.unsafeFromIntPicometers(650000).asRight
+                Wavelength.unsafeFromIntPicometers(650000).asRight,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
               ).asRight
       ).asRight
     )

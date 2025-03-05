@@ -14,8 +14,7 @@ import spire.implicits.*
 
 case class IntegrationTime(
   exposureTime:  TimeSpan,
-  exposureCount: NonNegInt,
-  signalToNoise: SignalToNoise
+  exposureCount: NonNegInt
 ) derives Encoder.AsObject
 
 object IntegrationTime:

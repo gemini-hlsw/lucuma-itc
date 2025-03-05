@@ -14912,9 +14912,18 @@ type IntegrationTime {
 
   # Exposures either requested or calculated
   exposureCount: NonNegInt!
+}
 
-  # Signal/Noise ratio either requested or calculated
-  signalToNoise: SignalToNoise!
+# Calculated signal to noise at a specific wavelength
+type SignalToNoiseAt {
+  # Single exposure signal to noise
+  single: SignalToNoise!
+
+  # Total exposure signal to noise
+  total: SignalToNoise!
+
+  # Wavelength sn was calculated at
+  wavelength: Wavelength!
 }
 
 type CalculationResult {
@@ -14955,6 +14964,9 @@ type TargetIntegrationTime {
 
   # The emission line used for the time calculation, in case of an EmissionLines SED
   emissionLine: Wavelength
+
+  # calculated signal to noise at a specific wavelength. Returned only if the wavelength At is valid
+  signalToNoiseAt: SignalToNoiseAt
 }
 
 type TargetError {

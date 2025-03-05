@@ -114,14 +114,12 @@ class imagingSuite extends GraphImagingQLSuite {
                 exposureTime {
                   seconds
                 }
-                signalToNoise
               }
               selected {
                 exposureCount
                 exposureTime {
                   seconds
                 }
-                signalToNoise
               }
             }
           }
@@ -149,21 +147,18 @@ class imagingSuite extends GraphImagingQLSuite {
                   "exposureCount" : 10,
                   "exposureTime" : {
                     "seconds" : 1.000000
-                  },
-                  "signalToNoise": 10.000
+                  }
                 }, {
                   "exposureCount" : 5,
                   "exposureTime" : {
                     "seconds" : 2.000000
-                  },
-                  "signalToNoise": 20.000
+                  }
                 }],
                 "selected" : {
                   "exposureCount" : 5,
                   "exposureTime" : {
                     "seconds" : 2.000000
-                  },
-                  "signalToNoise": 20.000
+                  }
                 }
               }
             }

@@ -14,8 +14,9 @@ import lucuma.core.math.Wavelength
 import lucuma.itc.encoders.given
 
 case class TargetIntegrationTime(
-  times:      Zipper[IntegrationTime],
-  bandOrLine: Either[Band, Wavelength]
+  times:           Zipper[IntegrationTime],
+  bandOrLine:      Either[Band, Wavelength],
+  signalToNoiseAt: Option[SignalToNoiseAt]
 ):
   def focusIndex(index: Int): Option[TargetIntegrationTime] =
     times
@@ -27,8 +28,9 @@ object TargetIntegrationTime:
   given Encoder[TargetIntegrationTime] = t =>
     Json
       .obj(
-        "band"         -> t.bandOrLine.left.toOption.asJson,
-        "emissionLine" -> t.bandOrLine.toOption.asJson
+        "band"            -> t.bandOrLine.left.toOption.asJson,
+        "emissionLine"    -> t.bandOrLine.toOption.asJson,
+        "signalToNoiseAt" -> t.signalToNoiseAt.asJson
       )
       .deepMerge(t.times.asJson)
 
