@@ -204,21 +204,22 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     figures:         Option[SignificantFigures]
   )(integrationTimes: AsterismIntegrationTimes): AsterismGraphRequest = {
     val brightestTarget: TargetIntegrationTime = integrationTimes.value.focus
-    val selectedVariation: IntegrationTime     = brightestTarget.times.focus
-    val expTime: TimeSpan                      = selectedVariation.exposureTime
-    val expCount: NonNegInt                    = selectedVariation.exposureCount
+    // val selectedVariation: IntegrationTime     = brightestTarget.times.focus
+    // val expTime: TimeSpan                      = selectedVariation.exposureTime
+    // val expCount: NonNegInt                    = selectedVariation.exposureCount
 
-    AsterismGraphRequest(
-      asterismRequest.asterism,
-      GraphParameters(
-        asterismRequest.exposureTimeMode.at,
-        asterismRequest.specMode,
-        asterismRequest.constraints,
-        expTime,
-        expCount
-      ),
-      figures
-    )
+    // AsterismGraphRequest(
+    //   asterismRequest.asterism,
+    //   GraphParameters(
+    //     asterismRequest.exposureTimeMode.at,
+    //     asterismRequest.specMode,
+    //     asterismRequest.constraints,
+    //     expTime,
+    //     expCount
+    //   ),
+    //   figures
+    // )
+    ???
   }
 
   def spectroscopyIntegrationTimeAndGraphs[F[

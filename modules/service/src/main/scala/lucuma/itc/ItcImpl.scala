@@ -155,19 +155,27 @@ object ItcImpl {
       ): F[TargetIntegrationTime] =
         println(s"/////////// ${r.exposureCalculation}")
         val tgts = r.exposureCalculation
-          .traverse: r =>
-            TimeSpan
-              .fromSeconds(r.exposureTime)
-              .map(expTime =>
-                IntegrationTime(expTime, NonNegInt.unsafeFrom(r.exposureCount.value))
-                  .pure[F]
-              )
-              .getOrElse:
-                MonadThrow[F].raiseError:
-                  CalculationError(s"Negative exposure time ${r.exposureTime}")
-          .map: ccdTimes =>
-            println(s"CCD times $ccdTimes")
-            Zipper.of(ccdTimes.head, ccdTimes.tail.toList*)
+          .map { all =>
+            all.exposureCalculations
+              .map: r =>
+                TimeSpan
+                  .fromSeconds(r.exposureTime)
+                  .map(expTime =>
+                    IntegrationTime(expTime, NonNegInt.unsafeFrom(r.exposureCount.value))
+                      .pure[F]
+                  )
+                  .getOrElse:
+                    MonadThrow[F].raiseError:
+                      CalculationError(s"Negative exposure time ${r.exposureTime}")
+              .sequence
+              .map: ccdTimes =>
+                println(s"CCD times $ccdTimes")
+                Zipper.of(ccdTimes.head, ccdTimes.tail.toList*).focusIndex(all.selectedIndex)
+          }
+          .getOrElse {
+            MonadThrow[F].raiseError:
+              CalculationError(s"ITC did not return exposure calculation")
+          }
         println(s"//////////////// ${tgts}")
         tgts.map(tgts => TargetIntegrationTime(tgts, bandOrLine, r.signalToNoiseAt.map(fromLegacy)))
 
@@ -233,13 +241,10 @@ object ItcImpl {
           _ <- L.info(s"Target $target at wavelength $atWavelength")
           r <- T.span("itc.calctime.spectroscopy-signal-to-noise"):
                  for
-                   _      <- T.put("itc.query" -> request.spaces2)
-                   _      <- L.info(request.noSpaces) // Request to the legacy itc
-                   a      <- itcLocal.calculateSignalToNoise(request.noSpaces)
-                   result <- {
-                     println(s"MMMMMMM $a"); convertIntegrationTimeRemoteResult(a, bandOrLine)
-                   }
-                 yield result
+                   _ <- T.put("itc.query" -> request.spaces2)
+                   _ <- L.info(request.noSpaces) // Request to the legacy itc
+                   a <- itcLocal.calculateSignalToNoise(request.noSpaces)
+                 yield TargetIntegrationTime(None, bandOrLine, a.signalToNoiseAt.map(fromLegacy))
         yield r
 
       def calculateSignalToNoise(

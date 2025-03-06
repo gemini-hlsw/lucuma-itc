@@ -36,6 +36,9 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
         selected {
           ...IntegrationTimeFields
         }
+        signalToNoiseAt {
+          single
+        }
       }
 
       fragment TargetIntegrationTimeOutcomeFields on TargetIntegrationTimeOutcome {

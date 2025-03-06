@@ -468,14 +468,13 @@ given Decoder[GraphsRemoteResult] = (c: HCursor) =>
 given Decoder[SignalToNoise] = (c: HCursor) =>
   c.as[BigDecimal]
     .flatMap: s =>
+      println(s.setScale(2, BigDecimal.RoundingMode.HALF_UP))
       SignalToNoise.FromBigDecimalRounding
-        .getOption(s)
+        .getOption(s.setScale(2, BigDecimal.RoundingMode.HALF_UP))
         .toRight(DecodingFailure("Invalid SignalToNoise value", c.history))
 
 given Decoder[ExposureCalculation] = (c: HCursor) =>
   for
-    sn    <- // We attempt decoding and validating S/N first
-      c.downField("signalToNoise").as[SignalToNoise]
     time  <- c.downField("exposureTime").as[Double]
     count <-
       c
@@ -483,7 +482,13 @@ given Decoder[ExposureCalculation] = (c: HCursor) =>
         .as[Int]
         .flatMap:
           refineV[NonNegative](_).leftMap(e => DecodingFailure(e, c.downField("exposures").history))
-  yield ExposureCalculation(time, count, sn)
+  yield ExposureCalculation(time, count)
+
+given Decoder[AllExposureCalculations] = (c: HCursor) =>
+  for
+    results  <- c.downField("exposuresPerCCD").as[NonEmptyChain[ExposureCalculation]]
+    selected <- c.downField("selected").as[Int]
+  yield AllExposureCalculations(results, selected)
 
 given Decoder[SignalToNoiseAt] = (c: HCursor) =>
   for
@@ -493,15 +498,19 @@ given Decoder[SignalToNoiseAt] = (c: HCursor) =>
   yield SignalToNoiseAt(wv, SingleSN(single), FinalSN(total))
 
 given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
-  val spec: Decoder.Result[IntegrationTimeRemoteResult] =
+  val spec: Option[Decoder.Result[IntegrationTimeRemoteResult]] =
     for {
       t <- c.downField("ItcSpectroscopyResult")
              .downField("exposureCalculation")
-             .as[Option[ExposureCalculation]]
+             .success
+             .map:
+               _.as[Option[AllExposureCalculations]]
       s <- c.downField("ItcSpectroscopyResult")
              .downField("signalToNoiseAt")
-             .as[Option[SignalToNoiseAt]]
-    } yield IntegrationTimeRemoteResult(t, s)
+             .success
+             .map:
+               _.as[Option[SignalToNoiseAt]]
+    } yield (t, s).mapN(IntegrationTimeRemoteResult(_, _))
 
   val img: Option[Decoder.Result[IntegrationTimeRemoteResult]] =
     for {
@@ -509,18 +518,16 @@ given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
              .downField("exposureCalculation")
              .success
              .map:
-               _.as[Option[ExposureCalculation]]
-      s <-
-        c.downField("ItcImagingResult")
-          .downField("signalToNoiseAt")
-          .success
-          .map:
-            _.as[Option[SignalToNoiseAt]]
-    } yield (t, s).mapN(IntegrationTimeRemoteResult.apply)
-  println(spec)
-  println(img)
+               _.as[Option[AllExposureCalculations]]
+      // s <- c.downField("ItcImagingResult")
+      //        .downField("signalToNoiseAt")
+      //        .success
+      //        .map:
+      //          _.as[Option[SignalToNoiseAt]]
+    } yield t.map(IntegrationTimeRemoteResult(_, None))
+  println("spec: " + spec)
+  println("img: " + img)
 
-  // spec
-  //   .orElse(img)
-  //   .getOrElse(Left(DecodingFailure("No valid IntegrationTimeRemoteResult", c.history)))
   spec
+    .orElse(img)
+    .getOrElse(Left(DecodingFailure("No valid IntegrationTimeRemoteResult", c.history)))

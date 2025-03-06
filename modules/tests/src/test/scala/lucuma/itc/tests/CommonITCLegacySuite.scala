@@ -21,7 +21,14 @@ trait CommonITCLegacySuite:
     err.exists(_.contains("Invalid S/N")) || err.exists(_.contains("do not overlap")) ||
       err.exists(_.contains("Unsupported configuration")) ||
       err.exists(_.contains("Unsupported calculation method")) ||
-      err.exists(_.contains("target is too bright"))
+      err.exists(_.contains("target is too bright")) // ||
+
+  def allowedErrorsWithLargeSN(err: List[String]) =
+    err.exists(_.contains("Invalid S/N")) || err.exists(_.contains("do not overlap")) ||
+      err.exists(_.contains("Unsupported configuration")) ||
+      err.exists(_.contains("Unsupported calculation method")) ||
+      err.exists(_.contains("target is too bright")) ||
+      err.exists(_.contains("Invalid SignalToNoise value"))
 
   lazy val localItc = {
 

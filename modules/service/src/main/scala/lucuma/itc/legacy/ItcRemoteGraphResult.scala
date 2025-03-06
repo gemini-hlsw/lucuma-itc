@@ -23,8 +23,7 @@ case class GraphsRemoteResult(
 
 case class ExposureCalculation(
   exposureTime:  Double,
-  exposureCount: NonNegInt,
-  signalToNoise: SignalToNoise
+  exposureCount: NonNegInt
 )
 
 case class SignalToNoiseAt(
@@ -33,9 +32,17 @@ case class SignalToNoiseAt(
   total:      FinalSN
 )
 
+case class AllExposureCalculations(
+  exposureCalculations: NonEmptyChain[ExposureCalculation],
+  selectedIndex:        Int
+)
+
 case class IntegrationTimeRemoteResult(
-  exposureCalculation: Option[ExposureCalculation],
-  signalToNoiseAt:     Option[
-    SignalToNoiseAt
-  ] // In principle this should not be null, but you could still use a wv outside the rang of a ccd. Rather than giving a zero SN, we just don't return anything.
+  // If we request time/counts we would gett a None, otherwise we get at least one result.
+  // Gmos spec returns one, thte selecte index
+  // Gmos img returns one per ccd, we use the first
+  exposureCalculation: Option[AllExposureCalculations],
+
+  // In principle this should not be empty, but you could still use a wv outside the rang of a ccd. Rather than giving a zero SN, we just don't return anything.
+  signalToNoiseAt: Option[SignalToNoiseAt]
 )

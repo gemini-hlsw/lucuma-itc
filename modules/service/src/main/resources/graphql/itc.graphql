@@ -14951,13 +14951,13 @@ union TargetIntegrationTimeOutcome = TargetIntegrationTime | TargetError
 # ITC results for a target, can be a single result or one per CCD
 type TargetIntegrationTime {
   # All CCD results for the target
-  all: [IntegrationTime!]!
+  all: [IntegrationTime!]
 
   # Index of the preferred CCD result, it is mode dependent
-  index: NonNegInt!
+  index: NonNegInt
 
   # Preferred CCD result for the target
-  selected: IntegrationTime!
+  selected: IntegrationTime
 
   # The band used for the time calculation, in case of a BandNormalized SED
   band: Band

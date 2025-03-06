@@ -35,16 +35,20 @@ object AsterismIntegrationTimeOutcomes extends NewType[NonEmptyChain[TargetInteg
       a.value
         .traverse(_.value.toOption)
         .map: nec =>
+          println(nec)
           AsterismIntegrationTimes(Zipper.of(nec.head, nec.tail.toList*).focusMin)
         .toRight(collectErrors.get) // Should be safe to call get here, we know there are errors.
 
     // The brightest target is the one with the shortest exposure time.
     // Only returns the index of the brightest target if there are no errors.
     def brightestIndex: Option[Int] =
-      partitionErrors.toOption.map(_.value.indexOfFocus)
+      println(
+        s"BR index $brightest ${partitionErrors.toOption.map(_.value.indexOfFocus).filter(_ => brightest.isDefined)}"
+      )
+      partitionErrors.toOption.map(_.value.indexOfFocus).filter(_ => brightest.isDefined)
 
     def brightest: Option[TargetIntegrationTime] =
-      partitionErrors.toOption.map(_.value.focus)
+      partitionErrors.toOption.map(_.value.focus).filter(_.times.isDefined)
 
     def collectErrors: Option[NonEmptyChain[(Error, Int)]] =
       NonEmptyChain.fromChain:

@@ -85,7 +85,7 @@ object decoders:
           .as[Band]
           .map(_.asLeft)
           .orElse(c.downField("emissionLine").as[Wavelength].map(_.asRight))
-      times      <- c.as[Zipper[IntegrationTime]]
+      times      <- c.as[Option[Zipper[IntegrationTime]]]
       sn         <- c.as[Option[SignalToNoiseAt]]
     yield TargetIntegrationTime(times, bandOrLine, sn)
 
@@ -99,4 +99,3 @@ object decoders:
       .or(Decoder[Error].map(_.asLeft))
       .map(TargetIntegrationTimeOutcome(_))
 
-  given Decoder[AsterismTimesAndGraphsOutcomes] = ???

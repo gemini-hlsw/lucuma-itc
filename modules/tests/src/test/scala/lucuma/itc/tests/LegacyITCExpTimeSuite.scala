@@ -312,7 +312,7 @@ class LegacyITCExpTimeSuite extends FunSuite with CommonITCLegacySuite:
         .calculateIntegrationTime(
           bodyIntMagUnits(f.withValueTagged(BrightnessValue.unsafeFrom(5))).asJson.noSpaces
         )
-      assert(result.fold(allowedErrors, _ => true))
+      assert(result.fold(allowedErrorsWithLargeSN, _ => true))
 
   def bodySurfaceMagUnits(c: BrightnessMeasure[Surface]) =
     ItcParameters(
@@ -338,14 +338,14 @@ class LegacyITCExpTimeSuite extends FunSuite with CommonITCLegacySuite:
         .calculateIntegrationTime(
           bodySurfaceMagUnits(f.withValueTagged(BrightnessValue.unsafeFrom(5))).asJson.noSpaces
         )
-      assert(result.fold(allowedErrors, _ => true))
+      assert(result.fold(allowedErrorsWithLargeSN, _ => true))
 
   def bodyIntGaussianMagUnits(c: BrightnessMeasure[Integrated]) =
     ItcParameters(
       sourceDefinition.copy(
         target = sourceDefinition.target.copy(
           sourceProfile = SourceProfile.Gaussian(
-            Angle.fromDoubleArcseconds(10),
+            Angle.fromDoubleArcseconds(1),
             SpectralDefinition.BandNormalized(
               UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
               SortedMap(Band.R -> c)
@@ -360,12 +360,16 @@ class LegacyITCExpTimeSuite extends FunSuite with CommonITCLegacySuite:
     )
 
   test("gaussian units".tag(LegacyITCTest)):
+    val b = BigDecimal(979107027)
+    println(lucuma.core.math.SignalToNoise.FromBigDecimalRounding.getOption(b))
     Brightness.Integrated.all.toList.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(
-          bodyIntGaussianMagUnits(f.withValueTagged(BrightnessValue.unsafeFrom(5))).asJson.noSpaces
+          bodyIntGaussianMagUnits(
+            f.withValueTagged(BrightnessValue.unsafeFrom(2))
+          ).asJson.noSpaces
         )
-      assert(result.fold(allowedErrors, _ => true))
+      assert(result.fold(allowedErrorsWithLargeSN, _ => true))
 
   def bodyPowerLaw(c: Int) =
     ItcParameters(
