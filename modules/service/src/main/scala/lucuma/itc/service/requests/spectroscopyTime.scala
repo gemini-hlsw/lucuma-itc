@@ -62,13 +62,8 @@ object AsterismSpectroscopyTimeRequest:
               roi
             ) =>
           Result.success:
-            new ObservingMode.SpectroscopyMode.GmosNorth(centralWavelength,
-                                                         grating,
-                                                         GmosNorthFpuParam(fpu),
-                                                         filter,
-                                                         ccdMode,
-                                                         roi
-            )
+            ObservingMode.SpectroscopyMode
+              .GmosNorth(centralWavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode, roi)
         case GmosSSpectroscopyInput(
               centralWavelength,
               grating,
@@ -78,13 +73,8 @@ object AsterismSpectroscopyTimeRequest:
               roi
             ) =>
           Result.success:
-            new ObservingMode.SpectroscopyMode.GmosSouth(centralWavelength,
-                                                         grating,
-                                                         GmosSouthFpuParam(fpu),
-                                                         filter,
-                                                         ccdMode,
-                                                         roi
-            )
+            ObservingMode.SpectroscopyMode
+              .GmosSouth(centralWavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode, roi)
         case _ =>
           Result.failure("Invalid spectroscopy mode")
 

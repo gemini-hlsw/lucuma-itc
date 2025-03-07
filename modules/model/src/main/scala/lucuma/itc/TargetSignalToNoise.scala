@@ -24,4 +24,3 @@ object SignalToNoiseAt:
         "single"     -> t.single.asJson,
         "total"      -> t.total.asJson
       )
-

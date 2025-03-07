@@ -31,6 +31,7 @@ object TargetIntegrationTime:
         "emissionLine"    -> t.bandOrLine.toOption.asJson,
         "signalToNoiseAt" -> t.signalToNoiseAt.asJson
       )
+    // This is needed or grackle will silently fail if those fields are missing
     t.times
       .map(_.asJson.deepMerge(common))
       .getOrElse(

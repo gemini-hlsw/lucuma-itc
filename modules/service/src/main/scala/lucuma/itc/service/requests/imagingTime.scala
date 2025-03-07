@@ -56,10 +56,10 @@ object AsterismImagingTimeRequest:
       mode match
         case GmosNImagingInput(filter, ccdMode) =>
           Result.success:
-            new ObservingMode.ImagingMode.GmosNorth(filter, ccdMode)
+            ObservingMode.ImagingMode.GmosNorth(filter, ccdMode)
         case GmosSImagingInput(filter, ccdMode) =>
           Result.success:
-            new ObservingMode.ImagingMode.GmosSouth(filter, ccdMode)
+            ObservingMode.ImagingMode.GmosSouth(filter, ccdMode)
         case _                                  =>
           Result.failure("Invalid imaging mode")
 

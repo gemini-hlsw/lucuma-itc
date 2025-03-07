@@ -5,7 +5,6 @@ package lucuma.itc.input.customSed
 
 import cats.Applicative
 import cats.Monad
-import cats.MonadThrow
 import cats.Parallel
 import cats.data.NonEmptyMap
 import cats.syntax.all.*
@@ -51,12 +50,12 @@ object CustomSed:
     case TargetGraphRequest(targetData, parameters) =>
       resolveTargetData(targetData).map(TargetGraphRequest(_, parameters))
 
-  def resolveTargetSpectroscopyTimeRequest[F[_]: MonadThrow: Parallel: Resolver]
+  def resolveTargetSpectroscopyTimeRequest[F[_]: Monad: Parallel: Resolver]
     : TargetSpectroscopyTimeRequest => F[TargetSpectroscopyTimeRequest] =
     case TargetSpectroscopyTimeRequest(targetData, parameters) =>
       resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters))
 
-  def resolveTargetSpectroscopySNRequest[F[_]: MonadThrow: Parallel: Resolver]
+  def resolveTargetSpectroscopySNRequest[F[_]: Monad: Parallel: Resolver]
     : TargetSpectroscopyTimeRequest => F[TargetSpectroscopyTimeRequest] =
     case TargetSpectroscopyTimeRequest(targetData, parameters) =>
       resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters))

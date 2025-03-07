@@ -110,22 +110,6 @@ trait ItcCacheOrRemote extends Version:
           case m @ ExposureTimeMode.TimeAndCountMode(_, _, _) =>
             cache.getOrInvokeBinary(r, requestSpecSNCalc(itc)(r, m), TTL, "itc:calc:spec:tc")
 
-  /**
-   * Request signal to noise calculation for spectroscopy
-   */
-  // def spechSNFromCacheOrRemote[F[
-  //   _
-  // ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
-  //   calcRequest: TargetSpectroscopyTimeRequest
-  // )(
-  //   itc:         Itc[F],
-  //   cache:       BinaryEffectfulCache[F]
-  // ): F[TargetSignalToNoise] =
-  //   CustomSed // We must resolve CustomSed before caching.
-  //     .resolveTargetSpectroscopySNRequest(calcRequest)
-  //     .flatMap: (r, m) =>
-  //       cache.getOrInvokeBinary(r, requestSpecSNCalc(itc)(r, m), TTL, "itc:calc:specsn")
-
   private def requestImgTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest
   ): F[TargetIntegrationTime] =
