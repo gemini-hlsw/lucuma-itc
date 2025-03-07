@@ -1,38 +1,43 @@
 // Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc.client
-package arb
+package lucuma.itc.arb
 
-import lucuma.core.enums.GmosNorthFpu
-import lucuma.core.enums.GmosSouthFpu
-import lucuma.core.util.arb.ArbEnumerated
+import lucuma.itc.Error
 import org.scalacheck.*
 import org.scalacheck.Arbitrary.arbitrary
 
-trait ArbGmosFpu {
+trait ArbError:
 
-  import ArbEnumerated.given
-  import ArbGmosCustomMask.given
-  import GmosFpu.North
-  import GmosFpu.South
-
-  given Arbitrary[North] =
+  given Arbitrary[Error.SourceTooBright] =
     Arbitrary {
-      arbitrary[Either[GmosCustomMask, GmosNorthFpu]].map(North(_))
+      arbitrary[BigDecimal].map(Error.SourceTooBright(_))
     }
 
-  given Cogen[North] =
-    Cogen[Either[GmosCustomMask, GmosNorthFpu]].contramap(_.fpu)
+  given Cogen[Error.SourceTooBright] =
+    Cogen[BigDecimal].contramap(_.wellHalfFilledSeconds)
 
-  given Arbitrary[South] =
+  given Arbitrary[Error.General] =
     Arbitrary {
-      arbitrary[Either[GmosCustomMask, GmosSouthFpu]].map(South(_))
+      arbitrary[String].map(Error.General(_))
     }
 
-  given Cogen[South] =
-    Cogen[Either[GmosCustomMask, GmosSouthFpu]].contramap(_.fpu)
+  given Cogen[Error.General] =
+    Cogen[String].contramap(_.message)
 
-}
+  given Arbitrary[Error] =
+    Arbitrary {
+      for {
+        sourceTooBright <- arbitrary[Error.SourceTooBright]
+        general         <- arbitrary[Error.General]
+        e               <- Gen.oneOf(sourceTooBright, general)
+      } yield e
+    }
 
-object ArbGmosFpu extends ArbGmosFpu
+  given Cogen[Error] =
+    Cogen[Either[BigDecimal, String]].contramap {
+      case Error.SourceTooBright(wellHalfFilledSeconds) => Left(wellHalfFilledSeconds)
+      case Error.General(message)                       => Right(message)
+    }
+
+object ArbError extends ArbError

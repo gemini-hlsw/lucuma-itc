@@ -7,9 +7,9 @@ import cats.data.NonEmptyChain
 import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.math.Wavelength
-import lucuma.itc.FinalSN
 import lucuma.itc.ItcGraphGroup
 import lucuma.itc.SingleSN
+import lucuma.itc.TotalSN
 
 case class GraphsRemoteResult(
   ccds:   NonEmptyChain[ItcRemoteCcd],
@@ -28,7 +28,7 @@ case class ExposureCalculation(
 case class SignalToNoiseAt(
   wavelength: Wavelength,
   single:     SingleSN,
-  total:      FinalSN
+  total:      TotalSN
 )
 
 case class AllExposureCalculations(

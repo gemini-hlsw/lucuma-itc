@@ -42,7 +42,7 @@ object MockItc extends Itc[IO]:
       Band.R.asLeft,
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
       ).some
     ).pure[IO]
 
@@ -61,7 +61,7 @@ object MockItc extends Itc[IO]:
       Band.R.asLeft,
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
       ).some
     ).pure[IO]
 
@@ -100,8 +100,8 @@ object MockItc extends Itc[IO]:
           )
         )
       ),
-      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
-      SignalToNoise.fromInt(1001).map(FinalSN.apply(_)),
+      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
+      SignalToNoise.fromInt(1001).map(TotalSN.apply(_)),
       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
       SignalToNoise.fromInt(1002).map(SingleSN.apply(_)),
       Band.R.asLeft
@@ -123,7 +123,7 @@ object MockImagingItc extends Itc[IO]:
       Band.R.asLeft,
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
       ).some
     ).pure[IO]
 
@@ -144,7 +144,7 @@ object MockImagingItc extends Itc[IO]:
       Band.R.asLeft,
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
       ).some
     ).pure[IO]
 
@@ -183,8 +183,8 @@ object MockImagingItc extends Itc[IO]:
           )
         )
       ),
-      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
-      SignalToNoise.fromInt(1001).map(FinalSN.apply(_)),
+      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
+      SignalToNoise.fromInt(1001).map(TotalSN.apply(_)),
       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
       SignalToNoise.fromInt(1002).map(SingleSN.apply(_)),
       Band.R.asLeft
@@ -206,7 +206,7 @@ object EmissionLineMockItc extends Itc[IO]:
       Band.R.asLeft,
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
       ).some
     ).pure[IO]
 
@@ -225,7 +225,7 @@ object EmissionLineMockItc extends Itc[IO]:
       Wavelength.unsafeFromIntPicometers(650000).asRight,
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
       ).some
     ).pure[IO]
 
@@ -254,7 +254,7 @@ object FailingMockItc extends Itc[IO]:
       Band.R.asLeft,
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
       ).some
     ).pure[IO]
 
@@ -302,8 +302,8 @@ object FailingMockItc extends Itc[IO]:
           )
         )
       ),
-      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1000.0)),
-      SignalToNoise.fromInt(1001).map(FinalSN.apply(_)),
+      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(1000.0)),
+      SignalToNoise.fromInt(1001).map(TotalSN.apply(_)),
       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
       SignalToNoise.fromInt(1002).map(SingleSN.apply(_)),
       Band.R.asLeft

@@ -11,8 +11,8 @@ import lucuma.core.data.Zipper
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.NewType
 
-object FinalSN extends NewType[SignalToNoise]
-type FinalSN = FinalSN.Type
+object TotalSN extends NewType[SignalToNoise]
+type TotalSN = TotalSN.Type
 
 object SingleSN extends NewType[SignalToNoise]
 type SingleSN = SingleSN.Type

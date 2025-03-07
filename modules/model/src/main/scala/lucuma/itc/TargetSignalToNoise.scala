@@ -13,7 +13,7 @@ import lucuma.itc.encoders.given
 case class SignalToNoiseAt(
   wavelength: Wavelength,
   single:     SingleSN,
-  total:      FinalSN
+  total:      TotalSN
 )
 
 object SignalToNoiseAt:

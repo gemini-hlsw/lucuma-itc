@@ -16,7 +16,6 @@ import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.Error
-import lucuma.itc.FinalSN
 import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcGraph
@@ -25,6 +24,7 @@ import lucuma.itc.SignalToNoiseAt
 import lucuma.itc.SingleSN
 import lucuma.itc.TargetIntegrationTime
 import lucuma.itc.TargetIntegrationTimeOutcome
+import lucuma.itc.TotalSN
 import lucuma.itc.client.*
 
 // Decoders for the client don't need to be as generic as the ones for the server.
@@ -75,7 +75,7 @@ object decoders:
       w <- c.downField("wavelength").as[Wavelength]
       s <- c.downField("single").as[SignalToNoise]
       t <- c.downField("total").as[SignalToNoise]
-    } yield SignalToNoiseAt(w, SingleSN(s), FinalSN(t))
+    } yield SignalToNoiseAt(w, SingleSN(s), TotalSN(t))
 
   given Decoder[TargetIntegrationTime] = c =>
     for

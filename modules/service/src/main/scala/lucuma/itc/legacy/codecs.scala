@@ -23,7 +23,6 @@ import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.core.syntax.display.*
 import lucuma.core.syntax.string.*
-import lucuma.itc.FinalSN
 import lucuma.itc.GraphType
 import lucuma.itc.ItcGraph
 import lucuma.itc.ItcGraphGroup
@@ -31,6 +30,7 @@ import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
 import lucuma.itc.SingleSN
+import lucuma.itc.TotalSN
 import lucuma.itc.legacy.syntax.all.*
 import lucuma.itc.search.*
 import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
@@ -494,7 +494,7 @@ given Decoder[SignalToNoiseAt] = (c: HCursor) =>
     wv     <- c.downField("wavelength").as[Wavelength]
     single <- c.downField("single").as[SignalToNoise]
     total  <- c.downField("final").as[SignalToNoise]
-  yield SignalToNoiseAt(wv, SingleSN(single), FinalSN(total))
+  yield SignalToNoiseAt(wv, SingleSN(single), TotalSN(total))
 
 given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
   val spec: Option[Decoder.Result[IntegrationTimeRemoteResult]] =

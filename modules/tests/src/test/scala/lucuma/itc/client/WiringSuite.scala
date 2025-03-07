@@ -55,7 +55,6 @@ import lucuma.core.model.UnnormalizedSED.Galaxy
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.*
 import lucuma.itc.AsterismIntegrationTimeOutcomes
-import lucuma.itc.FinalSN
 import lucuma.itc.GraphType
 import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcAxis
@@ -66,6 +65,7 @@ import lucuma.itc.SignalToNoiseAt
 import lucuma.itc.SingleSN
 import lucuma.itc.TargetIntegrationTime
 import lucuma.itc.TargetIntegrationTimeOutcome
+import lucuma.itc.TotalSN
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
 import lucuma.refined.*
 
@@ -96,7 +96,7 @@ class WiringSuite extends ClientSuite {
                 Band.R.asLeft,
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                                FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
                 ).some
               ).asRight
       ).asRight
@@ -119,7 +119,7 @@ class WiringSuite extends ClientSuite {
                 Band.R.asLeft,
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                                FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
                 ).some
               ).asRight
       ).asRight
@@ -167,8 +167,8 @@ class WiringSuite extends ClientSuite {
                       )
                     )
                   ),
-                  FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
-                  SignalToNoise.fromInt(1001).map(FinalSN(_)),
+                  TotalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
+                  SignalToNoise.fromInt(1001).map(TotalSN(_)),
                   SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
                   SignalToNoise.fromInt(1002).map(SingleSN(_))
                 ),
@@ -195,7 +195,7 @@ class WiringSuite extends ClientSuite {
                 Wavelength.unsafeFromIntPicometers(650000).asRight,
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                                FinalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
                 ).some
               ).asRight
       ).asRight

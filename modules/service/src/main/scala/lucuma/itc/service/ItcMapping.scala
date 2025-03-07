@@ -156,7 +156,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       significantFigures.fold(graphResult.peakSingleSNRatio):
         graphResult.peakSingleSNRatio.adjustSignificantFigures
 
-    val atWvFinalSNRatio: Option[FinalSN] =
+    val atWvFinalSNRatio: Option[TotalSN] =
       significantFigures.fold(graphResult.atWavelengthFinalSNRatio): s =>
         graphResult.atWavelengthFinalSNRatio.map(_.adjustSignificantFigures(s))
 
