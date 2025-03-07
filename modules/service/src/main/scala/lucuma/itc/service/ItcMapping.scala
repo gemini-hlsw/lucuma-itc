@@ -13,10 +13,8 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import grackle.*
 import grackle.circe.CirceMapping
 import io.circe.syntax.*
-import lucuma.core.data.Zipper
 import lucuma.core.enums.{ExecutionEnvironment as _, *}
 import lucuma.core.math.SignalToNoise
-import lucuma.core.util.TimeSpan
 import lucuma.itc.*
 import lucuma.itc.CalculationResult
 import lucuma.itc.ItcVersions
@@ -202,8 +200,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   private def buildAsterismGraphRequest(
     asterismRequest: AsterismSpectroscopyTimeRequest,
     figures:         Option[SignificantFigures]
-  )(integrationTimes: AsterismIntegrationTimes): AsterismGraphRequest = {
-    val brightestTarget: TargetIntegrationTime = integrationTimes.value.focus
+  )(integrationTimes: AsterismIntegrationTimes): AsterismGraphRequest =
+    // val brightestTarget: TargetIntegrationTime = integrationTimes.value.focus
     // val selectedVariation: IntegrationTime     = brightestTarget.times.focus
     // val expTime: TimeSpan                      = selectedVariation.exposureTime
     // val expCount: NonNegInt                    = selectedVariation.exposureCount
@@ -220,7 +218,6 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     //   figures
     // )
     ???
-  }
 
   def spectroscopyIntegrationTimeAndGraphs[F[
     _

@@ -23,12 +23,14 @@ import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.core.syntax.display.*
 import lucuma.core.syntax.string.*
+import lucuma.itc.FinalSN
 import lucuma.itc.GraphType
 import lucuma.itc.ItcGraph
 import lucuma.itc.ItcGraphGroup
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
+import lucuma.itc.SingleSN
 import lucuma.itc.legacy.syntax.all.*
 import lucuma.itc.search.*
 import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
@@ -36,8 +38,6 @@ import lucuma.itc.syntax.all.given
 
 import java.math.MathContext
 import scala.util.Try
-import lucuma.itc.FinalSN
-import lucuma.itc.SingleSN
 
 ////////////////////////////////////////////////////////////
 //
@@ -468,7 +468,6 @@ given Decoder[GraphsRemoteResult] = (c: HCursor) =>
 given Decoder[SignalToNoise] = (c: HCursor) =>
   c.as[BigDecimal]
     .flatMap: s =>
-      println(s.setScale(2, BigDecimal.RoundingMode.HALF_UP))
       SignalToNoise.FromBigDecimalRounding
         .getOption(s.setScale(2, BigDecimal.RoundingMode.HALF_UP))
         .toRight(DecodingFailure("Invalid SignalToNoise value", c.history))
@@ -519,14 +518,7 @@ given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
              .success
              .map:
                _.as[Option[AllExposureCalculations]]
-      // s <- c.downField("ItcImagingResult")
-      //        .downField("signalToNoiseAt")
-      //        .success
-      //        .map:
-      //          _.as[Option[SignalToNoiseAt]]
     } yield t.map(IntegrationTimeRemoteResult(_, None))
-  println("spec: " + spec)
-  println("img: " + img)
 
   spec
     .orElse(img)

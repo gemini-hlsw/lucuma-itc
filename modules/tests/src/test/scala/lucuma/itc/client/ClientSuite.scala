@@ -14,6 +14,7 @@ import munit.CatsEffectSuite
 import munit.catseffect.IOFixture
 import natchez.Trace.Implicits.noop
 import org.http4s.*
+import org.http4s.client.middleware.ResponseLogger
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.jdkhttpclient.JdkHttpClient
 import org.http4s.server.Server
@@ -51,7 +52,7 @@ trait ClientSuite extends CatsEffectSuite {
 
   private def itcClient(fixture: IOFixture[Server]): Resource[IO, ItcClient[IO]] =
     for
-      h <- JdkHttpClient.simple[IO]
+      h <- JdkHttpClient.simple[IO].map(ResponseLogger(false, true))
       u <- Resource.eval(IO(fixture()).map(_.baseUri / "graphql"))
       c <- Resource.eval(ItcClient.create[IO](u, h))
     yield c
@@ -61,7 +62,7 @@ trait ClientSuite extends CatsEffectSuite {
 
   def spectroscopy(
     in:       SpectroscopyInput,
-    expected: Either[String, CalculationResult]
+    expected: Either[String, ClientCalculationResult]
   ): IO[Unit] =
     bandNormalizedClient.use:
       _.spectroscopy(in).attempt
@@ -70,7 +71,7 @@ trait ClientSuite extends CatsEffectSuite {
 
   def imaging(
     in:       ImagingInput,
-    expected: Either[String, CalculationResult]
+    expected: Either[String, ClientCalculationResult]
   ): IO[Unit] =
     bandNormalizedClient.use:
       _.imaging(in).attempt
@@ -96,7 +97,7 @@ trait ClientSuite extends CatsEffectSuite {
 
   def spectroscopyEmissionLines(
     in:       SpectroscopyInput,
-    expected: Either[String, CalculationResult]
+    expected: Either[String, ClientCalculationResult]
   ): IO[Unit] =
     emissionLineClient.use:
       _.spectroscopy(in).attempt

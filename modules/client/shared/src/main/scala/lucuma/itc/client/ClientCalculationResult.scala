@@ -11,21 +11,23 @@ import io.circe.HCursor
 import lucuma.itc.AsterismIntegrationTimeOutcomes
 import lucuma.itc.Error
 import lucuma.itc.ItcVersions
+import lucuma.itc.TargetIntegrationTimeOutcome
 import lucuma.itc.client.json.decoders.given
 
-case class CalculationResult(
+case class ClientCalculationResult(
   versions:    ItcVersions,
   targetTimes: AsterismIntegrationTimeOutcomes
 ) derives Eq
 
-object CalculationResult:
-  given Decoder[CalculationResult] with
-    def apply(c: HCursor): Decoder.Result[CalculationResult] =
+object ClientCalculationResult:
+  given Decoder[ClientCalculationResult] with
+    def apply(c: HCursor): Decoder.Result[ClientCalculationResult] =
       for
         v <- c.downField("versions").as[ItcVersions]
-        t <- c.downField("targetTimes").as[AsterismIntegrationTimeOutcomes]
-      yield CalculationResult(v, t)
+        t <-
+          c.downField("targetTimes").as[AsterismIntegrationTimeOutcomes]
+      yield ClientCalculationResult(v, t)
 
-  given Eq[CalculationResult] with
-    def eqv(x: CalculationResult, y: CalculationResult): Boolean =
+  given Eq[ClientCalculationResult] with
+    def eqv(x: ClientCalculationResult, y: ClientCalculationResult): Boolean =
       x.versions === y.versions && x.targetTimes === y.targetTimes

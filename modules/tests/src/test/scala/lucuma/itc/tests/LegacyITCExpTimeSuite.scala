@@ -360,8 +360,6 @@ class LegacyITCExpTimeSuite extends FunSuite with CommonITCLegacySuite:
     )
 
   test("gaussian units".tag(LegacyITCTest)):
-    val b = BigDecimal(979107027)
-    println(lucuma.core.math.SignalToNoise.FromBigDecimalRounding.getOption(b))
     Brightness.Integrated.all.toList.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(

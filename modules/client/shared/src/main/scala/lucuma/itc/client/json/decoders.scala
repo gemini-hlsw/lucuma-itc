@@ -15,18 +15,17 @@ import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
-import lucuma.itc.AsterismTimesAndGraphsOutcomes
 import lucuma.itc.Error
+import lucuma.itc.FinalSN
 import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcGraph
 import lucuma.itc.ItcSeries
+import lucuma.itc.SignalToNoiseAt
+import lucuma.itc.SingleSN
 import lucuma.itc.TargetIntegrationTime
 import lucuma.itc.TargetIntegrationTimeOutcome
 import lucuma.itc.client.*
-import lucuma.itc.SignalToNoiseAt
-import lucuma.itc.SingleSN
-import lucuma.itc.FinalSN
 
 // Decoders for the client don't need to be as generic as the ones for the server.
 object decoders:
@@ -86,7 +85,7 @@ object decoders:
           .map(_.asLeft)
           .orElse(c.downField("emissionLine").as[Wavelength].map(_.asRight))
       times      <- c.as[Option[Zipper[IntegrationTime]]]
-      sn         <- c.as[Option[SignalToNoiseAt]]
+      sn         <- c.downField("signalToNoiseAt").as[Option[SignalToNoiseAt]]
     yield TargetIntegrationTime(times, bandOrLine, sn)
 
   given Decoder[ItcCcd]    = deriveDecoder[ItcCcd]
@@ -98,4 +97,3 @@ object decoders:
       .map(_.asRight)
       .or(Decoder[Error].map(_.asLeft))
       .map(TargetIntegrationTimeOutcome(_))
-

@@ -4,8 +4,7 @@
 package lucuma.itc.client
 
 import cats.effect.Async
-import cats.syntax.flatMap.*
-import cats.syntax.functor.*
+import cats.syntax.all.*
 import clue.http4s.Http4sHttpBackend
 import clue.http4s.Http4sHttpClient
 import clue.syntax.*
@@ -22,12 +21,12 @@ trait ItcClient[F[_]] {
   def spectroscopy(
     input:    SpectroscopyInput,
     useCache: Boolean = true
-  ): F[CalculationResult]
+  ): F[ClientCalculationResult]
 
   def imaging(
     input:    ImagingInput,
     useCache: Boolean = true
-  ): F[CalculationResult]
+  ): F[ClientCalculationResult]
 
   def spectroscopyGraphs(
     input:    SpectroscopyGraphsInput,
@@ -50,8 +49,8 @@ object ItcClient {
     client: Client[F]
   ): F[ItcClient[F]] =
     for
-      specCache         <- ItcCache.simple[F, SpectroscopyInput, CalculationResult]
-      imgCache          <- ItcCache.simple[F, ImagingInput, CalculationResult]
+      specCache         <- ItcCache.simple[F, SpectroscopyInput, ClientCalculationResult]
+      imgCache          <- ItcCache.simple[F, ImagingInput, ClientCalculationResult]
       graphCache        <-
         ItcCache.simple[F, SpectroscopyGraphsInput, SpectroscopyGraphsResult]
       timeAndGraphCache <-
@@ -65,26 +64,26 @@ object ItcClient {
       override def spectroscopy(
         input:    SpectroscopyInput,
         useCache: Boolean = true
-      ): F[CalculationResult] = {
-        val callOut: F[CalculationResult] =
+      ): F[ClientCalculationResult] = {
+        val callOut: F[ClientCalculationResult] =
           http
             .request(SpectroscopyIntegrationTime)
             .withInput(input)
             .raiseGraphQLErrorsOnNoData
 
         for
-          _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")
+          _ <- Logger[F].info(s"ITC Input: \n${input.asJson.spaces2}")
           v <- if (useCache) specCache.getOrCalcF(input)(callOut)
                else callOut.flatTap(specCache.put(input))
-          _ <- Logger[F].debug(s"ITC Result:\n$v")
+          _ <- Logger[F].info(s"ITC Result:\n$v")
         yield v
       }
 
       override def imaging(
         input:    ImagingInput,
         useCache: Boolean = true
-      ): F[CalculationResult] = {
-        val callOut: F[CalculationResult] =
+      ): F[ClientCalculationResult] = {
+        val callOut: F[ClientCalculationResult] =
           http
             .request(ImagingIntegrationTime)
             .withInput(input)

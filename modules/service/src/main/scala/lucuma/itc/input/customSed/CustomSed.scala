@@ -12,13 +12,11 @@ import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.math.Wavelength
 import lucuma.core.model.Attachment
-import lucuma.core.model.ExposureTimeMode.TimeAndCountMode
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED
 import lucuma.itc.search.TargetData
-import lucuma.itc.service.requests.SpectroscopyTimeParameters
 import lucuma.itc.service.requests.TargetGraphRequest
 import lucuma.itc.service.requests.TargetImagingTimeRequest
 import lucuma.itc.service.requests.TargetSpectroscopyTimeRequest
@@ -59,13 +57,9 @@ object CustomSed:
       resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters))
 
   def resolveTargetSpectroscopySNRequest[F[_]: MonadThrow: Parallel: Resolver]
-    : TargetSpectroscopyTimeRequest => F[(TargetSpectroscopyTimeRequest, TimeAndCountMode)] =
-    case TargetSpectroscopyTimeRequest(
-          targetData,
-          parameters @ SpectroscopyTimeParameters(m @ TimeAndCountMode(_, _, _), _, _)
-        ) =>
-      resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters)).tupleRight(m)
-    case _ => MonadThrow[F].raiseError(new RuntimeException("Only TimeAndCountMode is supported"))
+    : TargetSpectroscopyTimeRequest => F[TargetSpectroscopyTimeRequest] =
+    case TargetSpectroscopyTimeRequest(targetData, parameters) =>
+      resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters))
 
   def resolveTargetImagingTimeRequest[F[_]: Monad: Parallel: Resolver]
     : TargetImagingTimeRequest => F[TargetImagingTimeRequest] =

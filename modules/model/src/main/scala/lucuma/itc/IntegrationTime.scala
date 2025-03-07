@@ -7,7 +7,6 @@ import cats.Order
 import eu.timepit.refined.cats.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.*
-import lucuma.core.math.SignalToNoise
 import lucuma.core.util.TimeSpan
 import lucuma.itc.encoders.given
 import spire.implicits.*

@@ -14907,10 +14907,10 @@ input SpectroscopyIntegrationTimeAndGraphsInput {
 }
 
 type IntegrationTime {
-  # Exposure time duration either requested or calculated
+  # Calculated exposure time duratio
   exposureTime: TimeSpan!
 
-  # Exposures either requested or calculated
+  # Calculate exposures count
   exposureCount: NonNegInt!
 }
 

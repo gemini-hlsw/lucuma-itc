@@ -8,7 +8,7 @@ import lucuma.itc.client.arb.ArbInstrumentMode
 import monocle.law.discipline.*
 import munit.*
 
-final class InstrumentModeSuite extends DisciplineSuite {
+class InstrumentModeSuite extends DisciplineSuite:
 
   import ArbInstrumentMode.given
 
@@ -17,5 +17,3 @@ final class InstrumentModeSuite extends DisciplineSuite {
   checkAll("InstrumentMode.gmosSouthSpectroscopy", PrismTests(InstrumentMode.gmosSouthSpectroscopy))
   checkAll("InstrumentMode.gmosNorthImaging", PrismTests(InstrumentMode.gmosNorthImaging))
   checkAll("InstrumentMode.gmosSouthImaging", PrismTests(InstrumentMode.gmosSouthImaging))
-
-}

@@ -153,7 +153,6 @@ object ItcImpl {
         r:          IntegrationTimeRemoteResult,
         bandOrLine: Either[Band, Wavelength]
       ): F[TargetIntegrationTime] =
-        println(s"/////////// ${r.exposureCalculation}")
         val tgts = r.exposureCalculation
           .map { all =>
             all.exposureCalculations
@@ -169,14 +168,12 @@ object ItcImpl {
                       CalculationError(s"Negative exposure time ${r.exposureTime}")
               .sequence
               .map: ccdTimes =>
-                println(s"CCD times $ccdTimes")
                 Zipper.of(ccdTimes.head, ccdTimes.tail.toList*).focusIndex(all.selectedIndex)
           }
           .getOrElse {
             MonadThrow[F].raiseError:
               CalculationError(s"ITC did not return exposure calculation")
           }
-        println(s"//////////////// ${tgts}")
         tgts.map(tgts => TargetIntegrationTime(tgts, bandOrLine, r.signalToNoiseAt.map(fromLegacy)))
 
       /**

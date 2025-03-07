@@ -62,6 +62,7 @@ import lucuma.itc.ItcAxis
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcVersions
 import lucuma.itc.SeriesDataType
+import lucuma.itc.SignalToNoiseAt
 import lucuma.itc.SingleSN
 import lucuma.itc.TargetIntegrationTime
 import lucuma.itc.TargetIntegrationTimeOutcome
@@ -70,7 +71,8 @@ import lucuma.refined.*
 
 import java.time.Instant
 import scala.collection.immutable.SortedMap
-import lucuma.itc.SignalToNoiseAt
+
+val atWavelength = Wavelength.fromIntNanometers(600).get
 
 class WiringSuite extends ClientSuite {
   val selected = IntegrationTime(
@@ -78,12 +80,10 @@ class WiringSuite extends ClientSuite {
     NonNegInt.unsafeFrom(10)
   )
 
-  val atWavelength = Wavelength.fromIntNanometers(600).get
-
   test("ItcClient spectroscopy basic wiring and sanity check") {
     spectroscopy(
       WiringSuite.SpectroscopyInputData,
-      CalculationResult(
+      ClientCalculationResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -103,10 +103,10 @@ class WiringSuite extends ClientSuite {
     )
   }
 
-  test("ItcClient imaging basic wiring and sanity check".ignore) {
+  test("ItcClient imaging basic wiring and sanity check") {
     imaging(
       WiringSuite.ImagingInputData,
-      CalculationResult(
+      ClientCalculationResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -126,7 +126,7 @@ class WiringSuite extends ClientSuite {
     )
   }
 
-  test("ItcClient spectroscopy graph wiring and sanity check".ignore) {
+  test("ItcClient spectroscopy graph wiring and sanity check") {
     spectroscopyGraphs(
       WiringSuite.GraphInput,
       SpectroscopyGraphsResult(
@@ -182,7 +182,7 @@ class WiringSuite extends ClientSuite {
   test("ItcClient spectroscopy with emission lines basic wiring and sanity check") {
     spectroscopyEmissionLines(
       WiringSuite.SpectroscopyEmissionLinesInput,
-      CalculationResult(
+      ClientCalculationResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -210,7 +210,7 @@ object WiringSuite {
       SpectroscopyParameters(
         ExposureTimeMode.SignalToNoiseMode(
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
-          Wavelength.Min
+          atWavelength
         ),
         ConstraintSet(
           ImageQuality.PointOne,
@@ -258,7 +258,7 @@ object WiringSuite {
       ImagingParameters(
         ExposureTimeMode.SignalToNoiseMode(
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
-          Wavelength.Min
+          atWavelength
         ),
         ConstraintSet(
           ImageQuality.PointOne,
@@ -344,7 +344,7 @@ object WiringSuite {
       SpectroscopyParameters(
         ExposureTimeMode.SignalToNoiseMode(
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
-          Wavelength.Min
+          atWavelength
         ),
         ConstraintSet(
           ImageQuality.PointOne,
