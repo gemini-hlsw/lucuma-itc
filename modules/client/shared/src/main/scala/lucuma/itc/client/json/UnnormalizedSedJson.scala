@@ -15,9 +15,6 @@ given Encoder[UnnormalizedSED] = {
   case UnnormalizedSED.StellarLibrary(s) =>
     Json.obj("stellarLibrary" -> s.asScreamingJson)
 
-  case UnnormalizedSED.UserDefinedAttachment(_) =>
-    sys.error("UserDefinedAttachment not supported yet")
-
   case UnnormalizedSED.CoolStarModel(s) =>
     Json.obj("coolStar" -> s.asScreamingJson)
 
@@ -43,10 +40,16 @@ given Encoder[UnnormalizedSED] = {
     Json.obj("blackBodyTempK" -> temperature.value.value.asJson)
 
   case UnnormalizedSED.UserDefined(fs) =>
-    Json.arr(fs.toNel.toList.map { case (w, d) =>
-      Json.obj(
-        "wavelength" -> w.asJson,
-        "density"    -> d.asJson
-      )
-    }*)
+    Json.obj(
+      "fluxDensities" ->
+        Json.arr(fs.toNel.toList.map { case (w, d) =>
+          Json.obj(
+            "wavelength" -> w.asJson,
+            "density"    -> d.asJson
+          )
+        }*)
+    )
+
+  case UnnormalizedSED.UserDefinedAttachment(attachmentId) =>
+    Json.obj("fluxDensitiesAttachment" -> attachmentId.asJson)
 }
