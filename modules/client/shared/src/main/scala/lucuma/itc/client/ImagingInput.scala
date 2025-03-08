@@ -11,19 +11,19 @@ import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ExposureTimeMode
+import lucuma.itc.client.json.encoders.given
 import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
-import lucuma.itc.encoders.given
 
-case class SpectroscopyIntegrationTimeParameters(
+case class ImagingParameters(
   exposureTimeMode: ExposureTimeMode,
   constraints:      ConstraintSet,
   mode:             InstrumentMode
 ) derives Eq
 
-object SpectroscopyIntegrationTimeParameters {
-  given Encoder[SpectroscopyIntegrationTimeParameters] with
-    def apply(a: SpectroscopyIntegrationTimeParameters): Json =
+object ImagingParameters {
+  given Encoder[ImagingParameters] with
+    def apply(a: ImagingParameters): Json =
       Json
         .obj(
           "exposureTimeMode" -> a.exposureTimeMode.asJson,
@@ -33,14 +33,15 @@ object SpectroscopyIntegrationTimeParameters {
         .dropNullValues
 }
 
-case class SpectroscopyIntegrationTimeInput(
-  parameters: SpectroscopyIntegrationTimeParameters,
+final case class ImagingInput(
+  parameters: ImagingParameters,
   asterism:   NonEmptyList[TargetInput]
 ) derives Eq:
   export parameters.*
 
-object SpectroscopyIntegrationTimeInput {
-  given Encoder[SpectroscopyIntegrationTimeInput] with
-    def apply(a: SpectroscopyIntegrationTimeInput): Json =
+object ImagingInput {
+
+  given Encoder[ImagingInput] with
+    def apply(a: ImagingInput): Json =
       Json.obj("asterism" -> a.asterism.asJson).deepMerge(a.parameters.asJson)
 }

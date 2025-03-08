@@ -11,7 +11,7 @@ class GraphQLSpectroscopyTimeEmissionLineSuite extends GraphQLEmissionLineSuite 
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -100,7 +100,7 @@ class GraphQLSpectroscopyTimeEmissionLineSuite extends GraphQLEmissionLineSuite 
       json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params": {

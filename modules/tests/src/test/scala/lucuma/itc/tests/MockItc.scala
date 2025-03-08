@@ -7,6 +7,7 @@ import cats.data.NonEmptyChain
 import cats.effect.IO
 import cats.syntax.applicative.*
 import cats.syntax.either.*
+import cats.syntax.option.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
@@ -28,6 +29,23 @@ import lucuma.refined.*
 
 object MockItc extends Itc[IO]:
 
+  override def calculateSignalToNoise(
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: NonNegInt
+  ): IO[TargetIntegrationTime] =
+    TargetIntegrationTime(
+      None,
+      Band.R.asLeft,
+      SignalToNoiseAt(atWavelength,
+                      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+      ).some
+    ).pure[IO]
+
   override def calculateIntegrationTime(
     target:        TargetData,
     atWavelength:  Wavelength,
@@ -36,10 +54,15 @@ object MockItc extends Itc[IO]:
     signalToNoise: SignalToNoise
   ): IO[TargetIntegrationTime] =
     TargetIntegrationTime(
-      Zipper.one:
-        IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get)
-      ,
-      Band.R.asLeft
+      Zipper
+        .one:
+          IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined)
+        .some,
+      Band.R.asLeft,
+      SignalToNoiseAt(atWavelength,
+                      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+      ).some
     ).pure[IO]
 
   override def calculateGraphs(
@@ -77,8 +100,8 @@ object MockItc extends Itc[IO]:
           )
         )
       ),
-      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
-      SignalToNoise.fromInt(1001).map(FinalSN.apply(_)),
+      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
+      SignalToNoise.fromInt(1001).map(TotalSN.apply(_)),
       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
       SignalToNoise.fromInt(1002).map(SingleSN.apply(_)),
       Band.R.asLeft
@@ -87,6 +110,23 @@ object MockItc extends Itc[IO]:
 
 object MockImagingItc extends Itc[IO]:
 
+  override def calculateSignalToNoise(
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: NonNegInt
+  ): IO[TargetIntegrationTime] =
+    TargetIntegrationTime(
+      None,
+      Band.R.asLeft,
+      SignalToNoiseAt(atWavelength,
+                      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+      ).some
+    ).pure[IO]
+
   override def calculateIntegrationTime(
     target:        TargetData,
     atWavelength:  Wavelength,
@@ -95,11 +135,17 @@ object MockImagingItc extends Itc[IO]:
     signalToNoise: SignalToNoise
   ): IO[TargetIntegrationTime] =
     TargetIntegrationTime(
-      Zipper.of(
-        IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get),
-        IntegrationTime(TimeSpan.fromSeconds(2).get, 5.refined, SignalToNoise.fromInt(20).get)
-      ),
-      Band.R.asLeft
+      Zipper
+        .of(
+          IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined),
+          IntegrationTime(TimeSpan.fromSeconds(2).get, 5.refined)
+        )
+        .some,
+      Band.R.asLeft,
+      SignalToNoiseAt(atWavelength,
+                      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+      ).some
     ).pure[IO]
 
   override def calculateGraphs(
@@ -137,8 +183,8 @@ object MockImagingItc extends Itc[IO]:
           )
         )
       ),
-      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
-      SignalToNoise.fromInt(1001).map(FinalSN.apply(_)),
+      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
+      SignalToNoise.fromInt(1001).map(TotalSN.apply(_)),
       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
       SignalToNoise.fromInt(1002).map(SingleSN.apply(_)),
       Band.R.asLeft
@@ -146,6 +192,23 @@ object MockImagingItc extends Itc[IO]:
       .pure[IO]
 
 object EmissionLineMockItc extends Itc[IO]:
+
+  override def calculateSignalToNoise(
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: NonNegInt
+  ): IO[TargetIntegrationTime] =
+    TargetIntegrationTime(
+      None,
+      Band.R.asLeft,
+      SignalToNoiseAt(atWavelength,
+                      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+      ).some
+    ).pure[IO]
 
   override def calculateIntegrationTime(
     target:        TargetData,
@@ -155,10 +218,15 @@ object EmissionLineMockItc extends Itc[IO]:
     signalToNoise: SignalToNoise
   ): IO[TargetIntegrationTime] =
     TargetIntegrationTime(
-      Zipper.one:
-        IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined, SignalToNoise.fromInt(10).get)
-      ,
-      Wavelength.unsafeFromIntPicometers(650000).asRight
+      Zipper
+        .one:
+          IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined)
+        .some,
+      Wavelength.unsafeFromIntPicometers(650000).asRight,
+      SignalToNoiseAt(atWavelength,
+                      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+      ).some
     ).pure[IO]
 
   override def calculateGraphs(
@@ -172,6 +240,23 @@ object EmissionLineMockItc extends Itc[IO]:
     IO.raiseError(CalculationError("Not implemented"))
 
 object FailingMockItc extends Itc[IO]:
+
+  override def calculateSignalToNoise(
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: NonNegInt
+  ): IO[TargetIntegrationTime] =
+    TargetIntegrationTime(
+      None,
+      Band.R.asLeft,
+      SignalToNoiseAt(atWavelength,
+                      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+      ).some
+    ).pure[IO]
 
   override def calculateIntegrationTime(
     target:        TargetData,
@@ -217,8 +302,8 @@ object FailingMockItc extends Itc[IO]:
           )
         )
       ),
-      FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1000.0)),
-      SignalToNoise.fromInt(1001).map(FinalSN.apply(_)),
+      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(1000.0)),
+      SignalToNoise.fromInt(1001).map(TotalSN.apply(_)),
       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
       SignalToNoise.fromInt(1002).map(SingleSN.apply(_)),
       Band.R.asLeft

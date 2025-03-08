@@ -11,8 +11,8 @@ import lucuma.core.data.Zipper
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.NewType
 
-object FinalSN extends NewType[SignalToNoise]
-type FinalSN = FinalSN.Type
+object TotalSN extends NewType[SignalToNoise]
+type TotalSN = TotalSN.Type
 
 object SingleSN extends NewType[SignalToNoise]
 type SingleSN = SingleSN.Type
@@ -41,10 +41,10 @@ object AsterismIntegrationTimeOutcomes extends NewType[NonEmptyChain[TargetInteg
     // The brightest target is the one with the shortest exposure time.
     // Only returns the index of the brightest target if there are no errors.
     def brightestIndex: Option[Int] =
-      partitionErrors.toOption.map(_.value.indexOfFocus)
+      partitionErrors.toOption.map(_.value.indexOfFocus).filter(_ => brightest.isDefined)
 
     def brightest: Option[TargetIntegrationTime] =
-      partitionErrors.toOption.map(_.value.focus)
+      partitionErrors.toOption.map(_.value.focus).filter(_.times.isDefined)
 
     def collectErrors: Option[NonEmptyChain[(Error, Int)]] =
       NonEmptyChain.fromChain:

@@ -75,8 +75,8 @@ case class ItcGraphGroup(graphs: NonEmptyChain[ItcGraph]) derives Eq, Encoder.As
 case class TargetGraphs(
   ccds:                      NonEmptyChain[ItcCcd],
   graphData:                 NonEmptyChain[ItcGraph],
-  peakFinalSNRatio:          FinalSN,
-  atWavelengthFinalSNRatio:  Option[FinalSN],
+  peakFinalSNRatio:          TotalSN,
+  atWavelengthFinalSNRatio:  Option[TotalSN],
   peakSingleSNRatio:         SingleSN,
   atWavelengthSingleSNRatio: Option[SingleSN]
 ) derives Eq,

@@ -11,7 +11,7 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 2,
@@ -106,7 +106,7 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
             }
           }],
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params" : {

@@ -55,6 +55,11 @@ object CustomSed:
     case TargetSpectroscopyTimeRequest(targetData, parameters) =>
       resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters))
 
+  def resolveTargetSpectroscopySNRequest[F[_]: Monad: Parallel: Resolver]
+    : TargetSpectroscopyTimeRequest => F[TargetSpectroscopyTimeRequest] =
+    case TargetSpectroscopyTimeRequest(targetData, parameters) =>
+      resolveTargetData(targetData).map(TargetSpectroscopyTimeRequest(_, parameters))
+
   def resolveTargetImagingTimeRequest[F[_]: Monad: Parallel: Resolver]
     : TargetImagingTimeRequest => F[TargetImagingTimeRequest] =
     case TargetImagingTimeRequest(targetData, parameters) =>
