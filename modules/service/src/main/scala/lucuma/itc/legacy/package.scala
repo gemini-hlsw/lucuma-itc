@@ -69,7 +69,8 @@ def spectroscopyGraphParams(
           coadds = None,
           exposureDuration = exposureDuration,
           sourceFraction = 1.0,
-          ditherOffset = Angle.Angle0
+          ditherOffset = Angle.Angle0,
+          wavelengthAt = atWavelength
         ),
         analysisMethod = observingMode.analysisMethod
       ),
@@ -98,10 +99,42 @@ def spectroscopyExposureTimeParams(
           ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
             sigma = sigma.toBigDecimal.toDouble,
             coadds = None,
-            wavelength = atWavelength,
+            wavelengthAt = atWavelength,
             sourceFraction = 1.0,
             ditherOffset = Angle.Angle0
           ),
+        analysisMethod = observingMode.analysisMethod
+      ),
+      conditions = conditions,
+      telescope = ItcTelescopeDetails(
+        wfs = ItcWavefrontSensor.OIWFS
+      ),
+      instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
+    )
+  (parameters, bandOrLine)
+
+def spectroscopySNParams(
+  target:           TargetData,
+  atWavelength:     Wavelength,
+  observingMode:    ObservingMode.SpectroscopyMode,
+  conditions:       ItcObservingConditions,
+  exposureDuration: FiniteDuration,
+  exposureCount:    Int
+): (ItcParameters, Either[Band, Wavelength]) = // Bubble up the selected band or line
+  val (sourceDefinition, bandOrLine): (ItcSourceDefinition, Either[Band, Wavelength]) =
+    buildSourceDefinition(target, atWavelength)
+  val parameters: ItcParameters                                                       =
+    ItcParameters(
+      source = sourceDefinition,
+      observation = ItcObservationDetails(
+        calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
+          exposureCount = exposureCount,
+          exposureDuration = exposureDuration,
+          coadds = None,
+          sourceFraction = 1.0,
+          ditherOffset = Angle.Angle0,
+          wavelengthAt = atWavelength
+        ),
         analysisMethod = observingMode.analysisMethod
       ),
       conditions = conditions,

@@ -5,13 +5,13 @@ package lucuma.itc.service
 
 import io.circe.literal.*
 
-class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
+class imagingSuite extends GraphImagingQLSuite {
 
   test("gmos north case") {
     query(
       """
         query {
-          imagingIntegrationTime(input: {
+          imaging(input: {
             exposureTimeMode: {
               signalToNoise: {
                 value: 600,
@@ -100,20 +100,26 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
                 }
               }
             }
+            exposureTimeMode {
+              signalToNoise {
+                value
+                at {
+                  picometers
+                }
+              }
+            }
             brightest {
               all {
                 exposureCount
                 exposureTime {
                   seconds
                 }
-                signalToNoise
               }
               selected {
                 exposureCount
                 exposureTime {
                   seconds
                 }
-                signalToNoise
               }
             }
           }
@@ -122,7 +128,7 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
       json"""
         {
           "data": {
-            "imagingIntegrationTime" : {
+            "imaging" : {
               "mode" : {
                 "__typename" : "ImagingMode",
                 "instrument" : "GMOS_NORTH",
@@ -130,26 +136,29 @@ class GraphQLImagingTimeSuite extends GraphImagingQLSuite {
                   "filter": "G_PRIME"
                 }
               },
+              "exposureTimeMode": {
+                "signalToNoise": {
+                  "value": 600,
+                  "at": { "picometers": 530000 }
+                }
+              },
               "brightest" : {
                 "all" : [{
                   "exposureCount" : 10,
                   "exposureTime" : {
                     "seconds" : 1.000000
-                  },
-                  "signalToNoise": 10.000
+                  }
                 }, {
                   "exposureCount" : 5,
                   "exposureTime" : {
                     "seconds" : 2.000000
-                  },
-                  "signalToNoise": 20.000
+                  }
                 }],
                 "selected" : {
                   "exposureCount" : 5,
                   "exposureTime" : {
                     "seconds" : 2.000000
-                  },
-                  "signalToNoise": 20.000
+                  }
                 }
               }
             }

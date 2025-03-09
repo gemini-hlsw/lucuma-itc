@@ -63,26 +63,37 @@ trait ItcCacheOrRemote extends Version:
       UnsupportedOperationException:
         "'Time And Count' exposure time mode is not yet implemented."
 
-  private def requestSpecTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
-    calcRequest: TargetSpectroscopyTimeRequest
+  private def requestSpecSNCalc[F[_]: MonadThrow](itc: Itc[F])(
+    calcRequest: TargetSpectroscopyTimeRequest,
+    mode:        ExposureTimeMode.TimeAndCountMode
   ): F[TargetIntegrationTime] =
-    calcRequest.exposureTimeMode match
-      case ExposureTimeMode.SignalToNoiseMode(value, at) =>
-        itc
-          .calculateIntegrationTime(
-            calcRequest.target,
-            at,
-            calcRequest.specMode,
-            calcRequest.constraints,
-            value
-          )
-      case ExposureTimeMode.TimeAndCountMode(_, _, _)    =>
-        timeAndCountModeNotImplemented
+    itc
+      .calculateSignalToNoise(
+        calcRequest.target,
+        mode.at,
+        calcRequest.specMode,
+        calcRequest.constraints,
+        mode.time,
+        mode.count
+      )
+
+  private def requestSpecTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
+    calcRequest: TargetSpectroscopyTimeRequest,
+    mode:        ExposureTimeMode.SignalToNoiseMode
+  ): F[TargetIntegrationTime] =
+    itc
+      .calculateIntegrationTime(
+        calcRequest.target,
+        mode.at,
+        calcRequest.specMode,
+        calcRequest.constraints,
+        mode.value
+      )
 
   /**
    * Request exposure time calculation for spectroscopy
    */
-  def specTimeFromCacheOrRemote[F[
+  def spectroscopyFromCacheOrRemote[F[
     _
   ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
     calcRequest: TargetSpectroscopyTimeRequest
@@ -93,7 +104,11 @@ trait ItcCacheOrRemote extends Version:
     CustomSed // We must resolve CustomSed before caching.
       .resolveTargetSpectroscopyTimeRequest(calcRequest)
       .flatMap: r =>
-        cache.getOrInvokeBinary(r, requestSpecTimeCalc(itc)(r), TTL, "itc:calc:spec")
+        r.exposureTimeMode match
+          case m @ ExposureTimeMode.SignalToNoiseMode(_, _)   =>
+            cache.getOrInvokeBinary(r, requestSpecTimeCalc(itc)(r, m), TTL, "itc:calc:spec:sn")
+          case m @ ExposureTimeMode.TimeAndCountMode(_, _, _) =>
+            cache.getOrInvokeBinary(r, requestSpecSNCalc(itc)(r, m), TTL, "itc:calc:spec:tc")
 
   private def requestImgTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest
@@ -114,7 +129,7 @@ trait ItcCacheOrRemote extends Version:
   /**
    * Request exposure time calculation for imaging
    */
-  def imgTimeFromCacheOrRemote[
+  def imagingFromCacheOrRemote[
     F[_]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver
   ](
     calcRequest: TargetImagingTimeRequest

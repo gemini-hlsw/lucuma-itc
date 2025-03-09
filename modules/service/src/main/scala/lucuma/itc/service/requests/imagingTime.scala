@@ -41,8 +41,8 @@ case class AsterismImagingTimeRequest(
       TargetImagingTimeRequest(_, parameters)
 
 object AsterismImagingTimeRequest:
-  def fromInput(input: ImagingIntegrationTimeInput): Result[AsterismImagingTimeRequest] = {
-    val ImagingIntegrationTimeInput(
+  def fromInput(input: ImagingInput): Result[AsterismImagingTimeRequest] = {
+    val ImagingInput(
       exposureTimeMode,
       asterism,
       constraints,

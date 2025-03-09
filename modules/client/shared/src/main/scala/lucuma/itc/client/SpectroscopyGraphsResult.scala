@@ -31,8 +31,8 @@ case class GraphResult(graphType: GraphType, series: List[SeriesResult]) derives
 case class TargetGraphs(
   ccds:                      NonEmptyChain[ItcCcd],
   graphData:                 NonEmptyChain[GraphResult],
-  peakFinalSNRatio:          FinalSN,
-  atWavelengthFinalSNRatio:  Option[FinalSN],
+  peakFinalSNRatio:          TotalSN,
+  atWavelengthFinalSNRatio:  Option[TotalSN],
   peakSingleSNRatio:         SingleSN,
   atWavelengthSingleSNRatio: Option[SingleSN]
 ) derives Eq,

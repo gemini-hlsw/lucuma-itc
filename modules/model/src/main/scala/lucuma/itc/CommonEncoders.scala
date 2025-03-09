@@ -15,6 +15,7 @@ import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength
+import lucuma.core.model.ExposureTimeMode
 import lucuma.core.util.TimeSpan
 
 type Nanosecond  = Nano * Second
@@ -49,3 +50,22 @@ object encoders:
       ("nanometers", Json.fromBigDecimal(w.toNanometers.value.value)),
       ("micrometers", Json.fromBigDecimal(w.toMicrometers.value.value))
     )
+
+  given Encoder[ExposureTimeMode] = {
+    case ExposureTimeMode.SignalToNoiseMode(n, w) =>
+      Json.obj(
+        "signalToNoise" -> Json.obj(
+          "value" -> n.asJson,
+          "at"    -> w.asJson
+        )
+      )
+
+    case ExposureTimeMode.TimeAndCountMode(t, c, w) =>
+      Json.obj(
+        "timeAndCount" -> Json.obj(
+          "time"  -> t.asJson,
+          "count" -> c.value.asJson,
+          "at"    -> w.asJson
+        )
+      )
+  }

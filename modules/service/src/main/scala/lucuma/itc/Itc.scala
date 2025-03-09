@@ -24,6 +24,18 @@ trait Itc[F[_]]:
   ): F[TargetIntegrationTime]
 
   /**
+   * Compute the signal to noise with an exposure time and number of exposures ed conditions.
+   */
+  def calculateSignalToNoise(
+    target:        TargetData,
+    atWavelength:  Wavelength,
+    observingMode: ObservingMode,
+    constraints:   ItcObservingConditions,
+    exposureTime:  TimeSpan,
+    exposureCount: NonNegInt
+  ): F[TargetIntegrationTime]
+
+  /**
    * Retrieve the graph data for the given mode and exposureTime and exposures
    */
   def calculateGraphs(

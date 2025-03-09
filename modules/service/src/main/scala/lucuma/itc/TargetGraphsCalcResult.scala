@@ -14,8 +14,8 @@ import lucuma.itc.legacy.ItcRemoteCcd
 case class TargetGraphsCalcResult(
   ccds:                      NonEmptyChain[ItcCcd],
   data:                      NonEmptyChain[ItcGraphGroup],
-  peakFinalSNRatio:          FinalSN,
-  atWavelengthFinalSNRatio:  Option[FinalSN],
+  peakFinalSNRatio:          TotalSN,
+  atWavelengthFinalSNRatio:  Option[TotalSN],
   peakSingleSNRatio:         SingleSN,
   atWavelengthSingleSNRatio: Option[SingleSN],
   bandOrLine:                Either[Band, Wavelength]
@@ -134,8 +134,8 @@ object TargetGraphsCalcResult:
     TargetGraphsCalcResult(
       NonEmptyChain.fromChainUnsafe(calculatedCCDs),
       graphs,
-      FinalSN(peakFinalSNRatio),
-      wvAtFinalRatio.map(FinalSN.apply(_)),
+      TotalSN(peakFinalSNRatio),
+      wvAtFinalRatio.map(TotalSN.apply(_)),
       SingleSN(peakSingleSNRatio),
       wvAtSingleRatio.map(SingleSN.apply(_)),
       bandOrLine
