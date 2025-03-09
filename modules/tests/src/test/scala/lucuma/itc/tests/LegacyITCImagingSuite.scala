@@ -384,4 +384,3 @@ class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
       telescope,
       gmosNImaging
     )
-

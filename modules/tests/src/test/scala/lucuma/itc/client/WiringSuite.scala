@@ -92,7 +92,7 @@ class WiringSuite extends ClientSuite {
           NonEmptyChain:
             TargetIntegrationTimeOutcome:
               TargetIntegrationTime(
-                Zipper.fromNel(NonEmptyList.one(selected)).some,
+                Zipper.fromNel(NonEmptyList.one(selected)),
                 Band.R.asLeft,
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
@@ -115,7 +115,7 @@ class WiringSuite extends ClientSuite {
           NonEmptyChain:
             TargetIntegrationTimeOutcome:
               TargetIntegrationTime(
-                Zipper.fromNel(NonEmptyList.one(selected)).some,
+                Zipper.fromNel(NonEmptyList.one(selected)),
                 Band.R.asLeft,
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
@@ -191,7 +191,7 @@ class WiringSuite extends ClientSuite {
           NonEmptyChain:
             TargetIntegrationTimeOutcome:
               TargetIntegrationTime(
-                Zipper.fromNel(NonEmptyList.one(selected)).some,
+                Zipper.fromNel(NonEmptyList.one(selected)),
                 Wavelength.unsafeFromIntPicometers(650000).asRight,
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),

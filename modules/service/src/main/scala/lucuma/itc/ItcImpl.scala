@@ -153,28 +153,26 @@ object ItcImpl {
         r:          IntegrationTimeRemoteResult,
         bandOrLine: Either[Band, Wavelength]
       ): F[TargetIntegrationTime] =
-        val tgts = r.exposureCalculation
-          .map { all =>
-            all.exposureCalculations
-              .map: r =>
-                TimeSpan
-                  .fromSeconds(r.exposureTime)
-                  .map(expTime =>
-                    IntegrationTime(expTime, NonNegInt.unsafeFrom(r.exposureCount.value))
-                      .pure[F]
-                  )
-                  .getOrElse:
-                    MonadThrow[F].raiseError:
-                      CalculationError(s"Negative exposure time ${r.exposureTime}")
-              .sequence
-              .map: ccdTimes =>
-                Zipper.of(ccdTimes.head, ccdTimes.tail.toList*).focusIndex(all.selectedIndex)
-          }
-          .getOrElse {
-            MonadThrow[F].raiseError:
-              CalculationError(s"ITC did not return exposure calculation")
-          }
-        tgts.map(tgts => TargetIntegrationTime(tgts, bandOrLine, r.signalToNoiseAt.map(fromLegacy)))
+        val tgts = r.exposureCalculation.exposures
+          .traverse: r =>
+            TimeSpan
+              .fromSeconds(r.exposureTime)
+              .map(expTime =>
+                IntegrationTime(expTime, NonNegInt.unsafeFrom(r.exposureCount.value))
+                  .pure[F]
+              )
+              .getOrElse:
+                MonadThrow[F].raiseError:
+                  CalculationError(s"Negative exposure time ${r.exposureTime}")
+          .flatMap: ccdTimes =>
+            Zipper
+              .of(ccdTimes.head, ccdTimes.tail.toList*)
+              .focusIndex(r.exposureCalculation.selectedIndex)
+              .map(_.pure[F])
+              .getOrElse:
+                MonadThrow[F].raiseError:
+                  CalculationError("Selected CCD index out of bounds")
+        tgts.map(TargetIntegrationTime(_, bandOrLine, r.signalToNoiseAt.map(fromLegacy)))
 
       /**
        * Compute the exposure time and number of exposures required to achieve the desired
@@ -241,7 +239,11 @@ object ItcImpl {
                    _ <- T.put("itc.query" -> request.spaces2)
                    _ <- L.info(request.noSpaces) // Request to the legacy itc
                    a <- itcLocal.calculateSignalToNoise(request.noSpaces)
-                 yield TargetIntegrationTime(None, bandOrLine, a.signalToNoiseAt.map(fromLegacy))
+                 yield TargetIntegrationTime(
+                   Zipper.one(IntegrationTime(exposureTime, exposureCount)),
+                   bandOrLine,
+                   a.signalToNoiseAt.map(fromLegacy)
+                 )
         yield r
 
       def calculateSignalToNoise(

@@ -20,7 +20,7 @@ case class GraphsRemoteResult(
   val maxPeakPixelFlux: Int   = ccds.map(_.peakPixelFlux).maximum.toInt
 }
 
-case class ExposureCalculation(
+case class Exposures(
   exposureTime:  Double,
   exposureCount: NonNegInt
 )
@@ -32,15 +32,12 @@ case class SignalToNoiseAt(
 )
 
 case class AllExposureCalculations(
-  exposureCalculations: NonEmptyChain[ExposureCalculation],
-  selectedIndex:        Int
+  exposures:     NonEmptyChain[Exposures],
+  selectedIndex: Int
 )
 
 case class IntegrationTimeRemoteResult(
-  // If we request time/counts we would gett a None, otherwise we get at least one result.
-  // Gmos spec returns one, thte selecte index
-  // Gmos img returns one per ccd, we use the first
-  exposureCalculation: Option[AllExposureCalculations],
+  exposureCalculation: AllExposureCalculations,
 
   // In principle this should not be empty, but you could still use a wv outside the rang of a ccd. Rather than giving a zero SN, we just don't return anything.
   signalToNoiseAt: Option[SignalToNoiseAt]
