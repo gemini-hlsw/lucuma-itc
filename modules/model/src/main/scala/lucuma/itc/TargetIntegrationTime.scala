@@ -14,14 +14,12 @@ import lucuma.core.math.Wavelength
 import lucuma.itc.encoders.given
 
 case class TargetIntegrationTime(
-  times:           Option[Zipper[IntegrationTime]],
+  times:           Zipper[IntegrationTime],
   bandOrLine:      Either[Band, Wavelength],
   signalToNoiseAt: Option[SignalToNoiseAt]
 ):
   def focusIndex(index: Int): Option[TargetIntegrationTime] =
-    times.flatMap:
-      _.focusIndex(index)
-        .map(newTimes => copy(times = Some(newTimes)))
+    times.focusIndex(index).map(newTimes => copy(times = newTimes))
 
 object TargetIntegrationTime:
   given Encoder[TargetIntegrationTime] = t =>
@@ -31,13 +29,7 @@ object TargetIntegrationTime:
         "emissionLine"    -> t.bandOrLine.toOption.asJson,
         "signalToNoiseAt" -> t.signalToNoiseAt.asJson
       )
-    // This is needed or grackle will silently fail if those fields are missing
-    t.times
-      .map(_.asJson.deepMerge(common))
-      .getOrElse(
-        common.deepMerge(
-          Json.obj("all" -> Json.Null, "index" -> Json.Null, "selected" -> Json.Null)
-        )
-      )
+    // Merge common fields with times fields which are now guaranteed to be present
+    t.times.asJson.deepMerge(common)
 
-  given Order[TargetIntegrationTime] = Order.by(_.times.map(_.focus))
+  given Order[TargetIntegrationTime] = Order.by(_.times.focus)

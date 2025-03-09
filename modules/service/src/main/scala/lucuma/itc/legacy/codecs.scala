@@ -472,7 +472,7 @@ given Decoder[SignalToNoise] = (c: HCursor) =>
         .getOption(s.setScale(2, BigDecimal.RoundingMode.HALF_UP))
         .toRight(DecodingFailure("Invalid SignalToNoise value", c.history))
 
-given Decoder[ExposureCalculation] = (c: HCursor) =>
+given Decoder[Exposures] = (c: HCursor) =>
   for
     time  <- c.downField("exposureTime").as[Double]
     count <-
@@ -481,11 +481,11 @@ given Decoder[ExposureCalculation] = (c: HCursor) =>
         .as[Int]
         .flatMap:
           refineV[NonNegative](_).leftMap(e => DecodingFailure(e, c.downField("exposures").history))
-  yield ExposureCalculation(time, count)
+  yield Exposures(time, count)
 
 given Decoder[AllExposureCalculations] = (c: HCursor) =>
   for
-    results  <- c.downField("exposuresPerCCD").as[NonEmptyChain[ExposureCalculation]]
+    results  <- c.downField("detectors").as[NonEmptyChain[Exposures]]
     selected <- c.downField("selected").as[Int]
   yield AllExposureCalculations(results, selected)
 
@@ -500,10 +500,10 @@ given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
   val spec: Option[Decoder.Result[IntegrationTimeRemoteResult]] =
     for {
       t <- c.downField("ItcSpectroscopyResult")
-             .downField("exposureCalculation")
+             .downField("times")
              .success
              .map:
-               _.as[Option[AllExposureCalculations]]
+               _.as[AllExposureCalculations]
       s <- c.downField("ItcSpectroscopyResult")
              .downField("signalToNoiseAt")
              .success
@@ -514,10 +514,10 @@ given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
   val img: Option[Decoder.Result[IntegrationTimeRemoteResult]] =
     for {
       t <- c.downField("ItcImagingResult")
-             .downField("exposureCalculation")
+             .downField("times")
              .success
              .map:
-               _.as[Option[AllExposureCalculations]]
+               _.as[AllExposureCalculations]
     } yield t.map(IntegrationTimeRemoteResult(_, None))
 
   spec

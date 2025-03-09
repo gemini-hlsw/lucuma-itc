@@ -119,6 +119,7 @@ class LegacyITCExpTimeSuite extends FunSuite with CommonITCLegacySuite:
     Enumerated[ImageQuality].all.foreach: iq =>
       val result = localItc
         .calculateIntegrationTime(bodyCond(conditions.copy(iq = iq)).asJson.noSpaces)
+
       assert(result.fold(allowedErrors, _ => true))
 
   test("cloud extinction".tag(LegacyITCTest)):

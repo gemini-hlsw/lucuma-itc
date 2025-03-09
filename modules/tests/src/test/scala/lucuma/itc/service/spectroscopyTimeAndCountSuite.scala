@@ -91,6 +91,19 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
             }
             targetTimes {
               ... on TargetIntegrationTime {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
+                }
+                index
+                all {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
+                }
                 signalToNoiseAt {
                   wavelength {
                     nanometers
@@ -129,6 +142,21 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
               },
               "targetTimes": [
                 {
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
+                    }
+                  },
+                  "index": 0,
+                  "all": [
+                    {
+                      "exposureCount": 10,
+                      "exposureTime": {
+                        "seconds": 1
+                      }
+                    }
+                  ],
                   "signalToNoiseAt": {
                     "wavelength": {
                       "nanometers": 600.000
@@ -244,6 +272,13 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
               }
               targetTimes {
                 ... on TargetIntegrationTime {
+                  selected {
+                    exposureCount
+                    exposureTime {
+                      seconds
+                    }
+                  }
+                  index
                   signalToNoiseAt {
                     wavelength {
                       nanometers
@@ -288,6 +323,13 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 },
                 "targetTimes": [
                   {
+                    "selected": {
+                      "exposureCount": 10,
+                      "exposureTime": {
+                        "seconds": 1
+                      }
+                    },
+                    "index": 0,
                     "signalToNoiseAt": {
                       "wavelength": {
                         "nanometers": 60.000
@@ -297,7 +339,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     }
                   }
                 ],
-                "brightest": null
+                "brightest": {
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
+                    }
+                  }
+                }
               }
             }
         }
@@ -548,7 +597,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     }
                   }
                 ],
-                "brightest": null
+                "brightest": {
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
+                    }
+                  }
+                }
               }
           }
         }
@@ -812,7 +868,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     }
                   }
                 ],
-                "brightest": null
+                "brightest": {
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
+                    }
+                  }
+                }
               }
           }
         }
@@ -970,7 +1033,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     }
                   }
                 ],
-                "brightest": null
+                "brightest": {
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
+                    }
+                  }
+                }
               }
           }
         }
@@ -1132,7 +1202,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     }
                   }
                 ],
-                "brightest": null
+                "brightest": {
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
+                    }
+                  }
+                }
               }
           }
         }
@@ -1289,7 +1366,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     }
                   }
                 ],
-                "brightest": null
+                "brightest": {
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
+                    }
+                  }
+                }
               }
           }
         }
@@ -1442,7 +1526,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     }
                   }
                 ],
-                "brightest": null
+                "brightest": {
+                  "selected": {
+                      "exposureCount": 10,
+                      "exposureTime": {
+                        "seconds": 1
+                      }
+                  }
+                }
               }
           }
         }
@@ -1541,6 +1632,12 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
                 targetTimes {
                   ...on TargetIntegrationTime {
+                    selected {
+                      exposureCount
+                      exposureTime {
+                        seconds
+                      }
+                    }
                     signalToNoiseAt {
                       wavelength {
                         nanometers
@@ -1586,6 +1683,12 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 },
                 "targetTimes": [
                   {
+                    "selected": {
+                      "exposureCount": 10,
+                      "exposureTime": {
+                        "seconds": 1
+                      }
+                    },
                     "signalToNoiseAt": {
                       "wavelength": {
                         "nanometers": 60.000
@@ -1595,7 +1698,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     }
                   }
                 ],
-                "brightest": null
+                "brightest": {
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
+                    }
+                  }
+                }
               }
           }
         }
@@ -1771,7 +1881,12 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     "single": 101.000,
                     "total": 102.000
                   },
-                  "selected" : null,
+                  "selected" : {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1.000000
+                    }
+                  },
                   "band": "R"
                 },
                 {
@@ -1782,12 +1897,24 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     "single": 101.000,
                     "total": 102.000
                   },
-                  "selected" : null,
+                  "selected" : {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1.000000
+                    }
+                  },
                   "band": "R"
                 }
               ],
-              "brightestIndex": null,
-              "brightest": null
+              "brightestIndex": 0,
+              "brightest": {
+                "selected": {
+                  "exposureCount": 10,
+                  "exposureTime": {
+                    "seconds": 1.000000
+                  }
+                }
+              }
             }
           }
         }

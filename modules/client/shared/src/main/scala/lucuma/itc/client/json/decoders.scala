@@ -84,7 +84,7 @@ object decoders:
           .as[Band]
           .map(_.asLeft)
           .orElse(c.downField("emissionLine").as[Wavelength].map(_.asRight))
-      times      <- c.as[Option[Zipper[IntegrationTime]]]
+      times      <- c.as[Zipper[IntegrationTime]]
       sn         <- c.downField("signalToNoiseAt").as[Option[SignalToNoiseAt]]
     yield TargetIntegrationTime(times, bandOrLine, sn)
 

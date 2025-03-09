@@ -201,24 +201,22 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   private def buildAsterismGraphRequest(
     asterismRequest: AsterismSpectroscopyTimeRequest,
     figures:         Option[SignificantFigures]
-  )(integrationTimes: AsterismIntegrationTimes): Option[AsterismGraphRequest] =
-    val brightestTarget: TargetIntegrationTime     = integrationTimes.value.focus
-    val selectedVariation: Option[IntegrationTime] = brightestTarget.times.map(_.focus)
-    val expTime: Option[TimeSpan]                  = selectedVariation.map(_.exposureTime)
-    val expCount: Option[NonNegInt]                = selectedVariation.map(_.exposureCount)
+  )(integrationTimes: AsterismIntegrationTimes): AsterismGraphRequest =
+    val brightestTarget: TargetIntegrationTime = integrationTimes.value.focus
+    val selectedVariation: IntegrationTime     = brightestTarget.times.focus
+    val expTime: TimeSpan                      = selectedVariation.exposureTime
+    val expCount: NonNegInt                    = selectedVariation.exposureCount
 
-    (expTime, expCount).mapN((expTime, expCount) =>
-      AsterismGraphRequest(
-        asterismRequest.asterism,
-        GraphParameters(
-          asterismRequest.exposureTimeMode.at,
-          asterismRequest.specMode,
-          asterismRequest.constraints,
-          expTime,
-          expCount
-        ),
-        figures
-      )
+    AsterismGraphRequest(
+      asterismRequest.asterism,
+      GraphParameters(
+        asterismRequest.exposureTimeMode.at,
+        asterismRequest.specMode,
+        asterismRequest.constraints,
+        expTime,
+        expCount
+      ),
+      figures
     )
 
   def spectroscopyIntegrationTimeAndGraphs[F[
@@ -240,13 +238,11 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             _ => specTimeResults.targetTimes.pure[ResultT[F, *]],
             // If integration times were all successful, compute graphs with brightest target's times.
             (integrationTimes: AsterismIntegrationTimes) =>
-              buildAsterismGraphRequest(asterismRequest, figures)(integrationTimes).fold(
-                ResultT.failure("Graphs need an resulting exposure time and count")
-              )(graphRequest =>
-                ResultT(spectroscopyGraphs(environment, cache, itc)(graphRequest)).map:
-                  (graphResult: SpectroscopyGraphsResult) =>
-                    AsterismTimeAndGraphs.fromTimeAndGraphResults(integrationTimes, graphResult)
-              )
+              val graphRequest =
+                buildAsterismGraphRequest(asterismRequest, figures)(integrationTimes)
+              ResultT(spectroscopyGraphs(environment, cache, itc)(graphRequest)).map:
+                (graphResult: SpectroscopyGraphsResult) =>
+                  AsterismTimeAndGraphs.fromTimeAndGraphResults(integrationTimes, graphResult)
           )
           .bisequence
           .map: (timesOrGraphs: Either[AsterismIntegrationTimeOutcomes, AsterismTimeAndGraphs]) =>

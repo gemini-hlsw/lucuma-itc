@@ -41,10 +41,10 @@ object AsterismIntegrationTimeOutcomes extends NewType[NonEmptyChain[TargetInteg
     // The brightest target is the one with the shortest exposure time.
     // Only returns the index of the brightest target if there are no errors.
     def brightestIndex: Option[Int] =
-      partitionErrors.toOption.map(_.value.indexOfFocus).filter(_ => brightest.isDefined)
+      partitionErrors.toOption.map(_.value.indexOfFocus)
 
     def brightest: Option[TargetIntegrationTime] =
-      partitionErrors.toOption.map(_.value.focus).filter(_.times.isDefined)
+      partitionErrors.toOption.map(_.value.focus)
 
     def collectErrors: Option[NonEmptyChain[(Error, Int)]] =
       NonEmptyChain.fromChain:
