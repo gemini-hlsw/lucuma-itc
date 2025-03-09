@@ -44,7 +44,7 @@ A few diferent encodings were tested to reduce size. Here are some measurement
 * Compressed json: 589896
 * Boopickle: 262216
 
-Make sure Redis is configured to use the `volatile-lru` eviction policy. This allows us to use it as a cache 
+Make sure Redis is configured to use the `volatile-lru` eviction policy. This allows us to use it as a cache
 for keys stored with a TTL, which is what we do here, while keeping a permanent entry for the version key.
 If the version key is missing or changes, the cache is flushed.
 
@@ -94,3 +94,20 @@ This project needs the following buildpacks to be used in heroku (order is impor
 First we need git lfs to get the files stored in github lfs
 Then scala to build the app
 And finally post-build-clean to reduce the slug size
+
+## Scheme stitching
+
+The itc schema uses many types defined on the odb schema. The `schemastitcher.js` script can be used
+to generate a single schema file that includes all the types needed by the itc schema. It uses as a
+base `itc_base.graphql` and stitches it with `ObservationDB.graphql`.
+
+It starts with the queries defined on `itc_base.graphql` and prunes the unused types, as itc doesn't
+need most of `ObservationDB.graphql` types.
+
+Call it as:
+```
+node schemastitcher.js modules/service/src/main/resources/graphql/ObservationDB.graphql modules/service/src/main/resources/graphql/itc_base.graphql modules/service/src/main/resources/graphql/itc.graphql
+
+```
+
+The script fetchODBSchema.sh will get the latest schema from the odb dev server and do the stitching
