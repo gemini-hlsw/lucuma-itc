@@ -14667,15 +14667,15 @@ type Query {
 
   # Given an instrument and a spectroscopy mode,
   # return the integration time and the estimated S/N for the given targets.
-  spectroscopyIntegrationTime(
-    input: SpectroscopyIntegrationTimeInput!
-  ): IntegrationTimeCalculationResult!
+  spectroscopy(
+    input: SpectroscopyInput!
+  ): CalculationResult!
 
   # Given an instrument and an imaging mode,
   # return the integration time and the estimated S/N for the given targets.
-  imagingIntegrationTime(
-    input: ImagingIntegrationTimeInput!
-  ): IntegrationTimeCalculationResult!
+  imaging(
+    input: ImagingInput!
+  ): CalculationResult!
 
   # Given an instrument and a mode, return the graph data for the given targets.
   # Values are rounded to limit the size of the response.
@@ -14812,7 +14812,7 @@ input InstrumentModesInput {
 }
 
 # Params for spectroscopy integration time calculation
-input SpectroscopyIntegrationTimeInput {
+input SpectroscopyInput {
 
   # Exposure time mode.
   exposureTimeMode: ExposureTimeModeInput!
@@ -14836,7 +14836,7 @@ input TargetInput {
 }
 
 # Params for imaging integration time calculation
-input ImagingIntegrationTimeInput {
+input ImagingInput {
 
   # Exposure time mode.
   exposureTimeMode: ExposureTimeModeInput!
@@ -14907,22 +14907,34 @@ input SpectroscopyIntegrationTimeAndGraphsInput {
 }
 
 type IntegrationTime {
-  # Exposure time duration
+  # Calculated exposure time duratio
   exposureTime: TimeSpan!
 
-  # Exposures
+  # Calculate exposures count
   exposureCount: NonNegInt!
-
-  # Signal/Noise ratio
-  signalToNoise: SignalToNoise!
 }
 
-type IntegrationTimeCalculationResult {
+# Calculated signal to noise at a specific wavelength
+type SignalToNoiseAt {
+  # Single exposure signal to noise
+  single: SignalToNoise!
+
+  # Total exposure signal to noise
+  total: SignalToNoise!
+
+  # Wavelength sn was calculated at
+  wavelength: Wavelength!
+}
+
+type CalculationResult {
   # server and data versions
   versions: ItcVersions!
 
   # queried mode
   mode: ITCObservingMode!
+
+  # exposure time mode
+  exposureTimeMode: ExposureTimeMode!
 
   # ITC results for each target
   targetTimes: [TargetIntegrationTimeOutcome!]!
@@ -14944,7 +14956,6 @@ type TargetIntegrationTime {
   # Index of the preferred CCD result, it is mode dependent
   index: NonNegInt!
 
-  # Preferred CCD result for the target
   selected: IntegrationTime!
 
   # The band used for the time calculation, in case of a BandNormalized SED
@@ -14952,6 +14963,9 @@ type TargetIntegrationTime {
 
   # The emission line used for the time calculation, in case of an EmissionLines SED
   emissionLine: Wavelength
+
+  # calculated signal to noise at a specific wavelength. Returned only if the wavelength At is valid
+  signalToNoiseAt: SignalToNoiseAt
 }
 
 type TargetError {

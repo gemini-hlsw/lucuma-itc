@@ -3,12 +3,10 @@
 
 package lucuma.itc
 
-import cats.data.NonEmptyMap
 import cats.implicits.*
 import coulomb.*
 import coulomb.syntax.*
 import coulomb.units.si.*
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.enums.*
@@ -33,6 +31,7 @@ import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ItcObservationDetails
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetData
+import lucuma.refined.*
 import munit.FunSuite
 
 import scala.collection.immutable.SortedMap
@@ -43,7 +42,7 @@ import scala.concurrent.duration.*
  * legacy ITC (Note that the ITC may still return an error but we want to ensure it can parse the
  * values
  */
-class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
+class LegacyITCExpTimeSuite extends FunSuite with CommonITCLegacySuite:
   override def munitTimeout: Duration = 5.minute
 
   val sourceDefinition = ItcSourceDefinition(
@@ -53,8 +52,8 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
           UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
           SortedMap(
             Band.R -> BrightnessValue
-              .unsafeFrom(9)
-              .withUnit[VegaMagnitude]
+              .unsafeFrom(16)
+              .withUnit[ABMagnitude]
               .toMeasureTagged
           )
         )
@@ -69,8 +68,9 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
     ItcObservationDetails.AnalysisMethod.Ifu.Single(skyFibres = 250, offset = 5.0)
 
   val obs = ItcObservationDetails(
-    calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
-      sigma = 100,
+    calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
+      exposureCount = 10,
+      exposureDuration = 3.seconds,
       wavelengthAt = Wavelength.decimalNanometers.getOption(610).get,
       coadds = None,
       sourceFraction = 1.0,
@@ -89,23 +89,21 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
       GmosNorthGrating.B1200_G5301,
       GmosNorthFpuParam(GmosNorthFpu.LongSlit_5_00),
       none,
-      GmosCcdMode(
-        GmosXBinning.One,
-        GmosYBinning.One,
-        GmosAmpCount.Twelve,
-        GmosAmpGain.High,
-        GmosAmpReadMode.Fast
+      GmosCcdMode(GmosXBinning.One,
+                  GmosYBinning.One,
+                  GmosAmpCount.Twelve,
+                  GmosAmpGain.High,
+                  GmosAmpReadMode.Fast
       ).some,
       GmosRoi.FullFrame.some
     )
   )
 
-  val conditions = ItcObservingConditions(
-    ImageQuality.PointEight,
-    CloudExtinction.OnePointFive,
-    WaterVapor.Median,
-    SkyBackground.Bright,
-    1
+  val conditions = ItcObservingConditions(ImageQuality.PointEight,
+                                          CloudExtinction.OnePointFive,
+                                          WaterVapor.Median,
+                                          SkyBackground.Bright,
+                                          1
   )
 
   def bodyCond(c: ItcObservingConditions) =
@@ -121,6 +119,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
     Enumerated[ImageQuality].all.foreach: iq =>
       val result = localItc
         .calculateIntegrationTime(bodyCond(conditions.copy(iq = iq)).asJson.noSpaces)
+
       assert(result.fold(allowedErrors, _ => true))
 
   test("cloud extinction".tag(LegacyITCTest)):
@@ -142,9 +141,9 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
       assert(result.fold(allowedErrors, _ => true))
 
   val gnConf = ObservingMode.SpectroscopyMode.GmosNorth(
-    Wavelength.decimalNanometers.getOption(600).get,
-    GmosNorthGrating.B1200_G5301,
-    GmosNorthFpuParam(GmosNorthFpu.LongSlit_1_00),
+    Wavelength.decimalNanometers.getOption(500).get,
+    GmosNorthGrating.B480_G5309,
+    GmosNorthFpuParam(GmosNorthFpu.LongSlit_0_25),
     none,
     GmosCcdMode(GmosXBinning.One,
                 GmosYBinning.One,
@@ -314,22 +313,7 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
         .calculateIntegrationTime(
           bodyIntMagUnits(f.withValueTagged(BrightnessValue.unsafeFrom(5))).asJson.noSpaces
         )
-      assert(result.fold(allowedErrors, _ => true))
-
-  test("user defined SED".tag(LegacyITCTest)) {
-    val userDefinedFluxDensities = NonEmptyMap.of(
-      Wavelength.decimalNanometers.getOption(500).get -> PosBigDecimal.unsafeFrom(1.0),
-      Wavelength.decimalNanometers.getOption(600).get -> PosBigDecimal.unsafeFrom(2.0),
-      Wavelength.decimalNanometers.getOption(700).get -> PosBigDecimal.unsafeFrom(3.0)
-    )
-
-    val result = localItc
-      .calculateIntegrationTime(
-        bodySED(UnnormalizedSED.UserDefined(userDefinedFluxDensities)).asJson.noSpaces
-      )
-
-    assert(result.fold(allowedErrors, _ => true))
-  }
+      assert(result.fold(allowedErrorsWithLargeSN, _ => true))
 
   def bodySurfaceMagUnits(c: BrightnessMeasure[Surface]) =
     ItcParameters(
@@ -355,14 +339,14 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
         .calculateIntegrationTime(
           bodySurfaceMagUnits(f.withValueTagged(BrightnessValue.unsafeFrom(5))).asJson.noSpaces
         )
-      assert(result.fold(allowedErrors, _ => true))
+      assert(result.fold(allowedErrorsWithLargeSN, _ => true))
 
   def bodyIntGaussianMagUnits(c: BrightnessMeasure[Integrated]) =
     ItcParameters(
       sourceDefinition.copy(
         target = sourceDefinition.target.copy(
           sourceProfile = SourceProfile.Gaussian(
-            Angle.fromDoubleArcseconds(10),
+            Angle.fromDoubleArcseconds(1),
             SpectralDefinition.BandNormalized(
               UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
               SortedMap(Band.R -> c)
@@ -380,9 +364,11 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
     Brightness.Integrated.all.toList.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(
-          bodyIntGaussianMagUnits(f.withValueTagged(BrightnessValue.unsafeFrom(5))).asJson.noSpaces
+          bodyIntGaussianMagUnits(
+            f.withValueTagged(BrightnessValue.unsafeFrom(2))
+          ).asJson.noSpaces
         )
-      assert(result.fold(allowedErrors, _ => true))
+      assert(result.fold(allowedErrorsWithLargeSN, _ => true))
 
   def bodyPowerLaw(c: Int) =
     ItcParameters(
@@ -440,53 +426,10 @@ class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
       gmosN
     )
 
-  // test("black body".tag(LocalOnly)) {
-  //   List[PosInt](10.refined, 100.refined).map { f =>
-  //     val result = localItc
-  //       .calculateIntegrationTime(bodyBlackBody(f).asJson.noSpaces)
-  //     println(result)
-  //     assert(result.fold(allowedErrors, _ => true))
-  //   }
-  // }
-
-  // def bodyEmissionLine(c: PosBigDecimal) =
-  //   ItcParameters(
-  //     sourceDefinition.copy(profile =
-  //       SourceProfile.Point(
-  //         SpectralDefinition.EmissionLines(
-  //           SortedMap(
-  //             Wavelength.decimalNanometers.getOption(600).get -> EmissionLine(
-  //               c.withUnit[KilometersPerSecond],
-  //               c
-  //                 .withUnit[WattsPerMeter2]
-  //                 .toMeasureTagged
-  //             )
-  //           ),
-  //           BigDecimal(5)
-  //             .withRefinedUnit[Positive, WattsPerMeter2Micrometer]
-  //             .toMeasureTagged
-  //         )
-  //       )
-  //     ),
-  //     obs,
-  //     conditions,
-  //     telescope,
-  //     instrument
-  //   )
-  //
-  // List[PosBigDecimal](BigDecimal(0.1), BigDecimal(10), BigDecimal(100)).map { f =>
-  //   println(bodyEmissionLine(f).asJson)
-  //   spec {
-  //     http("emission line")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200))
-  //       .check(substring("decode").notExists)
-  //       .check(substring("ItcSpectroscopyResult").exists)
-  //       .body(
-  //         StringBody(
-  //           bodyEmissionLine(f).asJson.noSpaces
-  //         )
-  //       )
-  //   }
-  // }
+  test("black body".tag(LegacyITCTest)) {
+    List[PosInt](10.refined, 100.refined).map { f =>
+      val result = localItc
+        .calculateIntegrationTime(bodyBlackBody(f).asJson.noSpaces)
+      assert(result.fold(allowedErrors, _ => true))
+    }
+  }

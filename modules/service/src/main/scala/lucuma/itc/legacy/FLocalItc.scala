@@ -41,3 +41,15 @@ case class FLocalItc[F[_]: Async](itcLocal: LocalItc):
             F.raiseError(new UpstreamException(msg))
         }
     }
+
+  def calculateSignalToNoise(jsonParams: String): F[IntegrationTimeRemoteResult] =
+    (F.cede *> F.delay(itcLocal.calculateSignalToNoise(jsonParams)).guarantee(F.cede)).flatMap {
+      case Right(result) => F.pure(result)
+      case Left(msg)     =>
+        msg match {
+          case TooBright :: HalfWell(v) :: Nil =>
+            F.raiseError(SourceTooBright(BigDecimal(v)))
+          case _                               =>
+            F.raiseError(new UpstreamException(msg))
+        }
+    }

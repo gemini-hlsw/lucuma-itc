@@ -10,17 +10,20 @@ import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcObservingConditions
 
-class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
+class spectroscopyTimeAndCountSuite extends GraphQLSuite:
 
-  test("gmos north case") {
+  test("gmos north case"):
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
-                at: { nanometers: 60 }
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
+                at: { nanometers: 600 }
               }
             },
             asterism: [
@@ -86,14 +89,40 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                 }
               }
             }
-            brightest {
-              selected {
-                exposureCount
-                exposureTime {
-                  seconds
+            targetTimes {
+              ... on TargetIntegrationTime {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
+                }
+                index
+                all {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
+                }
+                signalToNoiseAt {
+                  wavelength {
+                    nanometers
+                  }
+                  single
+                  total
                 }
               }
-              band
+            }
+            exposureTimeMode {
+              timeAndCount {
+                time {
+                  seconds
+                }
+                count
+                at {
+                  nanometers
+                }
+              }
             }
           }
         }
@@ -101,7 +130,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params": {
@@ -111,30 +140,58 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   "nanometers" : 60.000
                 }
               },
-              "brightest": {
-                "selected" : {
-                  "exposureCount" : 10,
-                  "exposureTime" : {
-                    "seconds" : 1.000000
+              "targetTimes": [
+                {
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
+                    }
+                  },
+                  "index": 0,
+                  "all": [
+                    {
+                      "exposureCount": 10,
+                      "exposureTime": {
+                        "seconds": 1
+                      }
+                    }
+                  ],
+                  "signalToNoiseAt": {
+                    "wavelength": {
+                      "nanometers": 600.000
+                    },
+                    "single": 101.000,
+                    "total": 102.000
                   }
-                },
-                "band": "R"
+                }
+              ],
+              "exposureTimeMode": {
+                "timeAndCount": {
+                  "time": {
+                    "seconds": 2
+                  },
+                  "count": 3,
+                  "at": { "nanometers": 600.000 }
+                }
               }
             }
           }
         }
         """
     )
-  }
 
-  test("gmos south case") {
+  test("gmos south case"):
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -202,6 +259,35 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   }
                 }
               }
+              exposureTimeMode {
+                timeAndCount {
+                  time {
+                    seconds
+                  }
+                  count
+                  at {
+                    nanometers
+                  }
+                }
+              }
+              targetTimes {
+                ... on TargetIntegrationTime {
+                  selected {
+                    exposureCount
+                    exposureTime {
+                      seconds
+                    }
+                  }
+                  index
+                  signalToNoiseAt {
+                    wavelength {
+                      nanometers
+                    }
+                    single
+                    total
+                  }
+                }
+              }
               brightest {
                 selected {
                   exposureCount
@@ -216,7 +302,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
                   "params": {
@@ -226,32 +312,61 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     "nanometers" : 60.000
                   }
                 },
+                "exposureTimeMode": {
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
+                    "at": { "nanometers": 60.000 }
+                  }
+                },
+                "targetTimes": [
+                  {
+                    "selected": {
+                      "exposureCount": 10,
+                      "exposureTime": {
+                        "seconds": 1
+                      }
+                    },
+                    "index": 0,
+                    "signalToNoiseAt": {
+                      "wavelength": {
+                        "nanometers": 60.000
+                      },
+                      "single": 101.000,
+                      "total": 102.000
+                    }
+                  }
+                ],
                 "brightest": {
-                  "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
                     }
                   }
                 }
               }
-          }
+            }
         }
         """
     )
-  }
 
-  test("gmos north case with variables") {
+  test("gmos north case with variables"):
     query(
       """
-        query($spectroscopy: SpectroscopyIntegrationTimeInput) {\n          spectroscopyIntegrationTime(input: $spectroscopy) {\n            mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n        }\n
+        query($spectroscopy: SpectroscopyInput) {\n          spectroscopy(input: $spectroscopy) {\n            mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n        }\n
       """,
       """
         {
           "spectroscopy" : {
             "exposureTimeMode": {
-              "signalToNoise": {
-                "value": 2,
+              "timeAndCount": {
+                "time": {
+                  "seconds": 2
+                },
+                "count": 3,
                 "at": { "nanometers": "600" }
               }
             },
@@ -310,7 +425,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
       json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_NORTH"
@@ -320,7 +435,6 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         }
         """
     )
-  }
 
   val allConditions =
     for {
@@ -338,15 +452,18 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
     2
   )
 
-  test("iterate over conditions") {
+  test("iterate over conditions"):
     allConditions.traverse { c =>
       query(
         s"""
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -413,6 +530,28 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
+                exposureTimeMode {
+                  timeAndCount {
+                    time {
+                      seconds
+                    }
+                    count
+                    at {
+                      nanometers
+                    }
+                  }
+                }
+                targetTimes {
+                  ... on TargetIntegrationTime {
+                    signalToNoiseAt {
+                      wavelength {
+                        nanometers
+                      }
+                      single
+                      total
+                    }
+                  }
+                }
                 brightest {
                   selected {
                     exposureCount
@@ -427,7 +566,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
@@ -438,11 +577,31 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     "nanometers" : 60.000
                   }
                 },
+                "exposureTimeMode": {
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
+                    "at": { "nanometers": 60.000 }
+                  }
+                },
+                "targetTimes": [
+                  {
+                    "signalToNoiseAt": {
+                      "wavelength": {
+                        "nanometers": 60.000
+                      },
+                      "single": 101.000,
+                      "total": 102.000
+                    }
+                  }
+                ],
                 "brightest": {
-                  "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
                     }
                   }
                 }
@@ -452,16 +611,18 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("Bad airmass") {
+  test("Bad airmass"):
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -528,6 +689,17 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   }
                 }
               }
+              exposureTimeMode {
+                timeAndCount {
+                  time {
+                    seconds
+                  }
+                  count
+                  at {
+                    nanometers
+                  }
+                }
+              }
               brightest {
                 selected {
                   exposureCount
@@ -550,17 +722,19 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         }
         """
     )
-  }
 
-  test("gmosN_gratings") {
+  test("gmosN_gratings"):
     Enumerated[GmosNorthGrating].all.traverse { d =>
       query(
         s"""
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -627,6 +801,28 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
+                exposureTimeMode {
+                  timeAndCount {
+                    time {
+                      seconds
+                    }
+                    count
+                    at {
+                      nanometers
+                    }
+                  }
+                }
+                targetTimes {
+                  ... on TargetIntegrationTime {
+                    signalToNoiseAt {
+                      wavelength {
+                        nanometers
+                      }
+                      single
+                      total
+                    }
+                  }
+                }
                 brightest {
                   selected {
                     exposureCount
@@ -641,7 +837,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
@@ -652,11 +848,31 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     "nanometers" : 60.000
                   }
                 },
+                "exposureTimeMode": {
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
+                    "at": { "nanometers": 60.000 }
+                  }
+                },
+                "targetTimes": [
+                  {
+                    "signalToNoiseAt": {
+                      "wavelength": {
+                        "nanometers": 60.000
+                      },
+                      "single": 101.000,
+                      "total": 102.000
+                    }
+                  }
+                ],
                 "brightest": {
-                  "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
                     }
                   }
                 }
@@ -666,17 +882,19 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("gmosS_gratings") {
+  test("gmosS_gratings"):
     Enumerated[GmosSouthGrating].all.traverse { d =>
       query(
         s"""
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -748,6 +966,28 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
+                exposureTimeMode {
+                  timeAndCount {
+                    time {
+                      seconds
+                    }
+                    count
+                    at {
+                      nanometers
+                    }
+                  }
+                }
+                targetTimes {
+                  ... on TargetIntegrationTime {
+                    signalToNoiseAt {
+                      wavelength {
+                        nanometers
+                      }
+                      single
+                      total
+                    }
+                  }
+                }
                 brightest {
                   selected {
                     exposureCount
@@ -762,7 +1002,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
@@ -770,14 +1010,34 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     "grating": ${d.tag.toScreamingSnakeCase}
                   },
                   "centralWavelength" : {
-                    "nanometers" : 60.00
+                    "nanometers" : 60.000
                   }
                 },
+                "exposureTimeMode": {
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
+                    "at": { "nanometers": 60.000 }
+                  }
+                },
+                "targetTimes": [
+                  {
+                    "signalToNoiseAt": {
+                      "wavelength": {
+                        "nanometers": 60.000
+                      },
+                      "single": 101.000,
+                      "total": 102.000
+                    }
+                  }
+                ],
                 "brightest": {
-                  "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
                     }
                   }
                 }
@@ -787,17 +1047,19 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("gmosN_fpu") {
+  test("gmosN_fpu"):
     Enumerated[GmosNorthFpu].all.traverse { d =>
       query(
         s"""
           query {
-            spectroscopyIntegrationTime(input: {
+            spectroscopy(input: {
               exposureTimeMode: {
-                signalToNoise: {
-                  value: 2,
+                timeAndCount: {
+                  time: {
+                    seconds: 2
+                  },
+                  count: 3,
                   at: { nanometers: 60 }
                 }
               },
@@ -871,6 +1133,28 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                       }
                     }
                   }
+                  exposureTimeMode {
+                    timeAndCount {
+                      time {
+                        seconds
+                      }
+                      count
+                      at {
+                        nanometers
+                      }
+                    }
+                  }
+                  targetTimes {
+                    ... on TargetIntegrationTime {
+                      signalToNoiseAt {
+                        wavelength {
+                          nanometers
+                        }
+                        single
+                        total
+                      }
+                    }
+                  }
                   brightest {
                     selected {
                       exposureCount
@@ -885,7 +1169,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
@@ -895,14 +1179,34 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   },
                   "centralWavelength" : {
-                    "nanometers" : 60.00
+                    "nanometers" : 60.000
                   }
                 },
+                "exposureTimeMode": {
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
+                    "at": { "nanometers": 60.000 }
+                  }
+                },
+                "targetTimes": [
+                  {
+                    "signalToNoiseAt": {
+                      "wavelength": {
+                        "nanometers": 60.000
+                      },
+                      "single": 101.000,
+                      "total": 102.000
+                    }
+                  }
+                ],
                 "brightest": {
-                  "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
                     }
                   }
                 }
@@ -912,17 +1216,19 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("gmosS_fpu") {
+  test("gmosS_fpu"):
     Enumerated[GmosSouthFpu].all.filter(_ =!= GmosSouthFpu.Bhros).traverse { d =>
       query(
         s"""
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -991,6 +1297,28 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
+                exposureTimeMode {
+                  timeAndCount {
+                    time {
+                      seconds
+                    }
+                    count
+                    at {
+                      nanometers
+                    }
+                  }
+                }
+                targetTimes {
+                  ... on TargetIntegrationTime {
+                    signalToNoiseAt {
+                      wavelength {
+                        nanometers
+                      }
+                      single
+                      total
+                    }
+                  }
+                }
                 brightest {
                   selected {
                     exposureCount
@@ -1005,7 +1333,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
@@ -1015,14 +1343,34 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   },
                   "centralWavelength" : {
-                    "nanometers" : 60.00
+                    "nanometers" : 60.000
                   }
                 },
+                "exposureTimeMode": {
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
+                    "at": { "nanometers": 60.000 }
+                  }
+                },
+                "targetTimes": [
+                  {
+                    "signalToNoiseAt": {
+                      "wavelength": {
+                        "nanometers": 60.000
+                      },
+                      "single": 101.000,
+                      "total": 102.000
+                    }
+                  }
+                ],
                 "brightest": {
-                  "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
                     }
                   }
                 }
@@ -1032,17 +1380,19 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("gmosN_filter") {
+  test("gmosN_filter"):
     Enumerated[GmosNorthFilter].all.traverse { d =>
       query(
         s"""
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -1109,6 +1459,28 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
+                exposureTimeMode {
+                  timeAndCount {
+                    time {
+                      seconds
+                    }
+                    count
+                    at {
+                      nanometers
+                    }
+                  }
+                }
+                targetTimes {
+                  ...on TargetIntegrationTime {
+                    signalToNoiseAt {
+                      wavelength {
+                        nanometers
+                      }
+                      single
+                      total
+                    }
+                  }
+                }
                 brightest {
                   selected {
                       exposureCount
@@ -1123,7 +1495,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
@@ -1134,12 +1506,32 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     "nanometers" : 60.000
                   }
                 },
-                "brightest": {
-                  "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
+                "exposureTimeMode": {
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
+                    "at": { "nanometers": 60.000 }
+                  }
+                },
+                "targetTimes": [
+                  {
+                    "signalToNoiseAt": {
+                      "wavelength": {
+                        "nanometers": 60.000
+                      },
+                      "single": 101.000,
+                      "total": 102.000
                     }
+                  }
+                ],
+                "brightest": {
+                  "selected": {
+                      "exposureCount": 10,
+                      "exposureTime": {
+                        "seconds": 1
+                      }
                   }
                 }
               }
@@ -1148,17 +1540,19 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("gmosS_filter") {
+  test("gmosS_filter"):
     Enumerated[GmosSouthFilter].all.traverse { d =>
       query(
         s"""
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -1225,6 +1619,34 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     }
                   }
                 }
+                exposureTimeMode {
+                  timeAndCount {
+                    time {
+                      seconds
+                    }
+                    count
+                    at {
+                      nanometers
+                    }
+                  }
+                }
+                targetTimes {
+                  ...on TargetIntegrationTime {
+                    selected {
+                      exposureCount
+                      exposureTime {
+                        seconds
+                      }
+                    }
+                    signalToNoiseAt {
+                      wavelength {
+                        nanometers
+                      }
+                      single
+                      total
+                    }
+                  }
+                }
                 brightest {
                   selected {
                       exposureCount
@@ -1239,7 +1661,7 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" :
+            "spectroscopy" :
               {
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
@@ -1250,11 +1672,37 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                     "nanometers" : 60.000
                   }
                 },
+                "exposureTimeMode": {
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
+                    "at": { "nanometers": 60.000 }
+                  }
+                },
+                "targetTimes": [
+                  {
+                    "selected": {
+                      "exposureCount": 10,
+                      "exposureTime": {
+                        "seconds": 1
+                      }
+                    },
+                    "signalToNoiseAt": {
+                      "wavelength": {
+                        "nanometers": 60.000
+                      },
+                      "single": 101.000,
+                      "total": 102.000
+                    }
+                  }
+                ],
                 "brightest": {
-                  "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
+                  "selected": {
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1
                     }
                   }
                 }
@@ -1264,16 +1712,18 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
         """
       )
     }
-  }
 
-  test("multiple targets") {
+  test("multiple targets"):
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
+          spectroscopy(input: {
             exposureTimeMode: {
-              signalToNoise: {
-                value: 2,
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
                 at: { nanometers: 60 }
               }
             },
@@ -1359,8 +1809,26 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                 }
               }
             }
+            exposureTimeMode {
+              timeAndCount {
+                time {
+                  seconds
+                }
+                count
+                at {
+                  nanometers
+                }
+              }
+            }
             targetTimes {
               ...on TargetIntegrationTime {
+                signalToNoiseAt {
+                  wavelength {
+                    nanometers
+                  }
+                  single
+                  total
+                }
                 selected {
                   exposureCount
                   exposureTime {
@@ -1371,13 +1839,21 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
               }
             }
             brightestIndex
+            brightest {
+              selected {
+                exposureCount
+                exposureTime {
+                  seconds
+                }
+              }
+            }
           }
         }
         """,
       json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params": {
@@ -1387,31 +1863,60 @@ class GraphQLSpectroscopyTimeSuite extends GraphQLSuite {
                   "nanometers" : 600.000
                 }
               },
+              "exposureTimeMode": {
+                "timeAndCount": {
+                  "time": {
+                    "seconds": 2.000000
+                  },
+                  "count": 3,
+                  "at": { "nanometers": 60.000 }
+                }
+              },
               "targetTimes": [
                 {
+                  "signalToNoiseAt": {
+                    "wavelength": {
+                      "nanometers": 60.000
+                    },
+                    "single": 101.000,
+                    "total": 102.000
+                  },
                   "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1.000000
                     }
                   },
                   "band": "R"
                 },
                 {
+                  "signalToNoiseAt": {
+                    "wavelength": {
+                      "nanometers": 60.000
+                    },
+                    "single": 101.000,
+                    "total": 102.000
+                  },
                   "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
+                    "exposureCount": 10,
+                    "exposureTime": {
+                      "seconds": 1.000000
                     }
                   },
                   "band": "R"
                 }
               ],
-              "brightestIndex": 0
+              "brightestIndex": 0,
+              "brightest": {
+                "selected": {
+                  "exposureCount": 10,
+                  "exposureTime": {
+                    "seconds": 1.000000
+                  }
+                }
+              }
             }
           }
         }
         """
     )
-  }
-}

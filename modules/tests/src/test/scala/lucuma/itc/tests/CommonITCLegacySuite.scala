@@ -10,18 +10,25 @@ import munit.Tag
 import java.io.File
 import java.io.FileFilter
 
-object LocalOnly extends Tag("LocalOnly")
+object LegacyITCTest extends Tag("LegacyItcTest")
 
 /**
  * This is a common trait for tests of the legacy ITC code
  */
-trait CommonITCSuite:
+trait CommonITCLegacySuite:
 
   def allowedErrors(err: List[String]) =
     err.exists(_.contains("Invalid S/N")) || err.exists(_.contains("do not overlap")) ||
       err.exists(_.contains("Unsupported configuration")) ||
       err.exists(_.contains("Unsupported calculation method")) ||
       err.exists(_.contains("target is too bright"))
+
+  def allowedErrorsWithLargeSN(err: List[String]) =
+    err.exists(_.contains("Invalid S/N")) || err.exists(_.contains("do not overlap")) ||
+      err.exists(_.contains("Unsupported configuration")) ||
+      err.exists(_.contains("Unsupported calculation method")) ||
+      err.exists(_.contains("target is too bright")) ||
+      err.exists(_.contains("Invalid SignalToNoise value"))
 
   lazy val localItc = {
 

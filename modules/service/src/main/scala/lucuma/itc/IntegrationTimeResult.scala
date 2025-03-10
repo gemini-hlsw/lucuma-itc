@@ -5,9 +5,6 @@ package lucuma.itc
 
 import cats.syntax.all.*
 import io.circe.Encoder
-import io.circe.Json
-import io.circe.syntax.*
-import lucuma.itc.search.ObservingMode
 
 sealed trait IntegrationTimeError extends RuntimeException {
   def message: String
@@ -33,20 +30,3 @@ case class CalculationError(msg: List[String]) extends IntegrationTimeError
 object CalculationError {
   def apply(msg: String): CalculationError = CalculationError(List(msg))
 }
-
-case class IntegrationTimeCalculationResult(
-  versions:    ItcVersions,
-  mode:        ObservingMode,
-  targetTimes: AsterismIntegrationTimeOutcomes
-)
-
-object IntegrationTimeCalculationResult:
-  given Encoder[IntegrationTimeCalculationResult] = r =>
-    Json
-      .obj(
-        "versions"       -> r.versions.asJson,
-        "mode"           -> r.mode.asJson,
-        "targetTimes"    -> r.targetTimes.asJson,
-        "brightestIndex" -> r.targetTimes.brightestIndex.asJson,
-        "brightest"      -> r.targetTimes.brightest.asJson
-      )

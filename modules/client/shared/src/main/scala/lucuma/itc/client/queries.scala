@@ -14,8 +14,8 @@ import lucuma.itc.ItcVersions
 import lucuma.itc.client.json.decoders.given
 
 object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
-  type Data      = IntegrationTimeResult
-  type Variables = SpectroscopyIntegrationTimeInput
+  type Data      = ClientCalculationResult
+  type Variables = SpectroscopyInput
 
   override val document: String =
     """
@@ -24,7 +24,6 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
           microseconds
         }
         exposureCount
-        signalToNoise
       }
 
       fragment TargetIntegrationTimeFields on TargetIntegrationTime {
@@ -36,6 +35,13 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
         index
         selected {
           ...IntegrationTimeFields
+        }
+        signalToNoiseAt {
+          single
+          total
+          wavelength {
+            picometers
+          }
         }
       }
 
@@ -50,8 +56,8 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
         }
       }
 
-      query Spectroscopy($spec: SpectroscopyIntegrationTimeInput!) {
-        spectroscopyIntegrationTime(input: $spec) {
+      query Spectroscopy($spec: SpectroscopyInput!) {
+        spectroscopy(input: $spec) {
           versions {
             serverVersion
             dataVersion
@@ -65,19 +71,19 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
     """
 
   override val varEncoder: Encoder.AsObject[Variables] =
-    Encoder.AsObject.instance[SpectroscopyIntegrationTimeInput] { input =>
+    Encoder.AsObject.instance[SpectroscopyInput] { input =>
       JsonObject(
-        "spec" -> Encoder[SpectroscopyIntegrationTimeInput].apply(input)
+        "spec" -> Encoder[SpectroscopyInput].apply(input)
       )
     }
 
-  override val dataDecoder: Decoder[IntegrationTimeResult] =
-    (c: HCursor) => c.downField("spectroscopyIntegrationTime").as[IntegrationTimeResult]
+  override val dataDecoder: Decoder[ClientCalculationResult] =
+    (c: HCursor) => c.downField("spectroscopy").as[ClientCalculationResult]
 }
 
 object ImagingIntegrationTime extends GraphQLOperation[Unit] {
-  type Data      = IntegrationTimeResult
-  type Variables = ImagingIntegrationTimeInput
+  type Data      = ClientCalculationResult
+  type Variables = ImagingInput
 
   override val document: String =
     """
@@ -86,7 +92,6 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
           microseconds
         }
         exposureCount
-        signalToNoise
       }
 
       fragment TargetIntegrationTimeFields on TargetIntegrationTime {
@@ -98,6 +103,13 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
         index
         selected {
           ...IntegrationTimeFields
+        }
+        signalToNoiseAt {
+          single
+          total
+          wavelength {
+            picometers
+          }
         }
       }
 
@@ -112,8 +124,8 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
         }
       }
 
-      query Imaging($spec: ImagingIntegrationTimeInput!) {
-        imagingIntegrationTime(input: $spec) {
+      query Imaging($spec: ImagingInput!) {
+        imaging(input: $spec) {
           versions {
             serverVersion
             dataVersion
@@ -127,14 +139,14 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
     """
 
   override val varEncoder: Encoder.AsObject[Variables] =
-    Encoder.AsObject.instance[ImagingIntegrationTimeInput] { input =>
+    Encoder.AsObject.instance[ImagingInput] { input =>
       JsonObject(
-        "spec" -> Encoder[ImagingIntegrationTimeInput].apply(input)
+        "spec" -> Encoder[ImagingInput].apply(input)
       )
     }
 
-  override val dataDecoder: Decoder[IntegrationTimeResult] =
-    (c: HCursor) => c.downField("imagingIntegrationTime").as[IntegrationTimeResult]
+  override val dataDecoder: Decoder[ClientCalculationResult] =
+    (c: HCursor) => c.downField("imaging").as[ClientCalculationResult]
 }
 
 object SpectroscopyGraphsQuery extends GraphQLOperation[Unit] {
@@ -236,7 +248,6 @@ object SpectroscopyIntegrationTimeAndGraphsQuery extends GraphQLOperation[Unit] 
           microseconds
         }
         exposureCount
-        signalToNoise
       }
 
       fragment TargetIntegrationTimeFields on TargetIntegrationTime {

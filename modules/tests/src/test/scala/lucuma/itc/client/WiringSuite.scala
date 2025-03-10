@@ -55,33 +55,35 @@ import lucuma.core.model.UnnormalizedSED.Galaxy
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.*
 import lucuma.itc.AsterismIntegrationTimeOutcomes
-import lucuma.itc.FinalSN
 import lucuma.itc.GraphType
 import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcAxis
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcVersions
 import lucuma.itc.SeriesDataType
+import lucuma.itc.SignalToNoiseAt
 import lucuma.itc.SingleSN
 import lucuma.itc.TargetIntegrationTime
 import lucuma.itc.TargetIntegrationTimeOutcome
+import lucuma.itc.TotalSN
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
 import lucuma.refined.*
 
 import java.time.Instant
 import scala.collection.immutable.SortedMap
 
+val atWavelength = Wavelength.fromIntNanometers(600).get
+
 class WiringSuite extends ClientSuite {
   val selected = IntegrationTime(
     TimeSpan.FromString.getOption("PT1S").get,
-    NonNegInt.unsafeFrom(10),
-    SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(10.0))
+    NonNegInt.unsafeFrom(10)
   )
 
   test("ItcClient spectroscopy basic wiring and sanity check") {
     spectroscopy(
-      WiringSuite.SpectroscopyInput,
-      IntegrationTimeResult(
+      WiringSuite.SpectroscopyInputData,
+      ClientCalculationResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -91,7 +93,11 @@ class WiringSuite extends ClientSuite {
             TargetIntegrationTimeOutcome:
               TargetIntegrationTime(
                 Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R.asLeft
+                Band.R.asLeft,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
               ).asRight
       ).asRight
     )
@@ -99,8 +105,8 @@ class WiringSuite extends ClientSuite {
 
   test("ItcClient imaging basic wiring and sanity check") {
     imaging(
-      WiringSuite.ImagingInput,
-      IntegrationTimeResult(
+      WiringSuite.ImagingInputData,
+      ClientCalculationResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -110,7 +116,11 @@ class WiringSuite extends ClientSuite {
             TargetIntegrationTimeOutcome:
               TargetIntegrationTime(
                 Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R.asLeft
+                Band.R.asLeft,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
               ).asRight
       ).asRight
     )
@@ -157,8 +167,8 @@ class WiringSuite extends ClientSuite {
                       )
                     )
                   ),
-                  FinalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
-                  SignalToNoise.fromInt(1001).map(FinalSN(_)),
+                  TotalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
+                  SignalToNoise.fromInt(1001).map(TotalSN(_)),
                   SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
                   SignalToNoise.fromInt(1002).map(SingleSN(_))
                 ),
@@ -172,7 +182,7 @@ class WiringSuite extends ClientSuite {
   test("ItcClient spectroscopy with emission lines basic wiring and sanity check") {
     spectroscopyEmissionLines(
       WiringSuite.SpectroscopyEmissionLinesInput,
-      IntegrationTimeResult(
+      ClientCalculationResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -182,7 +192,11 @@ class WiringSuite extends ClientSuite {
             TargetIntegrationTimeOutcome:
               TargetIntegrationTime(
                 Zipper.fromNel(NonEmptyList.one(selected)),
-                Wavelength.unsafeFromIntPicometers(650000).asRight
+                Wavelength.unsafeFromIntPicometers(650000).asRight,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
               ).asRight
       ).asRight
     )
@@ -191,12 +205,12 @@ class WiringSuite extends ClientSuite {
 
 object WiringSuite {
 
-  val SpectroscopyInput: SpectroscopyIntegrationTimeInput =
-    SpectroscopyIntegrationTimeInput(
-      SpectroscopyIntegrationTimeParameters(
+  val SpectroscopyInputData: SpectroscopyInput =
+    SpectroscopyInput(
+      SpectroscopyParameters(
         ExposureTimeMode.SignalToNoiseMode(
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
-          Wavelength.Min
+          atWavelength
         ),
         ConstraintSet(
           ImageQuality.PointOne,
@@ -239,12 +253,12 @@ object WiringSuite {
       )
     )
 
-  val ImagingInput: ImagingIntegrationTimeInput =
-    ImagingIntegrationTimeInput(
-      ImagingIntegrationTimeParameters(
+  val ImagingInputData: ImagingInput =
+    ImagingInput(
+      ImagingParameters(
         ExposureTimeMode.SignalToNoiseMode(
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
-          Wavelength.Min
+          atWavelength
         ),
         ConstraintSet(
           ImageQuality.PointOne,
@@ -325,12 +339,12 @@ object WiringSuite {
       )
     )
 
-  val SpectroscopyEmissionLinesInput: SpectroscopyIntegrationTimeInput =
-    SpectroscopyIntegrationTimeInput(
-      SpectroscopyIntegrationTimeParameters(
+  val SpectroscopyEmissionLinesInput: SpectroscopyInput =
+    SpectroscopyInput(
+      SpectroscopyParameters(
         ExposureTimeMode.SignalToNoiseMode(
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
-          Wavelength.Min
+          atWavelength
         ),
         ConstraintSet(
           ImageQuality.PointOne,

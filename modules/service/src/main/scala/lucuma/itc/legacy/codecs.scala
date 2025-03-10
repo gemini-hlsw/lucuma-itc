@@ -5,7 +5,7 @@ package lucuma.itc.legacy
 
 import cats.data.NonEmptyChain
 import cats.syntax.all.*
-import eu.timepit.refined.numeric.Positive
+import eu.timepit.refined.numeric.NonNegative
 import eu.timepit.refined.refineV
 import io.circe.*
 import io.circe.generic.semiauto.*
@@ -29,6 +29,8 @@ import lucuma.itc.ItcGraphGroup
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
+import lucuma.itc.SingleSN
+import lucuma.itc.TotalSN
 import lucuma.itc.legacy.syntax.all.*
 import lucuma.itc.search.*
 import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
@@ -66,6 +68,20 @@ given Encoder[ItcObservingConditions] =
 given Encoder[Wavelength] = w =>
   Json.fromString:
     s"${Wavelength.decimalNanometers.reverseGet(w)} nm"
+
+given Decoder[Wavelength] = w =>
+  val key: String = w.keys.flatMap(_.headOption).orEmpty
+  Decoder
+    .decodeBigDecimal(w)
+    .flatMap(w =>
+      Wavelength.decimalNanometers
+        .getOption(w)
+        .toRight(
+          DecodingFailure(s"Invalid wavelength value no enum value matched for $w",
+                          List(CursorOp.Field(key))
+          )
+        )
+    )
 
 private val encodeGmosNorthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.GmosNorth] =
   new Encoder[ObservingMode.SpectroscopyMode.GmosNorth] {
@@ -449,43 +465,61 @@ given Decoder[GraphsRemoteResult] = (c: HCursor) =>
                 .as[NonEmptyChain[ItcRemoteCcd]]
   yield GraphsRemoteResult(ccd, graphs)
 
-given Decoder[ExposureCalculation] = (c: HCursor) =>
+given Decoder[SignalToNoise] = (c: HCursor) =>
+  c.as[BigDecimal]
+    .flatMap: s =>
+      SignalToNoise.FromBigDecimalRounding
+        .getOption(s.setScale(2, BigDecimal.RoundingMode.HALF_UP))
+        .toRight(DecodingFailure("Invalid SignalToNoise value", c.history))
+
+given Decoder[Exposures] = (c: HCursor) =>
   for
-    sn    <- // We attempt decoding and validating S/N first
-      c
-        .downField("signalToNoise")
-        .as[BigDecimal]
-        .flatMap: s =>
-          SignalToNoise.FromBigDecimalRounding
-            .getOption(s)
-            .filter(_.toBigDecimal > BigDecimal(0))
-            .toRight:
-              DecodingFailure(
-                s"Invalid S/N value computed: $s",
-                c.downField("signalToNoise").history
-              )
     time  <- c.downField("exposureTime").as[Double]
     count <-
       c
         .downField("exposures")
         .as[Int]
         .flatMap:
-          refineV[Positive](_).leftMap(e => DecodingFailure(e, c.downField("exposures").history))
-  yield ExposureCalculation(time, count, sn)
+          refineV[NonNegative](_).leftMap(e => DecodingFailure(e, c.downField("exposures").history))
+  yield Exposures(time, count)
+
+given Decoder[AllExposureCalculations] = (c: HCursor) =>
+  for
+    results  <- c.downField("detectors").as[NonEmptyChain[Exposures]]
+    selected <- c.downField("selected").as[Int]
+  yield AllExposureCalculations(results, selected)
+
+given Decoder[SignalToNoiseAt] = (c: HCursor) =>
+  for
+    wv     <- c.downField("wavelength").as[Wavelength]
+    single <- c.downField("single").as[SignalToNoise]
+    total  <- c.downField("final").as[SignalToNoise]
+  yield SignalToNoiseAt(wv, SingleSN(single), TotalSN(total))
 
 given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
   val spec: Option[Decoder.Result[IntegrationTimeRemoteResult]] =
-    c.downField("ItcSpectroscopyResult")
-      .downField("exposureCalculation")
-      .success
-      .map:
-        _.as[ExposureCalculation]
-          .map(c => IntegrationTimeRemoteResult(NonEmptyChain.one(c)))
+    for {
+      t <- c.downField("ItcSpectroscopyResult")
+             .downField("times")
+             .success
+             .map:
+               _.as[AllExposureCalculations]
+      s <- c.downField("ItcSpectroscopyResult")
+             .downField("signalToNoiseAt")
+             .success
+             .map:
+               _.as[Option[SignalToNoiseAt]]
+    } yield (t, s).mapN(IntegrationTimeRemoteResult(_, _))
 
-  val img: Decoder.Result[IntegrationTimeRemoteResult] =
-    c.downField("ItcImagingResult")
-      .downField("exposureCalculation")
-      .as[NonEmptyChain[ExposureCalculation]]
-      .map(c => IntegrationTimeRemoteResult(c))
+  val img: Option[Decoder.Result[IntegrationTimeRemoteResult]] =
+    for {
+      t <- c.downField("ItcImagingResult")
+             .downField("times")
+             .success
+             .map:
+               _.as[AllExposureCalculations]
+    } yield t.map(IntegrationTimeRemoteResult(_, None))
 
-  spec.getOrElse(img)
+  spec
+    .orElse(img)
+    .getOrElse(Left(DecodingFailure("No valid IntegrationTimeRemoteResult", c.history)))

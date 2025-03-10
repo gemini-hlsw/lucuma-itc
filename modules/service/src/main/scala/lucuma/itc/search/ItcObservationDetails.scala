@@ -52,7 +52,8 @@ object ItcObservationDetails {
         coadds:           Option[Int],
         exposureDuration: FiniteDuration,
         sourceFraction:   Double,
-        ditherOffset:     Angle
+        ditherOffset:     Angle,
+        wavelengthAt:     Wavelength
       ) extends SignalToNoise
 
       object Spectroscopy {
@@ -63,17 +64,18 @@ object ItcObservationDetails {
               "coadds"         -> a.coadds.asJson,
               "exposureTime"   -> a.exposureDuration.toDoubleSeconds.asJson,
               "sourceFraction" -> a.sourceFraction.asJson,
-              "offset"         -> Angle.signedDecimalArcseconds.get(a.ditherOffset).asJson
+              "offset"         -> Angle.signedDecimalArcseconds.get(a.ditherOffset).asJson,
+              "wavelengthAt"   -> a.wavelengthAt.nm.value.value.asJson
             )
           }
       }
 
       case class SpectroscopyWithSNAt(
         sigma:          Double,
-        wavelength:     Wavelength,
         coadds:         Option[Int],
         sourceFraction: Double,
-        ditherOffset:   Angle
+        ditherOffset:   Angle,
+        wavelengthAt:   Wavelength
       ) extends SignalToNoise
 
       object SpectroscopyWithSNAt {
@@ -81,10 +83,10 @@ object ItcObservationDetails {
           Encoder.instance { a =>
             Json.obj(
               "sigma"          -> a.sigma.asJson,
-              "wavelength"     -> a.wavelength.toNanometers.value.value.asJson,
               "coadds"         -> a.coadds.asJson,
               "sourceFraction" -> a.sourceFraction.asJson,
-              "offset"         -> Angle.signedDecimalArcseconds.get(a.ditherOffset).asJson
+              "offset"         -> Angle.signedDecimalArcseconds.get(a.ditherOffset).asJson,
+              "wavelengthAt"   -> a.wavelengthAt.nm.value.value.asJson
             )
           }
       }

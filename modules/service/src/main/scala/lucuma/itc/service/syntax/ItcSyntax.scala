@@ -7,13 +7,13 @@ import cats.data.*
 import grackle.Problem
 import grackle.Query.Environment
 import lucuma.core.math.SignalToNoise
-import lucuma.itc.FinalSN
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcGraph
 import lucuma.itc.ItcGraphGroup
 import lucuma.itc.ItcSeries
 import lucuma.itc.SignificantFigures
 import lucuma.itc.SingleSN
+import lucuma.itc.TotalSN
 import lucuma.itc.math.roundToSignificantFigures
 import monocle.Focus
 import monocle.std.these.*
@@ -69,10 +69,10 @@ trait ItcGraphSyntax:
     def adjustSignificantFigures(figures: SignificantFigures): ItcGraph =
       graph.copy(series = graph.series.map(_.adjustSignificantFigures(figures)))
 
-  extension (sn: FinalSN)
+  extension (sn: TotalSN)
     @targetName("finalAdjust")
-    def adjustSignificantFigures(figures: SignificantFigures): FinalSN =
-      FinalSN(sn.value.adjustSignificantFigures(figures))
+    def adjustSignificantFigures(figures: SignificantFigures): TotalSN =
+      TotalSN(sn.value.adjustSignificantFigures(figures))
 
   extension (sn: SingleSN)
     @targetName("finalSingle")

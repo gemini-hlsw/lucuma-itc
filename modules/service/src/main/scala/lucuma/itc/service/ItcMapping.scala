@@ -13,11 +13,11 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import grackle.*
 import grackle.circe.CirceMapping
 import io.circe.syntax.*
-import lucuma.core.data.Zipper
 import lucuma.core.enums.{ExecutionEnvironment as _, *}
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.TimeSpan
 import lucuma.itc.*
+import lucuma.itc.CalculationResult
 import lucuma.itc.ItcVersions
 import lucuma.itc.cache.BinaryEffectfulCache
 import lucuma.itc.encoders.given
@@ -62,8 +62,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   private def errorToProblem(error: Error, targetIndex: Int): Problem =
     Problem(error.message, extensions = ErrorExtension(targetIndex, error).asJsonObject.some)
 
-  extension (timeResult: IntegrationTimeCalculationResult)
-    private def toResult: Result[IntegrationTimeCalculationResult] =
+  extension (timeResult: CalculationResult)
+    private def toResult: Result[CalculationResult] =
       timeResult.targetTimes.collectErrors.fold(Result.success(timeResult)): errors =>
         Result.Warning(errors.map(errorToProblem), timeResult)
 
@@ -85,18 +85,19 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     itc:             Itc[F]
   )(
     asterismRequest: AsterismSpectroscopyTimeRequest
-  ): F[Result[IntegrationTimeCalculationResult]] =
+  ): F[Result[CalculationResult]] =
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetSpectroscopyTimeRequest) =>
-        specTimeFromCacheOrRemote(targetRequest)(itc, cache).attempt
+        spectroscopyFromCacheOrRemote(targetRequest)(itc, cache).attempt
           .map: (result: Either[Throwable, TargetIntegrationTime]) =>
             TargetIntegrationTimeOutcome:
               result.leftMap(buildError)
       .map: (targetOutcomes: NonEmptyChain[TargetIntegrationTimeOutcome]) =>
-        IntegrationTimeCalculationResult(
+        CalculationResult(
           ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
           asterismRequest.specMode,
-          AsterismIntegrationTimeOutcomes(targetOutcomes)
+          AsterismIntegrationTimeOutcomes(targetOutcomes),
+          asterismRequest.exposureTimeMode
         ).toResult
       .onError: t =>
         Logger[F]
@@ -109,10 +110,10 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     environment: ExecutionEnvironment,
     cache:       BinaryEffectfulCache[F],
     itc:         Itc[F]
-  )(asterismRequest: AsterismImagingTimeRequest): F[Result[IntegrationTimeCalculationResult]] =
+  )(asterismRequest: AsterismImagingTimeRequest): F[Result[CalculationResult]] =
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetImagingTimeRequest) =>
-        imgTimeFromCacheOrRemote(targetRequest)(itc, cache).attempt
+        imagingFromCacheOrRemote(targetRequest)(itc, cache).attempt
           .map: (result: Either[Throwable, TargetIntegrationTime]) =>
             TargetIntegrationTimeOutcome:
               result
@@ -125,10 +126,11 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                         .focusIndex(1) // For gmos focus on the second CCD
                         .getOrElse(integrationTime)
       .map: (targetOutcomes: NonEmptyChain[TargetIntegrationTimeOutcome]) =>
-        IntegrationTimeCalculationResult(
+        CalculationResult(
           ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
           asterismRequest.imagingMode,
-          AsterismIntegrationTimeOutcomes(targetOutcomes)
+          AsterismIntegrationTimeOutcomes(targetOutcomes),
+          asterismRequest.exposureTimeMode
         ).toResult
       .onError: t =>
         Logger[F]
@@ -154,7 +156,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       significantFigures.fold(graphResult.peakSingleSNRatio):
         graphResult.peakSingleSNRatio.adjustSignificantFigures
 
-    val atWvFinalSNRatio: Option[FinalSN] =
+    val atWvFinalSNRatio: Option[TotalSN] =
       significantFigures.fold(graphResult.atWavelengthFinalSNRatio): s =>
         graphResult.atWavelengthFinalSNRatio.map(_.adjustSignificantFigures(s))
 
@@ -199,7 +201,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   private def buildAsterismGraphRequest(
     asterismRequest: AsterismSpectroscopyTimeRequest,
     figures:         Option[SignificantFigures]
-  )(integrationTimes: AsterismIntegrationTimes): AsterismGraphRequest = {
+  )(integrationTimes: AsterismIntegrationTimes): AsterismGraphRequest =
     val brightestTarget: TargetIntegrationTime = integrationTimes.value.focus
     val selectedVariation: IntegrationTime     = brightestTarget.times.focus
     val expTime: TimeSpan                      = selectedVariation.exposureTime
@@ -216,7 +218,6 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       ),
       figures
     )
-  }
 
   def spectroscopyIntegrationTimeAndGraphs[F[
     _
@@ -229,7 +230,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     figures:         Option[SignificantFigures]
   ): F[Result[SpectroscopyTimeAndGraphsResult]] =
     ResultT(calculateSpectroscopyIntegrationTime(environment, cache, itc)(asterismRequest))
-      .flatMap: (specTimeResults: IntegrationTimeCalculationResult) =>
+      .flatMap: (specTimeResults: CalculationResult) =>
         specTimeResults.targetTimes.partitionErrors
           .bimap(
             // If there was an error computing integration times, we cannot compute the graphs
@@ -237,7 +238,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             _ => specTimeResults.targetTimes.pure[ResultT[F, *]],
             // If integration times were all successful, compute graphs with brightest target's times.
             (integrationTimes: AsterismIntegrationTimes) =>
-              val graphRequest: AsterismGraphRequest =
+              val graphRequest =
                 buildAsterismGraphRequest(asterismRequest, figures)(integrationTimes)
               ResultT(spectroscopyGraphs(environment, cache, itc)(graphRequest)).map:
                 (graphResult: SpectroscopyGraphsResult) =>
@@ -280,17 +281,17 @@ object ItcMapping extends ItcCacheOrRemote with Version {
               tpe = QueryType,
               fieldMappings = List(
                 RootEffect.computeEncodable("versions")((_, _) => versions(environment)),
-                RootEffect.computeEncodable("spectroscopyIntegrationTime") { (_, env) =>
+                RootEffect.computeEncodable("spectroscopy") { (_, env) =>
                   env
-                    .getR[SpectroscopyIntegrationTimeInput]("input")
+                    .getR[SpectroscopyInput]("input")
                     .flatMap(AsterismSpectroscopyTimeRequest.fromInput)
                     .flatTraverse:
                       calculateSpectroscopyIntegrationTime[F](environment, cache, itc)
                     .toGraphQLErrors
                 },
-                RootEffect.computeEncodable("imagingIntegrationTime") { (_, env) =>
+                RootEffect.computeEncodable("imaging") { (_, env) =>
                   env
-                    .getR[ImagingIntegrationTimeInput]("input")
+                    .getR[ImagingInput]("input")
                     .flatMap(AsterismImagingTimeRequest.fromInput)
                     .flatTraverse:
                       calculateImagingIntegrationTime(environment, cache, itc)
@@ -328,15 +329,9 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             Elab.liftR(input).flatMap(i => Elab.env("input" -> i))
 
           SelectElaborator {
-            case (QueryType,
-                  "spectroscopyIntegrationTime",
-                  List(SpectroscopyIntegrationTimeInput.Binding("input", input))
-                ) =>
+            case (QueryType, "spectroscopy", List(SpectroscopyInput.Binding("input", input))) =>
               handle(input)
-            case (QueryType,
-                  "imagingIntegrationTime",
-                  List(ImagingIntegrationTimeInput.Binding("input", input))
-                ) =>
+            case (QueryType, "imaging", List(ImagingInput.Binding("input", input)))           =>
               handle(input)
             case (QueryType,
                   "spectroscopyGraphs",

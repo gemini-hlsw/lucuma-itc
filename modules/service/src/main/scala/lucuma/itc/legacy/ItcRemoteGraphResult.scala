@@ -5,9 +5,11 @@ package lucuma.itc.legacy
 
 import cats.data.NonEmptyChain
 import cats.syntax.all.*
-import eu.timepit.refined.types.numeric.PosInt
-import lucuma.core.math.SignalToNoise
+import eu.timepit.refined.types.numeric.NonNegInt
+import lucuma.core.math.Wavelength
 import lucuma.itc.ItcGraphGroup
+import lucuma.itc.SingleSN
+import lucuma.itc.TotalSN
 
 case class GraphsRemoteResult(
   ccds:   NonEmptyChain[ItcRemoteCcd],
@@ -18,10 +20,25 @@ case class GraphsRemoteResult(
   val maxPeakPixelFlux: Int   = ccds.map(_.peakPixelFlux).maximum.toInt
 }
 
-case class ExposureCalculation(
+case class Exposures(
   exposureTime:  Double,
-  exposureCount: PosInt,
-  signalToNoise: SignalToNoise
+  exposureCount: NonNegInt
 )
 
-case class IntegrationTimeRemoteResult(exposureCalculation: NonEmptyChain[ExposureCalculation])
+case class SignalToNoiseAt(
+  wavelength: Wavelength,
+  single:     SingleSN,
+  total:      TotalSN
+)
+
+case class AllExposureCalculations(
+  exposures:     NonEmptyChain[Exposures],
+  selectedIndex: Int
+)
+
+case class IntegrationTimeRemoteResult(
+  exposureCalculation: AllExposureCalculations,
+
+  // In principle this should not be empty, but you could still use a wv outside the rang of a ccd. Rather than giving a zero SN, we just don't return anything.
+  signalToNoiseAt: Option[SignalToNoiseAt]
+)

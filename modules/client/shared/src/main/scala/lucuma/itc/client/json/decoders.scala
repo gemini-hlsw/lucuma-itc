@@ -15,14 +15,16 @@ import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
-import lucuma.itc.AsterismTimesAndGraphsOutcomes
 import lucuma.itc.Error
 import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcGraph
 import lucuma.itc.ItcSeries
+import lucuma.itc.SignalToNoiseAt
+import lucuma.itc.SingleSN
 import lucuma.itc.TargetIntegrationTime
 import lucuma.itc.TargetIntegrationTimeOutcome
+import lucuma.itc.TotalSN
 import lucuma.itc.client.*
 
 // Decoders for the client don't need to be as generic as the ones for the server.
@@ -66,9 +68,14 @@ object decoders:
       n <- c.downField("exposureCount")
              .as[Int]
              .flatMap(n => NonNegInt.from(n).leftMap(m => DecodingFailure(m, c.history)))
-      s <- c.downField("signalToNoise")
-             .as[SignalToNoise]
-    } yield IntegrationTime(t, n, s)
+    } yield IntegrationTime(t, n)
+
+  given Decoder[SignalToNoiseAt] = c =>
+    for {
+      w <- c.downField("wavelength").as[Wavelength]
+      s <- c.downField("single").as[SignalToNoise]
+      t <- c.downField("total").as[SignalToNoise]
+    } yield SignalToNoiseAt(w, SingleSN(s), TotalSN(t))
 
   given Decoder[TargetIntegrationTime] = c =>
     for
@@ -78,7 +85,8 @@ object decoders:
           .map(_.asLeft)
           .orElse(c.downField("emissionLine").as[Wavelength].map(_.asRight))
       times      <- c.as[Zipper[IntegrationTime]]
-    yield TargetIntegrationTime(times, bandOrLine)
+      sn         <- c.downField("signalToNoiseAt").as[Option[SignalToNoiseAt]]
+    yield TargetIntegrationTime(times, bandOrLine, sn)
 
   given Decoder[ItcCcd]    = deriveDecoder[ItcCcd]
   given Decoder[ItcSeries] = deriveDecoder[ItcSeries]
@@ -89,5 +97,3 @@ object decoders:
       .map(_.asRight)
       .or(Decoder[Error].map(_.asLeft))
       .map(TargetIntegrationTimeOutcome(_))
-
-  given Decoder[AsterismTimesAndGraphsOutcomes] = ???
