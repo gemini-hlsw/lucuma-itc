@@ -144,6 +144,9 @@ object ItcImpl {
                    _      <- T.put("itc.query" -> request.spaces2)
                    _      <- T.put("itc.sigma" -> signalToNoise.toBigDecimal.toDouble)
                    _      <- L.info(request.noSpaces) // Request to the legacy itc
+                   _      <- L.info(
+                               s"Spectroscopy: Signal to noise mode ${request.noSpaces}"
+                             ) // Request to the legacy itc
                    a      <- itcLocal.calculateIntegrationTime(request.noSpaces)
                    result <- convertIntegrationTimeRemoteResult(a, bandOrLine)
                  yield result
@@ -200,7 +203,9 @@ object ItcImpl {
                  for
                    _            <- T.put("itc.query" -> request.spaces2)
                    _            <- T.put("itc.sigma" -> signalToNoise.toBigDecimal.toDouble)
-                   _            <- L.info(request.noSpaces)
+                   _            <- L.info(
+                                     s"Imaging: Signal to noise mode ${request.noSpaces}"
+                                   ) // Request to the legacy itc
                    remoteResult <- itcLocal.calculateIntegrationTime(request.noSpaces)
                    result       <- convertIntegrationTimeRemoteResult(remoteResult, bandOrLine)
                  yield result
@@ -237,7 +242,9 @@ object ItcImpl {
           r <- T.span("itc.calctime.spectroscopy-signal-to-noise"):
                  for
                    _ <- T.put("itc.query" -> request.spaces2)
-                   _ <- L.info(request.noSpaces) // Request to the legacy itc
+                   _ <- L.info(
+                          s"Spectroscopy: Signal to noise mode ${request.noSpaces}"
+                        ) // Request to the legacy itc
                    a <- itcLocal.calculateSignalToNoise(request.noSpaces)
                  yield TargetIntegrationTime(
                    Zipper.one(IntegrationTime(exposureTime, exposureCount)),
