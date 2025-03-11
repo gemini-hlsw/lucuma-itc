@@ -1,7 +1,7 @@
 // Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc
+package lucuma.itc.legacy
 
 import cats.data.NonEmptyMap
 import cats.implicits.*
@@ -26,7 +26,6 @@ import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.Enumerated
-import lucuma.itc.legacy.*
 import lucuma.itc.legacy.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
@@ -37,13 +36,14 @@ import munit.FunSuite
 
 import scala.collection.immutable.SortedMap
 import scala.concurrent.duration.*
+import lucuma.itc.ItcObservingConditions
 
 /**
  * This is a unit test mostly to ensure all possible combination of params can be parsed by the
  * legacy ITC (Note that the ITC may still return an error but we want to ensure it can parse the
  * values
  */
-class LegacyITCSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
+class LegacyITCGmosSpecSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
   override def munitTimeout: Duration = 5.minute
 
   val sourceDefinition = ItcSourceDefinition(

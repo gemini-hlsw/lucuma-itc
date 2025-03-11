@@ -1,14 +1,12 @@
 // Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc
+package lucuma.itc.legacy
 
-import cats.data.NonEmptyMap
 import cats.implicits.*
 import coulomb.*
 import coulomb.syntax.*
 import coulomb.units.si.*
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.enums.*
@@ -26,22 +24,25 @@ import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.Enumerated
-import lucuma.itc.legacy.*
 import lucuma.itc.legacy.given
+import lucuma.itc.search.GmosNorthFpuParam
+import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ItcObservationDetails
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetData
+import lucuma.refined.*
 import munit.FunSuite
 
 import scala.collection.immutable.SortedMap
 import scala.concurrent.duration.*
+import lucuma.itc.ItcObservingConditions
 
 /**
- * This is a unit test for GMOS imaging mode in the legacy ITC, ensuring all possible combinations
- * of parameters can be parsed. The ITC may still return an error but we want to ensure it can parse
- * the values.
+ * This is a unit test mostly to ensure all possible combination of params can be parsed by the
+ * legacy ITC (Note that the ITC may still return an error but we want to ensure it can parse the
+ * values
  */
-class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLegacySuite:
+class LegacyITCGmosSpecExpTimeSuite extends FunSuite with CommonITCLegacySuite:
   override def munitTimeout: Duration = 5.minute
 
   val sourceDefinition = ItcSourceDefinition(
@@ -51,8 +52,8 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
           UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
           SortedMap(
             Band.R -> BrightnessValue
-              .unsafeFrom(9)
-              .withUnit[VegaMagnitude]
+              .unsafeFrom(16)
+              .withUnit[ABMagnitude]
               .toMeasureTagged
           )
         )
@@ -62,41 +63,47 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
     Band.R.asLeft
   )
 
-  val analysisMethod = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
+  val lsAnalysisMethod  = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
+  val ifuAnalysisMethod =
+    ItcObservationDetails.AnalysisMethod.Ifu.Single(skyFibres = 250, offset = 5.0)
 
   val obs = ItcObservationDetails(
-    calculationMethod = ItcObservationDetails.CalculationMethod.IntegrationTime.ImagingExp(
-      sigma = 600,
+    calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
+      exposureCount = 10,
+      exposureDuration = 3.seconds,
+      wavelengthAt = Wavelength.decimalNanometers.getOption(610).get,
       coadds = None,
       sourceFraction = 1.0,
       ditherOffset = Angle.Angle0
     ),
-    analysisMethod = analysisMethod
+    analysisMethod = lsAnalysisMethod
   )
 
   val telescope = ItcTelescopeDetails(
     wfs = ItcWavefrontSensor.OIWFS
   )
 
-  val gmosNImaging = ItcInstrumentDetails(
-    ObservingMode.ImagingMode.GmosNorth(
-      GmosNorthFilter.GPrime,
-      GmosCcdMode(
-        GmosXBinning.One,
-        GmosYBinning.One,
-        GmosAmpCount.Twelve,
-        GmosAmpGain.High,
-        GmosAmpReadMode.Fast
-      ).some
+  val gmosN = ItcInstrumentDetails(
+    ObservingMode.SpectroscopyMode.GmosNorth(
+      Wavelength.decimalNanometers.getOption(600).get,
+      GmosNorthGrating.B1200_G5301,
+      GmosNorthFpuParam(GmosNorthFpu.LongSlit_5_00),
+      none,
+      GmosCcdMode(GmosXBinning.One,
+                  GmosYBinning.One,
+                  GmosAmpCount.Twelve,
+                  GmosAmpGain.High,
+                  GmosAmpReadMode.Fast
+      ).some,
+      GmosRoi.FullFrame.some
     )
   )
 
-  val conditions = ItcObservingConditions(
-    ImageQuality.PointEight,
-    CloudExtinction.OnePointFive,
-    WaterVapor.Median,
-    SkyBackground.Bright,
-    1
+  val conditions = ItcObservingConditions(ImageQuality.PointEight,
+                                          CloudExtinction.OnePointFive,
+                                          WaterVapor.Median,
+                                          SkyBackground.Bright,
+                                          1
   )
 
   def bodyCond(c: ItcObservingConditions) =
@@ -105,13 +112,14 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
       obs,
       c,
       telescope,
-      gmosNImaging
+      gmosN
     )
 
   test("image quality".tag(LegacyITCTest)):
     Enumerated[ImageQuality].all.foreach: iq =>
       val result = localItc
         .calculateIntegrationTime(bodyCond(conditions.copy(iq = iq)).asJson.noSpaces)
+
       assert(result.fold(allowedErrors, _ => true))
 
   test("cloud extinction".tag(LegacyITCTest)):
@@ -132,53 +140,99 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
         .calculateIntegrationTime(bodyCond(conditions.copy(sb = sb)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  val gmosNConf = ObservingMode.ImagingMode.GmosNorth(
-    GmosNorthFilter.GPrime,
-    GmosCcdMode(
-      GmosXBinning.One,
-      GmosYBinning.One,
-      GmosAmpCount.Twelve,
-      GmosAmpGain.High,
-      GmosAmpReadMode.Fast
-    ).some
+  val gnConf = ObservingMode.SpectroscopyMode.GmosNorth(
+    Wavelength.decimalNanometers.getOption(500).get,
+    GmosNorthGrating.B480_G5309,
+    GmosNorthFpuParam(GmosNorthFpu.LongSlit_0_25),
+    none,
+    GmosCcdMode(GmosXBinning.One,
+                GmosYBinning.One,
+                GmosAmpCount.Twelve,
+                GmosAmpGain.High,
+                GmosAmpReadMode.Fast
+    ).some,
+    GmosRoi.FullFrame.some
   )
 
-  def bodyConf(c: ObservingMode.ImagingMode) =
+  def bodyConf(
+    c:        ObservingMode.SpectroscopyMode,
+    analysis: ItcObservationDetails.AnalysisMethod = lsAnalysisMethod
+  ) =
     ItcParameters(
       sourceDefinition,
-      obs,
-      ItcObservingConditions(
-        ImageQuality.PointEight,
-        CloudExtinction.OnePointFive,
-        WaterVapor.Median,
-        SkyBackground.Dark,
-        2
+      obs.copy(analysisMethod = analysis),
+      ItcObservingConditions(ImageQuality.PointEight,
+                             CloudExtinction.OnePointFive,
+                             WaterVapor.Median,
+                             SkyBackground.Dark,
+                             2
       ),
       telescope,
       ItcInstrumentDetails(c)
     )
 
+  test("gmos north grating".tag(LegacyITCTest)):
+    Enumerated[GmosNorthGrating].all.foreach: d =>
+      val result = localItc
+        .calculateIntegrationTime(bodyConf(gnConf.copy(disperser = d)).asJson.noSpaces)
+      assert(result.fold(allowedErrors, _ => true))
+
   test("gmos north filter".tag(LegacyITCTest)):
     Enumerated[GmosNorthFilter].all.foreach: f =>
       val result = localItc
-        .calculateIntegrationTime(bodyConf(gmosNConf.copy(filter = f)).asJson.noSpaces)
+        .calculateIntegrationTime(bodyConf(gnConf.copy(filter = f.some)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  val gmosSConf = ObservingMode.ImagingMode.GmosSouth(
-    GmosSouthFilter.GPrime,
-    GmosCcdMode(
-      GmosXBinning.One,
-      GmosYBinning.One,
-      GmosAmpCount.Twelve,
-      GmosAmpGain.High,
-      GmosAmpReadMode.Fast
-    ).some
+  test("gmos north fpu".tag(LegacyITCTest)):
+    Enumerated[GmosNorthFpu].all.foreach: f =>
+      val result = localItc
+        .calculateIntegrationTime(
+          bodyConf(gnConf.copy(fpu = GmosNorthFpuParam(f)),
+                   analysis = if (f.isIFU) ifuAnalysisMethod else lsAnalysisMethod
+          ).asJson.noSpaces
+        )
+      assert(result.fold(allowedErrors, _ => true))
+
+  val gsConf = ObservingMode.SpectroscopyMode.GmosSouth(
+    Wavelength.decimalNanometers.getOption(600).get,
+    GmosSouthGrating.B1200_G5321,
+    GmosSouthFpuParam(GmosSouthFpu.LongSlit_1_00),
+    none,
+    GmosCcdMode(GmosXBinning.One,
+                GmosYBinning.One,
+                GmosAmpCount.Twelve,
+                GmosAmpGain.High,
+                GmosAmpReadMode.Fast
+    ).some,
+    GmosRoi.FullFrame.some
   )
+
+  test("gmos south grating".tag(LegacyITCTest)):
+    Enumerated[GmosSouthGrating].all.foreach: d =>
+      val result = localItc
+        .calculateIntegrationTime(bodyConf(gsConf.copy(disperser = d)).asJson.noSpaces)
+      assert(result.fold(allowedErrors, _ => true))
 
   test("gmos south filter".tag(LegacyITCTest)):
     Enumerated[GmosSouthFilter].all.foreach: f =>
       val result = localItc
-        .calculateIntegrationTime(bodyConf(gmosSConf.copy(filter = f)).asJson.noSpaces)
+        .calculateIntegrationTime(bodyConf(gsConf.copy(filter = f.some)).asJson.noSpaces)
+      assert(result.fold(allowedErrors, _ => true))
+
+  test("gmos south fpu".tag(LegacyITCTest)):
+    Enumerated[GmosSouthFpu].all.foreach: f =>
+      val result = localItc
+        .calculateIntegrationTime(
+          bodyConf(gsConf.copy(fpu = GmosSouthFpuParam(f)),
+                   analysis = if (f.isIFU) ifuAnalysisMethod else lsAnalysisMethod
+          ).asJson.noSpaces
+        )
+      assert(result.fold(allowedErrors, _ => true))
+
+  test("gmos south filter".tag(LegacyITCTest)):
+    Enumerated[GmosSouthFilter].all.foreach: f =>
+      val result = localItc
+        .calculateIntegrationTime(bodyConf(gsConf.copy(filter = f.some)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
   def bodySED(c: UnnormalizedSED) =
@@ -193,7 +247,7 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
       obs,
       conditions,
       telescope,
-      gmosNImaging
+      gmosN
     )
 
   test("stellar library spectrum".tag(LegacyITCTest)):
@@ -250,7 +304,7 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
       obs,
       conditions,
       telescope,
-      gmosNImaging
+      gmosN
     )
 
   test("brightness integrated units".tag(LegacyITCTest)):
@@ -259,22 +313,7 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
         .calculateIntegrationTime(
           bodyIntMagUnits(f.withValueTagged(BrightnessValue.unsafeFrom(5))).asJson.noSpaces
         )
-      assert(result.fold(allowedErrors, _ => true))
-
-  test("user defined SED".tag(LegacyITCTest)):
-    val userDefinedFluxDensities = NonEmptyMap.of(
-      Wavelength.decimalNanometers.getOption(300).get -> PosBigDecimal.unsafeFrom(0.5),
-      Wavelength.decimalNanometers.getOption(500).get -> PosBigDecimal.unsafeFrom(1.0),
-      Wavelength.decimalNanometers.getOption(600).get -> PosBigDecimal.unsafeFrom(2.0),
-      Wavelength.decimalNanometers.getOption(700).get -> PosBigDecimal.unsafeFrom(3.0)
-    )
-
-    val result = localItc
-      .calculateIntegrationTime(
-        bodySED(UnnormalizedSED.UserDefined(userDefinedFluxDensities)).asJson.noSpaces
-      )
-
-    assert(result.fold(allowedErrors, _ => true))
+      assert(result.fold(allowedErrorsWithLargeSN, _ => true))
 
   def bodySurfaceMagUnits(c: BrightnessMeasure[Surface]) =
     ItcParameters(
@@ -291,7 +330,7 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
       obs,
       conditions,
       telescope,
-      gmosNImaging
+      gmosN
     )
 
   test("surface units".tag(LegacyITCTest)):
@@ -300,14 +339,14 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
         .calculateIntegrationTime(
           bodySurfaceMagUnits(f.withValueTagged(BrightnessValue.unsafeFrom(5))).asJson.noSpaces
         )
-      assert(result.fold(allowedErrors, _ => true))
+      assert(result.fold(allowedErrorsWithLargeSN, _ => true))
 
   def bodyIntGaussianMagUnits(c: BrightnessMeasure[Integrated]) =
     ItcParameters(
       sourceDefinition.copy(
         target = sourceDefinition.target.copy(
           sourceProfile = SourceProfile.Gaussian(
-            Angle.fromDoubleArcseconds(10),
+            Angle.fromDoubleArcseconds(1),
             SpectralDefinition.BandNormalized(
               UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
               SortedMap(Band.R -> c)
@@ -318,16 +357,18 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
       obs,
       conditions,
       telescope,
-      gmosNImaging
+      gmosN
     )
 
   test("gaussian units".tag(LegacyITCTest)):
     Brightness.Integrated.all.toList.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(
-          bodyIntGaussianMagUnits(f.withValueTagged(BrightnessValue.unsafeFrom(5))).asJson.noSpaces
+          bodyIntGaussianMagUnits(
+            f.withValueTagged(BrightnessValue.unsafeFrom(2))
+          ).asJson.noSpaces
         )
-      assert(result.fold(allowedErrors, _ => true))
+      assert(result.fold(allowedErrorsWithLargeSN, _ => true))
 
   def bodyPowerLaw(c: Int) =
     ItcParameters(
@@ -351,7 +392,7 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
       obs,
       conditions,
       telescope,
-      gmosNImaging
+      gmosN
     )
 
   test("power law".tag(LegacyITCTest)):
@@ -382,5 +423,13 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
       obs,
       conditions,
       telescope,
-      gmosNImaging
+      gmosN
     )
+
+  test("black body".tag(LegacyITCTest)) {
+    List[PosInt](10.refined, 100.refined).map { f =>
+      val result = localItc
+        .calculateIntegrationTime(bodyBlackBody(f).asJson.noSpaces)
+      assert(result.fold(allowedErrors, _ => true))
+    }
+  }
