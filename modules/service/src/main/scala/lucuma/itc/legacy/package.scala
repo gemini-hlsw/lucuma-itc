@@ -137,7 +137,7 @@ def spectroscopySNParams(
       telescope = ItcTelescopeDetails(
         wfs = ItcWavefrontSensor.OIWFS
       ),
-      instrument = ItcInstrumentDetails.fromObservingMode(observingMode)
+      instrument = ItcInstrumentDetails(observingMode)
     )
   (parameters, bandOrLine)
 

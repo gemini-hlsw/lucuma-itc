@@ -80,30 +80,10 @@ class WiringSuite extends ClientSuite {
     NonNegInt.unsafeFrom(10)
   )
 
-  test("ItcClient gmosN spectroscopy basic wiring and sanity check") {
+  test("ItcClient spectroscopy basic wiring and sanity check") {
     spectroscopy(
       WiringSuite.SpectroscopyInputData,
       ClientCalculationResult(
-      IntegrationTimeResult(
-        ItcVersions(
-          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          BuildInfo.ocslibHash.some
-        ),
-        AsterismIntegrationTimeOutcomes:
-          NonEmptyChain:
-            TargetIntegrationTimeOutcome:
-              TargetIntegrationTime(
-                Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R.asLeft
-              ).asRight
-      ).asRight
-    )
-  }
-
-  test("ItcClient f2 spectroscopy basic wiring and sanity check") {
-    spectroscopy(
-      WiringSuite.SpectroscopyIntegrationF2Input,
-      IntegrationTimeResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
           BuildInfo.ocslibHash.some
@@ -225,7 +205,6 @@ class WiringSuite extends ClientSuite {
 
 object WiringSuite {
 
-  val SpectroscopyIntegrationGmosNInput: SpectroscopyIntegrationTimeInput =
   val SpectroscopyInputData: SpectroscopyInput =
     SpectroscopyInput(
       SpectroscopyParameters(
@@ -233,52 +212,6 @@ object WiringSuite {
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
           atWavelength
         ),
-        ConstraintSet(
-          ImageQuality.PointOne,
-          CloudExtinction.PointOne,
-          SkyBackground.Darkest,
-          WaterVapor.VeryDry,
-          AirMass.Default
-        ),
-        InstrumentMode.GmosNorthSpectroscopy(
-          Wavelength.Min,
-          GmosNorthGrating.B1200_G5301,
-          GmosNorthFilter.GPrime.some,
-          GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
-          GmosCcdMode(
-            GmosXBinning.Two,
-            GmosYBinning.Two,
-            GmosAmpCount.Twelve,
-            GmosAmpGain.High,
-            GmosAmpReadMode.Fast
-          ).some,
-          GmosRoi.FullFrame.some
-        )
-      ),
-      NonEmptyList.of(
-        TargetInput(
-          SourceProfile.Point(
-            BandNormalized[Integrated](
-              Galaxy(Spiral).some,
-              SortedMap(
-                Band.R ->
-                  Measure(
-                    BrightnessValue.unsafeFrom(BigDecimal(10.0)),
-                    TaggedUnit[VegaMagnitude, Brightness[Integrated]].unit
-                  ).tag
-              )
-            )
-          ),
-          RadialVelocity.fromMetersPerSecond.getOption(1.0).get
-        )
-      )
-    )
-
-  val SpectroscopyIntegrationF2Input: SpectroscopyIntegrationTimeInput =
-    SpectroscopyIntegrationTimeInput(
-      SpectroscopyIntegrationTimeParameters(
-        Wavelength.Min,
-        SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
         ConstraintSet(
           ImageQuality.PointOne,
           CloudExtinction.PointOne,

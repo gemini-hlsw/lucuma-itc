@@ -37,11 +37,11 @@ import scala.collection.immutable.SortedMap
 import scala.concurrent.duration.*
 
 /**
- * This is a unit test for imaging mode in the legacy ITC, ensuring all possible combinations of
- * parameters can be parsed. The ITC may still return an error but we want to ensure it can parse
+ * This is a unit test for GMOS imaging mode in the legacy ITC, ensuring all possible combinations
+ * of parameters can be parsed. The ITC may still return an error but we want to ensure it can parse
  * the values.
  */
-class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
+class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLegacySuite:
   override def munitTimeout: Duration = 5.minute
 
   val sourceDefinition = ItcSourceDefinition(

@@ -68,9 +68,6 @@ code but given the use of legacy libraries this requires the jar files to be
 loaded dynamically by the application and be called via reflection with a custom
 classloader
 
-There is a branch on ocs with changes to the itc that are unsupported on the ocs
-Please use the branch `itc-gpp` to build the jar files
-
 In case the code in ocs2 changes we need to update the jar files using the
 `update.sh` script.  The jar files are fairly large (they contain the data files
 used to calculate the itc results). Given github limitations these need to be

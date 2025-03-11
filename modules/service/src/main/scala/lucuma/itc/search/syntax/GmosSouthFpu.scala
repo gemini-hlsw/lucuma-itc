@@ -26,3 +26,4 @@ extension (self: GmosSouthFpu)
       case LongSlit_1_50                                                     => false
       case LongSlit_2_00                                                     => false
       case LongSlit_5_00                                                     => false
+      case Bhros                                                             => false

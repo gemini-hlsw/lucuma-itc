@@ -73,7 +73,7 @@ class LegacyITCSuite extends FunSuite:
   val obs = ItcObservationDetails(
     calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
       sigma = 1,
-      wavelength = Wavelength.decimalNanometers.getOption(600).get,
+      wavelengthAt = Wavelength.decimalNanometers.getOption(600).get,
       coadds = None,
       sourceFraction = 1.0,
       ditherOffset = Angle.Angle0
