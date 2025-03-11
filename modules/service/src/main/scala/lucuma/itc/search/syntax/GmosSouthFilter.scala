@@ -61,6 +61,3 @@ extension (self: GmosSouthFilter)
       case IPrime_CaT   => cov(780000, 850000)
       case ZPrime_CaT   => cov(848000, 933000)
       case IPrime_RG780 => cov(783512, 849932)
-
-      // Obsolete
-      case Lya395 => sys.error("obsolete")
