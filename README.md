@@ -110,4 +110,4 @@ node schemastitcher.js modules/service/src/main/resources/graphql/ObservationDB.
 
 ```
 
-The script fetchODBSchema.sh will get the latest schema from the odb dev server and do the stitching
+The script fetchODBSchema.sh will get the latest schema from the odb dev server and do the stitching in one go
