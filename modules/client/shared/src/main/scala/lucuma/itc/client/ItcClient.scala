@@ -72,10 +72,10 @@ object ItcClient {
             .raiseGraphQLErrorsOnNoData
 
         for
-          _ <- Logger[F].info(s"ITC Input: \n${input.asJson.spaces2}")
+          _ <- Logger[F].debug(s"ITC Input: \n${input.asJson.spaces2}")
           v <- if (useCache) specCache.getOrCalcF(input)(callOut)
                else callOut.flatTap(specCache.put(input))
-          _ <- Logger[F].info(s"ITC Result:\n$v")
+          _ <- Logger[F].debug(s"ITC Result:\n$v")
         yield v
       }
 
