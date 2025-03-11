@@ -22,7 +22,6 @@ extension (self: GmosNorthFilter)
     self match
 
       // Broad Band Imaging Filters
-      case UPrime => cov(336000, 385000)
       case GPrime => cov(398000, 552000)
       case RPrime => cov(562000, 698000)
       case IPrime => cov(706000, 850000)

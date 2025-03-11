@@ -39,11 +39,8 @@ trait GmosNorthGratingSyntax:
         case B1200_G5301 => "B1200_G5301"
         case R831_G5302  => "R831_G5302"
         case B480_G5309  => "B480_G5309"
-        case B600_G5303  => "B600_G5303"
-        case B600_G5307  => "B600_G5307"
         case R600_G5304  => "R600_G5304"
         case R400_G5305  => "R400_G5305"
-        case R150_G5306  => "R150_G5306"
         case R150_G5308  => "R150_G5308"
 
 object gmosnorthgrating extends GmosNorthGratingSyntax
@@ -73,7 +70,6 @@ trait GmosSouthFilterSyntax:
         case OIIIC            => "OIIIC_G0339"
         case HeII             => "HeII_G0340"
         case HeIIC            => "HeIIC_G0341"
-        case Lya395           => "Lya395_G0342"
         case OVI              => "OVI_G0347"
         case OVIC             => "OVIC_G0348"
         case HartmannA_RPrime => "HartmannA_G0337_r_G0326"
@@ -122,7 +118,6 @@ trait GmosNorthFilterSyntax:
         case RPrime_RG610     => "r_G0303_RG610_G0307"
         case IPrime_CaT       => "i_G0302_CaT_G0309"
         case ZPrime_CaT       => "z_G0304_CaT_G0309"
-        case UPrime           => "u_G0308"
 
 object gmosnorthfilter extends GmosNorthFilterSyntax
 
