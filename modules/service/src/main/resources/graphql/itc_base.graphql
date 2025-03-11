@@ -116,6 +116,20 @@ input GmosNImagingInput {
   ccdMode: GmosCcdModeInput
 }
 
+input Flamingos2SpectroscopyInput {
+  """Center of the configuration spectrum"""
+  centralWavelength: WavelengthInput!
+
+  """Flamingos2 disperser"""
+  disperser: Flamingos2Disperser
+
+  """Flamingos2 Focal plane unit"""
+  fpu: Flamingos2Fpu!
+
+  """Flamingos2 filter"""
+  filter: Flamingos2Filter!
+}
+
 type GmosSITCParams {
   """Gmos South disperser"""
   grating: GmosSouthGrating
@@ -144,7 +158,18 @@ type GmosNITCParams {
   filter: GmosNorthFilter
 }
 
-union InstrumentITCParams = GmosNITCParams | GmosSITCParams
+type Flamingos2ITCParams {
+  """Flamingos2 disperser"""
+  disperser: Flamingos2Disperser
+
+  """Flamingos2 Focal plane unit"""
+  fpu: Flamingos2Fpu
+
+  """Flamingos2 filter"""
+  filter: Flamingos2Filter
+}
+
+union InstrumentITCParams = GmosNITCParams | GmosSITCParams | Flamingos2ITCParams
 
 """Params for instrument modes"""
 input InstrumentModesInput {
@@ -159,6 +184,9 @@ input InstrumentModesInput {
 
   """Gmos South Imaging"""
   gmosSImaging: GmosSImagingInput
+
+  """Flamingos2 Spectroscopy"""
+  flamingos2Spectroscopy: Flamingos2SpectroscopyInput
 }
 
 """Params for spectroscopy integration time calculation"""
