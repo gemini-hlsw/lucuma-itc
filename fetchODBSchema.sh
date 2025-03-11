@@ -1,4 +1,6 @@
 #!/bin/bash
 
-# gq https://lucuma-odb-development.herokuapp.com/odb --introspect >templates/src/main/resources/lucuma/schemas/ObservationDB.graphql
-gq http://localhost:8080/odb --introspect > modules/service/src/main/resources/graphql/ObservationDB.graphql
+npm ci
+
+./fetchODBSchema.mjs $@
+node schemastitcher.js modules/service/src/main/resources/graphql/ObservationDB.graphql modules/service/src/main/resources/graphql/itc_base.graphql modules/service/src/main/resources/graphql/itc.graphql
