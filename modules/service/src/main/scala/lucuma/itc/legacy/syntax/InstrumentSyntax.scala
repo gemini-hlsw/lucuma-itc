@@ -189,8 +189,6 @@ trait F2FilterSyntax:
         case F2Filter.KShort => "K_SHORT"
         case F2Filter.KBlue  => "K_BLUE"
         case F2Filter.KRed   => "K_RED"
-        case F2Filter.Open   => "OPEN"
-        case F2Filter.Dark   => "DARK"
         case _               => self.tag
 
 object f2filter extends F2FilterSyntax

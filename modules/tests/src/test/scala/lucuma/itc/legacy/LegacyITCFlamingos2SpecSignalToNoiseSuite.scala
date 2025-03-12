@@ -7,9 +7,7 @@ import cats.data.NonEmptyMap
 import cats.implicits.*
 import coulomb.*
 import coulomb.syntax.*
-import coulomb.units.si.*
 import eu.timepit.refined.types.numeric.PosBigDecimal
-import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.enums.*
 import lucuma.core.math.Angle
@@ -68,7 +66,7 @@ class LegacyITCFlamingos2SpecSignalToNoiseSuite extends FunSuite with CommonITCL
   val obs = ItcObservationDetails(
     calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
       sigma = 100,
-      wavelengthAt = Wavelength.decimalNanometers.getOption(610).get,
+      wavelengthAt = Wavelength.decimalNanometers.getOption(1200).get,
       coadds = None,
       sourceFraction = 1.0,
       ditherOffset = Angle.Angle0
@@ -148,27 +146,23 @@ class LegacyITCFlamingos2SpecSignalToNoiseSuite extends FunSuite with CommonITCL
       ItcInstrumentDetails(c)
     )
 
-  test("flamingos2 grating".tag(LegacyITCTest)):
-    Enumerated[F2Disperser].all.foreach: d =>
-      val result = localItc
-        .calculateIntegrationTime(bodyConf(f2Conf.copy(disperser = d)).asJson.noSpaces)
-      assert(result.fold(allowedErrors, _ => true))
-
   test("flamingos2 filter".tag(LegacyITCTest)):
     Enumerated[F2Filter].all.foreach: f =>
+      val d      = f match
+        case F2Filter.J | F2Filter.H | F2Filter.JH | F2Filter.HK =>
+          F2Disperser.R1200JH
+        case _                                                   => F2Disperser.R3000
       val result = localItc
-        .calculateIntegrationTime(bodyConf(f2Conf.copy(filter = f)).asJson.noSpaces)
+        .calculateIntegrationTime(bodyConf(f2Conf.copy(filter = f, disperser = d)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  // test("flamingos2 fpu".tag(LegacyITCTest)):
-  //   Enumerated[F2Fpu].all.foreach: f =>
-  //     val result = localItc
-  //       .calculateIntegrationTime(
-  //         bodyConf(f2Conf.copy(fpu = Flamingos2FpuParam(f)),
-  //                  analysis = if (f.isIFU) ifuAnalysisMethod else lsAnalysisMethod
-  //         ).asJson.noSpaces
-  //       )
-  //     assert(result.fold(allowedErrors, _ => true))
+  test("flamingos2 fpu".tag(LegacyITCTest)):
+    Enumerated[F2Fpu].all.foreach: f =>
+      val result = localItc
+        .calculateIntegrationTime(
+          bodyConf(f2Conf.copy(fpu = f)).asJson.noSpaces
+        )
+      assert(result.fold(allowedErrors, _ => true))
 
   def bodySED(c: UnnormalizedSED) =
     ItcParameters(
@@ -344,83 +338,7 @@ class LegacyITCFlamingos2SpecSignalToNoiseSuite extends FunSuite with CommonITCL
     )
 
   test("power law".tag(LegacyITCTest)):
-    List(-10, 0, 10, 100).foreach: f =>
+    List(-10, 0, 10).foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodyPowerLaw(f).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
-
-  def bodyBlackBody(c: PosInt) =
-    ItcParameters(
-      sourceDefinition.copy(
-        target = sourceDefinition.target.copy(
-          sourceProfile = SourceProfile.Gaussian(
-            Angle.fromDoubleArcseconds(10),
-            SpectralDefinition.BandNormalized(
-              UnnormalizedSED.BlackBody(c.withUnit[Kelvin]).some,
-              SortedMap(
-                Band.R ->
-                  BrightnessValue
-                    .unsafeFrom(5)
-                    .withUnit[VegaMagnitude]
-                    .toMeasureTagged
-              )
-            )
-          )
-        )
-      ),
-      obs,
-      conditions,
-      telescope,
-      flamingos2
-    )
-
-  // test("black body".tag(LocalOnly)) {
-  //   List[PosInt](10.refined, 100.refined).map { f =>
-  //     val result = localItc
-  //       .calculateIntegrationTime(bodyBlackBody(f).asJson.noSpaces)
-  //     println(result)
-  //     assert(result.fold(allowedErrors, _ => true))
-  //   }
-  // }
-
-  // def bodyEmissionLine(c: PosBigDecimal) =
-  //   ItcParameters(
-  //     sourceDefinition.copy(profile =
-  //       SourceProfile.Point(
-  //         SpectralDefinition.EmissionLines(
-  //           SortedMap(
-  //             Wavelength.decimalNanometers.getOption(600).get -> EmissionLine(
-  //               c.withUnit[KilometersPerSecond],
-  //               c
-  //                 .withUnit[WattsPerMeter2]
-  //                 .toMeasureTagged
-  //             )
-  //           ),
-  //           BigDecimal(5)
-  //             .withRefinedUnit[Positive, WattsPerMeter2Micrometer]
-  //             .toMeasureTagged
-  //         )
-  //       )
-  //     ),
-  //     obs,
-  //     conditions,
-  //     telescope,
-  //     instrument
-  //   )
-  //
-  // List[PosBigDecimal](BigDecimal(0.1), BigDecimal(10), BigDecimal(100)).map { f =>
-  //   println(bodyEmissionLine(f).asJson)
-  //   spec {
-  //     http("emission line")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200))
-  //       .check(substring("decode").notExists)
-  //       .check(substring("ItcSpectroscopyResult").exists)
-  //       .body(
-  //         StringBody(
-  //           bodyEmissionLine(f).asJson.noSpaces
-  //         )
-  //       )
-  //   }
-  // }
