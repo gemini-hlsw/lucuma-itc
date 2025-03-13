@@ -4,14 +4,14 @@
 package lucuma.itc
 
 import cats.Order
-import io.circe.Encoder
-import io.circe.Json
-import io.circe.syntax.*
 import lucuma.core.data.Zipper
 import lucuma.core.data.ZipperCodec.given
 import lucuma.core.enums.Band
 import lucuma.core.math.Wavelength
-import lucuma.itc.encoders.given
+import lucuma.core.util.TimeSpan
+import io.circe.Encoder
+import io.circe.Json
+import io.circe.syntax.*
 
 case class TargetIntegrationTime(
   times:           Zipper[IntegrationTime],
@@ -22,7 +22,10 @@ case class TargetIntegrationTime(
     times.focusIndex(index).map(newTimes => copy(times = newTimes))
 
 object TargetIntegrationTime:
-  given Encoder[TargetIntegrationTime] = t =>
+  given (using
+    Encoder[Wavelength],
+    Encoder[TimeSpan]
+  ): Encoder[TargetIntegrationTime] = t =>
     val common = Json
       .obj(
         "band"            -> t.bandOrLine.left.toOption.asJson,

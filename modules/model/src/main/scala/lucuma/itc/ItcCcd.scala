@@ -5,9 +5,9 @@ package lucuma.itc
 
 import cats.Eq
 import cats.derived.*
-import io.circe.Encoder
 import lucuma.core.math.Wavelength
-import lucuma.itc.encoders.given
+import io.circe.Encoder
+import io.circe.generic.semiauto.*
 
 case class ItcCcd(
   singleSNRatio:                 Double,          // the final SN ratio for a single image
@@ -20,8 +20,7 @@ case class ItcCcd(
   wellDepth:                     Double,          // the well depth (max e- count per pixel) for this CCD
   ampGain:                       Double,          // the amplifier gain for this CCD (used to calculate ADU)
   warnings:                      List[ItcWarning] // the warnings provided by ITC for this CCD
-) derives Eq,
-      Encoder.AsObject {
+) derives Eq:
 
   // the max percentage of the well saturation for peak pixel
   val percentFullWell: Double =
@@ -31,4 +30,5 @@ case class ItcCcd(
   val adu: Int =
     (peakPixelFlux / ampGain).toInt
 
-}
+object ItcCcd:
+  given (using Encoder[Wavelength]): Encoder[ItcCcd] = deriveEncoder

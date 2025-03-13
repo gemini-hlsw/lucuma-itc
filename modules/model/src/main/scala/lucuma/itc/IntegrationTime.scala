@@ -6,17 +6,19 @@ package lucuma.itc
 import cats.Order
 import eu.timepit.refined.cats.*
 import eu.timepit.refined.types.numeric.NonNegInt
-import io.circe.*
+import io.circe.refined.*
 import lucuma.core.util.TimeSpan
-import lucuma.itc.encoders.given
-import spire.implicits.*
+import io.circe.Encoder
+import io.circe.generic.semiauto.*
 
 case class IntegrationTime(
   exposureTime:  TimeSpan,
   exposureCount: NonNegInt
-) derives Encoder.AsObject
+)
 
 object IntegrationTime:
   // The brightest target will be the one with the smallest exposure time.
   // We break ties by exposure count.
   given Order[IntegrationTime] = Order.by(it => (it.exposureTime, it.exposureCount))
+
+  given (using Encoder[TimeSpan]): Encoder[IntegrationTime] = deriveEncoder

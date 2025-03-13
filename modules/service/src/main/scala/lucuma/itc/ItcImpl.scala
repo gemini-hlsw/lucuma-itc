@@ -24,6 +24,7 @@ import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.ObservingMode.ImagingMode
 import lucuma.itc.search.ObservingMode.SpectroscopyMode
 import lucuma.itc.search.TargetData
+import lucuma.itc.legacy.codecs.given
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 

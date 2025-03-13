@@ -25,6 +25,7 @@ import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.Enumerated
 import lucuma.itc.ItcObservingConditions
 import lucuma.itc.legacy.given
+import lucuma.itc.legacy.codecs.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
 import lucuma.itc.search.ItcObservationDetails

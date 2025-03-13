@@ -8,7 +8,6 @@ import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
-import lucuma.itc.encoders.given
 
 case class SignalToNoiseAt(
   wavelength: Wavelength,
@@ -17,7 +16,7 @@ case class SignalToNoiseAt(
 )
 
 object SignalToNoiseAt:
-  given Encoder[SignalToNoiseAt] = t =>
+  given (using Encoder[Wavelength]): Encoder[SignalToNoiseAt] = t =>
     Json
       .obj(
         "wavelength" -> t.wavelength.asJson,

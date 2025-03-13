@@ -10,7 +10,7 @@ import io.circe.syntax.*
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.Enumerated
-import lucuma.itc.encoders.given
+import lucuma.itc.service.encoders.given
 
 case class UpstreamException(msg: List[String]) extends RuntimeException(msg.mkString("\n"))
 

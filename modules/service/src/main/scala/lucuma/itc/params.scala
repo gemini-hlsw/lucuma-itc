@@ -11,8 +11,8 @@ import lucuma.core.enums.*
 import lucuma.core.math.Wavelength
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange
-import lucuma.itc.encoders.given
 import lucuma.itc.search.*
+import lucuma.itc.service.encoders.given
 
 sealed trait SpectroscopyParams
 

@@ -62,8 +62,11 @@ object AsterismSpectroscopyTimeRequest:
               roi
             ) =>
           Result.success:
-            ObservingMode.SpectroscopyMode
+            import io.circe.syntax.*
+            val a = ObservingMode.SpectroscopyMode
               .GmosNorth(centralWavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode, roi)
+            println(a.asJson)
+            a
         case GmosSSpectroscopyInput(
               centralWavelength,
               grating,

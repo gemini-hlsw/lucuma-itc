@@ -27,6 +27,7 @@ import lucuma.itc.legacy.given
 import lucuma.itc.search.ItcObservationDetails
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetData
+import lucuma.itc.legacy.codecs.given
 import munit.FunSuite
 
 import scala.collection.immutable.SortedMap

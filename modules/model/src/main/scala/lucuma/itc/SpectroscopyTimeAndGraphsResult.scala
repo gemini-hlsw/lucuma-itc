@@ -7,6 +7,8 @@ import io.circe.Encoder
 import io.circe.Json
 import io.circe.generic.semiauto.*
 import io.circe.syntax.*
+import lucuma.core.math.Wavelength
+import lucuma.core.util.TimeSpan
 
 case class SpectroscopyTimeAndGraphsResult(
   versions:       ItcVersions,
@@ -14,12 +16,13 @@ case class SpectroscopyTimeAndGraphsResult(
 )
 
 object SpectroscopyTimeAndGraphsResult:
-  given Encoder[SpectroscopyTimeAndGraphsResult] = r =>
-    Json
-      .obj(
-        "versions"             -> r.versions.asJson,
-        "targetTimesAndGraphs" -> r.targetOutcomes.value.toOption.asJson,
-        "targetTimes"          -> r.targetOutcomes.value.left.toOption.asJson,
-        "brightestIndex"       -> r.targetOutcomes.value.toOption.flatMap(_.brightestIndex).asJson,
-        "brightest"            -> r.targetOutcomes.value.toOption.flatMap(_.brightest).asJson
-      )
+  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[SpectroscopyTimeAndGraphsResult] =
+    r =>
+      Json
+        .obj(
+          "versions"             -> r.versions.asJson,
+          "targetTimesAndGraphs" -> r.targetOutcomes.value.toOption.asJson,
+          "targetTimes"          -> r.targetOutcomes.value.left.toOption.asJson,
+          "brightestIndex"       -> r.targetOutcomes.value.toOption.flatMap(_.brightestIndex).asJson,
+          "brightest"            -> r.targetOutcomes.value.toOption.flatMap(_.brightest).asJson
+        )
