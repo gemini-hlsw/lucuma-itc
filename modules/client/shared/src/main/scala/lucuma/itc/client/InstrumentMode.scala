@@ -99,16 +99,16 @@ object InstrumentMode {
         r  <- c.downField("roi").as[Option[GmosRoi]]
       yield GmosSouthSpectroscopy(cw, g, f, u, d, r)
 
-  case class F2Spectroscopy(
+  case class Flamingos2Spectroscopy(
     centralWavelength: Wavelength,
     disperser:         F2Disperser,
     filter:            F2Filter,
     fpu:               F2Fpu
   ) extends InstrumentMode derives Eq
 
-  object F2Spectroscopy:
+  object Flamingos2Spectroscopy:
 
-    given Encoder[F2Spectroscopy] = a =>
+    given Encoder[Flamingos2Spectroscopy] = a =>
       Json.fromFields(
         List(
           "centralWavelength" -> a.centralWavelength.asJson,
@@ -118,13 +118,13 @@ object InstrumentMode {
         )
       )
 
-    given Decoder[F2Spectroscopy] = c =>
+    given Decoder[Flamingos2Spectroscopy] = c =>
       for
         cw <- c.downField("centralWavelength").as[Wavelength]
         g  <- c.downField("disperser").as[F2Disperser]
         f  <- c.downField("filter").as[F2Filter]
         u  <- c.downField("fpu").as[F2Fpu]
-      yield F2Spectroscopy(cw, g, f, u)
+      yield Flamingos2Spectroscopy(cw, g, f, u)
 
   case class GmosNorthImaging(
     filter:  GmosNorthFilter,
@@ -186,7 +186,7 @@ object InstrumentMode {
         Json.obj("gmosNImaging" -> a.asJson)
       case a @ GmosSouthImaging(_, _)                  =>
         Json.obj("gmosSImaging" -> a.asJson)
-      case a @ F2Spectroscopy(_, _, _, _)              =>
+      case a @ Flamingos2Spectroscopy(_, _, _, _)      =>
         Json.obj("flamingos2Spectroscopy" -> a.asJson)
 
   given Decoder[InstrumentMode] = c =>
@@ -195,7 +195,7 @@ object InstrumentMode {
       ss <- c.downField("gmosSSpectroscopy").as[Option[GmosSouthSpectroscopy]]
       ni <- c.downField("gmosNImaging").as[Option[GmosNorthImaging]]
       si <- c.downField("gmosSImaging").as[Option[GmosSouthImaging]]
-      fs <- c.downField("flamingos2Spectroscopy").as[Option[F2Spectroscopy]]
+      fs <- c.downField("flamingos2Spectroscopy").as[Option[Flamingos2Spectroscopy]]
       m  <- (ns, ss, ni, si, fs) match
               case (Some(n), None, None, None, None) => (n: InstrumentMode).asRight
               case (None, Some(s), None, None, None) => (s: InstrumentMode).asRight
@@ -211,10 +211,10 @@ object InstrumentMode {
   given Eq[InstrumentMode] with
     def eqv(x: InstrumentMode, y: InstrumentMode): Boolean =
       (x, y) match
-        case (x0: GmosNorthSpectroscopy, y0: GmosNorthSpectroscopy) => x0 === y0
-        case (x0: GmosSouthSpectroscopy, y0: GmosSouthSpectroscopy) => x0 === y0
-        case (x0: GmosNorthImaging, y0: GmosNorthImaging)           => x0 === y0
-        case (x0: GmosSouthImaging, y0: GmosSouthImaging)           => x0 === y0
-        case (x0: F2Spectroscopy, y0: F2Spectroscopy)               => x0 === y0
-        case _                                                      => false
+        case (x0: GmosNorthSpectroscopy, y0: GmosNorthSpectroscopy)   => x0 === y0
+        case (x0: GmosSouthSpectroscopy, y0: GmosSouthSpectroscopy)   => x0 === y0
+        case (x0: GmosNorthImaging, y0: GmosNorthImaging)             => x0 === y0
+        case (x0: GmosSouthImaging, y0: GmosSouthImaging)             => x0 === y0
+        case (x0: Flamingos2Spectroscopy, y0: Flamingos2Spectroscopy) => x0 === y0
+        case _                                                        => false
 }

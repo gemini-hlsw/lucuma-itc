@@ -273,11 +273,13 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
     query(
       """
         query {
-          spectroscopyIntegrationTime(input: {
-            atWavelength: {
-              nanometers: 60,
+          spectroscopy(input: {
+            exposureTimeMode: {
+              signalToNoise: {
+                value: 2,
+                at: { nanometers: 60 }
+              }
             },
-            signalToNoise: 2,
             asterism: [
               {
                 sourceProfile: {
@@ -341,6 +343,17 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                   }
                 }
               }
+              targetTimes {
+                ... on TargetIntegrationTime {
+                  signalToNoiseAt {
+                    single
+                    total
+                    wavelength {
+                      nanometers
+                    }
+                  }
+                }
+              }
               brightest {
                 selected {
                   exposureCount
@@ -355,7 +368,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
       json"""
         {
           "data": {
-            "spectroscopyIntegrationTime" : {
+            "spectroscopy" : {
                 "mode" : {
                   "instrument" : "FLAMINGOS2",
                   "params": {
@@ -366,6 +379,17 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                     "nanometers" : 60.000
                   }
                 },
+                "targetTimes": [
+                  {
+                    "signalToNoiseAt": {
+                      "single": 101.000000,
+                      "total": 102.000000,
+                      "wavelength": {
+                        "nanometers": 60.000
+                      }
+                    }
+                  }
+                ],
                 "brightest": {
                   "selected" : {
                     "exposureCount" : 10,

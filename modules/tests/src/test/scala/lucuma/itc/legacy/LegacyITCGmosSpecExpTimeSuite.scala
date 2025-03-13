@@ -24,6 +24,7 @@ import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.Enumerated
+import lucuma.itc.ItcObservingConditions
 import lucuma.itc.legacy.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
@@ -35,7 +36,6 @@ import munit.FunSuite
 
 import scala.collection.immutable.SortedMap
 import scala.concurrent.duration.*
-import lucuma.itc.ItcObservingConditions
 
 /**
  * This is a unit test mostly to ensure all possible combination of params can be parsed by the

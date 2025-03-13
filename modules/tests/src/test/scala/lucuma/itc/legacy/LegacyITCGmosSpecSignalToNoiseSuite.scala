@@ -26,6 +26,7 @@ import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.Enumerated
+import lucuma.itc.ItcObservingConditions
 import lucuma.itc.legacy.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
@@ -36,7 +37,6 @@ import munit.FunSuite
 
 import scala.collection.immutable.SortedMap
 import scala.concurrent.duration.*
-import lucuma.itc.ItcObservingConditions
 
 /**
  * This is a unit test mostly to ensure all possible combination of params can be parsed by the
@@ -439,54 +439,3 @@ class LegacyITCGmosSpecSignalToNoiseSuite extends FunSuite with CommonITCLegacyS
       telescope,
       gmosN
     )
-
-  // test("black body".tag(LocalOnly)) {
-  //   List[PosInt](10.refined, 100.refined).map { f =>
-  //     val result = localItc
-  //       .calculateIntegrationTime(bodyBlackBody(f).asJson.noSpaces)
-  //     println(result)
-  //     assert(result.fold(allowedErrors, _ => true))
-  //   }
-  // }
-
-  // def bodyEmissionLine(c: PosBigDecimal) =
-  //   ItcParameters(
-  //     sourceDefinition.copy(profile =
-  //       SourceProfile.Point(
-  //         SpectralDefinition.EmissionLines(
-  //           SortedMap(
-  //             Wavelength.decimalNanometers.getOption(600).get -> EmissionLine(
-  //               c.withUnit[KilometersPerSecond],
-  //               c
-  //                 .withUnit[WattsPerMeter2]
-  //                 .toMeasureTagged
-  //             )
-  //           ),
-  //           BigDecimal(5)
-  //             .withRefinedUnit[Positive, WattsPerMeter2Micrometer]
-  //             .toMeasureTagged
-  //         )
-  //       )
-  //     ),
-  //     obs,
-  //     conditions,
-  //     telescope,
-  //     instrument
-  //   )
-  //
-  // List[PosBigDecimal](BigDecimal(0.1), BigDecimal(10), BigDecimal(100)).map { f =>
-  //   println(bodyEmissionLine(f).asJson)
-  //   spec {
-  //     http("emission line")
-  //       .post("/json")
-  //       .headers(headers_10)
-  //       .check(status.in(200))
-  //       .check(substring("decode").notExists)
-  //       .check(substring("ItcSpectroscopyResult").exists)
-  //       .body(
-  //         StringBody(
-  //           bodyEmissionLine(f).asJson.noSpaces
-  //         )
-  //       )
-  //   }
-  // }
