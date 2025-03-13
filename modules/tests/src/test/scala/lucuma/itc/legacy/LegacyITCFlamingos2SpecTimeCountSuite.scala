@@ -80,7 +80,6 @@ class LegacyITCFlamingos2TimeAndCountSuite extends FunSuite with CommonITCLegacy
 
   val f2Conf =
     ObservingMode.SpectroscopyMode.Flamingos2(
-      Wavelength.decimalNanometers.getOption(1600).get,
       F2Disperser.R3000,
       F2Filter.J,
       F2Fpu.LongSlit2

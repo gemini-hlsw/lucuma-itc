@@ -5,7 +5,7 @@ package lucuma.itc.service
 
 import io.circe.literal.*
 
-class GraphQLSpectroscopyTimeEmissionLineSuite extends GraphQLEmissionLineSuite {
+class emissionLineSuite extends GraphQLEmissionLineSuite {
 
   test("emission lines") {
     query(
@@ -78,10 +78,10 @@ class GraphQLSpectroscopyTimeEmissionLineSuite extends GraphQLEmissionLineSuite 
                 params {
                   ... on GmosNITCParams {
                     grating
+                    centralWavelength {
+                      nanometers
+                    }
                   }
-                }
-                centralWavelength {
-                  nanometers
                 }
               }
             }
@@ -104,10 +104,10 @@ class GraphQLSpectroscopyTimeEmissionLineSuite extends GraphQLEmissionLineSuite 
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params": {
-                  "grating": "B1200_G5301"
-                },
-                "centralWavelength" : {
-                  "nanometers" : 60.000
+                  "grating": "B1200_G5301",
+                  "centralWavelength" : {
+                    "nanometers" : 60.000
+                  }
                 }
               },
               "brightest": {

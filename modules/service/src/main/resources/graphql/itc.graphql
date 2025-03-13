@@ -3279,9 +3279,6 @@ enum Flamingos2Filter {
   """Flamingos2Filter Y (1.02 um)"""
   Y
 
-  """Flamingos2Filter F1056 (1.056 um)"""
-  F1056
-
   """Flamingos2Filter J (1.25 um)"""
   J
 
@@ -3303,17 +3300,8 @@ enum Flamingos2Filter {
   """Flamingos2Filter K-short (2.15 um)"""
   K_SHORT
 
-  """Flamingos2Filter F1063 (1.063 um)"""
-  F1063
-
   """Flamingos2Filter K-blue (2.06 um)"""
   K_BLUE
-
-  """Flamingos2Filter Open"""
-  OPEN
-
-  """Flamingos2Filter Dark"""
-  DARK
 }
 
 """Flamingos2 FPU"""
@@ -3616,9 +3604,6 @@ enum GmosNorthGrating {
 
   """GmosNorthGrating B600_G5303"""
   B600_G5303
-
-  """GmosNorthGrating B600_G5307"""
-  B600_G5307
 
   """GmosNorthGrating R600_G5304"""
   R600_G5304
@@ -7170,17 +7155,6 @@ type Query {
   spectroscopyIntegrationTimeAndGraphs(input: SpectroscopyIntegrationTimeAndGraphsInput!): SpectroscopyTimeAndGraphsResult!
 }
 
-type ObservingModeSpectroscopy {
-  """Wavelength in appropriate units"""
-  wavelength: Wavelength!
-
-  """params"""
-  params: InstrumentITCParams!
-
-  """instrument"""
-  instrument: Instrument
-}
-
 type ItcVersions {
   """id of the backend server"""
   serverVersion: String!
@@ -7246,11 +7220,8 @@ input GmosNImagingInput {
 }
 
 input Flamingos2SpectroscopyInput {
-  """Center of the configuration spectrum"""
-  centralWavelength: WavelengthInput!
-
   """Flamingos2 disperser"""
-  disperser: Flamingos2Disperser
+  disperser: Flamingos2Disperser!
 
   """Flamingos2 Focal plane unit"""
   fpu: Flamingos2Fpu!
@@ -7260,6 +7231,9 @@ input Flamingos2SpectroscopyInput {
 }
 
 type GmosSITCParams {
+  """Wavelength in appropriate units"""
+  centralWavelength: Wavelength!
+
   """Gmos South disperser"""
   grating: GmosSouthGrating
 
@@ -7274,6 +7248,9 @@ type GmosSITCParams {
 }
 
 type GmosNITCParams {
+  """Wavelength in appropriate units"""
+  centralWavelength: Wavelength!
+
   """Gmos North disperser"""
   grating: GmosNorthGrating
 
@@ -7497,9 +7474,6 @@ type ImagingMode implements ITCObservingMode {
 }
 
 type SpectroscopyMode implements ITCObservingMode {
-  """Wavelength in appropriate units"""
-  centralWavelength: Wavelength!
-
   """params"""
   params: InstrumentITCParams!
 

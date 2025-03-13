@@ -288,7 +288,6 @@ object WiringSuite:
           AirMass.Default
         ),
         InstrumentMode.Flamingos2Spectroscopy(
-          Wavelength.Min,
           F2Disperser.R3000,
           F2Filter.J,
           F2Fpu.LongSlit2

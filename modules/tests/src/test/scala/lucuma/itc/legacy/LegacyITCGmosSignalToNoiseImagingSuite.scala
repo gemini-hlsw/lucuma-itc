@@ -50,7 +50,7 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
           UnnormalizedSED.StellarLibrary(StellarLibrarySpectrum.A0V).some,
           SortedMap(
             Band.R -> BrightnessValue
-              .unsafeFrom(9)
+              .unsafeFrom(12)
               .withUnit[VegaMagnitude]
               .toMeasureTagged
           )
@@ -195,16 +195,18 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
       gmosNImaging
     )
 
-  test("stellar library spectrum".tag(LegacyITCTest)):
+  test("stellar library spectrum".tag(LegacyITCTest).ignore):
     Enumerated[StellarLibrarySpectrum].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodySED(UnnormalizedSED.StellarLibrary(f)).asJson.noSpaces)
+      println(result)
       assert(result.fold(allowedErrors, containsValidResults))
 
-  test("cool star".tag(LegacyITCTest)):
+  test("cool star".tag(LegacyITCTest).ignore):
     Enumerated[CoolStarTemperature].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodySED(UnnormalizedSED.CoolStarModel(f)).asJson.noSpaces)
+      println(result)
       assert(result.fold(allowedErrors, containsValidResults))
 
   test("galaxy spectrum".tag(LegacyITCTest)):

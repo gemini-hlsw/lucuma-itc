@@ -41,17 +41,6 @@ type Query {
   ): SpectroscopyTimeAndGraphsResult!
 }
 
-type ObservingModeSpectroscopy {
-  """Wavelength in appropriate units"""
-  wavelength: Wavelength!
-
-  """params"""
-  params: InstrumentITCParams!
-
-  """instrument"""
-  instrument: Instrument
-}
-
 type ItcVersions {
   """id of the backend server"""
   serverVersion: String!
@@ -117,11 +106,8 @@ input GmosNImagingInput {
 }
 
 input Flamingos2SpectroscopyInput {
-  """Center of the configuration spectrum"""
-  centralWavelength: WavelengthInput!
-
   """Flamingos2 disperser"""
-  disperser: Flamingos2Disperser
+  disperser: Flamingos2Disperser!
 
   """Flamingos2 Focal plane unit"""
   fpu: Flamingos2Fpu!
@@ -131,6 +117,9 @@ input Flamingos2SpectroscopyInput {
 }
 
 type GmosSITCParams {
+  """Wavelength in appropriate units"""
+  centralWavelength: Wavelength!
+
   """Gmos South disperser"""
   grating: GmosSouthGrating
 
@@ -145,6 +134,9 @@ type GmosSITCParams {
 }
 
 type GmosNITCParams {
+  """Wavelength in appropriate units"""
+  centralWavelength: Wavelength!
+
   """Gmos North disperser"""
   grating: GmosNorthGrating
 
@@ -366,9 +358,6 @@ type ImagingMode implements ITCObservingMode {
 }
 
 type SpectroscopyMode implements ITCObservingMode {
-  """Wavelength in appropriate units"""
-  centralWavelength: Wavelength!
-
   """params"""
   params: InstrumentITCParams!
 
