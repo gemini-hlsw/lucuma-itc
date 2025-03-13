@@ -15,14 +15,6 @@ import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.*
-import lucuma.itc.GraphType
-import lucuma.itc.IntegrationTime
-import lucuma.itc.ItcCcd
-import lucuma.itc.ItcGraph
-import lucuma.itc.ItcGraphGroup
-import lucuma.itc.ItcObservingConditions
-import lucuma.itc.ItcSeries
-import lucuma.itc.SeriesDataType
 import lucuma.itc.search.ObservingMode
 import lucuma.itc.search.TargetData
 import lucuma.refined.*

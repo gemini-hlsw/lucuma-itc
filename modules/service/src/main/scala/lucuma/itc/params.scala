@@ -11,7 +11,6 @@ import lucuma.core.enums.*
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange
 import lucuma.itc.search.*
-import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
 
 sealed trait SpectroscopyParams
 

@@ -6,8 +6,6 @@ package lucuma.itc.client.json
 import cats.syntax.either.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.*
-import io.circe.Decoder
-import io.circe.DecodingFailure
 import io.circe.generic.semiauto.*
 import lucuma.core.data.Zipper
 import lucuma.core.data.ZipperCodec.given
