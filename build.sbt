@@ -18,9 +18,9 @@ val graphQLRoutesVersion        = "0.8.17"
 val http4sVersion               = "0.23.30"
 val http4sJdkHttpClientVersion  = "0.10.0"
 val keySemaphoreVersion         = "0.3.0-M1"
-val kittensVersion              = "3.4.0"
+val kittensVersion              = "3.5.0"
 val log4catsVersion             = "2.7.0"
-val lucumaCoreVersion           = "0.117.0"
+val lucumaCoreVersion           = "0.118.0"
 val lucumaRefinedVersion        = "0.1.3"
 val monocleVersion              = "3.3.0"
 val munitVersion                = "1.1.0"
@@ -35,9 +35,9 @@ val spireVersion                = "0.18.0"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / scalaVersion        := "3.6.3"
-ThisBuild / crossScalaVersions  := Seq("3.6.3")
-ThisBuild / tlBaseVersion       := "0.29"
+ThisBuild / scalaVersion        := "3.6.4"
+ThisBuild / crossScalaVersions  := Seq("3.6.4")
+ThisBuild / tlBaseVersion       := "0.30"
 ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
 

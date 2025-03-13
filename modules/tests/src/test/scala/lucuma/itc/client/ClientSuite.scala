@@ -24,7 +24,7 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.duration.*
 
-trait ClientSuite extends CatsEffectSuite {
+trait ClientSuite extends CatsEffectSuite:
 
   given Logger[IO] =
     Slf4jLogger.getLoggerFromClass(getClass)
@@ -103,4 +103,3 @@ trait ClientSuite extends CatsEffectSuite {
       _.spectroscopy(in).attempt
         .map(_.leftMap(_.getMessage))
         .assertEquals(expected)
-}

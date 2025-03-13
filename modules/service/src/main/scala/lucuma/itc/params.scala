@@ -11,7 +11,6 @@ import lucuma.core.enums.*
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange
 import lucuma.itc.search.*
-import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
 
 sealed trait SpectroscopyParams
 
@@ -25,6 +24,12 @@ case class GmosSSpectroscopyParams(
   grating: GmosSouthGrating,
   fpu:     GmosSouthFpuParam,
   filter:  Option[GmosSouthFilter]
+) extends SpectroscopyParams derives Encoder.AsObject
+
+case class F2SpectroscopyParams(
+  disperser: F2Disperser,
+  fpu:       F2Fpu,
+  filter:    F2Filter
 ) extends SpectroscopyParams derives Encoder.AsObject
 
 sealed trait ImagingParams

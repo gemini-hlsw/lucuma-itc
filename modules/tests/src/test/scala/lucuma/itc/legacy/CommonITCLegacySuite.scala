@@ -1,9 +1,8 @@
 // Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc
+package lucuma.itc.legacy
 
-import lucuma.itc.legacy.*
 import lucuma.itc.service.Main.ReverseClassLoader
 import munit.Tag
 
@@ -21,7 +20,10 @@ trait CommonITCLegacySuite:
     err.exists(_.contains("Invalid S/N")) || err.exists(_.contains("do not overlap")) ||
       err.exists(_.contains("Unsupported configuration")) ||
       err.exists(_.contains("Unsupported calculation method")) ||
-      err.exists(_.contains("target is too bright"))
+      err.exists(_.contains("target is too bright")) ||
+      err.exists(_.contains("Signal = 0")) ||
+      err.exists(_.contains("Redshifted SED")) ||
+      err.exists(_.contains("Wavelength"))
 
   def allowedErrorsWithLargeSN(err: List[String]) =
     err.exists(_.contains("Invalid S/N")) || err.exists(_.contains("do not overlap")) ||

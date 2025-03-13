@@ -2354,6 +2354,21 @@ type UpdateProgramUsersResult {
 }
 
 """
+The result of updating the selected notes, up to `LIMIT` or the maximum of
+(1000).  If `hasMore` is true, additional notes were modified and not included
+here.
+"""
+type UpdateProgramNotesResult {
+  """
+  The edited notes, up to the specified LIMIT or the default maximum of 1000.
+  """
+  programNotes: [ProgramNote!]!
+
+  """`true` when there were additional edits that were not returned."""
+  hasMore: Boolean!
+}
+
+"""
 The result of updating the selected programs, up to `LIMIT` or the maximum of (1000).  If `hasMore` is true, additional programs were modified and not included here.
 """
 type UpdateProgramsResult {
@@ -7230,6 +7245,20 @@ input GmosNImagingInput {
   ccdMode: GmosCcdModeInput
 }
 
+input Flamingos2SpectroscopyInput {
+  """Center of the configuration spectrum"""
+  centralWavelength: WavelengthInput!
+
+  """Flamingos2 disperser"""
+  disperser: Flamingos2Disperser
+
+  """Flamingos2 Focal plane unit"""
+  fpu: Flamingos2Fpu!
+
+  """Flamingos2 filter"""
+  filter: Flamingos2Filter!
+}
+
 type GmosSITCParams {
   """Gmos South disperser"""
   grating: GmosSouthGrating
@@ -7258,7 +7287,18 @@ type GmosNITCParams {
   filter: GmosNorthFilter
 }
 
-union InstrumentITCParams = GmosNITCParams | GmosSITCParams
+type Flamingos2ITCParams {
+  """Flamingos2 disperser"""
+  disperser: Flamingos2Disperser
+
+  """Flamingos2 Focal plane unit"""
+  fpu: Flamingos2Fpu
+
+  """Flamingos2 filter"""
+  filter: Flamingos2Filter
+}
+
+union InstrumentITCParams = GmosNITCParams | GmosSITCParams | Flamingos2ITCParams
 
 """Params for instrument modes"""
 input InstrumentModesInput {
@@ -7273,6 +7313,9 @@ input InstrumentModesInput {
 
   """Gmos South Imaging"""
   gmosSImaging: GmosSImagingInput
+
+  """Flamingos2 Spectroscopy"""
+  flamingos2Spectroscopy: Flamingos2SpectroscopyInput
 }
 
 """Params for spectroscopy integration time calculation"""

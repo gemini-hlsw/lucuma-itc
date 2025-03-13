@@ -170,6 +170,16 @@ private val encodeGmosSouthSpectroscopy: Encoder[ObservingMode.SpectroscopyMode.
       )
   }
 
+private val encodeF2Spectroscopy: Encoder[ObservingMode.SpectroscopyMode.Flamingos2] = a =>
+  Json.obj(
+    // Translate observing mode to OCS2 style
+    "filter"          -> Json.fromString(a.filter.ocs2Tag),
+    "grism"           -> Json.fromString(a.disperser.ocs2Tag),
+    "mask"            -> Json.fromString(a.fpu.ocs2Tag),
+    "readMode"        -> Json.fromString("FAINT_OBJECT_SPEC"),
+    "customSlitWidth" -> Json.Null
+  )
+
 private val encodeGmosSouthImaging: Encoder[ObservingMode.ImagingMode.GmosSouth] =
   new Encoder[ObservingMode.ImagingMode.GmosSouth] {
     def apply(a: ObservingMode.ImagingMode.GmosSouth): Json =
@@ -199,13 +209,15 @@ private val encodeGmosSouthImaging: Encoder[ObservingMode.ImagingMode.GmosSouth]
 
 private given Encoder[ItcInstrumentDetails] = (a: ItcInstrumentDetails) =>
   a.mode match
-    case a: ObservingMode.SpectroscopyMode.GmosNorth =>
+    case a: ObservingMode.SpectroscopyMode.GmosNorth  =>
       Json.obj("GmosParameters" -> encodeGmosNorthSpectroscopy(a))
-    case a: ObservingMode.SpectroscopyMode.GmosSouth =>
+    case a: ObservingMode.SpectroscopyMode.GmosSouth  =>
       Json.obj("GmosParameters" -> encodeGmosSouthSpectroscopy(a))
-    case a: ObservingMode.ImagingMode.GmosNorth      =>
+    case a: ObservingMode.SpectroscopyMode.Flamingos2 =>
+      Json.obj("Flamingos2Parameters" -> encodeF2Spectroscopy(a))
+    case a: ObservingMode.ImagingMode.GmosNorth       =>
       Json.obj("GmosParameters" -> encodeGmosNorthImaging(a))
-    case a: ObservingMode.ImagingMode.GmosSouth      =>
+    case a: ObservingMode.ImagingMode.GmosSouth       =>
       Json.obj("GmosParameters" -> encodeGmosSouthImaging(a))
 
 private given Encoder[ItcWavefrontSensor] = Encoder[String].contramap(_.ocs2Tag)

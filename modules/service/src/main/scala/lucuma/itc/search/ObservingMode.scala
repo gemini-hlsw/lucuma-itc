@@ -12,11 +12,13 @@ import lucuma.core.enums.*
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import lucuma.core.model.sequence.gmos.GmosCcdMode
+import lucuma.itc.F2SpectroscopyParams
 import lucuma.itc.GmosNImagingParams
 import lucuma.itc.GmosNSpectroscopyParams
 import lucuma.itc.GmosSImagingParams
 import lucuma.itc.GmosSSpectroscopyParams
 import lucuma.itc.encoders.given
+import lucuma.itc.search.ItcObservationDetails.AnalysisMethod
 import lucuma.itc.search.hashes.given
 import lucuma.itc.search.syntax.*
 import spire.math.Interval
@@ -53,8 +55,9 @@ object ObservingMode {
 
   object SpectroscopyMode {
     given Encoder[ObservingMode.SpectroscopyMode] = Encoder.instance {
-      case gn: GmosNorth => gn.asJson
-      case gs: GmosSouth => gs.asJson
+      case gn: GmosNorth  => gn.asJson
+      case gs: GmosSouth  => gs.asJson
+      case f2: Flamingos2 => f2.asJson
     }
 
     sealed trait GmosSpectroscopy extends SpectroscopyMode derives Hash {
@@ -133,6 +136,31 @@ object ObservingMode {
         Json.obj(
           ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
           ("params", GmosSSpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
+          ("centralWavelength", a.centralWavelength.asJson)
+        )
+
+    case class Flamingos2(
+      centralWavelength: Wavelength,
+      disperser:         F2Disperser,
+      filter:            F2Filter,
+      fpu:               F2Fpu
+    ) extends SpectroscopyMode derives Hash {
+
+      override def analysisMethod: AnalysisMethod =
+        ItcObservationDetails.AnalysisMethod.Aperture.Auto(
+          skyAperture = 1.0
+        )
+
+      val instrument: Instrument =
+        Instrument.Flamingos2
+
+    }
+
+    object Flamingos2:
+      given Encoder[Flamingos2] = a =>
+        Json.obj(
+          ("instrument", a.instrument.asJson),
+          ("params", F2SpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
           ("centralWavelength", a.centralWavelength.asJson)
         )
 

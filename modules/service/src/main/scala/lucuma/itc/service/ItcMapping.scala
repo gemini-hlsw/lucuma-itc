@@ -17,8 +17,6 @@ import lucuma.core.enums.{ExecutionEnvironment as _, *}
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.TimeSpan
 import lucuma.itc.*
-import lucuma.itc.CalculationResult
-import lucuma.itc.ItcVersions
 import lucuma.itc.cache.BinaryEffectfulCache
 import lucuma.itc.encoders.given
 import lucuma.itc.input.*

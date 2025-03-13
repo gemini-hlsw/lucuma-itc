@@ -12,7 +12,6 @@ import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.NewType
 import lucuma.itc.*
-import lucuma.itc.ItcVersions
 import lucuma.itc.client.json.decoders.given
 
 // These are limited versions of the graph for the client as we don't want to transfer all the data.

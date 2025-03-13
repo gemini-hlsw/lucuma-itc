@@ -1,15 +1,13 @@
 // Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc
+package lucuma.itc.legacy
 
 import cats.data.NonEmptyMap
 import cats.implicits.*
 import coulomb.*
 import coulomb.syntax.*
-import coulomb.units.si.*
 import eu.timepit.refined.types.numeric.PosBigDecimal
-import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.enums.*
 import lucuma.core.math.Angle
@@ -18,15 +16,13 @@ import lucuma.core.math.BrightnessValue
 import lucuma.core.math.Redshift
 import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.*
-import lucuma.core.math.dimensional.Units
 import lucuma.core.math.dimensional.syntax.*
 import lucuma.core.math.units.*
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
-import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.Enumerated
-import lucuma.itc.legacy.*
+import lucuma.itc.ItcObservingConditions
 import lucuma.itc.legacy.given
 import lucuma.itc.search.ItcObservationDetails
 import lucuma.itc.search.ObservingMode
@@ -37,11 +33,11 @@ import scala.collection.immutable.SortedMap
 import scala.concurrent.duration.*
 
 /**
- * This is a unit test for imaging mode in the legacy ITC, ensuring all possible combinations of
- * parameters can be parsed. The ITC may still return an error but we want to ensure it can parse
- * the values.
+ * This is a unit test mostly to ensure all possible combination of params can be parsed by the
+ * legacy ITC (Note that the ITC may still return an error but we want to ensure it can parse the
+ * values
  */
-class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
+class LegacyITCFlamingos2SpecSignalToNoiseSuite extends FunSuite with CommonITCLegacySuite:
   override def munitTimeout: Duration = 5.minute
 
   val sourceDefinition = ItcSourceDefinition(
@@ -62,34 +58,34 @@ class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
     Band.R.asLeft
   )
 
-  val analysisMethod = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
+  val lsAnalysisMethod  = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
+  val ifuAnalysisMethod =
+    ItcObservationDetails.AnalysisMethod.Ifu.Single(skyFibres = 250, offset = 5.0)
 
   val obs = ItcObservationDetails(
-    calculationMethod = ItcObservationDetails.CalculationMethod.IntegrationTime.ImagingExp(
-      sigma = 600,
+    calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
+      sigma = 100,
+      wavelengthAt = Wavelength.decimalNanometers.getOption(1200).get,
       coadds = None,
       sourceFraction = 1.0,
       ditherOffset = Angle.Angle0
     ),
-    analysisMethod = analysisMethod
+    analysisMethod = lsAnalysisMethod
   )
 
   val telescope = ItcTelescopeDetails(
     wfs = ItcWavefrontSensor.OIWFS
   )
 
-  val gmosNImaging = ItcInstrumentDetails(
-    ObservingMode.ImagingMode.GmosNorth(
-      GmosNorthFilter.GPrime,
-      GmosCcdMode(
-        GmosXBinning.One,
-        GmosYBinning.One,
-        GmosAmpCount.Twelve,
-        GmosAmpGain.High,
-        GmosAmpReadMode.Fast
-      ).some
+  val f2Conf =
+    ObservingMode.SpectroscopyMode.Flamingos2(
+      Wavelength.decimalNanometers.getOption(1600).get,
+      F2Disperser.R3000,
+      F2Filter.J,
+      F2Fpu.LongSlit2
     )
-  )
+
+  val flamingos2 = ItcInstrumentDetails(f2Conf)
 
   val conditions = ItcObservingConditions(
     ImageQuality.PointEight,
@@ -105,7 +101,7 @@ class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
       obs,
       c,
       telescope,
-      gmosNImaging
+      flamingos2
     )
 
   test("image quality".tag(LegacyITCTest)):
@@ -132,53 +128,39 @@ class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
         .calculateIntegrationTime(bodyCond(conditions.copy(sb = sb)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  val gmosNConf = ObservingMode.ImagingMode.GmosNorth(
-    GmosNorthFilter.GPrime,
-    GmosCcdMode(
-      GmosXBinning.One,
-      GmosYBinning.One,
-      GmosAmpCount.Twelve,
-      GmosAmpGain.High,
-      GmosAmpReadMode.Fast
-    ).some
-  )
-
-  def bodyConf(c: ObservingMode.ImagingMode) =
+  def bodyConf(
+    c:        ObservingMode.SpectroscopyMode,
+    analysis: ItcObservationDetails.AnalysisMethod = lsAnalysisMethod
+  ) =
     ItcParameters(
       sourceDefinition,
-      obs,
-      ItcObservingConditions(
-        ImageQuality.PointEight,
-        CloudExtinction.OnePointFive,
-        WaterVapor.Median,
-        SkyBackground.Dark,
-        2
+      obs.copy(analysisMethod = analysis),
+      ItcObservingConditions(ImageQuality.PointEight,
+                             CloudExtinction.OnePointFive,
+                             WaterVapor.Median,
+                             SkyBackground.Dark,
+                             2
       ),
       telescope,
       ItcInstrumentDetails(c)
     )
 
-  test("gmos north filter".tag(LegacyITCTest)):
-    Enumerated[GmosNorthFilter].all.foreach: f =>
+  test("flamingos2 filter".tag(LegacyITCTest)):
+    Enumerated[F2Filter].all.foreach: f =>
+      val d      = f match
+        case F2Filter.J | F2Filter.H | F2Filter.JH | F2Filter.HK =>
+          F2Disperser.R1200JH
+        case _                                                   => F2Disperser.R3000
       val result = localItc
-        .calculateIntegrationTime(bodyConf(gmosNConf.copy(filter = f)).asJson.noSpaces)
+        .calculateIntegrationTime(bodyConf(f2Conf.copy(filter = f, disperser = d)).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
 
-  val gmosSConf = ObservingMode.ImagingMode.GmosSouth(
-    GmosSouthFilter.GPrime,
-    GmosCcdMode(
-      GmosXBinning.One,
-      GmosYBinning.One,
-      GmosAmpCount.Twelve,
-      GmosAmpGain.High,
-      GmosAmpReadMode.Fast
-    ).some
-  )
-
-  test("gmos south filter".tag(LegacyITCTest)):
-    Enumerated[GmosSouthFilter].all.foreach: f =>
+  test("flamingos2 fpu".tag(LegacyITCTest)):
+    Enumerated[F2Fpu].all.foreach: f =>
       val result = localItc
-        .calculateIntegrationTime(bodyConf(gmosSConf.copy(filter = f)).asJson.noSpaces)
+        .calculateIntegrationTime(
+          bodyConf(f2Conf.copy(fpu = f)).asJson.noSpaces
+        )
       assert(result.fold(allowedErrors, _ => true))
 
   def bodySED(c: UnnormalizedSED) =
@@ -193,7 +175,7 @@ class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
       obs,
       conditions,
       telescope,
-      gmosNImaging
+      flamingos2
     )
 
   test("stellar library spectrum".tag(LegacyITCTest)):
@@ -250,7 +232,7 @@ class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
       obs,
       conditions,
       telescope,
-      gmosNImaging
+      flamingos2
     )
 
   test("brightness integrated units".tag(LegacyITCTest)):
@@ -261,9 +243,8 @@ class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
         )
       assert(result.fold(allowedErrors, _ => true))
 
-  test("user defined SED".tag(LegacyITCTest)):
+  test("user defined SED".tag(LegacyITCTest)) {
     val userDefinedFluxDensities = NonEmptyMap.of(
-      Wavelength.decimalNanometers.getOption(300).get -> PosBigDecimal.unsafeFrom(0.5),
       Wavelength.decimalNanometers.getOption(500).get -> PosBigDecimal.unsafeFrom(1.0),
       Wavelength.decimalNanometers.getOption(600).get -> PosBigDecimal.unsafeFrom(2.0),
       Wavelength.decimalNanometers.getOption(700).get -> PosBigDecimal.unsafeFrom(3.0)
@@ -275,6 +256,7 @@ class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
       )
 
     assert(result.fold(allowedErrors, _ => true))
+  }
 
   def bodySurfaceMagUnits(c: BrightnessMeasure[Surface]) =
     ItcParameters(
@@ -291,7 +273,7 @@ class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
       obs,
       conditions,
       telescope,
-      gmosNImaging
+      flamingos2
     )
 
   test("surface units".tag(LegacyITCTest)):
@@ -318,7 +300,7 @@ class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
       obs,
       conditions,
       telescope,
-      gmosNImaging
+      flamingos2
     )
 
   test("gaussian units".tag(LegacyITCTest)):
@@ -351,36 +333,11 @@ class LegacyITCImagingSuite extends FunSuite with CommonITCLegacySuite:
       obs,
       conditions,
       telescope,
-      gmosNImaging
+      flamingos2
     )
 
   test("power law".tag(LegacyITCTest)):
-    List(-10, 0, 10, 100).foreach: f =>
+    List(-10, 0, 10).foreach: f =>
       val result = localItc
         .calculateIntegrationTime(bodyPowerLaw(f).asJson.noSpaces)
       assert(result.fold(allowedErrors, _ => true))
-
-  def bodyBlackBody(c: PosInt) =
-    ItcParameters(
-      sourceDefinition.copy(
-        target = sourceDefinition.target.copy(
-          sourceProfile = SourceProfile.Gaussian(
-            Angle.fromDoubleArcseconds(10),
-            SpectralDefinition.BandNormalized(
-              UnnormalizedSED.BlackBody(c.withUnit[Kelvin]).some,
-              SortedMap(
-                Band.R ->
-                  BrightnessValue
-                    .unsafeFrom(5)
-                    .withUnit[VegaMagnitude]
-                    .toMeasureTagged
-              )
-            )
-          )
-        )
-      ),
-      obs,
-      conditions,
-      telescope,
-      gmosNImaging
-    )

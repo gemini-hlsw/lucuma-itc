@@ -34,7 +34,6 @@ import natchez.http4s.NatchezMiddleware
 import natchez.http4s.implicits.*
 import natchez.log.Log
 import org.http4s.*
-import org.http4s.HttpApp
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.headers.`Cache-Control`
 import org.http4s.implicits.*

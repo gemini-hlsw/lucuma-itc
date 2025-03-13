@@ -14,6 +14,9 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
 import lucuma.core.enums.CloudExtinction
+import lucuma.core.enums.F2Disperser
+import lucuma.core.enums.F2Filter
+import lucuma.core.enums.F2Fpu
 import lucuma.core.enums.GalaxySpectrum.Spiral
 import lucuma.core.enums.GmosAmpCount
 import lucuma.core.enums.GmosAmpGain
@@ -74,15 +77,15 @@ import scala.collection.immutable.SortedMap
 
 val atWavelength = Wavelength.fromIntNanometers(600).get
 
-class WiringSuite extends ClientSuite {
+class WiringSuite extends ClientSuite:
   val selected = IntegrationTime(
     TimeSpan.FromString.getOption("PT1S").get,
     NonNegInt.unsafeFrom(10)
   )
 
-  test("ItcClient spectroscopy basic wiring and sanity check") {
+  test("ItcClient spectroscopy basic wiring and sanity check"):
     spectroscopy(
-      WiringSuite.SpectroscopyInputData,
+      WiringSuite.GmosSpectroscopyInputData,
       ClientCalculationResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
@@ -101,11 +104,32 @@ class WiringSuite extends ClientSuite {
               ).asRight
       ).asRight
     )
-  }
 
-  test("ItcClient imaging basic wiring and sanity check") {
+  test("ItcClient flamingos2 spectroscopy basic wiring and sanity check"):
+    spectroscopy(
+      WiringSuite.Flamingos2SpectroscopyInputData,
+      ClientCalculationResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+          BuildInfo.ocslibHash.some
+        ),
+        AsterismIntegrationTimeOutcomes:
+          NonEmptyChain:
+            TargetIntegrationTimeOutcome:
+              TargetIntegrationTime(
+                Zipper.fromNel(NonEmptyList.one(selected)),
+                Band.R.asLeft,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
+              ).asRight
+      ).asRight
+    )
+
+  test("ItcClient imaging basic wiring and sanity check"):
     imaging(
-      WiringSuite.ImagingInputData,
+      WiringSuite.GmosImagingInputData,
       ClientCalculationResult(
         ItcVersions(
           versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
@@ -124,9 +148,8 @@ class WiringSuite extends ClientSuite {
               ).asRight
       ).asRight
     )
-  }
 
-  test("ItcClient spectroscopy graph wiring and sanity check") {
+  test("ItcClient spectroscopy graph wiring and sanity check"):
     spectroscopyGraphs(
       WiringSuite.GraphInput,
       SpectroscopyGraphsResult(
@@ -177,9 +200,8 @@ class WiringSuite extends ClientSuite {
           )
       ).asRight
     )
-  }
 
-  test("ItcClient spectroscopy with emission lines basic wiring and sanity check") {
+  test("ItcClient spectroscopy with emission lines basic wiring and sanity check"):
     spectroscopyEmissionLines(
       WiringSuite.SpectroscopyEmissionLinesInput,
       ClientCalculationResult(
@@ -200,12 +222,10 @@ class WiringSuite extends ClientSuite {
               ).asRight
       ).asRight
     )
-  }
-}
 
-object WiringSuite {
+object WiringSuite:
 
-  val SpectroscopyInputData: SpectroscopyInput =
+  val GmosSpectroscopyInputData: SpectroscopyInput =
     SpectroscopyInput(
       SpectroscopyParameters(
         ExposureTimeMode.SignalToNoiseMode(
@@ -253,7 +273,47 @@ object WiringSuite {
       )
     )
 
-  val ImagingInputData: ImagingInput =
+  val Flamingos2SpectroscopyInputData: SpectroscopyInput =
+    SpectroscopyInput(
+      SpectroscopyParameters(
+        ExposureTimeMode.SignalToNoiseMode(
+          SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+          atWavelength
+        ),
+        ConstraintSet(
+          ImageQuality.PointOne,
+          CloudExtinction.PointOne,
+          SkyBackground.Darkest,
+          WaterVapor.VeryDry,
+          AirMass.Default
+        ),
+        InstrumentMode.Flamingos2Spectroscopy(
+          Wavelength.Min,
+          F2Disperser.R3000,
+          F2Filter.J,
+          F2Fpu.LongSlit2
+        )
+      ),
+      NonEmptyList.of(
+        TargetInput(
+          SourceProfile.Point(
+            BandNormalized[Integrated](
+              Galaxy(Spiral).some,
+              SortedMap(
+                Band.R ->
+                  Measure(
+                    BrightnessValue.unsafeFrom(BigDecimal(10.0)),
+                    TaggedUnit[VegaMagnitude, Brightness[Integrated]].unit
+                  ).tag
+              )
+            )
+          ),
+          RadialVelocity.fromMetersPerSecond.getOption(1.0).get
+        )
+      )
+    )
+
+  val GmosImagingInputData: ImagingInput =
     ImagingInput(
       ImagingParameters(
         ExposureTimeMode.SignalToNoiseMode(
@@ -392,4 +452,3 @@ object WiringSuite {
         )
       )
     )
-}

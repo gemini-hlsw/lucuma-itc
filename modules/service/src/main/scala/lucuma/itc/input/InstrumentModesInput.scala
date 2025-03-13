@@ -17,13 +17,22 @@ object InstrumentModesInput:
             GmosNSpectroscopyInput.binding.Option("gmosNSpectroscopy", gmosNSpectroscopy),
             GmosSSpectroscopyInput.binding.Option("gmosSSpectroscopy", gmosSSpectroscopy),
             GmosNImagingInput.binding.Option("gmosNImaging", gmosNImaging),
-            GmosSImagingInput.binding.Option("gmosSImaging", gmosSImaging)
+            GmosSImagingInput.binding.Option("gmosSImaging", gmosSImaging),
+            F2SpectroscopyInput.binding.Option("flamingos2Spectroscopy", f2Spectroscopy)
           ) =>
-        (gmosNSpectroscopy, gmosSSpectroscopy, gmosNImaging, gmosSImaging).parTupled.flatMap {
-          case (gmosNSpectroscopy, gmosSSpectroscopy, gmosNImaging, gmosSImaging) =>
-            oneOrFail(gmosNSpectroscopy -> "gmosNSpectroscopy",
-                      gmosSSpectroscopy -> "gmosSSpectroscopy",
-                      gmosNImaging      -> "gmosNImaging",
-                      gmosSImaging      -> "gmosSImaging"
-            )
-        }
+        (gmosNSpectroscopy, gmosSSpectroscopy, gmosNImaging, gmosSImaging, f2Spectroscopy).parTupled
+          .flatMap {
+            case (gmosNSpectroscopy,
+                  gmosSSpectroscopy,
+                  gmosNImaging,
+                  gmosSImaging,
+                  f2Spectroscopy
+                ) =>
+              oneOrFail(
+                gmosNSpectroscopy -> "gmosNSpectroscopy",
+                gmosSSpectroscopy -> "gmosSSpectroscopy",
+                gmosNImaging      -> "gmosNImaging",
+                gmosSImaging      -> "gmosSImaging",
+                f2Spectroscopy    -> "flamingos2Spectroscopy"
+              )
+          }

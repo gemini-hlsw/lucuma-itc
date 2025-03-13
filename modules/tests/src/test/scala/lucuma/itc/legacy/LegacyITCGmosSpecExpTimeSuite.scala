@@ -1,7 +1,7 @@
 // Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc
+package lucuma.itc.legacy
 
 import cats.implicits.*
 import coulomb.*
@@ -16,7 +16,6 @@ import lucuma.core.math.BrightnessValue
 import lucuma.core.math.Redshift
 import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.*
-import lucuma.core.math.dimensional.Units
 import lucuma.core.math.dimensional.syntax.*
 import lucuma.core.math.units.*
 import lucuma.core.model.SourceProfile
@@ -24,7 +23,7 @@ import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.Enumerated
-import lucuma.itc.legacy.*
+import lucuma.itc.ItcObservingConditions
 import lucuma.itc.legacy.given
 import lucuma.itc.search.GmosNorthFpuParam
 import lucuma.itc.search.GmosSouthFpuParam
@@ -42,7 +41,7 @@ import scala.concurrent.duration.*
  * legacy ITC (Note that the ITC may still return an error but we want to ensure it can parse the
  * values
  */
-class LegacyITCExpTimeSuite extends FunSuite with CommonITCLegacySuite:
+class LegacyITCGmosSpecExpTimeSuite extends FunSuite with CommonITCLegacySuite:
   override def munitTimeout: Duration = 5.minute
 
   val sourceDefinition = ItcSourceDefinition(
