@@ -151,8 +151,6 @@ object ObservingMode {
           skyAperture = 1.0
         )
 
-      val isIfu = fpu.slitWidth > 0
-
       val instrument: Instrument =
         Instrument.Flamingos2
 

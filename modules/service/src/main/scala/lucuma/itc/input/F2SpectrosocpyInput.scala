@@ -25,7 +25,6 @@ object F2SpectroscopyInput:
       case List(
             WavelengthInput.Binding("centralWavelength", centralWavelength),
             F2DisperserBinding("disperser", disperser),
-            // F2FpuInput.Binding("fpu", fpu),
             F2FpuBinding("fpu", fpu),
             F2FilterBinding("filter", filter)
           ) =>
