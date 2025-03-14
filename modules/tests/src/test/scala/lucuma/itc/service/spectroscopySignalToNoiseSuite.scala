@@ -77,7 +77,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               ... on SpectroscopyMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNSpectroscopyParams {
                     grating
                   }
                 }
@@ -201,7 +201,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                 ... on SpectroscopyMode {
                   instrument
                   params {
-                    ... on GmosSITCParams {
+                    ... on GmosSSpectroscopyParams {
                       grating
                       centralWavelength {
                         nanometers
@@ -324,7 +324,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                 ... on SpectroscopyMode {
                   instrument
                   params {
-                    ... on Flamingos2ITCParams {
+                    ... on Flamingos2SpectroscopyParams {
                       disperser
                       fpu
                     }
@@ -553,7 +553,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosNITCParams {
+                      ... on GmosNSpectroscopyParams {
                         grating
                       }
                     }
@@ -676,7 +676,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                 ... on SpectroscopyMode {
                   instrument
                   params {
-                    ... on GmosNITCParams {
+                    ... on GmosNSpectroscopyParams {
                       grating
                     }
                   }
@@ -780,7 +780,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosNITCParams {
+                      ... on GmosNSpectroscopyParams {
                         grating
                       }
                     }
@@ -909,7 +909,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosSITCParams {
+                      ... on GmosSSpectroscopyParams {
                         grating
                         centralWavelength {
                           nanometers
@@ -1044,7 +1044,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                     ... on SpectroscopyMode {
                       instrument
                       params {
-                        ... on GmosNITCParams {
+                        ... on GmosNSpectroscopyParams {
                           fpu {
                             builtin
                           }
@@ -1172,7 +1172,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosSITCParams {
+                      ... on GmosSSpectroscopyParams {
                         fpu {
                           builtin
                         }
@@ -1306,7 +1306,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosNITCParams {
+                      ... on GmosNSpectroscopyParams {
                         filter
                         centralWavelength {
                           nanometers
@@ -1436,7 +1436,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosSITCParams {
+                      ... on GmosSSpectroscopyParams {
                         filter
                         centralWavelength {
                           nanometers
@@ -1584,7 +1584,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               ... on SpectroscopyMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNSpectroscopyParams {
                     grating
                     centralWavelength {
                       nanometers

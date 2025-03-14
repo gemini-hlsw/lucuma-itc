@@ -76,7 +76,7 @@ class emissionLineSuite extends GraphQLEmissionLineSuite {
               ... on SpectroscopyMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNSpectroscopyParams {
                     grating
                     centralWavelength {
                       nanometers

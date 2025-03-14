@@ -116,7 +116,7 @@ input Flamingos2SpectroscopyInput {
   filter: Flamingos2Filter!
 }
 
-type GmosSITCParams {
+type GmosSSpectroscopyParams {
   """Wavelength in appropriate units"""
   centralWavelength: Wavelength!
 
@@ -133,7 +133,7 @@ type GmosSITCParams {
   filter: GmosSouthFilter
 }
 
-type GmosNITCParams {
+type GmosNSpectroscopyParams {
   """Wavelength in appropriate units"""
   centralWavelength: Wavelength!
 
@@ -150,7 +150,7 @@ type GmosNITCParams {
   filter: GmosNorthFilter
 }
 
-type Flamingos2ITCParams {
+type Flamingos2SpectroscopyParams {
   """Flamingos2 disperser"""
   disperser: Flamingos2Disperser
 
@@ -161,7 +161,7 @@ type Flamingos2ITCParams {
   filter: Flamingos2Filter
 }
 
-union InstrumentITCParams = GmosNITCParams | GmosSITCParams | Flamingos2ITCParams
+union InstrumentITCParams = GmosNSpectroscopyParams | GmosSSpectroscopyParams | Flamingos2SpectroscopyParams
 
 """Params for instrument modes"""
 input InstrumentModesInput {
@@ -496,7 +496,7 @@ type TargetGraphsResult {
   """The band used for the graphs calculation, in case of a BandNormalized SED"""
   band: Band
 
-  """The emission line used for the graphs calculation, in case of an EmissionLines SED"""
+  """The emission line used for the time calculation, in case of an EmissionLines SED"""
   emissionLine: Wavelength
 }
 

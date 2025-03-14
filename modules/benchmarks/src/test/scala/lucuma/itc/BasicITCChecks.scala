@@ -78,7 +78,7 @@ class BasicITCChecks extends Simulation {
                 mode {
                   instrument
                   params {
-                    ... on GmosNITCParams {
+                    ... on GmosNSpectroscopyParams {
                       grating
                     }
                   }

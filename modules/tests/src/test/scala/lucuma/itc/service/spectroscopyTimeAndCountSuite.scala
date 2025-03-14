@@ -80,7 +80,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
               ... on SpectroscopyMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNSpectroscopyParams {
                     grating
                     centralWavelength {
                       nanometers
@@ -250,7 +250,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 ... on SpectroscopyMode {
                   instrument
                   params {
-                    ... on GmosSITCParams {
+                    ... on GmosSSpectroscopyParams {
                       grating
                       centralWavelength {
                         nanometers
@@ -521,7 +521,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosNITCParams {
+                      ... on GmosNSpectroscopyParams {
                         grating
                         centralWavelength {
                           nanometers
@@ -680,7 +680,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 ... on SpectroscopyMode {
                   instrument
                   params {
-                    ... on GmosNITCParams {
+                    ... on GmosNSpectroscopyParams {
                       grating
                       centralWavelength {
                         nanometers
@@ -792,7 +792,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosNITCParams {
+                      ... on GmosNSpectroscopyParams {
                         grating
                         centralWavelength {
                           nanometers
@@ -957,7 +957,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosSITCParams {
+                      ... on GmosSSpectroscopyParams {
                         grating
                         centralWavelength {
                           nanometers
@@ -1122,7 +1122,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     ... on SpectroscopyMode {
                       instrument
                       params {
-                        ... on GmosNITCParams {
+                        ... on GmosNSpectroscopyParams {
                           fpu {
                             builtin
                           }
@@ -1286,7 +1286,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosSITCParams {
+                      ... on GmosSSpectroscopyParams {
                         fpu {
                           builtin
                         }
@@ -1450,7 +1450,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosNITCParams {
+                      ... on GmosNSpectroscopyParams {
                         filter
                       }
                     }
@@ -1604,7 +1604,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosSITCParams {
+                      ... on GmosSSpectroscopyParams {
                         filter
                       }
                     }
@@ -1788,7 +1788,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
               ... on SpectroscopyMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNSpectroscopyParams {
                     grating
                     centralWavelength {
                       nanometers
@@ -1973,7 +1973,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 ... on SpectroscopyMode {
                   instrument
                   params {
-                    ... on Flamingos2ITCParams {
+                    ... on Flamingos2SpectroscopyParams {
                       disperser
                       fpu
                     }
