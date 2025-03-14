@@ -8,11 +8,11 @@ import cats.derived.*
 import cats.syntax.all.*
 import io.circe.*
 import lucuma.core.enums.*
+import lucuma.core.math.Wavelength
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange
-import lucuma.core.math.Wavelength
-import lucuma.itc.search.*
 import lucuma.itc.encoders.given
+import lucuma.itc.search.*
 
 sealed trait SpectroscopyParams
 

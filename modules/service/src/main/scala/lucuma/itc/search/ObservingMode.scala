@@ -103,7 +103,7 @@ object ObservingMode {
     object GmosNorth:
       given Encoder[GmosNorth] = a =>
         Json.obj(
-          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+          ("instrument", a.instrument.asJson),
           ("params",
            GmosNSpectroscopyParams(a.centralWavelength, a.disperser, a.fpu, a.filter).asJson
           )
@@ -134,7 +134,7 @@ object ObservingMode {
     object GmosSouth:
       given Encoder[GmosSouth] = a =>
         Json.obj(
-          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+          ("instrument", a.instrument.asJson),
           ("params",
            GmosSSpectroscopyParams(a.centralWavelength, a.disperser, a.fpu, a.filter).asJson
           )
@@ -195,7 +195,7 @@ object ObservingMode {
     object GmosNorth:
       given Encoder[GmosNorth] = a =>
         Json.obj(
-          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+          ("instrument", a.instrument.asJson),
           ("params", GmosNImagingParams(a.filter).asJson)
         )
 
@@ -212,7 +212,7 @@ object ObservingMode {
     object GmosSouth:
       given Encoder[GmosSouth] = a =>
         Json.obj(
-          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+          ("instrument", a.instrument.asJson),
           ("params", GmosSImagingParams(a.filter).asJson)
         )
   }

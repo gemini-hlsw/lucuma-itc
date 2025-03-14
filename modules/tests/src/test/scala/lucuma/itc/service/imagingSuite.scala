@@ -7,7 +7,7 @@ import io.circe.literal.*
 
 class imagingSuite extends GraphImagingQLSuite {
 
-  test("gmos north case".ignore) {
+  test("gmos north case") {
     query(
       """
         query {
@@ -94,7 +94,7 @@ class imagingSuite extends GraphImagingQLSuite {
               ... on ImagingMode {
                 instrument
                 params {
-                  ... on GmosNSpectroscopyParams {
+                  ... on GmosNImagingParams {
                     filter
                   }
                 }

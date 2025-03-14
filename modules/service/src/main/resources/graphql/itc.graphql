@@ -7275,7 +7275,19 @@ type Flamingos2SpectroscopyParams {
   filter: Flamingos2Filter
 }
 
-union InstrumentITCParams = GmosNSpectroscopyParams | GmosSSpectroscopyParams | Flamingos2SpectroscopyParams
+union SpectroscopyParams = GmosNSpectroscopyParams | GmosSSpectroscopyParams | Flamingos2SpectroscopyParams
+
+type GmosSImagingParams {
+  """Gmos South filter"""
+  filter: GmosSouthFilter!
+}
+
+type GmosNImagingParams {
+  """Gmos North filter"""
+  filter: GmosNorthFilter
+}
+
+union ImagingParams = GmosNImagingParams | GmosSImagingParams
 
 """Params for instrument modes"""
 input InstrumentModesInput {
@@ -7470,15 +7482,15 @@ type ImagingMode implements ITCObservingMode {
   instrument: Instrument!
 
   """params"""
-  params: InstrumentITCParams!
+  params: ImagingParams!
 }
 
 type SpectroscopyMode implements ITCObservingMode {
-  """params"""
-  params: InstrumentITCParams!
-
   """instrument"""
   instrument: Instrument!
+
+  """params"""
+  params: SpectroscopyParams!
 }
 
 """Graph data types"""
