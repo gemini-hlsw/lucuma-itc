@@ -100,10 +100,9 @@ object InstrumentMode {
       yield GmosSouthSpectroscopy(cw, g, f, u, d, r)
 
   case class Flamingos2Spectroscopy(
-    centralWavelength: Wavelength,
-    disperser:         F2Disperser,
-    filter:            F2Filter,
-    fpu:               F2Fpu
+    disperser: F2Disperser,
+    filter:    F2Filter,
+    fpu:       F2Fpu
   ) extends InstrumentMode derives Eq
 
   object Flamingos2Spectroscopy:
@@ -111,20 +110,18 @@ object InstrumentMode {
     given Encoder[Flamingos2Spectroscopy] = a =>
       Json.fromFields(
         List(
-          "centralWavelength" -> a.centralWavelength.asJson,
-          "disperser"         -> a.disperser.asScreamingJson,
-          "fpu"               -> a.fpu.asJson,
-          "filter"            -> a.filter.asJson
+          "disperser" -> a.disperser.asScreamingJson,
+          "fpu"       -> a.fpu.asJson,
+          "filter"    -> a.filter.asJson
         )
       )
 
     given Decoder[Flamingos2Spectroscopy] = c =>
       for
-        cw <- c.downField("centralWavelength").as[Wavelength]
-        g  <- c.downField("disperser").as[F2Disperser]
-        f  <- c.downField("filter").as[F2Filter]
-        u  <- c.downField("fpu").as[F2Fpu]
-      yield Flamingos2Spectroscopy(cw, g, f, u)
+        g <- c.downField("disperser").as[F2Disperser]
+        f <- c.downField("filter").as[F2Filter]
+        u <- c.downField("fpu").as[F2Fpu]
+      yield Flamingos2Spectroscopy(g, f, u)
 
   case class GmosNorthImaging(
     filter:  GmosNorthFilter,
@@ -186,7 +183,7 @@ object InstrumentMode {
         Json.obj("gmosNImaging" -> a.asJson)
       case a @ GmosSouthImaging(_, _)                  =>
         Json.obj("gmosSImaging" -> a.asJson)
-      case a @ Flamingos2Spectroscopy(_, _, _, _)      =>
+      case a @ Flamingos2Spectroscopy(_, _, _)         =>
         Json.obj("flamingos2Spectroscopy" -> a.asJson)
 
   given Decoder[InstrumentMode] = c =>

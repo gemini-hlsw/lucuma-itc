@@ -5,7 +5,7 @@ package lucuma.itc.service
 
 import io.circe.literal.*
 
-class GraphQLCustomSedSuite extends GraphQLSuite {
+class customSedSuite extends GraphQLSuite {
 
   test("custom sed in request") {
     query(
@@ -72,12 +72,12 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
               ... on SpectroscopyMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNSpectroscopyParams {
                     grating
+                    centralWavelength {
+                      nanometers
+                    }
                   }
-                }
-                centralWavelength {
-                  nanometers
                 }
               }
             }
@@ -100,10 +100,10 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params": {
-                  "grating": "B1200_G5301"
-                },
-                "centralWavelength" : {
-                  "nanometers" : 60.000
+                  "grating": "B1200_G5301",
+                  "centralWavelength" : {
+                    "nanometers" : 60.000
+                  }
                 }
               },
               "brightest": {
@@ -183,12 +183,12 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
               ... on SpectroscopyMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNSpectroscopyParams {
                     grating
+                    centralWavelength {
+                      nanometers
+                    }
                   }
-                }
-                centralWavelength {
-                  nanometers
                 }
               }
             }
@@ -211,10 +211,10 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params": {
-                  "grating": "B1200_G5301"
-                },
-                "centralWavelength" : {
-                  "nanometers" : 60.000
+                  "grating": "B1200_G5301",
+                  "centralWavelength" : {
+                    "nanometers" : 60.000
+                  }
                 }
               },
               "brightest": {
@@ -294,12 +294,12 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
               ... on SpectroscopyMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNSpectroscopyParams {
                     grating
+                    centralWavelength {
+                      nanometers
+                    }
                   }
-                }
-                centralWavelength {
-                  nanometers
                 }
               }
             }
@@ -335,10 +335,10 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params" : {
-                  "grating" : "B1200_G5301"
-                },
-                "centralWavelength" : {
-                  "nanometers" : 60.000
+                  "grating" : "B1200_G5301",
+                  "centralWavelength" : {
+                    "nanometers" : 60.000
+                  }
                 }
               },
               "brightest" : null
@@ -410,12 +410,12 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
               ... on SpectroscopyMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNSpectroscopyParams {
                     grating
+                    centralWavelength {
+                      nanometers
+                    }
                   }
-                }
-                centralWavelength {
-                  nanometers
                 }
               }
             }
@@ -451,10 +451,10 @@ class GraphQLCustomSedSuite extends GraphQLSuite {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params" : {
-                  "grating" : "B1200_G5301"
-                },
-                "centralWavelength" : {
-                  "nanometers" : 60.000
+                  "grating" : "B1200_G5301",
+                  "centralWavelength" : {
+                    "nanometers" : 60.000
+                  }
                 }
               },
               "brightest" : null

@@ -76,14 +76,12 @@ object AsterismSpectroscopyTimeRequest:
             ObservingMode.SpectroscopyMode
               .GmosSouth(centralWavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode, roi)
         case F2SpectroscopyInput(
-              centralWavelength,
               disperser,
               filter,
               fpu
             ) =>
           Result.success:
-            ObservingMode.SpectroscopyMode
-              .Flamingos2(centralWavelength, disperser, filter, fpu)
+            ObservingMode.SpectroscopyMode.Flamingos2(disperser, filter, fpu)
         case _ =>
           Result.failure("Invalid spectroscopy mode")
 

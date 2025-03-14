@@ -53,7 +53,7 @@ object ItcImpl {
           observingMode match
             case s @ (SpectroscopyMode.GmosNorth(_, _, _, _, _, _) |
                 SpectroscopyMode.GmosSouth(_, _, _, _, _, _) |
-                SpectroscopyMode.Flamingos2(_, _, _, _)) =>
+                SpectroscopyMode.Flamingos2(_, _, _)) =>
               spectroscopy(target, atWavelength, s, constraints, signalToNoise)
             case i @ (
                   ObservingMode.ImagingMode.GmosNorth(_, _) |
@@ -72,7 +72,7 @@ object ItcImpl {
         observingMode match
           case s @ (SpectroscopyMode.GmosNorth(_, _, _, _, _, _) |
               SpectroscopyMode.GmosSouth(_, _, _, _, _, _) |
-              SpectroscopyMode.Flamingos2(_, _, _, _)) =>
+              SpectroscopyMode.Flamingos2(_, _, _)) =>
             spectroscopyGraphs(
               target,
               atWavelength,

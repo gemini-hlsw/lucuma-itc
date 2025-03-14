@@ -3279,9 +3279,6 @@ enum Flamingos2Filter {
   """Flamingos2Filter Y (1.02 um)"""
   Y
 
-  """Flamingos2Filter F1056 (1.056 um)"""
-  F1056
-
   """Flamingos2Filter J (1.25 um)"""
   J
 
@@ -3303,17 +3300,8 @@ enum Flamingos2Filter {
   """Flamingos2Filter K-short (2.15 um)"""
   K_SHORT
 
-  """Flamingos2Filter F1063 (1.063 um)"""
-  F1063
-
   """Flamingos2Filter K-blue (2.06 um)"""
   K_BLUE
-
-  """Flamingos2Filter Open"""
-  OPEN
-
-  """Flamingos2Filter Dark"""
-  DARK
 }
 
 """Flamingos2 FPU"""
@@ -3616,9 +3604,6 @@ enum GmosNorthGrating {
 
   """GmosNorthGrating B600_G5303"""
   B600_G5303
-
-  """GmosNorthGrating B600_G5307"""
-  B600_G5307
 
   """GmosNorthGrating R600_G5304"""
   R600_G5304
@@ -7170,17 +7155,6 @@ type Query {
   spectroscopyIntegrationTimeAndGraphs(input: SpectroscopyIntegrationTimeAndGraphsInput!): SpectroscopyTimeAndGraphsResult!
 }
 
-type ObservingModeSpectroscopy {
-  """Wavelength in appropriate units"""
-  wavelength: Wavelength!
-
-  """params"""
-  params: InstrumentITCParams!
-
-  """instrument"""
-  instrument: Instrument
-}
-
 type ItcVersions {
   """id of the backend server"""
   serverVersion: String!
@@ -7246,11 +7220,8 @@ input GmosNImagingInput {
 }
 
 input Flamingos2SpectroscopyInput {
-  """Center of the configuration spectrum"""
-  centralWavelength: WavelengthInput!
-
   """Flamingos2 disperser"""
-  disperser: Flamingos2Disperser
+  disperser: Flamingos2Disperser!
 
   """Flamingos2 Focal plane unit"""
   fpu: Flamingos2Fpu!
@@ -7259,7 +7230,10 @@ input Flamingos2SpectroscopyInput {
   filter: Flamingos2Filter!
 }
 
-type GmosSITCParams {
+type GmosSSpectroscopyParams {
+  """Wavelength in appropriate units"""
+  centralWavelength: Wavelength!
+
   """Gmos South disperser"""
   grating: GmosSouthGrating
 
@@ -7273,7 +7247,10 @@ type GmosSITCParams {
   filter: GmosSouthFilter
 }
 
-type GmosNITCParams {
+type GmosNSpectroscopyParams {
+  """Wavelength in appropriate units"""
+  centralWavelength: Wavelength!
+
   """Gmos North disperser"""
   grating: GmosNorthGrating
 
@@ -7287,7 +7264,7 @@ type GmosNITCParams {
   filter: GmosNorthFilter
 }
 
-type Flamingos2ITCParams {
+type Flamingos2SpectroscopyParams {
   """Flamingos2 disperser"""
   disperser: Flamingos2Disperser
 
@@ -7298,7 +7275,19 @@ type Flamingos2ITCParams {
   filter: Flamingos2Filter
 }
 
-union InstrumentITCParams = GmosNITCParams | GmosSITCParams | Flamingos2ITCParams
+union SpectroscopyParams = GmosNSpectroscopyParams | GmosSSpectroscopyParams | Flamingos2SpectroscopyParams
+
+type GmosSImagingParams {
+  """Gmos South filter"""
+  filter: GmosSouthFilter!
+}
+
+type GmosNImagingParams {
+  """Gmos North filter"""
+  filter: GmosNorthFilter
+}
+
+union ImagingParams = GmosNImagingParams | GmosSImagingParams
 
 """Params for instrument modes"""
 input InstrumentModesInput {
@@ -7493,18 +7482,15 @@ type ImagingMode implements ITCObservingMode {
   instrument: Instrument!
 
   """params"""
-  params: InstrumentITCParams!
+  params: ImagingParams!
 }
 
 type SpectroscopyMode implements ITCObservingMode {
-  """Wavelength in appropriate units"""
-  centralWavelength: Wavelength!
-
-  """params"""
-  params: InstrumentITCParams!
-
   """instrument"""
   instrument: Instrument!
+
+  """params"""
+  params: SpectroscopyParams!
 }
 
 """Graph data types"""
@@ -7636,7 +7622,7 @@ type TargetGraphsResult {
   band: Band
 
   """
-  The emission line used for the graphs calculation, in case of an EmissionLines SED
+  The emission line used for the time calculation, in case of an EmissionLines SED
   """
   emissionLine: Wavelength
 }
