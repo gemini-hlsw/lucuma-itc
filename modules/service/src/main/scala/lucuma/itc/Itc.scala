@@ -7,8 +7,8 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
-import lucuma.itc.TargetIntegrationTime
 import lucuma.itc.TargetGraphsCalcResult
+import lucuma.itc.TargetIntegrationTime
 
 trait Itc[F[_]]:
 

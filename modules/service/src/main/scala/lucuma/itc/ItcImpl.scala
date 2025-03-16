@@ -18,21 +18,17 @@ import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
-import lucuma.itc.legacy.FLocalItc
-import lucuma.itc.legacy.codecs.given
-import lucuma.itc.legacy.IntegrationTimeRemoteResult
-import lucuma.itc.service.ObservingMode
-import lucuma.itc.service.ObservingMode.ImagingMode
-import lucuma.itc.service.ObservingMode.SpectroscopyMode
-import lucuma.itc.service.TargetData
-import lucuma.itc.service.ItcObservingConditions
-import lucuma.itc.service.encoders.given
-import lucuma.itc.SignalToNoiseAt
-import lucuma.itc.TargetIntegrationTime
-import lucuma.itc.Millisecond
-import lucuma.itc.TargetGraphsCalcResult
 import lucuma.itc.CalculationError
 import lucuma.itc.IntegrationTime
+import lucuma.itc.Millisecond
+import lucuma.itc.SignalToNoiseAt
+import lucuma.itc.TargetGraphsCalcResult
+import lucuma.itc.TargetIntegrationTime
+import lucuma.itc.legacy.FLocalItc
+import lucuma.itc.legacy.IntegrationTimeRemoteResult
+import lucuma.itc.legacy.codecs.given
+import lucuma.itc.service.ObservingMode.ImagingMode
+import lucuma.itc.service.ObservingMode.SpectroscopyMode
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
@@ -103,7 +99,6 @@ object ItcImpl {
         exposureCount:    Int,
         level:            Option[NonNegInt] = none
       ): F[TargetGraphsCalcResult] =
-        import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
         T.span("legacy-itc-query"):
@@ -136,7 +131,6 @@ object ItcImpl {
         constraints:   ItcObservingConditions,
         signalToNoise: SignalToNoise
       ): F[TargetIntegrationTime] =
-        import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
         val (request, bandOrLine): (Json, Either[Band, Wavelength]) =
@@ -200,7 +194,6 @@ object ItcImpl {
         constraints:   ItcObservingConditions,
         signalToNoise: SignalToNoise
       ): F[TargetIntegrationTime] =
-        import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
         val (request, bandOrLine): (Json, Either[Band, Wavelength]) =
@@ -235,7 +228,6 @@ object ItcImpl {
         exposureTime:  TimeSpan,
         exposureCount: NonNegInt
       ): F[TargetIntegrationTime] =
-        import lucuma.itc.legacy.given
         import lucuma.itc.legacy.*
 
         val (request, bandOrLine): (Json, Either[Band, Wavelength]) =

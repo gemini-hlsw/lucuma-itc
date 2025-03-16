@@ -6,7 +6,6 @@ package lucuma.itc.service
 import cats.effect.*
 import io.circe.Json
 import io.circe.parser.*
-import lucuma.itc.service.Itc
 import lucuma.itc.tests.EmissionLineMockItc
 import lucuma.itc.tests.FailingMockItc
 import lucuma.itc.tests.MockImagingItc

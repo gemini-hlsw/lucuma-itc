@@ -6,10 +6,10 @@ package lucuma.itc
 import cats.Order
 import eu.timepit.refined.cats.*
 import eu.timepit.refined.types.numeric.NonNegInt
-import io.circe.refined.*
-import lucuma.core.util.TimeSpan
 import io.circe.Encoder
 import io.circe.generic.semiauto.*
+import io.circe.refined.*
+import lucuma.core.util.TimeSpan
 
 case class IntegrationTime(
   exposureTime:  TimeSpan,

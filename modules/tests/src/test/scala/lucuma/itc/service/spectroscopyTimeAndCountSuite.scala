@@ -8,7 +8,6 @@ import io.circe.literal.*
 import lucuma.core.enums.*
 import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
-import lucuma.itc.service.ItcObservingConditions
 
 class spectroscopyTimeAndCountSuite extends GraphQLSuite:
 

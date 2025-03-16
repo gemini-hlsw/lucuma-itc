@@ -6,9 +6,9 @@ package lucuma.itc
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
+import lucuma.core.math.Wavelength
 import lucuma.core.model.ExposureTimeMode
 import lucuma.core.util.TimeSpan
-import lucuma.core.math.Wavelength
 import lucuma.itc.encoders.given
 import lucuma.itc.service.ObservingMode
 

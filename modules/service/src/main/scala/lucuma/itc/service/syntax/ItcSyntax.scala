@@ -107,5 +107,3 @@ trait ItcGraphSyntax:
           ampGain = roundToSignificantFigures(ccd.ampGain, c.value)
         )
       )
-
-object all extends ItcSyntax with ItcGraphSyntax

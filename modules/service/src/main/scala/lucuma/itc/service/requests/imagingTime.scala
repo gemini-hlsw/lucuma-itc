@@ -14,9 +14,9 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.*
 import lucuma.itc.input.*
+import lucuma.itc.service.ItcObservingConditions
 import lucuma.itc.service.ObservingMode
 import lucuma.itc.service.TargetData
-import lucuma.itc.service.ItcObservingConditions
 import lucuma.itc.service.hashes.given
 
 case class ImagingTimeParameters(

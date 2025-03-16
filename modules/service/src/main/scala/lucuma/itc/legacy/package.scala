@@ -9,8 +9,8 @@ import lucuma.core.math.Redshift
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.SourceProfile
-import lucuma.itc.service.ItcObservingConditions
 import lucuma.itc.service.ItcObservationDetails
+import lucuma.itc.service.ItcObservingConditions
 import lucuma.itc.service.ObservingMode
 import lucuma.itc.service.TargetData
 

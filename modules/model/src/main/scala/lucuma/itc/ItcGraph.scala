@@ -9,13 +9,13 @@ import cats.derived.*
 import cats.syntax.all.*
 import io.circe.Decoder
 import io.circe.Encoder
-import io.circe.syntax.*
+import io.circe.JsonObject
 import io.circe.generic.semiauto.*
+import io.circe.syntax.*
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.Enumerated
-import io.circe.JsonObject
 
 enum SeriesDataType(val tag: String) derives Enumerated:
   case SignalData     extends SeriesDataType("signal_data")

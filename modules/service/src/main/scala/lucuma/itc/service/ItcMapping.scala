@@ -18,11 +18,10 @@ import lucuma.core.math.SignalToNoise
 import lucuma.core.util.TimeSpan
 import lucuma.itc.*
 import lucuma.itc.cache.BinaryEffectfulCache
-import lucuma.itc.service.encoders.given
 import lucuma.itc.input.*
 import lucuma.itc.input.customSed.CustomSed
-import lucuma.itc.service.ObservingMode
 import lucuma.itc.service.config.*
+import lucuma.itc.service.encoders.given
 import lucuma.itc.service.requests.*
 import lucuma.itc.service.syntax.all.*
 import natchez.Trace

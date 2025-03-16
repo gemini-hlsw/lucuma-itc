@@ -25,13 +25,12 @@ import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.UnnormalizedSED
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.Enumerated
-import lucuma.itc.service.ItcObservingConditions
-import lucuma.itc.legacy.given
+import lucuma.itc.legacy.codecs.given
 import lucuma.itc.service.ItcObservationDetails
+import lucuma.itc.service.ItcObservingConditions
 import lucuma.itc.service.ObservingMode
 import lucuma.itc.service.TargetData
 import munit.FunSuite
-import lucuma.itc.legacy.codecs.given
 
 import scala.collection.immutable.SortedMap
 import scala.concurrent.duration.*

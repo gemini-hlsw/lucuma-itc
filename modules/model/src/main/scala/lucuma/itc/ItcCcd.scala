@@ -5,9 +5,9 @@ package lucuma.itc
 
 import cats.Eq
 import cats.derived.*
-import lucuma.core.math.Wavelength
 import io.circe.Encoder
 import io.circe.generic.semiauto.*
+import lucuma.core.math.Wavelength
 
 case class ItcCcd(
   singleSNRatio:                 Double,          // the final SN ratio for a single image

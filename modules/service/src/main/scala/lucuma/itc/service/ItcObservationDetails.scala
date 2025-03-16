@@ -8,7 +8,7 @@ import io.circe.generic.semiauto.*
 import io.circe.syntax.*
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
-import lucuma.itc.syntax.finiteduration.*
+import lucuma.itc.service.syntax.finiteduration.*
 
 import scala.concurrent.duration.FiniteDuration
 

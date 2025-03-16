@@ -7,8 +7,8 @@ import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength
-import lucuma.core.util.TimeSpan
 import lucuma.core.model.ExposureTimeMode
+import lucuma.core.util.TimeSpan
 
 given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[ExposureTimeMode] = {
   case ExposureTimeMode.SignalToNoiseMode(n, w) =>

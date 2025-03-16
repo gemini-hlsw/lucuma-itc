@@ -4,14 +4,14 @@
 package lucuma.itc
 
 import cats.Order
+import io.circe.Encoder
+import io.circe.Json
+import io.circe.syntax.*
 import lucuma.core.data.Zipper
 import lucuma.core.data.ZipperCodec.given
 import lucuma.core.enums.Band
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
-import io.circe.Encoder
-import io.circe.Json
-import io.circe.syntax.*
 
 case class TargetIntegrationTime(
   times:           Zipper[IntegrationTime],

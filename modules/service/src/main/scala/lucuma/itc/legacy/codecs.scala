@@ -26,15 +26,15 @@ import lucuma.core.syntax.string.*
 import lucuma.itc.GraphType
 import lucuma.itc.ItcGraph
 import lucuma.itc.ItcGraphGroup
-import lucuma.itc.service.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
 import lucuma.itc.SingleSN
 import lucuma.itc.TotalSN
 import lucuma.itc.legacy.syntax.all.*
+import lucuma.itc.service.ItcObservingConditions
 import lucuma.itc.service.ObservingMode
 import lucuma.itc.service.ObservingMode.SpectroscopyMode.*
-import lucuma.itc.syntax.all.given
+import lucuma.itc.service.syntax.all.given
 
 import java.math.MathContext
 import scala.util.Try
@@ -238,7 +238,7 @@ object codecs:
       "wfs"            -> a.wfs.asJson
     )
 
-  private given Encoder[SourceProfile] = (a: SourceProfile) =>
+  given Encoder[SourceProfile] = (a: SourceProfile) =>
     import SourceProfile._
     a match {
       case Point(_)          =>
