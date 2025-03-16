@@ -1,7 +1,7 @@
 // Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc
+package lucuma.itc.service
 
 import cats.Hash
 import cats.derived.*
@@ -11,7 +11,7 @@ import lucuma.core.enums.*
 import lucuma.core.math.Wavelength
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange
-import lucuma.itc.search.*
+import lucuma.itc.service.*
 import lucuma.itc.service.encoders.given
 
 sealed trait SpectroscopyParams

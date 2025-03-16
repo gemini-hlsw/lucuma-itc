@@ -1,7 +1,7 @@
 // Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc.search
+package lucuma.itc.service
 
 import cats.Hash
 import cats.derived.*
@@ -12,14 +12,9 @@ import lucuma.core.enums.*
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import lucuma.core.model.sequence.gmos.GmosCcdMode
-import lucuma.itc.F2SpectroscopyParams
-import lucuma.itc.GmosNImagingParams
-import lucuma.itc.GmosNSpectroscopyParams
-import lucuma.itc.GmosSImagingParams
-import lucuma.itc.GmosSSpectroscopyParams
-import lucuma.itc.search.ItcObservationDetails.AnalysisMethod
-import lucuma.itc.search.hashes.given
-import lucuma.itc.search.syntax.*
+import lucuma.itc.service.ItcObservationDetails.AnalysisMethod
+import lucuma.itc.service.hashes.given
+import lucuma.itc.service.syntax.*
 import spire.math.Interval
 import spire.math.Rational
 

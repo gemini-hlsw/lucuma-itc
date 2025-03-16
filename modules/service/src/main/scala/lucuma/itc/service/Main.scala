@@ -18,7 +18,7 @@ import fs2.compression.Compression
 import fs2.io.net.Network
 import lucuma.graphql.routes.GraphQLService
 import lucuma.graphql.routes.Routes
-import lucuma.itc.ItcImpl
+import lucuma.itc.service.ItcImpl
 import lucuma.itc.cache.RedisEffectfulCache
 import lucuma.itc.input.customSed.CustomSed
 import lucuma.itc.input.customSed.CustomSedCachedResolver

@@ -8,7 +8,7 @@ import cats.syntax.option.*
 import lucuma.core.model.Attachment
 import lucuma.graphql.routes.GraphQLService
 import lucuma.graphql.routes.Routes
-import lucuma.itc.Itc
+import lucuma.itc.service.Itc
 import lucuma.itc.cache.RedisEffectfulCache
 import lucuma.itc.input.customSed.CustomSed
 import lucuma.itc.input.customSed.CustomSedDatResolver

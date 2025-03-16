@@ -26,14 +26,14 @@ import lucuma.core.syntax.string.*
 import lucuma.itc.GraphType
 import lucuma.itc.ItcGraph
 import lucuma.itc.ItcGraphGroup
-import lucuma.itc.ItcObservingConditions
+import lucuma.itc.service.ItcObservingConditions
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
 import lucuma.itc.SingleSN
 import lucuma.itc.TotalSN
 import lucuma.itc.legacy.syntax.all.*
-import lucuma.itc.search.*
-import lucuma.itc.search.ObservingMode.SpectroscopyMode.*
+import lucuma.itc.service.ObservingMode
+import lucuma.itc.service.ObservingMode.SpectroscopyMode.*
 import lucuma.itc.syntax.all.given
 
 import java.math.MathContext

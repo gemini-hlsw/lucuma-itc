@@ -21,7 +21,7 @@ import lucuma.itc.cache.BinaryEffectfulCache
 import lucuma.itc.service.encoders.given
 import lucuma.itc.input.*
 import lucuma.itc.input.customSed.CustomSed
-import lucuma.itc.search.ObservingMode
+import lucuma.itc.service.ObservingMode
 import lucuma.itc.service.config.*
 import lucuma.itc.service.requests.*
 import lucuma.itc.service.syntax.all.*

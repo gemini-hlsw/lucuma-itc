@@ -15,11 +15,12 @@ import lucuma.core.model.ExposureTimeMode
 import lucuma.core.model.sequence.gmos.GmosFpuMask
 import lucuma.itc.*
 import lucuma.itc.input.*
-import lucuma.itc.search.GmosNorthFpuParam
-import lucuma.itc.search.GmosSouthFpuParam
-import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.TargetData
-import lucuma.itc.search.hashes.given
+import lucuma.itc.service.GmosNorthFpuParam
+import lucuma.itc.service.GmosSouthFpuParam
+import lucuma.itc.service.ObservingMode
+import lucuma.itc.service.TargetData
+import lucuma.itc.service.ItcObservingConditions
+import lucuma.itc.service.hashes.given
 
 case class SpectroscopyTimeParameters(
   exposureTimeMode: ExposureTimeMode,

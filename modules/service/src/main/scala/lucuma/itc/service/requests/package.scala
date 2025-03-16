@@ -7,7 +7,7 @@ import cats.data.NonEmptyChain
 import cats.syntax.all.*
 import grackle.Result
 import lucuma.itc.input.TargetDataInput
-import lucuma.itc.search.TargetData
+import lucuma.itc.service.TargetData
 
 private def targetInputsToData(
   asterism: List[TargetDataInput]

@@ -7,9 +7,10 @@ import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.model.ExposureTimeMode
-import lucuma.itc.service.encoders.given
+import lucuma.core.util.TimeSpan
+import lucuma.core.math.Wavelength
 import lucuma.itc.encoders.given
-import lucuma.itc.search.ObservingMode
+import lucuma.itc.service.ObservingMode
 
 case class CalculationResult(
   versions:         ItcVersions,
@@ -19,7 +20,7 @@ case class CalculationResult(
 )
 
 object CalculationResult:
-  given Encoder[CalculationResult] = r =>
+  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[CalculationResult] = r =>
     Json
       .obj(
         "versions"         -> r.versions.asJson,

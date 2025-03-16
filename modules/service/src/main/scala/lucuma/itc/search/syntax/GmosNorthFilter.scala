@@ -1,7 +1,7 @@
 // Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc.search.syntax
+package lucuma.itc.service.syntax
 
 import cats.implicits.*
 import lucuma.core.enums.GmosNorthFilter

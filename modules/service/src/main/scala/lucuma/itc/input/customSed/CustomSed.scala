@@ -15,7 +15,7 @@ import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.UnnormalizedSED
-import lucuma.itc.search.TargetData
+import lucuma.itc.service.TargetData
 import lucuma.itc.service.requests.TargetGraphRequest
 import lucuma.itc.service.requests.TargetImagingTimeRequest
 import lucuma.itc.service.requests.TargetSpectroscopyTimeRequest

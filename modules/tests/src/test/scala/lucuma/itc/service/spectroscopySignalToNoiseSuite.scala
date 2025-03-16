@@ -8,7 +8,7 @@ import io.circe.literal.*
 import lucuma.core.enums.*
 import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
-import lucuma.itc.ItcObservingConditions
+import lucuma.itc.service.ItcObservingConditions
 
 class spectroscopySignalToNoiseSuite extends GraphQLSuite:
 

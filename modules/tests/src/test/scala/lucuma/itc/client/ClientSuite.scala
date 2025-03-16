@@ -6,7 +6,7 @@ package lucuma.itc.client
 import cats.effect.*
 import cats.implicits.*
 import com.comcast.ip4s.*
-import lucuma.itc.Itc
+import lucuma.itc.service.Itc
 import lucuma.itc.ItcVersions
 import lucuma.itc.tests.EmissionLineMockItc
 import lucuma.itc.tests.MockItc
