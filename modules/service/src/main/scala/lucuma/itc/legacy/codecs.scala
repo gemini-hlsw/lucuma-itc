@@ -39,7 +39,7 @@ import lucuma.itc.service.syntax.all.given
 import java.math.MathContext
 import scala.util.Try
 
-object codecs:
+private[legacy] object codecs:
   ////////////////////////////////////////////////////////////
   //
   // These are encoders/decoders used to communicate with the

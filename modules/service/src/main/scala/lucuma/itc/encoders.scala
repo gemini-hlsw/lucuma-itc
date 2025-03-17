@@ -16,7 +16,7 @@ import io.circe.syntax.*
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 
-private [service] object encoders:
+private[service] object encoders:
 
   given nelEncoder[A: Encoder]: Encoder[NonEmptyList[A]] = Encoder.encodeList[A].contramap(_.toList)
   given Encoder[NonEmptyString]                          = (s: NonEmptyString) => s.value.asJson
@@ -44,4 +44,3 @@ private [service] object encoders:
       ("nanometers", Json.fromBigDecimal(w.toNanometers.value.value)),
       ("micrometers", Json.fromBigDecimal(w.toMicrometers.value.value))
     )
-

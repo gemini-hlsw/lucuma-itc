@@ -23,6 +23,7 @@ import lucuma.itc.input.customSed.CustomSed
 import lucuma.itc.input.customSed.CustomSedCachedResolver
 import lucuma.itc.input.customSed.CustomSedOdbAttachmentResolver
 import lucuma.itc.legacy.FLocalItc
+import lucuma.itc.legacy.ItcImpl
 import lucuma.itc.legacy.LocalItc
 import lucuma.itc.service.config.*
 import lucuma.itc.service.config.ExecutionEnvironment.*

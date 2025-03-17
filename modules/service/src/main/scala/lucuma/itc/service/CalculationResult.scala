@@ -9,9 +9,9 @@ import io.circe.syntax.*
 import lucuma.core.math.Wavelength
 import lucuma.core.model.ExposureTimeMode
 import lucuma.core.util.TimeSpan
-import lucuma.itc.encoders.given
-import lucuma.itc.ItcVersions
 import lucuma.itc.AsterismIntegrationTimeOutcomes
+import lucuma.itc.ItcVersions
+import lucuma.itc.encoders.given
 
 case class CalculationResult(
   versions:         ItcVersions,

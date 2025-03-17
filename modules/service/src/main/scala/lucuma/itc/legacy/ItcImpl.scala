@@ -1,7 +1,7 @@
 // Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc.service
+package lucuma.itc.legacy
 
 import algebra.instances.all.given
 import cats.*
@@ -24,11 +24,13 @@ import lucuma.itc.Millisecond
 import lucuma.itc.SignalToNoiseAt
 import lucuma.itc.TargetGraphsCalcResult
 import lucuma.itc.TargetIntegrationTime
-import lucuma.itc.legacy.FLocalItc
-import lucuma.itc.legacy.IntegrationTimeRemoteResult
 import lucuma.itc.legacy.codecs.given
+import lucuma.itc.service.Itc
+import lucuma.itc.service.ItcObservingConditions
+import lucuma.itc.service.ObservingMode
 import lucuma.itc.service.ObservingMode.ImagingMode
 import lucuma.itc.service.ObservingMode.SpectroscopyMode
+import lucuma.itc.service.TargetData
 import natchez.Trace
 import org.typelevel.log4cats.Logger
 
