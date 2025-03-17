@@ -10,12 +10,12 @@ import cats.syntax.all.*
 import io.circe.Decoder
 import io.circe.Encoder
 import io.circe.JsonObject
+import io.circe.generic.semiauto.*
 import io.circe.syntax.*
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.Enumerated
-import lucuma.itc.encoders.given
 
 enum SeriesDataType(val tag: String) derives Enumerated:
   case SignalData     extends SeriesDataType("signal_data")
@@ -79,8 +79,10 @@ case class TargetGraphs(
   atWavelengthFinalSNRatio:  Option[TotalSN],
   peakSingleSNRatio:         SingleSN,
   atWavelengthSingleSNRatio: Option[SingleSN]
-) derives Eq,
-      Encoder.AsObject
+) derives Eq
+
+object TargetGraphs:
+  given (using Encoder[ItcCcd]): Encoder[TargetGraphs] = deriveEncoder
 
 case class TargetGraphsResult(
   graphs:     TargetGraphs,
@@ -89,7 +91,7 @@ case class TargetGraphsResult(
   export graphs.*
 
 object TargetGraphsResult:
-  given Encoder.AsObject[TargetGraphsResult] = x =>
+  given (using Encoder[Wavelength]): Encoder.AsObject[TargetGraphsResult] = x =>
     JsonObject(
       "graphs"       -> x.graphs.asJson,
       "band"         -> x.bandOrLine.left.toOption.asJson,
@@ -99,5 +101,8 @@ object TargetGraphsResult:
 case class SpectroscopyGraphsResult(
   versions:     ItcVersions,
   targetGraphs: AsterismTargetGraphsOutcomes
-) derives Eq,
-      Encoder.AsObject
+) derives Eq
+
+object SpectroscopyGraphsResult:
+  given (using Encoder[AsterismTargetGraphsOutcomes]): Encoder.AsObject[SpectroscopyGraphsResult] =
+    deriveEncoder

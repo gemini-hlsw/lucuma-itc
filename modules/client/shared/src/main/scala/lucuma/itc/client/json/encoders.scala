@@ -12,12 +12,12 @@ import lucuma.core.util.TimeSpan
 import lucuma.itc.client.*
 
 // Decoders for the client don't need to be as generic as the ones for the server.
-object encoders:
+private[client] object encoders:
   given Encoder[TimeSpan]   = t =>
     Json.obj("microseconds" -> TimeSpan.FromMicroseconds.reverseGet(t).asJson)
   given Encoder[Wavelength] = w => Json.obj("picometers" -> w.toPicometers.value.value.asJson)
 
-  given Encoder[ExposureTimeMode] = {
+  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[ExposureTimeMode] = {
     case ExposureTimeMode.SignalToNoiseMode(n, w) =>
       Json.obj(
         "signalToNoise" -> Json.obj(

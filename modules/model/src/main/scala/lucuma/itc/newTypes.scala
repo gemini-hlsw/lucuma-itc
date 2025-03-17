@@ -9,7 +9,9 @@ import io.circe.Encoder
 import io.circe.syntax.*
 import lucuma.core.data.Zipper
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.Wavelength
 import lucuma.core.util.NewType
+import lucuma.core.util.TimeSpan
 
 object TotalSN extends NewType[SignalToNoise]
 type TotalSN = TotalSN.Type
@@ -21,7 +23,7 @@ object AsterismIntegrationTimes extends NewType[Zipper[TargetIntegrationTime]]
 type AsterismIntegrationTimes = AsterismIntegrationTimes.Type
 
 object TargetIntegrationTimeOutcome extends NewType[Either[Error, TargetIntegrationTime]]:
-  given Encoder[TargetIntegrationTimeOutcome] =
+  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[TargetIntegrationTimeOutcome] =
     _.value match
       case Left(e)  => e.asJson
       case Right(t) => t.asJson
@@ -52,7 +54,7 @@ object AsterismIntegrationTimeOutcomes extends NewType[NonEmptyChain[TargetInteg
 type AsterismIntegrationTimeOutcomes = AsterismIntegrationTimeOutcomes.Type
 
 object TargetGraphsOutcome extends NewType[Either[Error, TargetGraphsResult]]:
-  given Encoder[TargetGraphsOutcome] =
+  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[TargetGraphsOutcome] =
     _.value match
       case Left(e)  => e.asJson
       case Right(t) => t.asJson
@@ -66,7 +68,7 @@ object AsterismTargetGraphsOutcomes extends NewType[NonEmptyChain[TargetGraphsOu
 type AsterismTargetGraphsOutcomes = AsterismTargetGraphsOutcomes.Type
 
 object TargetTimeAndGraphsOutcome extends NewType[Either[Error, TargetTimeAndGraphs]]:
-  given Encoder[TargetTimeAndGraphsOutcome] =
+  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[TargetTimeAndGraphsOutcome] =
     _.value match
       case Left(e)  => e.asJson
       case Right(t) => t.asJson

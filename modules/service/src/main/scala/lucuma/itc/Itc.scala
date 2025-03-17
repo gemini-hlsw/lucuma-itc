@@ -1,13 +1,14 @@
 // Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc
+package lucuma.itc.service
 
 import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
-import lucuma.itc.search.*
+import lucuma.itc.TargetGraphsCalcResult
+import lucuma.itc.TargetIntegrationTime
 
 trait Itc[F[_]]:
 

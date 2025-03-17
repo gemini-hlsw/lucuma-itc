@@ -11,7 +11,7 @@ import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.math.Wavelength
 import lucuma.core.model.Attachment
 import lucuma.itc.cache.BinaryEffectfulCache
-import lucuma.itc.search.hashes.given
+import lucuma.itc.service.hashes.given
 import lucuma.itc.service.redis.given
 
 import scala.concurrent.duration.FiniteDuration

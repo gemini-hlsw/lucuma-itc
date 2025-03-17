@@ -15,8 +15,10 @@ import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.*
-import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.TargetData
+import lucuma.itc.service.Itc
+import lucuma.itc.service.ItcObservingConditions
+import lucuma.itc.service.ObservingMode
+import lucuma.itc.service.TargetData
 import lucuma.refined.*
 
 object MockItc extends Itc[IO]:

@@ -1,14 +1,14 @@
 // Copyright (c) 2016-2023 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package lucuma.itc.search
+package lucuma.itc.service
 
 import io.circe.*
 import io.circe.generic.semiauto.*
 import io.circe.syntax.*
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
-import lucuma.itc.syntax.finiteduration.*
+import lucuma.itc.service.syntax.finiteduration.*
 
 import scala.concurrent.duration.FiniteDuration
 

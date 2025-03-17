@@ -6,7 +6,7 @@ package lucuma.itc.legacy
 import cats.syntax.all.*
 import io.circe.parser.decode
 import lucuma.itc.legacy
-import lucuma.itc.legacy.given
+import lucuma.itc.legacy.codecs.given
 
 import java.lang.reflect.Method
 

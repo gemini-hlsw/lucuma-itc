@@ -11,13 +11,13 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.JsonObject
+import io.circe.refined.given
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength
 import lucuma.core.model.ConstraintSet
 import lucuma.core.util.TimeSpan
 import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
-import lucuma.itc.encoders.given
 
 case class SpectroscopyGraphParameters(
   atWavelength:       Wavelength,

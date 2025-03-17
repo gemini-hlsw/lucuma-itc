@@ -9,10 +9,10 @@ import lucuma.core.math.Redshift
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.model.SourceProfile
-import lucuma.itc.ItcObservingConditions
-import lucuma.itc.search.ItcObservationDetails
-import lucuma.itc.search.ObservingMode
-import lucuma.itc.search.TargetData
+import lucuma.itc.service.ItcObservationDetails
+import lucuma.itc.service.ItcObservingConditions
+import lucuma.itc.service.ObservingMode
+import lucuma.itc.service.TargetData
 
 import scala.concurrent.duration.FiniteDuration
 

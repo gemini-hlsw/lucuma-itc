@@ -8,12 +8,15 @@ import cats.Order
 import cats.derived.*
 import io.circe.Encoder
 import io.circe.generic.semiauto.*
+import lucuma.core.math.Wavelength
+import lucuma.core.util.TimeSpan
 
 case class TargetTimeAndGraphs(
   integrationTime: TargetIntegrationTime,
   graphs:          TargetGraphs
-) derives Eq,
-      Encoder.AsObject
+) derives Eq
 
 object TargetTimeAndGraphs:
-  given Order[TargetTimeAndGraphs] = Order.by(_.integrationTime)
+  given Order[TargetTimeAndGraphs]                                                            = Order.by(_.integrationTime)
+  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder.AsObject[TargetTimeAndGraphs] =
+    deriveEncoder
