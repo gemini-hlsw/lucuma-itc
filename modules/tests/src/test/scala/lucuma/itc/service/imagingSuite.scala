@@ -94,7 +94,7 @@ class imagingSuite extends GraphImagingQLSuite {
               ... on ImagingMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNImagingParams {
                     filter
                   }
                 }

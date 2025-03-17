@@ -17,7 +17,6 @@ import lucuma.itc.GmosNImagingParams
 import lucuma.itc.GmosNSpectroscopyParams
 import lucuma.itc.GmosSImagingParams
 import lucuma.itc.GmosSSpectroscopyParams
-import lucuma.itc.encoders.given
 import lucuma.itc.search.ItcObservationDetails.AnalysisMethod
 import lucuma.itc.search.hashes.given
 import lucuma.itc.search.syntax.*
@@ -49,9 +48,7 @@ object ObservingMode {
     case img: ImagingMode       => img.asJson
   }
 
-  sealed trait SpectroscopyMode extends ObservingMode derives Hash {
-    def centralWavelength: Wavelength
-  }
+  sealed trait SpectroscopyMode extends ObservingMode derives Hash {}
 
   object SpectroscopyMode {
     given Encoder[ObservingMode.SpectroscopyMode] = Encoder.instance {
@@ -66,6 +63,8 @@ object ObservingMode {
       def resolution: Rational
 
       def coverage: Interval[Wavelength]
+
+      def centralWavelength: Wavelength
 
       def analysisMethod: ItcObservationDetails.AnalysisMethod =
         if (isIfu)
@@ -104,9 +103,10 @@ object ObservingMode {
     object GmosNorth:
       given Encoder[GmosNorth] = a =>
         Json.obj(
-          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-          ("params", GmosNSpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
-          ("centralWavelength", a.centralWavelength.asJson)
+          ("instrument", a.instrument.asJson),
+          ("params",
+           GmosNSpectroscopyParams(a.centralWavelength, a.disperser, a.fpu, a.filter).asJson
+          )
         )
 
     case class GmosSouth(
@@ -134,16 +134,16 @@ object ObservingMode {
     object GmosSouth:
       given Encoder[GmosSouth] = a =>
         Json.obj(
-          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
-          ("params", GmosSSpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
-          ("centralWavelength", a.centralWavelength.asJson)
+          ("instrument", a.instrument.asJson),
+          ("params",
+           GmosSSpectroscopyParams(a.centralWavelength, a.disperser, a.fpu, a.filter).asJson
+          )
         )
 
     case class Flamingos2(
-      centralWavelength: Wavelength,
-      disperser:         F2Disperser,
-      filter:            F2Filter,
-      fpu:               F2Fpu
+      disperser: F2Disperser,
+      filter:    F2Filter,
+      fpu:       F2Fpu
     ) extends SpectroscopyMode derives Hash {
 
       override def analysisMethod: AnalysisMethod =
@@ -160,8 +160,7 @@ object ObservingMode {
       given Encoder[Flamingos2] = a =>
         Json.obj(
           ("instrument", a.instrument.asJson),
-          ("params", F2SpectroscopyParams(a.disperser, a.fpu, a.filter).asJson),
-          ("centralWavelength", a.centralWavelength.asJson)
+          ("params", F2SpectroscopyParams(a.disperser, a.fpu, a.filter).asJson)
         )
 
   }
@@ -196,7 +195,7 @@ object ObservingMode {
     object GmosNorth:
       given Encoder[GmosNorth] = a =>
         Json.obj(
-          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+          ("instrument", a.instrument.asJson),
           ("params", GmosNImagingParams(a.filter).asJson)
         )
 
@@ -213,7 +212,7 @@ object ObservingMode {
     object GmosSouth:
       given Encoder[GmosSouth] = a =>
         Json.obj(
-          ("instrument", Json.fromString(a.instrument.longName.toUpperCase.replace(" ", "_"))),
+          ("instrument", a.instrument.asJson),
           ("params", GmosSImagingParams(a.filter).asJson)
         )
   }

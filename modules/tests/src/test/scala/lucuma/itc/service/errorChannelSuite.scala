@@ -5,7 +5,7 @@ package lucuma.itc.service
 
 import io.circe.literal.*
 
-class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
+class errorChannelSuite extends FailingCalculationSuite:
 
   test("Test error channel") {
     query(
@@ -72,12 +72,12 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
               ... on SpectroscopyMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNSpectroscopyParams {
                     grating
+                    centralWavelength {
+                      nanometers
+                    }
                   }
-                }
-                centralWavelength {
-                  nanometers
                 }
               }
             }
@@ -110,10 +110,10 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params" : {
-                  "grating" : "B1200_G5301"
-                },
-                "centralWavelength" : {
-                  "nanometers" : 60.000
+                  "grating" : "B1200_G5301",
+                  "centralWavelength" : {
+                    "nanometers" : 60.000
+                  }
                 }
               },
               "brightest" : null
@@ -123,4 +123,3 @@ class GraphQLIntTimeErrorsSuite extends FailingCalculationSuite {
         """
     )
   }
-}

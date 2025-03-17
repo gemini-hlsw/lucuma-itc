@@ -15,6 +15,9 @@ object LegacyITCTest extends Tag("LegacyItcTest")
  * This is a common trait for tests of the legacy ITC code
  */
 trait CommonITCLegacySuite:
+  def containsValidResults(r: IntegrationTimeRemoteResult): Boolean =
+    r.exposureCalculation.selectedIndex < r.exposureCalculation.exposures.length &&
+      r.exposureCalculation.exposures.forall(e => e.exposureTime >= 0 && e.exposureCount.value >= 0)
 
   def allowedErrors(err: List[String]) =
     err.exists(_.contains("Invalid S/N")) || err.exists(_.contains("do not overlap")) ||

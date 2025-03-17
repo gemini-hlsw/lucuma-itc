@@ -80,12 +80,12 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
               ... on SpectroscopyMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNSpectroscopyParams {
                     grating
+                    centralWavelength {
+                      nanometers
+                    }
                   }
-                }
-                centralWavelength {
-                  nanometers
                 }
               }
             }
@@ -134,10 +134,10 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params": {
-                  "grating": "B1200_G5301"
-                },
-                "centralWavelength" : {
-                  "nanometers" : 60.000
+                  "grating": "B1200_G5301",
+                  "centralWavelength" : {
+                    "nanometers" : 60.000
+                  }
                 }
               },
               "targetTimes": [
@@ -250,12 +250,12 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 ... on SpectroscopyMode {
                   instrument
                   params {
-                    ... on GmosSITCParams {
+                    ... on GmosSSpectroscopyParams {
                       grating
+                      centralWavelength {
+                        nanometers
+                      }
                     }
-                  }
-                  centralWavelength {
-                    nanometers
                   }
                 }
               }
@@ -306,10 +306,10 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
                   "params": {
-                    "grating": "B1200_G5321"
-                  },
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
+                    "grating": "B1200_G5321",
+                    "centralWavelength" : {
+                      "nanometers" : 60.000
+                    }
                   }
                 },
                 "exposureTimeMode": {
@@ -521,12 +521,12 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosNITCParams {
+                      ... on GmosNSpectroscopyParams {
                         grating
+                        centralWavelength {
+                          nanometers
+                        }
                       }
-                    }
-                    centralWavelength {
-                      nanometers
                     }
                   }
                 }
@@ -571,10 +571,10 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
                   "params": {
-                    "grating": "B1200_G5301"
-                  },
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
+                    "grating": "B1200_G5301",
+                    "centralWavelength" : {
+                      "nanometers" : 60.000
+                    }
                   }
                 },
                 "exposureTimeMode": {
@@ -680,12 +680,12 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 ... on SpectroscopyMode {
                   instrument
                   params {
-                    ... on GmosNITCParams {
+                    ... on GmosNSpectroscopyParams {
                       grating
+                      centralWavelength {
+                        nanometers
+                      }
                     }
-                  }
-                  centralWavelength {
-                    nanometers
                   }
                 }
               }
@@ -792,12 +792,12 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosNITCParams {
+                      ... on GmosNSpectroscopyParams {
                         grating
+                        centralWavelength {
+                          nanometers
+                        }
                       }
-                    }
-                    centralWavelength {
-                      nanometers
                     }
                   }
                 }
@@ -842,10 +842,10 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
                   "params": {
-                    "grating": ${d.tag.toScreamingSnakeCase}
-                  },
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
+                    "grating": ${d.tag.toScreamingSnakeCase},
+                    "centralWavelength" : {
+                      "nanometers" : 60.000
+                    }
                   }
                 },
                 "exposureTimeMode": {
@@ -957,12 +957,12 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosSITCParams {
+                      ... on GmosSSpectroscopyParams {
                         grating
+                        centralWavelength {
+                          nanometers
+                        }
                       }
-                    }
-                    centralWavelength {
-                      nanometers
                     }
                   }
                 }
@@ -1007,10 +1007,10 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
                   "params": {
-                    "grating": ${d.tag.toScreamingSnakeCase}
-                  },
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
+                    "grating": ${d.tag.toScreamingSnakeCase},
+                    "centralWavelength" : {
+                      "nanometers" : 60.000
+                    }
                   }
                 },
                 "exposureTimeMode": {
@@ -1122,14 +1122,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     ... on SpectroscopyMode {
                       instrument
                       params {
-                        ... on GmosNITCParams {
+                        ... on GmosNSpectroscopyParams {
                           fpu {
                             builtin
                           }
+                          centralWavelength {
+                            nanometers
+                          }
                         }
-                      }
-                      centralWavelength {
-                        nanometers
                       }
                     }
                   }
@@ -1176,10 +1176,10 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   "params": {
                     "fpu": {
                       "builtin": ${d.tag.toScreamingSnakeCase}
+                    },
+                    "centralWavelength" : {
+                      "nanometers" : 60.000
                     }
-                  },
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
                   }
                 },
                 "exposureTimeMode": {
@@ -1286,14 +1286,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosSITCParams {
+                      ... on GmosSSpectroscopyParams {
                         fpu {
                           builtin
                         }
+                        centralWavelength {
+                          nanometers
+                        }
                       }
-                    }
-                    centralWavelength {
-                      nanometers
                     }
                   }
                 }
@@ -1340,10 +1340,10 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   "params": {
                     "fpu": {
                       "builtin": ${d.tag.toScreamingSnakeCase}
+                    },
+                    "centralWavelength" : {
+                      "nanometers" : 60.000
                     }
-                  },
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
                   }
                 },
                 "exposureTimeMode": {
@@ -1450,12 +1450,9 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosNITCParams {
+                      ... on GmosNSpectroscopyParams {
                         filter
                       }
-                    }
-                    centralWavelength {
-                      nanometers
                     }
                   }
                 }
@@ -1501,9 +1498,6 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   "instrument" : "GMOS_NORTH",
                   "params": {
                     "filter": ${d.tag.toScreamingSnakeCase}
-                  },
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
                   }
                 },
                 "exposureTimeMode": {
@@ -1610,12 +1604,9 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   ... on SpectroscopyMode {
                     instrument
                     params {
-                      ... on GmosSITCParams {
+                      ... on GmosSSpectroscopyParams {
                         filter
                       }
-                    }
-                    centralWavelength {
-                      nanometers
                     }
                   }
                 }
@@ -1667,9 +1658,6 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   "instrument" : "GMOS_SOUTH",
                   "params": {
                     "filter": ${d.tag.toScreamingSnakeCase}
-                  },
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
                   }
                 },
                 "exposureTimeMode": {
@@ -1800,12 +1788,12 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
               ... on SpectroscopyMode {
                 instrument
                 params {
-                  ... on GmosNITCParams {
+                  ... on GmosNSpectroscopyParams {
                     grating
+                    centralWavelength {
+                      nanometers
+                    }
                   }
-                }
-                centralWavelength {
-                  nanometers
                 }
               }
             }
@@ -1857,10 +1845,10 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
               "mode" : {
                 "instrument" : "GMOS_NORTH",
                 "params": {
-                  "grating": "B1200_G5301"
-                },
-                "centralWavelength" : {
-                  "nanometers" : 600.000
+                  "grating": "B1200_G5301",
+                  "centralWavelength" : {
+                    "nanometers" : 600.000
+                  }
                 }
               },
               "exposureTimeMode": {
@@ -1920,3 +1908,133 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
         }
         """
     )
+
+  test("f2 case") {
+    query(
+      """
+        query {
+          spectroscopy(input: {
+            exposureTimeMode: {
+              timeAndCount: {
+                time: {
+                  seconds: 2
+                },
+                count: 3,
+                at: { nanometers: 60 }
+              }
+            },
+            asterism: [
+              {
+                sourceProfile: {
+                  point: {
+                    bandNormalized: {
+                      sed: {
+                        planet: JUPITER
+                      }
+                      brightnesses: [ {
+                        band: R
+                        value: 3
+                        units: ERG_PER_S_PER_CM_SQUARED_PER_A
+                        error: 0.2
+                      }, {
+                        band: J
+                        value: 2.1
+                        units: AB_MAGNITUDE
+                      }]
+                    }
+                  }
+                },
+                radialVelocity: {
+                  kilometersPerSecond: 1000
+                }
+              }
+            ],
+            constraints: {
+              imageQuality: POINT_THREE,
+              cloudExtinction: POINT_FIVE,
+              skyBackground: DARK,
+              waterVapor: DRY,
+              elevationRange: {
+                airMass: {
+                  min: 1,
+                  max: 2
+                }
+              }
+            },
+            mode: {
+              flamingos2Spectroscopy: {
+                filter: Y,
+                fpu: LONG_SLIT_1,
+                disperser: R3000
+              }
+            }
+          }) {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on Flamingos2SpectroscopyParams {
+                      disperser
+                      fpu
+                    }
+                  }
+                }
+              }
+              targetTimes {
+                ... on TargetIntegrationTime {
+                  signalToNoiseAt {
+                    single
+                    total
+                    wavelength {
+                      nanometers
+                    }
+                  }
+                }
+              }
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
+                }
+              }
+          }
+        }
+        """,
+      json"""
+        {
+          "data": {
+            "spectroscopy" : {
+                "mode" : {
+                  "instrument" : "FLAMINGOS2",
+                  "params": {
+                    "disperser": "R3000",
+                    "fpu": "LONG_SLIT_1"
+                  }
+                },
+                "targetTimes": [
+                  {
+                    "signalToNoiseAt": {
+                      "single": 101.000000,
+                      "total": 102.000000,
+                      "wavelength": {
+                        "nanometers": 60.000
+                      }
+                    }
+                  }
+                ],
+                "brightest": {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
+                    }
+                  }
+                }
+              }
+          }
+        }
+        """
+    )
+  }

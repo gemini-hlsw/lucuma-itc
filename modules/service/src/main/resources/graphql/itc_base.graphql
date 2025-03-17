@@ -41,17 +41,6 @@ type Query {
   ): SpectroscopyTimeAndGraphsResult!
 }
 
-type ObservingModeSpectroscopy {
-  """Wavelength in appropriate units"""
-  wavelength: Wavelength!
-
-  """params"""
-  params: InstrumentITCParams!
-
-  """instrument"""
-  instrument: Instrument
-}
-
 type ItcVersions {
   """id of the backend server"""
   serverVersion: String!
@@ -117,11 +106,8 @@ input GmosNImagingInput {
 }
 
 input Flamingos2SpectroscopyInput {
-  """Center of the configuration spectrum"""
-  centralWavelength: WavelengthInput!
-
   """Flamingos2 disperser"""
-  disperser: Flamingos2Disperser
+  disperser: Flamingos2Disperser!
 
   """Flamingos2 Focal plane unit"""
   fpu: Flamingos2Fpu!
@@ -130,7 +116,10 @@ input Flamingos2SpectroscopyInput {
   filter: Flamingos2Filter!
 }
 
-type GmosSITCParams {
+type GmosSSpectroscopyParams {
+  """Wavelength in appropriate units"""
+  centralWavelength: Wavelength!
+
   """Gmos South disperser"""
   grating: GmosSouthGrating
 
@@ -144,7 +133,10 @@ type GmosSITCParams {
   filter: GmosSouthFilter
 }
 
-type GmosNITCParams {
+type GmosNSpectroscopyParams {
+  """Wavelength in appropriate units"""
+  centralWavelength: Wavelength!
+
   """Gmos North disperser"""
   grating: GmosNorthGrating
 
@@ -158,7 +150,7 @@ type GmosNITCParams {
   filter: GmosNorthFilter
 }
 
-type Flamingos2ITCParams {
+type Flamingos2SpectroscopyParams {
   """Flamingos2 disperser"""
   disperser: Flamingos2Disperser
 
@@ -169,7 +161,19 @@ type Flamingos2ITCParams {
   filter: Flamingos2Filter
 }
 
-union InstrumentITCParams = GmosNITCParams | GmosSITCParams | Flamingos2ITCParams
+union SpectroscopyParams = GmosNSpectroscopyParams | GmosSSpectroscopyParams | Flamingos2SpectroscopyParams
+
+type GmosSImagingParams {
+  """Gmos South filter"""
+  filter: GmosSouthFilter!
+}
+
+type GmosNImagingParams {
+  """Gmos North filter"""
+  filter: GmosNorthFilter
+}
+
+union ImagingParams = GmosNImagingParams | GmosSImagingParams
 
 """Params for instrument modes"""
 input InstrumentModesInput {
@@ -362,18 +366,15 @@ type ImagingMode implements ITCObservingMode {
   instrument: Instrument!
 
   """params"""
-  params: InstrumentITCParams!
+  params: ImagingParams!
 }
 
 type SpectroscopyMode implements ITCObservingMode {
-  """Wavelength in appropriate units"""
-  centralWavelength: Wavelength!
-
-  """params"""
-  params: InstrumentITCParams!
-
   """instrument"""
   instrument: Instrument!
+
+  """params"""
+  params: SpectroscopyParams!
 }
 
 """Graph data types"""
@@ -507,7 +508,7 @@ type TargetGraphsResult {
   """The band used for the graphs calculation, in case of a BandNormalized SED"""
   band: Band
 
-  """The emission line used for the graphs calculation, in case of an EmissionLines SED"""
+  """The emission line used for the time calculation, in case of an EmissionLines SED"""
   emissionLine: Wavelength
 }
 
