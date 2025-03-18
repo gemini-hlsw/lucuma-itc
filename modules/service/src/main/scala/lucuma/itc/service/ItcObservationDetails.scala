@@ -73,18 +73,18 @@ object ItcObservationDetails {
 
     }
 
-    sealed trait IntMethod extends CalculationMethod
-    object IntMethod {
-      case class SpectroscopyInt(
+    sealed trait IntegrationTimeMethod extends CalculationMethod
+    object IntegrationTimeMethod {
+      case class SpectroscopyIntegrationTime(
         sigma:          Double,
         coadds:         Option[Int],
         sourceFraction: Double,
         ditherOffset:   Angle,
         wavelengthAt:   Wavelength
-      ) extends IntMethod
+      ) extends IntegrationTimeMethod
 
-      object SpectroscopyInt:
-        val encoder: Encoder[SpectroscopyInt] = a =>
+      object SpectroscopyIntegrationTime:
+        val encoder: Encoder[SpectroscopyIntegrationTime] = a =>
           Json.obj(
             "sigma"          -> a.sigma.asJson,
             "coadds"         -> a.coadds.asJson,
@@ -93,15 +93,15 @@ object ItcObservationDetails {
             "wavelengthAt"   -> a.wavelengthAt.nm.value.value.asJson
           )
 
-      case class ImagingInt(
+      case class ImagingIntegrationTime(
         sigma:          Double,
         coadds:         Option[Int],
         sourceFraction: Double,
         ditherOffset:   Angle
-      ) extends IntMethod
+      ) extends IntegrationTimeMethod
 
-      object ImagingInt:
-        val encoder: Encoder[ImagingInt] = a =>
+      object ImagingIntegrationTime:
+        val encoder: Encoder[ImagingIntegrationTime] = a =>
           Json.obj(
             "sigma"          -> a.sigma.asJson,
             "coadds"         -> a.coadds.asJson,
@@ -110,15 +110,16 @@ object ItcObservationDetails {
           )
 
       // We expect a spectroscopy option at some point
-      val encoder: Encoder[IntMethod] = a =>
+      val encoder: Encoder[IntegrationTimeMethod] = a =>
         a match {
-          case a: SpectroscopyInt =>
-            Json.obj("SpectroscopyInt" -> SpectroscopyInt.encoder(a))
-          case a: ImagingInt      => Json.obj("ImagingInt" -> ImagingInt.encoder(a))
+          case a: SpectroscopyIntegrationTime =>
+            Json.obj("SpectroscopyIntegrationTime" -> SpectroscopyIntegrationTime.encoder(a))
+          case a: ImagingIntegrationTime      =>
+            Json.obj("ImagingIntegrationTime" -> ImagingIntegrationTime.encoder(a))
         }
     }
 
-    case class ImagingExpCount(
+    case class ImagingExposureCount(
       sigma:            Double,
       exposureDuration: FiniteDuration,
       coadds:           Option[Int],
@@ -126,8 +127,8 @@ object ItcObservationDetails {
       ditherOffset:     Angle
     ) extends CalculationMethod
 
-    object ImagingExpCount:
-      val encoder: Encoder[ImagingExpCount] = a =>
+    object ImagingExposureCount:
+      val encoder: Encoder[ImagingExposureCount] = a =>
         Json.obj(
           "sigma"          -> a.sigma.asJson,
           "exposureTime"   -> a.exposureDuration.toDoubleSeconds.asJson,
@@ -138,9 +139,11 @@ object ItcObservationDetails {
 
     given Encoder[CalculationMethod] = a =>
       a match {
-        case a: S2NMethod       => Json.obj("S2NMethod" -> S2NMethod.encoder(a))
-        case a: IntMethod       => Json.obj("IntMethod" -> IntMethod.encoder(a))
-        case a: ImagingExpCount => Json.obj("ExpCountMethod" -> ImagingExpCount.encoder(a))
+        case a: S2NMethod             => Json.obj("S2NMethod" -> S2NMethod.encoder(a))
+        case a: IntegrationTimeMethod =>
+          Json.obj("IntegrationTimeMethod" -> IntegrationTimeMethod.encoder(a))
+        case a: ImagingExposureCount  =>
+          Json.obj("ExposureCountMethod" -> ImagingExposureCount.encoder(a))
       }
 
   }

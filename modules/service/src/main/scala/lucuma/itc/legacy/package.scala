@@ -91,7 +91,7 @@ def spectroscopyExposureTimeParams(
     ItcParameters(
       source = sourceDefinition,
       observation = ItcObservationDetails(
-        calculationMethod = ItcObservationDetails.CalculationMethod.IntMethod.SpectroscopyInt(
+        calculationMethod = ItcObservationDetails.CalculationMethod.IntegrationTimeMethod.SpectroscopyIntegrationTime(
           sigma = sigma.toBigDecimal.toDouble,
           coadds = None,
           wavelengthAt = atWavelength,
@@ -153,7 +153,7 @@ def imagingParams(
     ItcParameters(
       source = sourceDefinition,
       observation = ItcObservationDetails(
-        calculationMethod = ItcObservationDetails.CalculationMethod.IntMethod.ImagingInt(
+        calculationMethod = ItcObservationDetails.CalculationMethod.IntegrationTimeMethod.ImagingIntegrationTime(
           sigma = sigma.toBigDecimal.toDouble,
           coadds = None,
           sourceFraction = 1.0,
