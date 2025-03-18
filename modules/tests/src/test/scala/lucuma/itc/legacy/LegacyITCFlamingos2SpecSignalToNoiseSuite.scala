@@ -63,7 +63,7 @@ class LegacyITCFlamingos2SpecSignalToNoiseSuite extends FunSuite with CommonITCL
     ItcObservationDetails.AnalysisMethod.Ifu.Single(skyFibres = 250, offset = 5.0)
 
   val obs = ItcObservationDetails(
-    calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
+    calculationMethod = ItcObservationDetails.CalculationMethod.IntMethod.SpectroscopyInt(
       sigma = 100,
       wavelengthAt = Wavelength.decimalNanometers.getOption(1200).get,
       coadds = None,

@@ -64,7 +64,7 @@ class LegacyITCGmosSignalToNoiseImagingSuite extends FunSuite with CommonITCLega
   val analysisMethod = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
 
   val obs = ItcObservationDetails(
-    calculationMethod = ItcObservationDetails.CalculationMethod.IntegrationTime.ImagingExp(
+    calculationMethod = ItcObservationDetails.CalculationMethod.IntMethod.ImagingInt(
       sigma = 600,
       coadds = None,
       sourceFraction = 1.0,

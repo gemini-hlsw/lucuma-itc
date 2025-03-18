@@ -68,7 +68,7 @@ class LegacyITCGmosSpecSignalToNoiseSuite extends FunSuite with CommonITCLegacyS
     ItcObservationDetails.AnalysisMethod.Ifu.Single(skyFibres = 250, offset = 5.0)
 
   val obs = ItcObservationDetails(
-    calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
+    calculationMethod = ItcObservationDetails.CalculationMethod.IntMethod.SpectroscopyInt(
       sigma = 100,
       wavelengthAt = Wavelength.decimalNanometers.getOption(610).get,
       coadds = None,

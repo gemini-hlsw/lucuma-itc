@@ -60,7 +60,7 @@ def spectroscopyGraphParams(
     ItcParameters(
       source = sourceDefinition,
       observation = ItcObservationDetails(
-        calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
+        calculationMethod = ItcObservationDetails.CalculationMethod.S2NMethod.SpectroscopyS2N(
           exposureCount = exposureCount,
           coadds = None,
           exposureDuration = exposureDuration,
@@ -91,14 +91,13 @@ def spectroscopyExposureTimeParams(
     ItcParameters(
       source = sourceDefinition,
       observation = ItcObservationDetails(
-        calculationMethod =
-          ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
-            sigma = sigma.toBigDecimal.toDouble,
-            coadds = None,
-            wavelengthAt = atWavelength,
-            sourceFraction = 1.0,
-            ditherOffset = Angle.Angle0
-          ),
+        calculationMethod = ItcObservationDetails.CalculationMethod.IntMethod.SpectroscopyInt(
+          sigma = sigma.toBigDecimal.toDouble,
+          coadds = None,
+          wavelengthAt = atWavelength,
+          sourceFraction = 1.0,
+          ditherOffset = Angle.Angle0
+        ),
         analysisMethod = observingMode.analysisMethod
       ),
       conditions = conditions,
@@ -123,7 +122,7 @@ def spectroscopySNParams(
     ItcParameters(
       source = sourceDefinition,
       observation = ItcObservationDetails(
-        calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
+        calculationMethod = ItcObservationDetails.CalculationMethod.S2NMethod.SpectroscopyS2N(
           exposureCount = exposureCount,
           exposureDuration = exposureDuration,
           coadds = None,
@@ -154,7 +153,7 @@ def imagingParams(
     ItcParameters(
       source = sourceDefinition,
       observation = ItcObservationDetails(
-        calculationMethod = ItcObservationDetails.CalculationMethod.IntegrationTime.ImagingExp(
+        calculationMethod = ItcObservationDetails.CalculationMethod.IntMethod.ImagingInt(
           sigma = sigma.toBigDecimal.toDouble,
           coadds = None,
           sourceFraction = 1.0,
