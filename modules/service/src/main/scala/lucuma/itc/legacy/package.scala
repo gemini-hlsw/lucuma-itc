@@ -60,7 +60,7 @@ def spectroscopyGraphParams(
     ItcParameters(
       source = sourceDefinition,
       observation = ItcObservationDetails(
-        calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
+        calculationMethod = ItcObservationDetails.CalculationMethod.S2NMethod.SpectroscopyS2N(
           exposureCount = exposureCount,
           coadds = None,
           exposureDuration = exposureDuration,
@@ -92,7 +92,7 @@ def spectroscopyExposureTimeParams(
       source = sourceDefinition,
       observation = ItcObservationDetails(
         calculationMethod =
-          ItcObservationDetails.CalculationMethod.SignalToNoise.SpectroscopyWithSNAt(
+          ItcObservationDetails.CalculationMethod.IntegrationTimeMethod.SpectroscopyIntegrationTime(
             sigma = sigma.toBigDecimal.toDouble,
             coadds = None,
             wavelengthAt = atWavelength,
@@ -123,7 +123,7 @@ def spectroscopySNParams(
     ItcParameters(
       source = sourceDefinition,
       observation = ItcObservationDetails(
-        calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
+        calculationMethod = ItcObservationDetails.CalculationMethod.S2NMethod.SpectroscopyS2N(
           exposureCount = exposureCount,
           exposureDuration = exposureDuration,
           coadds = None,
@@ -154,12 +154,13 @@ def imagingParams(
     ItcParameters(
       source = sourceDefinition,
       observation = ItcObservationDetails(
-        calculationMethod = ItcObservationDetails.CalculationMethod.IntegrationTime.ImagingExp(
-          sigma = sigma.toBigDecimal.toDouble,
-          coadds = None,
-          sourceFraction = 1.0,
-          ditherOffset = Angle.Angle0
-        ),
+        calculationMethod =
+          ItcObservationDetails.CalculationMethod.IntegrationTimeMethod.ImagingIntegrationTime(
+            sigma = sigma.toBigDecimal.toDouble,
+            coadds = None,
+            sourceFraction = 1.0,
+            ditherOffset = Angle.Angle0
+          ),
         analysisMethod = observingMode.analysisMethod
       ),
       conditions = conditions,

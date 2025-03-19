@@ -67,7 +67,7 @@ class LegacyITCGmosSpecExpTimeSuite extends FunSuite with CommonITCLegacySuite:
     ItcObservationDetails.AnalysisMethod.Ifu.Single(skyFibres = 250, offset = 5.0)
 
   val obs = ItcObservationDetails(
-    calculationMethod = ItcObservationDetails.CalculationMethod.SignalToNoise.Spectroscopy(
+    calculationMethod = ItcObservationDetails.CalculationMethod.S2NMethod.SpectroscopyS2N(
       exposureCount = 10,
       exposureDuration = 3.seconds,
       wavelengthAt = Wavelength.decimalNanometers.getOption(610).get,
