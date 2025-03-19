@@ -13,29 +13,27 @@ import lucuma.itc.legacy.codecs.given
 import lucuma.itc.service.ItcObservationDetails
 import lucuma.itc.service.ObservingMode
 
-import scala.concurrent.duration.*
-
 /**
- * This is a unit test for GMOS imaging mode in time and count mode for the legacy ITC, ensuring all
- * possible combinations of parameters can be parsed. The ITC may still return an error but we want
- * to ensure it can parse the values.
+ * This is a unit test for GMOS imaging mode in the legacy ITC, ensuring all possible combinations
+ * of parameters can be parsed. The ITC may still return an error but we want to ensure it can parse
+ * the values.
  */
-class LegacyITCGmosImgExpTimeSuite extends CommonITCLegacySuite:
+class LegacyITCGmosImgSignalToNoiseSuite extends CommonITCLegacySuite:
 
-  // Define observation details
-  val obs = ItcObservationDetails(
-    calculationMethod = ItcObservationDetails.CalculationMethod.S2NMethod.ImagingS2N(
-      exposureCount = 10,
-      exposureDuration = 3.seconds,
-      coadds = None,
-      sourceFraction = 1.0,
-      ditherOffset = Angle.Angle0
-    ),
+  // Define observation details with signal-to-noise calculation method
+  override val obs = ItcObservationDetails(
+    calculationMethod =
+      ItcObservationDetails.CalculationMethod.IntegrationTimeMethod.ImagingIntegrationTime(
+        sigma = 600,
+        coadds = None,
+        sourceFraction = 1.0,
+        ditherOffset = Angle.Angle0
+      ),
     analysisMethod = lsAnalysisMethod
   )
 
   // Define GMOS imaging TxC instrument
-  val instrument = ItcInstrumentDetails(
+  override val instrument = ItcInstrumentDetails(
     ObservingMode.ImagingMode.GmosNorth(
       GmosNorthFilter.GPrime,
       GmosCcdMode(
@@ -49,7 +47,7 @@ class LegacyITCGmosImgExpTimeSuite extends CommonITCLegacySuite:
   )
 
   // Testing observing conditions
-  testConditions("GMOS imaging TxC", baseParams)
+  testConditions("GMOS imaging TxC S/N", baseParams)
 
   // GMOS North filter testing
   val gmosNConf = ObservingMode.ImagingMode.GmosNorth(
@@ -92,13 +90,13 @@ class LegacyITCGmosImgExpTimeSuite extends CommonITCLegacySuite:
       assert(result.fold(allowedErrors, containsValidResults))
 
   // Testing various SEDs
-  testSEDs("GMOS imaging TxC", baseParams)
+  testSEDs("GMOS imaging TxC S/N", baseParams, false, false)
 
   // Testing user defined SED
-  testUserDefinedSED("GMOS imaging TxC", baseParams)
+  testUserDefinedSED("GMOS imaging TxC S/N", baseParams)
 
   // Testing brightness units
-  testBrightnessUnits("GMOS imaging TxC", baseParams)
+  testBrightnessUnits("GMOS imaging TxC S/N", baseParams)
 
   // Testing power law and blackbody
-  testPowerAndBlackbody("GMOS imaging TxC", baseParams)
+  testPowerAndBlackbody("GMOS imaging TxC S/N", baseParams)
