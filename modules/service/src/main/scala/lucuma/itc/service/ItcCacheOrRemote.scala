@@ -58,11 +58,6 @@ trait ItcCacheOrRemote extends Version:
       .flatMap: r =>
         cache.getOrInvokeBinary(r, requestGraphs(itc)(r), TTL, "itc:graph:spec")
 
-  private def timeAndCountModeNotImplemented[F[_]: MonadThrow, A]: F[A] =
-    MonadThrow[F].raiseError[A]:
-      UnsupportedOperationException:
-        "'Time And Count' exposure time mode is not yet implemented."
-
   private def requestSpecSNCalc[F[_]: MonadThrow](itc: Itc[F])(
     calcRequest: TargetSpectroscopyTimeRequest,
     mode:        ExposureTimeMode.TimeAndCountMode
@@ -111,20 +106,31 @@ trait ItcCacheOrRemote extends Version:
             cache.getOrInvokeBinary(r, requestSpecSNCalc(itc)(r, m), TTL, "itc:calc:spec:tc")
 
   private def requestImgTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
-    calcRequest: TargetImagingTimeRequest
+    calcRequest: TargetImagingTimeRequest,
+    mode:        ExposureTimeMode.SignalToNoiseMode
   ): F[TargetIntegrationTime] =
-    calcRequest.exposureTimeMode match
-      case ExposureTimeMode.SignalToNoiseMode(value, at) =>
-        itc
-          .calculateIntegrationTime(
-            calcRequest.target,
-            at,
-            calcRequest.imagingMode,
-            calcRequest.constraints,
-            value
-          )
-      case ExposureTimeMode.TimeAndCountMode(_, _, _)    =>
-        timeAndCountModeNotImplemented
+    itc
+      .calculateIntegrationTime(
+        calcRequest.target,
+        mode.at,
+        calcRequest.imagingMode,
+        calcRequest.constraints,
+        mode.value
+      )
+
+  private def requestImgSNCalc[F[_]: MonadThrow](itc: Itc[F])(
+    calcRequest: TargetImagingTimeRequest,
+    mode:        ExposureTimeMode.TimeAndCountMode
+  ): F[TargetIntegrationTime] =
+    itc
+      .calculateSignalToNoise(
+        calcRequest.target,
+        mode.at,
+        calcRequest.imagingMode,
+        calcRequest.constraints,
+        mode.time,
+        mode.count
+      )
 
   /**
    * Request exposure time calculation for imaging
@@ -140,7 +146,11 @@ trait ItcCacheOrRemote extends Version:
     CustomSed // We must resolve CustomSed before caching.
       .resolveTargetImagingTimeRequest(calcRequest)
       .flatMap: r =>
-        cache.getOrInvokeBinary(r, requestImgTimeCalc(itc)(r), TTL, "itc:calc:img")
+        r.exposureTimeMode match
+          case m @ ExposureTimeMode.SignalToNoiseMode(_, _)   =>
+            cache.getOrInvokeBinary(r, requestImgTimeCalc(itc)(r, m), TTL, "itc:calc:img:sn")
+          case m @ ExposureTimeMode.TimeAndCountMode(_, _, _) =>
+            cache.getOrInvokeBinary(r, requestImgSNCalc(itc)(r, m), TTL, "itc:calc:img:tc")
 
   /**
    * This method will get the version from the remote itc and compare it with the one on the cache.
