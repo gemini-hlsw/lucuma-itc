@@ -64,7 +64,8 @@ object ItcImpl {
               spectroscopy(target, atWavelength, s, constraints, signalToNoise)
             case i @ (
                   ObservingMode.ImagingMode.GmosNorth(_, _) |
-                  ObservingMode.ImagingMode.GmosSouth(_, _)
+                  ObservingMode.ImagingMode.GmosSouth(_, _) |
+                  ObservingMode.ImagingMode.Flamingos2(_)
                 ) =>
               imaging(target, atWavelength, i, constraints, signalToNoise)
 
@@ -88,7 +89,7 @@ object ItcImpl {
               exposureTime.toMilliseconds.withUnit[Millisecond].toUnit[Second],
               exposureCount.value
             )
-          case ImagingMode.GmosNorth(_, _) | ImagingMode.GmosSouth(_, _) =>
+          case ImagingMode.GmosNorth(_, _) | ImagingMode.GmosSouth(_, _) | ImagingMode.Flamingos2(_) =>
             MonadThrow[F].raiseError:
               new IllegalArgumentException("Imaging mode not supported for graph calculation")
 

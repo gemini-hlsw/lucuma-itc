@@ -166,6 +166,7 @@ object ObservingMode {
     given Encoder[ObservingMode.ImagingMode] = Encoder.instance {
       case gn: GmosNorth => gn.asJson
       case gs: GmosSouth => gs.asJson
+      case f2: Flamingos2 => f2.asJson
     }
 
     sealed trait GmosImaging extends ImagingMode derives Hash {
@@ -209,6 +210,24 @@ object ObservingMode {
         Json.obj(
           ("instrument", a.instrument.asJson),
           ("params", GmosSImagingParams(a.filter).asJson)
+        )
+        
+    case class Flamingos2(
+      filter: F2Filter
+    ) extends ImagingMode {
+      val instrument: Instrument = Instrument.Flamingos2
+      
+      def analysisMethod: ItcObservationDetails.AnalysisMethod =
+        ItcObservationDetails.AnalysisMethod.Aperture.Auto(
+          skyAperture = 1.0
+        )
+    }
+    
+    object Flamingos2:
+      given Encoder[Flamingos2] = a =>
+        Json.obj(
+          ("instrument", a.instrument.asJson),
+          ("params", Flamingos2ImagingParams(a.filter).asJson)
         )
   }
 

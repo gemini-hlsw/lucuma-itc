@@ -122,6 +122,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                       integrationTime
                         .focusIndex(1) // For gmos focus on the second CCD
                         .getOrElse(integrationTime)
+                    case ObservingMode.ImagingMode.Flamingos2(_) =>
+                      integrationTime
       .map: (targetOutcomes: NonEmptyChain[TargetIntegrationTimeOutcome]) =>
         CalculationResult(
           ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
