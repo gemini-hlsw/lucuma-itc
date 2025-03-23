@@ -7240,7 +7240,7 @@ type GmosNImagingParams {
 
 type Flamingos2ImagingParams {
   """Flamingos2 filter"""
-  filter: GmosNorthFilter
+  filter: Flamingos2Filter
 }
 
 union ImagingParams = GmosNImagingParams | GmosSImagingParams | Flamingos2ImagingParams

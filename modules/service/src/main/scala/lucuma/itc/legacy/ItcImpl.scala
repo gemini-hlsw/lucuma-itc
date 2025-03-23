@@ -89,7 +89,8 @@ object ItcImpl {
               exposureTime.toMilliseconds.withUnit[Millisecond].toUnit[Second],
               exposureCount.value
             )
-          case ImagingMode.GmosNorth(_, _) | ImagingMode.GmosSouth(_, _) | ImagingMode.Flamingos2(_) =>
+          case ImagingMode.GmosNorth(_, _) | ImagingMode.GmosSouth(_, _) |
+              ImagingMode.Flamingos2(_) =>
             MonadThrow[F].raiseError:
               new IllegalArgumentException("Imaging mode not supported for graph calculation")
 
@@ -188,39 +189,6 @@ object ItcImpl {
 
       /**
        * Compute the exposure time and number of exposures required to achieve the desired
-       * signal-to-noise under the requested conditions. Only for spectroscopy modes
-       */
-      private def imaging(
-        target:        TargetData,
-        atWavelength:  Wavelength,
-        observingMode: ObservingMode.ImagingMode,
-        constraints:   ItcObservingConditions,
-        signalToNoise: SignalToNoise
-      ): F[TargetIntegrationTime] =
-        import lucuma.itc.legacy.*
-
-        val (request, bandOrLine): (Json, Either[Band, Wavelength]) =
-          imagingParams(target, atWavelength, observingMode, constraints, signalToNoise).leftMap(
-            _.asJson
-          )
-
-        for
-          _ <- L.info(s"Desired S/N $signalToNoise")
-          _ <- L.info(s"Target $target  at wavelength $atWavelength")
-          r <- T.span("itc.calctime.spectroscopy-exp-time-at"):
-                 for
-                   _            <- T.put("itc.query" -> request.spaces2)
-                   _            <- T.put("itc.sigma" -> signalToNoise.toBigDecimal.toDouble)
-                   _            <- L.info(
-                                     s"Imaging: Signal to noise mode ${request.noSpaces}"
-                                   ) // Request to the legacy itc
-                   remoteResult <- itcLocal.calculateIntegrationTime(request.noSpaces)
-                   result       <- convertIntegrationTimeRemoteResult(remoteResult, bandOrLine)
-                 yield result
-        yield r
-
-      /**
-       * Compute the exposure time and number of exposures required to achieve the desired
        * signal-to-noise under the requested conditions. Only for spectroscopy modes.
        */
       private def spectroscopySignalToNoise(
@@ -282,5 +250,39 @@ object ItcImpl {
             case _ =>
               MonadThrow[F].raiseError:
                 CalculationError(s"Imaginng mode not supported for signal-to-noise calculation")
+
+      /**
+       * Compute the exposure time and number of exposures required to achieve the desired
+       * signal-to-noise under the requested conditions. Only for spectroscopy modes
+       */
+      private def imaging(
+        target:        TargetData,
+        atWavelength:  Wavelength,
+        observingMode: ObservingMode.ImagingMode,
+        constraints:   ItcObservingConditions,
+        signalToNoise: SignalToNoise
+      ): F[TargetIntegrationTime] =
+        import lucuma.itc.legacy.*
+
+        val (request, bandOrLine): (Json, Either[Band, Wavelength]) =
+          imagingParams(target, atWavelength, observingMode, constraints, signalToNoise).leftMap(
+            _.asJson
+          )
+
+        for
+          _ <- L.info(s"Desired S/N $signalToNoise")
+          _ <- L.info(s"Target $target  at wavelength $atWavelength")
+          r <- T.span("itc.calctime.spectroscopy-exp-time-at"):
+                 for
+                   _            <- T.put("itc.query" -> request.spaces2)
+                   _            <- T.put("itc.sigma" -> signalToNoise.toBigDecimal.toDouble)
+                   _            <- L.info(
+                                     s"Imaging: Signal to noise mode ${request.noSpaces}"
+                                   ) // Request to the legacy itc
+                   remoteResult <- itcLocal.calculateIntegrationTime(request.noSpaces)
+                   result       <- convertIntegrationTimeRemoteResult(remoteResult, bandOrLine)
+                 yield result
+        yield r
     }
+
 }

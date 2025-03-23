@@ -187,6 +187,22 @@ private[legacy] object codecs:
       "customSlitWidth" -> Json.Null
     )
 
+  private val encodeF2Imaging: Encoder[ObservingMode.ImagingMode.Flamingos2] = a =>
+    Json.obj(
+      // Translate observing mode to OCS2 style
+      "filter"          -> Json.fromString(a.filter.ocs2Tag),
+      "grism"           -> Json.fromString("NONE"),
+      "mask"            -> Json.fromString("NONE"),
+      "readMode"        -> Json.fromString("FAINT_OBJECT_SPEC"),
+      "customSlitWidth" -> Json.Null
+
+      // "filter",
+      // "grism",
+      // "mask",
+      // "customSlitWidth",
+      // "readMode"
+    )
+
   private val encodeGmosSouthImaging: Encoder[ObservingMode.ImagingMode.GmosSouth] =
     new Encoder[ObservingMode.ImagingMode.GmosSouth] {
       def apply(a: ObservingMode.ImagingMode.GmosSouth): Json =
@@ -224,6 +240,8 @@ private[legacy] object codecs:
         Json.obj("GmosParameters" -> encodeGmosSouthSpectroscopy(a))
       case a: ObservingMode.SpectroscopyMode.Flamingos2 =>
         Json.obj("Flamingos2Parameters" -> encodeF2Spectroscopy(a))
+      case a: ObservingMode.ImagingMode.Flamingos2      =>
+        Json.obj("Flamingos2Parameters" -> encodeF2Imaging(a))
       case a: ObservingMode.ImagingMode.GmosNorth       =>
         Json.obj("GmosParameters" -> encodeGmosNorthImaging(a))
       case a: ObservingMode.ImagingMode.GmosSouth       =>

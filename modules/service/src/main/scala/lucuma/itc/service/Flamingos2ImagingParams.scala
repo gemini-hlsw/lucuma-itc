@@ -3,10 +3,12 @@
 
 package lucuma.itc.service
 
+import cats.Eq
 import cats.derived.*
 import io.circe.Encoder
 import lucuma.core.enums.F2Filter
 
 case class Flamingos2ImagingParams(
   filter: F2Filter
-) derives Encoder.AsObject
+) derives Eq,
+      Encoder.AsObject

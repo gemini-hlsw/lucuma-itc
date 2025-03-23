@@ -5,7 +5,7 @@ package lucuma.itc.service
 
 import io.circe.literal.*
 
-class imagingSuite extends GraphImagingQLSuite:
+class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
 
   test("gmos north signal to noise"):
     query(
@@ -475,9 +475,9 @@ class imagingSuite extends GraphImagingQLSuite:
                   }
                 }],
                 "selected" : {
-                  "exposureCount" : 5,
+                  "exposureCount" : 10,
                   "exposureTime" : {
-                    "seconds" : 2.000000
+                    "seconds" : 1.000000
                   }
                 }
               }
