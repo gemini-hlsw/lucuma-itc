@@ -192,15 +192,9 @@ private[legacy] object codecs:
       // Translate observing mode to OCS2 style
       "filter"          -> Json.fromString(a.filter.ocs2Tag),
       "grism"           -> Json.fromString("NONE"),
-      "mask"            -> Json.fromString("NONE"),
+      "mask"            -> Json.fromString("FPU_NONE"),
       "readMode"        -> Json.fromString("FAINT_OBJECT_SPEC"),
       "customSlitWidth" -> Json.Null
-
-      // "filter",
-      // "grism",
-      // "mask",
-      // "customSlitWidth",
-      // "readMode"
     )
 
   private val encodeGmosSouthImaging: Encoder[ObservingMode.ImagingMode.GmosSouth] =
