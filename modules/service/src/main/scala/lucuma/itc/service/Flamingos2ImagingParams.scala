@@ -8,7 +8,4 @@ import cats.derived.*
 import io.circe.Encoder
 import lucuma.core.enums.F2Filter
 
-case class Flamingos2ImagingParams(
-  filter: F2Filter
-) derives Eq,
-      Encoder.AsObject
+case class Flamingos2ImagingParams(filter: F2Filter) derives Eq, Encoder.AsObject

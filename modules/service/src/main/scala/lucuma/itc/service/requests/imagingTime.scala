@@ -61,7 +61,7 @@ object AsterismImagingTimeRequest:
         case GmosSImagingInput(filter, ccdMode) =>
           Result.success:
             ObservingMode.ImagingMode.GmosSouth(filter, ccdMode)
-        case Flamingos2ImagingInput(filter) =>
+        case Flamingos2ImagingInput(filter)     =>
           Result.success:
             ObservingMode.ImagingMode.Flamingos2(filter)
         case _                                  =>

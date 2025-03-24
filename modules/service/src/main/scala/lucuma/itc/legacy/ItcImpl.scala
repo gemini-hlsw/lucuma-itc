@@ -277,9 +277,8 @@ object ItcImpl {
                  for
                    _            <- T.put("itc.query" -> request.spaces2)
                    _            <- T.put("itc.sigma" -> signalToNoise.toBigDecimal.toDouble)
-                   _            <- L.info(
-                                     s"Imaging: Signal to noise mode ${request.noSpaces}"
-                                   ) // Request to the legacy itc
+                   // Request to the legacy itc
+                   _            <- L.info(s"Imaging: Signal to noise mode ${request.noSpaces}")
                    remoteResult <- itcLocal.calculateIntegrationTime(request.noSpaces)
                    result       <- convertIntegrationTimeRemoteResult(remoteResult, bandOrLine)
                  yield result

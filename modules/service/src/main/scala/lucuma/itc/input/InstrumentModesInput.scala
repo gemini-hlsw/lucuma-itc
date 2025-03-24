@@ -21,7 +21,13 @@ object InstrumentModesInput:
             F2SpectroscopyInput.binding.Option("flamingos2Spectroscopy", f2Spectroscopy),
             Flamingos2ImagingInput.binding.Option("flamingos2Imaging", f2Imaging)
           ) =>
-        (gmosNSpectroscopy, gmosSSpectroscopy, gmosNImaging, gmosSImaging, f2Spectroscopy, f2Imaging).parTupled
+        (gmosNSpectroscopy,
+         gmosSSpectroscopy,
+         gmosNImaging,
+         gmosSImaging,
+         f2Spectroscopy,
+         f2Imaging
+        ).parTupled
           .flatMap {
             case (gmosNSpectroscopy,
                   gmosSSpectroscopy,

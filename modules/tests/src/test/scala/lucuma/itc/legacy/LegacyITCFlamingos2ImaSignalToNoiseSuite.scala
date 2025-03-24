@@ -3,7 +3,7 @@
 
 package lucuma.itc.legacy
 
-import cats.syntax.option.* // For .some extension method
+import cats.syntax.option.*
 import io.circe.syntax.*
 import lucuma.core.enums.*
 import lucuma.core.math.Angle
