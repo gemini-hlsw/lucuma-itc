@@ -78,7 +78,7 @@ def spectroscopyGraphParams(
     )
   (parameters, bandOrLine)
 
-def spectroscopyExposureTimeParams(
+def spectroscopyIntegrationTimeParams(
   target:        TargetData,
   atWavelength:  Wavelength,
   observingMode: ObservingMode.SpectroscopyMode,
@@ -141,7 +141,7 @@ def spectroscopySNParams(
     )
   (parameters, bandOrLine)
 
-def imagingParams(
+def imagingIntegrationTimeParams(
   target:        TargetData,
   atWavelength:  Wavelength,
   observingMode: ObservingMode,
@@ -161,6 +161,37 @@ def imagingParams(
             sourceFraction = 1.0,
             ditherOffset = Angle.Angle0
           ),
+        analysisMethod = observingMode.analysisMethod
+      ),
+      conditions = conditions,
+      telescope = ItcTelescopeDetails(
+        wfs = ItcWavefrontSensor.OIWFS
+      ),
+      instrument = ItcInstrumentDetails(observingMode)
+    )
+  (parameters, bandOrLine)
+
+def imagingS2NParams(
+  target:           TargetData,
+  atWavelength:     Wavelength,
+  observingMode:    ObservingMode,
+  conditions:       ItcObservingConditions,
+  exposureDuration: FiniteDuration,
+  exposureCount:    Int
+): (ItcParameters, Either[Band, Wavelength]) = // Bubble up the selected band or line
+  val (sourceDefinition, bandOrLine): (ItcSourceDefinition, Either[Band, Wavelength]) =
+    buildSourceDefinition(target, atWavelength)
+  val parameters: ItcParameters                                                       =
+    ItcParameters(
+      source = sourceDefinition,
+      observation = ItcObservationDetails(
+        calculationMethod = ItcObservationDetails.CalculationMethod.S2NMethod.ImagingS2N(
+          exposureCount = exposureCount,
+          exposureDuration = exposureDuration,
+          coadds = None,
+          sourceFraction = 1.0,
+          ditherOffset = Angle.Angle0
+        ),
         analysisMethod = observingMode.analysisMethod
       ),
       conditions = conditions,
