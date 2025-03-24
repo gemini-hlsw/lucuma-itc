@@ -239,7 +239,8 @@ object ItcImpl {
         T.span("calculate-signal-to-noise"):
           observingMode match
             case s @ (ObservingMode.SpectroscopyMode.GmosNorth(_, _, _, _, _, _) |
-                ObservingMode.SpectroscopyMode.GmosSouth(_, _, _, _, _, _)) =>
+                ObservingMode.SpectroscopyMode.GmosSouth(_, _, _, _, _, _) |
+                ObservingMode.SpectroscopyMode.Flamingos2(_, _, _)) =>
               spectroscopySignalToNoise(target,
                                         atWavelength,
                                         s,
@@ -249,7 +250,7 @@ object ItcImpl {
               )
             case _ =>
               MonadThrow[F].raiseError:
-                CalculationError(s"Imaginng mode not supported for signal-to-noise calculation")
+                CalculationError(s"Mode not supported for signal-to-noise calculation")
 
       /**
        * Compute the exposure time and number of exposures required to achieve the desired
