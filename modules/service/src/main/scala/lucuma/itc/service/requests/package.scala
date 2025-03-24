@@ -6,9 +6,9 @@ package lucuma.itc.service.requests
 import cats.data.NonEmptyChain
 import cats.syntax.all.*
 import grackle.Result
+import lucuma.core.model.SourceProfile
 import lucuma.itc.input.TargetDataInput
 import lucuma.itc.service.TargetData
-import lucuma.core.model.SourceProfile
 
 extension (asterism: List[TargetDataInput])
   def targetInputsToData: Result[NonEmptyChain[TargetData]] =
@@ -20,11 +20,19 @@ extension (asterism: List[TargetDataInput])
                       targetDataInput.radialVelocity.toRedshift,
                       s"Invalid radial velocity: ${targetDataInput.radialVelocity}"
                     )
-               // TODO no SED is valid for emission lines
-               _ <-
-                 Result.fromOption(
-                   SourceProfile.unnormalizedSED.getOption(targetDataInput.sourceProfile).flatten,
-                   "No SED provided. a SED is required for all targets"
-                 )
+               _ <- {
+                 val isEmmisionLines = SourceProfile.integratedEmissionLinesSpectralDefinition
+                   .getOption(targetDataInput.sourceProfile)
+                   .isDefined ||
+                   SourceProfile.surfaceEmissionLinesSpectralDefinition
+                     .getOption(targetDataInput.sourceProfile)
+                     .isDefined
+                 if (isEmmisionLines) Result.unit
+                 else
+                   Result.fromOption(
+                     SourceProfile.unnormalizedSED.getOption(targetDataInput.sourceProfile).flatten,
+                     "No SED provided. a SED is required for all targets"
+                   )
+               }
              yield TargetData(targetDataInput.sourceProfile, z)
     } yield r
