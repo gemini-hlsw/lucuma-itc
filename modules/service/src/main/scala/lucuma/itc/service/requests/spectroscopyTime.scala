@@ -49,9 +49,6 @@ object AsterismSpectroscopyTimeRequest:
     val SpectroscopyTimeInput(exposureTimeMode, asterism, constraints, mode) =
       input
 
-    val asterismResult: Result[NonEmptyChain[TargetData]] =
-      targetInputsToData(asterism)
-
     val modeResult: Result[ObservingMode.SpectroscopyMode] =
       mode match
         case GmosNSpectroscopyInput(
@@ -90,9 +87,10 @@ object AsterismSpectroscopyTimeRequest:
       constraints.create
         .flatMap(c => Result.fromEither(ItcObservingConditions.fromConstraints(c)))
 
-    (asterismResult, modeResult, conditionsResult).parMapN: (asterism, mode, conditions) =>
-      AsterismSpectroscopyTimeRequest(
-        asterism,
-        SpectroscopyTimeParameters(exposureTimeMode, mode, conditions)
-      )
+    (asterism.targetInputsToData, modeResult, conditionsResult).parMapN:
+      (asterism, mode, conditions) =>
+        AsterismSpectroscopyTimeRequest(
+          asterism,
+          SpectroscopyTimeParameters(exposureTimeMode, mode, conditions)
+        )
   }

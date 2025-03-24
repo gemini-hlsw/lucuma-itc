@@ -94,7 +94,7 @@ object Main extends IOApp with ItcCacheOrRemote {
   ): Resource[F, EntryPoint[F]] =
     config.fold(Log.entryPoint(ServiceName).pure[Resource[F, *]]): cfg =>
       Honeycomb.entryPoint(ServiceName): cb =>
-        Sync[F].delay:
+        Sync[F].blocking:
           cb.setWriteKey(cfg.writeKey)
           cb.setDataset(cfg.dataset)
           cb.build()
@@ -160,7 +160,7 @@ object Main extends IOApp with ItcCacheOrRemote {
   // and it will conflict with the current scala 3 classes
   def legacyItcLoader[F[_]: Sync: Logger](config: Config): F[LocalItc] =
     Sync[F]
-      .delay:
+      .blocking:
         val dir      =
           if (config.dyno.isDefined) "modules/service/target/universal/stage/ocslib" else "ocslib"
         val jarFiles =
