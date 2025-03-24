@@ -61,9 +61,6 @@ object AsterismGraphRequest:
       figures
     ) = input
 
-    val asterismResult: Result[NonEmptyChain[TargetData]] =
-      targetInputsToData(asterism)
-
     val modeResult: Result[ObservingMode.SpectroscopyMode] = mode match {
       case GmosNSpectroscopyInput(
             centralWavelength,
@@ -97,16 +94,17 @@ object AsterismGraphRequest:
       constraints.create
         .flatMap(c => Result.fromEither(ItcObservingConditions.fromConstraints(c)))
 
-    (asterismResult, modeResult, conditionsResult).parMapN: (asterism, mode, conditions) =>
-      AsterismGraphRequest(
-        asterism,
-        GraphParameters(
-          atWavelength,
-          mode,
-          conditions,
-          exposureTime,
-          exposureCount
-        ),
-        figures
-      )
+    (asterism.targetInputsToData, modeResult, conditionsResult).parMapN:
+      (asterism, mode, conditions) =>
+        AsterismGraphRequest(
+          asterism,
+          GraphParameters(
+            atWavelength,
+            mode,
+            conditions,
+            exposureTime,
+            exposureCount
+          ),
+          figures
+        )
   }

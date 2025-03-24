@@ -8,17 +8,23 @@ import cats.syntax.all.*
 import grackle.Result
 import lucuma.itc.input.TargetDataInput
 import lucuma.itc.service.TargetData
+import lucuma.core.model.SourceProfile
 
-private def targetInputsToData(
-  asterism: List[TargetDataInput]
-): Result[NonEmptyChain[TargetData]] =
-  Result
-    .fromOption(NonEmptyChain.fromSeq(asterism), "No targets provided")
-    .flatMap:
-      _.traverse: targetDataInput =>
-        Result
-          .fromOption(
-            targetDataInput.radialVelocity.toRedshift,
-            s"Invalid radial velocity: ${targetDataInput.radialVelocity}"
-          )
-          .map(z => TargetData(targetDataInput.sourceProfile, z))
+extension (asterism: List[TargetDataInput])
+  def targetInputsToData: Result[NonEmptyChain[TargetData]] =
+    for {
+      t <- Result.fromOption(NonEmptyChain.fromSeq(asterism), "No targets provided")
+      r <- t.traverse: targetDataInput =>
+             for
+               z <- Result.fromOption(
+                      targetDataInput.radialVelocity.toRedshift,
+                      s"Invalid radial velocity: ${targetDataInput.radialVelocity}"
+                    )
+               // TODO no SED is valid for emission lines
+               _ <-
+                 Result.fromOption(
+                   SourceProfile.unnormalizedSED.getOption(targetDataInput.sourceProfile).flatten,
+                   "No SED provided. a SED is required for all targets"
+                 )
+             yield TargetData(targetDataInput.sourceProfile, z)
+    } yield r

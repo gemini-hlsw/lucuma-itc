@@ -50,9 +50,6 @@ object AsterismImagingTimeRequest:
       mode
     ) = input
 
-    val asterismResult: Result[NonEmptyChain[TargetData]] =
-      targetInputsToData(asterism)
-
     val modeResult: Result[ObservingMode.ImagingMode] =
       mode match
         case GmosNImagingInput(filter, ccdMode) =>
@@ -71,9 +68,10 @@ object AsterismImagingTimeRequest:
       constraints.create
         .flatMap(c => Result.fromEither(ItcObservingConditions.fromConstraints(c)))
 
-    (asterismResult, modeResult, conditionsResult).parMapN: (asterism, mode, conditions) =>
-      AsterismImagingTimeRequest(
-        asterism,
-        ImagingTimeParameters(exposureTimeMode, mode, conditions)
-      )
+    (asterism.targetInputsToData, modeResult, conditionsResult).parMapN:
+      (asterism, mode, conditions) =>
+        AsterismImagingTimeRequest(
+          asterism,
+          ImagingTimeParameters(exposureTimeMode, mode, conditions)
+        )
   }
