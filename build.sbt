@@ -41,8 +41,6 @@ ThisBuild / tlBaseVersion       := "0.32"
 ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
 
-Global / onChangedBuildSource := ReloadOnSourceChanges
-
 enablePlugins(NoPublishPlugin)
 
 addCommandAlias(
@@ -50,9 +48,10 @@ addCommandAlias(
   "; scalafix OrganizeImports; Test/scalafix OrganizeImports; scalafmtAll"
 )
 
-lazy val commonSettings = lucumaGlobalSettings ++ Seq(
-  Test / parallelExecution := false // tests run fine in parallel but output is nicer this way
-)
+lazy val commonSettings = lucumaGlobalSettings
+// ++ Seq(
+//   Test / parallelExecution := false // tests run fine in parallel but output is nicer this way
+// )
 
 ThisBuild / watchOnTermination := { (action, cmd, times, state) =>
   val projNames = cmd
