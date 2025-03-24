@@ -120,8 +120,8 @@ trait CommonITCLegacySuite extends FunSuite:
     1
   )
 
-  val obs: ItcObservationDetails
-  val instrument: ItcInstrumentDetails
+  def obs: ItcObservationDetails
+  def instrument: ItcInstrumentDetails
 
   private def baseParamsFn(obs: ItcObservationDetails, instrument: ItcInstrumentDetails) =
     ItcParameters(
@@ -132,7 +132,7 @@ trait CommonITCLegacySuite extends FunSuite:
       instrument
     )
 
-  lazy val baseParams = baseParamsFn(obs, instrument)
+  def baseParams = baseParamsFn(obs, instrument)
 
   // Common builder methods for test parameters
   def bodyCond(

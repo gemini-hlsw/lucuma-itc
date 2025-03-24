@@ -163,7 +163,7 @@ lazy val service = project
       (dir ** AllPassFilter).pair(relativeTo(dir.getParentFile))
     }
   )
-  .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
+  .enablePlugins(JavaAppPackaging, BuildInfoPlugin, NoPublishPlugin)
 
 lazy val client = crossProject(JVMPlatform, JSPlatform)
   .in(file("modules/client"))
