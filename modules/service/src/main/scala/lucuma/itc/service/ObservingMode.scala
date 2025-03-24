@@ -9,7 +9,6 @@ import cats.syntax.all.*
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.enums.*
-import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.itc.service.ItcObservationDetails.AnalysisMethod
@@ -17,20 +16,6 @@ import lucuma.itc.service.hashes.given
 import lucuma.itc.service.syntax.*
 import spire.math.Interval
 import spire.math.Rational
-
-case class GmosNorthFpuParam(
-  builtin: GmosNorthFpu
-) derives Encoder.AsObject {
-  def isIfu: Boolean            = builtin.isGNIfu
-  def effectiveSlitWidth: Angle = builtin.effectiveSlitWidth
-}
-
-case class GmosSouthFpuParam(
-  builtin: GmosSouthFpu
-) derives Encoder.AsObject {
-  def isIfu: Boolean            = builtin.isGSIfu
-  def effectiveSlitWidth: Angle = builtin.effectiveSlitWidth
-}
 
 sealed trait ObservingMode {
   def instrument: Instrument
@@ -164,8 +149,9 @@ object ObservingMode {
 
   object ImagingMode {
     given Encoder[ObservingMode.ImagingMode] = Encoder.instance {
-      case gn: GmosNorth => gn.asJson
-      case gs: GmosSouth => gs.asJson
+      case gn: GmosNorth  => gn.asJson
+      case gs: GmosSouth  => gs.asJson
+      case f2: Flamingos2 => f2.asJson
     }
 
     sealed trait GmosImaging extends ImagingMode derives Hash {
@@ -209,6 +195,22 @@ object ObservingMode {
         Json.obj(
           ("instrument", a.instrument.asJson),
           ("params", GmosSImagingParams(a.filter).asJson)
+        )
+
+    case class Flamingos2(filter: F2Filter) extends ImagingMode {
+      val instrument: Instrument = Instrument.Flamingos2
+
+      def analysisMethod: ItcObservationDetails.AnalysisMethod =
+        ItcObservationDetails.AnalysisMethod.Aperture.Auto(
+          skyAperture = 1.0
+        )
+    }
+
+    object Flamingos2:
+      given Encoder[Flamingos2] = a =>
+        Json.obj(
+          ("instrument", a.instrument.asJson),
+          ("params", Flamingos2ImagingParams(a.filter).asJson)
         )
   }
 

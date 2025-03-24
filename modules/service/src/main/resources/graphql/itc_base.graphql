@@ -116,6 +116,11 @@ input Flamingos2SpectroscopyInput {
   filter: Flamingos2Filter!
 }
 
+input Flamingos2ImagingInput {
+  """Flamingos2 filter"""
+  filter: Flamingos2Filter!
+}
+
 type GmosSSpectroscopyParams {
   """Wavelength in appropriate units"""
   centralWavelength: Wavelength!
@@ -173,7 +178,12 @@ type GmosNImagingParams {
   filter: GmosNorthFilter
 }
 
-union ImagingParams = GmosNImagingParams | GmosSImagingParams
+type Flamingos2ImagingParams {
+  """Flamingos2 filter"""
+  filter: Flamingos2Filter
+}
+
+union ImagingParams = GmosNImagingParams | GmosSImagingParams | Flamingos2ImagingParams
 
 """Params for instrument modes"""
 input InstrumentModesInput {
@@ -191,6 +201,9 @@ input InstrumentModesInput {
 
   """Flamingos2 Spectroscopy"""
   flamingos2Spectroscopy: Flamingos2SpectroscopyInput
+
+  """Flamingos2 Imaging"""
+  flamingos2Imaging: Flamingos2ImagingInput
 }
 
 """Params for spectroscopy integration time calculation"""
