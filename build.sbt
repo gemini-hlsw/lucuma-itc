@@ -71,7 +71,7 @@ ThisBuild / watchOnTermination := { (action, cmd, times, state) =>
   }
 }
 
-ThisBuild / githubWorkflowBuild +=
+ThisBuild / githubWorkflowBuildPreamble +=
   WorkflowStep.Use(
     UseRef.Public("kamilkisiela", "graphql-inspector", "master"),
     name = Some("Validate GraphQL schema changes"),
