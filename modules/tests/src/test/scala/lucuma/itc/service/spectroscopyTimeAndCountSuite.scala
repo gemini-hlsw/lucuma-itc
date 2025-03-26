@@ -1217,7 +1217,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
     }
 
   test("gmosS_fpu"):
-    Enumerated[GmosSouthFpu].all.filter(_ =!= GmosSouthFpu.Bhros).traverse { d =>
+    Enumerated[GmosSouthFpu].all.traverse { d =>
       query(
         s"""
         query {

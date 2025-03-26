@@ -168,7 +168,6 @@ trait GmosSouthFpuSyntax:
         case LongSlit_1_50       => "LONGSLIT_5"
         case LongSlit_2_00       => "LONGSLIT_6"
         case LongSlit_5_00       => "LONGSLIT_7"
-        case Bhros               => "BHROS"
       }
 
 object gmossouthfpu extends GmosSouthFpuSyntax
