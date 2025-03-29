@@ -323,7 +323,7 @@ object ItcImpl {
 
         for {
           _ <- L.info(s"Calculate S/N for exp time $exposureTime and count $exposureCount")
-          _ <- L.info(s"Target $target  at wavelength $atWavelength")
+          _ <- L.info(s"Target $target at wavelength $atWavelength")
           r <- T.span("itc.calctime.imaging-exp-time-at"):
                  for
                    _            <- T.put("itc.query" -> request.spaces2)

@@ -240,9 +240,5 @@ lazy val tests = project
       "org.scalameta" %%% "munit"                  % munitVersion               % Test,
       "org.typelevel" %%% "discipline-munit"       % disciplineMunitVersion     % Test
     ),
-    Test / testOptions ++= {
-      if (sys.env.get("CI").contains("true")) Seq(Tests.Argument("munit.ExcludeTags", "LocalOnly"))
-      else Seq()
-    },
     testFrameworks += MUnitFramework
   )
