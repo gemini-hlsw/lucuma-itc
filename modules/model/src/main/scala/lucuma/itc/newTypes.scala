@@ -8,16 +8,9 @@ import cats.syntax.all.*
 import io.circe.Encoder
 import io.circe.syntax.*
 import lucuma.core.data.Zipper
-import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.NewType
 import lucuma.core.util.TimeSpan
-
-object TotalSN extends NewType[SignalToNoise]
-type TotalSN = TotalSN.Type
-
-object SingleSN extends NewType[SignalToNoise]
-type SingleSN = SingleSN.Type
 
 object AsterismIntegrationTimes extends NewType[Zipper[TargetIntegrationTime]]
 type AsterismIntegrationTimes = AsterismIntegrationTimes.Type

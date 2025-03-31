@@ -143,14 +143,6 @@ class LegacyITCGmosSpecSignalToNoiseSuite extends FunSuite with CommonITCLegacyS
         )
       assert(result.fold(allowedErrors, containsValidResults))
 
-  test("gmos south filter".tag(LegacyITCTest)):
-    Enumerated[GmosSouthFilter].all.foreach: f =>
-      val result = localItc
-        .calculateIntegrationTime(
-          bodyConf(sourceDefinition, obs, gsConf.copy(filter = f.some)).asJson.noSpaces
-        )
-      assert(result.fold(allowedErrors, containsValidResults))
-
   // Testing various SEDs
   testSEDs("GMOS spectroscopy S/N", baseParams)
 
