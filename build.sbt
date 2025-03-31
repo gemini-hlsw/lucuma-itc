@@ -241,7 +241,7 @@ lazy val tests = project
       "org.typelevel" %%% "discipline-munit"       % disciplineMunitVersion     % Test
     ),
     Test / testOptions ++= {
-      if (sys.env.get("CI").contains("true")) Seq(Tests.Argument("munit.ExcludeTags", "LocalOnly"))
+      if (sys.env.get("CI").isDefined) Seq(Tests.Argument("munit.ExcludeTags", "LegacyItcTest"))
       else Seq()
     },
     testFrameworks += MUnitFramework

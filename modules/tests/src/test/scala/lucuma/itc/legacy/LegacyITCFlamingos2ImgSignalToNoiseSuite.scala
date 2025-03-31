@@ -37,3 +37,6 @@ class LegacyITCFlamingos2ImgSignalToNoiseSuite extends LegacyITCFlamingos2Suite:
 
   def observingModeWithFilter(f: F2Filter): ObservingMode =
     f2.copy(filter = f)
+
+  def observingModeWithFpu(f: F2Fpu): ObservingMode =
+    f2

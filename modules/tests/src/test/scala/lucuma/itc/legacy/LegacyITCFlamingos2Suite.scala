@@ -23,6 +23,8 @@ trait LegacyITCFlamingos2Suite extends FunSuite with CommonITCLegacySuite:
 
   def observingModeWithFilter(f: F2Filter): ObservingMode
 
+  def observingModeWithFpu(f: F2Fpu): ObservingMode
+
   def title: String
 
   test(s"$title - F2 filter".tag(LegacyITCTest)):
@@ -37,11 +39,19 @@ trait LegacyITCFlamingos2Suite extends FunSuite with CommonITCLegacySuite:
         )
       assert(result.fold(allowedErrors, containsValidResults))
 
+  test(s"$title - F2 fpu".tag(LegacyITCTest)):
+    Enumerated[F2Fpu].all.foreach: f =>
+      val result = localItc
+        .calculateIntegrationTime(
+          bodyConf(sourceDefinition, obs, observingModeWithFpu(f)).asJson.noSpaces
+        )
+      assert(result.fold(allowedErrors, containsValidResults))
+
   // Testing observing conditions
   testConditions(title, baseParams)
 
   // Testing various SEDs
-  testSEDs(title, baseParams, runStellar = false, runCoolStar = false)
+  testSEDs(title, baseParams)
 
   // Testing user defined SED
   testUserDefinedSED(title, baseParams)

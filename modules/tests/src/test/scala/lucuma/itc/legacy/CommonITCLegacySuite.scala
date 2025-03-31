@@ -83,7 +83,7 @@ trait CommonITCLegacySuite extends FunSuite:
   }
 
   // Define the source profile for this test suite
-  val sourceDefinition = ItcSourceDefinition(
+  def sourceDefinition = ItcSourceDefinition(
     TargetData(
       SourceProfile.Point(
         SpectralDefinition.BandNormalized(
@@ -102,17 +102,17 @@ trait CommonITCLegacySuite extends FunSuite:
   )
 
   // Common analysis methods - these will be used in tests
-  lazy val lsAnalysisMethod  = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
-  lazy val ifuAnalysisMethod =
+  def lsAnalysisMethod  = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
+  def ifuAnalysisMethod =
     ItcObservationDetails.AnalysisMethod.Ifu.Single(skyFibres = 250, offset = 5.0)
 
   // Common telescope details - this will be used in tests
-  lazy val telescope = ItcTelescopeDetails(
+  def telescope = ItcTelescopeDetails(
     wfs = ItcWavefrontSensor.OIWFS
   )
 
   // Common observing conditions - this will be used in tests
-  lazy val defaultConditions = ItcObservingConditions(
+  def defaultConditions = ItcObservingConditions(
     ImageQuality.PointEight,
     CloudExtinction.OnePointFive,
     WaterVapor.Median,
