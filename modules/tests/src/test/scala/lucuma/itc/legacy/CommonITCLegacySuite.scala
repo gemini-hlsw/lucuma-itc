@@ -504,6 +504,9 @@ trait CommonITCLegacySuite extends FunSuite:
               f.withValueTagged(BrightnessValue.unsafeFrom(5))
             ).asJson.noSpaces
           )
+
+        println(s"***** $result")
+
         assert(result.fold(errorCheck, containsValidResults))
 
     test(s"$name - surface units".tag(LegacyITCTest)):

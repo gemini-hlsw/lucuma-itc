@@ -58,7 +58,9 @@ private[legacy] object codecs:
          )
        ),
        Json.obj(
-         "extinction" -> Json.fromBigDecimal(BigDecimal(a.cc.toCloudExtinction.toVegaMagnitude))
+         "extinction" -> Json.fromBigDecimal(
+           BigDecimal(a.cc.toCloudExtinction.toVegaMagnitude.value.toDouble)
+         )
        ),
        a.wv.ocs2Tag,
        a.sb.ocs2Tag,
