@@ -9,8 +9,10 @@ import cats.syntax.all.*
 import io.circe.*
 import lucuma.core.enums.*
 import lucuma.core.math.Wavelength
+import lucuma.core.model.CloudExtinction
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange
+import lucuma.core.model.ImageQuality
 import lucuma.itc.service.encoders.given
 
 sealed trait SpectroscopyParams
@@ -44,8 +46,8 @@ case class GmosSImagingParams(filter: GmosSouthFilter) extends ImagingParams
     derives Encoder.AsObject
 
 case class ItcObservingConditions(
-  iq:      ImageQuality,
-  cc:      CloudExtinction,
+  iq:      ImageQuality.Point,
+  cc:      CloudExtinction.Point,
   wv:      WaterVapor,
   sb:      SkyBackground,
   airmass: Double

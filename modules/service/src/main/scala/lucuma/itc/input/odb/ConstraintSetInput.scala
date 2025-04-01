@@ -7,18 +7,18 @@ package input
 import cats.syntax.option.*
 import cats.syntax.parallel.*
 import grackle.Result
-import lucuma.core.enums.CloudExtinction
-import lucuma.core.enums.ImageQuality
 import lucuma.core.enums.SkyBackground
 import lucuma.core.enums.WaterVapor
+import lucuma.core.model.CloudExtinction
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange
+import lucuma.core.model.ImageQuality
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.ConstraintSetInput.NominalConstraints
 
 final case class ConstraintSetInput(
-  cloudExtinction: Option[CloudExtinction],
-  imageQuality:    Option[ImageQuality],
+  cloudExtinction: Option[CloudExtinction.Point],
+  imageQuality:    Option[ImageQuality.Point],
   skyBackground:   Option[SkyBackground],
   waterVapor:      Option[WaterVapor],
   elevationRange:  Option[ElevationRangeInput]
@@ -42,8 +42,8 @@ object ConstraintSetInput {
 
   val NominalConstraints: ConstraintSet =
     ConstraintSet(
-      cloudExtinction = CloudExtinction.PointThree,
-      imageQuality = ImageQuality.PointEight,
+      cloudExtinction = CloudExtinction.Point.PointThree,
+      imageQuality = ImageQuality.Point.PointEight,
       skyBackground = SkyBackground.Bright,
       waterVapor = WaterVapor.Wet,
       elevationRange = ElevationRange.AirMass.Default
@@ -58,11 +58,11 @@ object ConstraintSetInput {
       ElevationRangeInput.Default.some
     )
 
-  val CloudExtinctionBinding: Matcher[CloudExtinction] =
-    enumeratedBinding[CloudExtinction]
+  val CloudExtinctionBinding: Matcher[CloudExtinction.Point] =
+    enumeratedBinding[CloudExtinction.Point]
 
-  val ImageQualityBinding: Matcher[ImageQuality] =
-    enumeratedBinding[ImageQuality]
+  val ImageQualityBinding: Matcher[ImageQuality.Point] =
+    enumeratedBinding[ImageQuality.Point]
 
   val SkyBackgroundBinding: Matcher[SkyBackground] =
     enumeratedBinding[SkyBackground]
