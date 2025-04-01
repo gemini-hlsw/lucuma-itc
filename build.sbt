@@ -13,8 +13,8 @@ val clueVersion                 = "0.43.1"
 val disciplineMunitVersion      = "2.0.0"
 val fs2Version                  = "3.12.0"
 val gatlingVersion              = "3.13.5"
-val grackleVersion              = "0.23.0"
-val graphQLRoutesVersion        = "0.8.17"
+val grackleVersion              = "0.24.0"
+val graphQLRoutesVersion        = "0.8.18"
 val http4sVersion               = "0.23.30"
 val http4sJdkHttpClientVersion  = "0.10.0"
 val keySemaphoreVersion         = "0.3.0-M1"
@@ -37,7 +37,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.6.4"
 ThisBuild / crossScalaVersions  := Seq("3.6.4")
-ThisBuild / tlBaseVersion       := "0.32"
+ThisBuild / tlBaseVersion       := "0.33"
 ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
 
@@ -241,7 +241,7 @@ lazy val tests = project
       "org.typelevel" %%% "discipline-munit"       % disciplineMunitVersion     % Test
     ),
     Test / testOptions ++= {
-      if (sys.env.get("CI").contains("true")) Seq(Tests.Argument("munit.ExcludeTags", "LocalOnly"))
+      if (sys.env.get("CI").isDefined) Seq(Tests.Argument("munit.ExcludeTags", "LegacyItcTest"))
       else Seq()
     },
     testFrameworks += MUnitFramework

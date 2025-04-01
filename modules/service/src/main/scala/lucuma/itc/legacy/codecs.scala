@@ -502,12 +502,20 @@ private[legacy] object codecs:
                   .as[NonEmptyChain[ItcRemoteCcd]]
     yield GraphsRemoteResult(ccd, graphs)
 
+  // SignalToNoise has already a decoder in lucuma-core, but it is too strict to
+  // be used with the legacy ocs code
   given Decoder[SignalToNoise] = (c: HCursor) =>
+    val maxSN  = SignalToNoise.Max.toBigDecimal
+    val maxSNR = SignalToNoise.Max.asRight
     c.as[BigDecimal]
       .flatMap: s =>
-        SignalToNoise.FromBigDecimalRounding
-          .getOption(s.setScale(2, BigDecimal.RoundingMode.HALF_UP))
-          .toRight(DecodingFailure("Invalid SignalToNoise value", c.history))
+        val r = s.setScale(2, BigDecimal.RoundingMode.HALF_UP)
+        // Sometimes ITC returns absurdely large values, lets cap it at max
+        if (r >= maxSN) maxSNR
+        else
+          SignalToNoise.FromBigDecimalRounding
+            .getOption(s.setScale(2, BigDecimal.RoundingMode.HALF_UP))
+            .toRight(DecodingFailure("Invalid SignalToNoise value", c.history))
 
   given Decoder[Exposures] = (c: HCursor) =>
     for

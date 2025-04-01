@@ -3,12 +3,9 @@
 
 package lucuma.itc.legacy
 
-import io.circe.syntax.*
 import lucuma.core.enums.*
 import lucuma.core.math.Angle
 import lucuma.core.math.Wavelength
-import lucuma.core.util.Enumerated
-import lucuma.itc.legacy.codecs.given
 import lucuma.itc.service.ItcObservationDetails
 import lucuma.itc.service.ObservingMode
 import munit.FunSuite
@@ -20,10 +17,10 @@ import scala.concurrent.duration.*
  * legacy ITC (Note that the ITC may still return an error but we want to ensure it can parse the
  * values
  */
-class LegacyITCFlamingos2SpecTimeAndCountSuite extends FunSuite with CommonITCLegacySuite:
-  override def munitTimeout: Duration = 5.minute
+class LegacyITCFlamingos2SpecTimeAndCountSuite extends LegacyITCFlamingos2Suite:
+  override def analysisMethod = ItcObservationDetails.AnalysisMethod.Aperture.Auto(5)
 
-  override val obs = ItcObservationDetails(
+  override def obs = ItcObservationDetails(
     calculationMethod = ItcObservationDetails.CalculationMethod.S2NMethod.SpectroscopyS2N(
       exposureCount = 10,
       exposureDuration = 3.seconds,
@@ -35,46 +32,23 @@ class LegacyITCFlamingos2SpecTimeAndCountSuite extends FunSuite with CommonITCLe
     analysisMethod = lsAnalysisMethod
   )
 
-  val f2Conf =
+  lazy val f2 =
     ObservingMode.SpectroscopyMode.Flamingos2(
       F2Disperser.R3000,
       F2Filter.J,
       F2Fpu.LongSlit2
     )
 
-  override val instrument = ItcInstrumentDetails(f2Conf)
+  override def instrument = ItcInstrumentDetails(f2)
 
-  // Testing observing conditions
-  testConditions("F2 spectroscopy TxC", baseParams)
+  override def title = "F2 Spectroscopy S/N"
 
-  test("instrument filter".tag(LegacyITCTest)):
-    Enumerated[F2Filter].all.foreach: f =>
-      val d      = f match
-        case F2Filter.J | F2Filter.H | F2Filter.JH | F2Filter.HK =>
-          F2Disperser.R1200JH
-        case _                                                   => F2Disperser.R3000
-      val result = localItc
-        .calculateIntegrationTime(
-          bodyConf(sourceDefinition, obs, f2Conf.copy(filter = f, disperser = d)).asJson.noSpaces
-        )
-      assert(result.fold(allowedErrors, containsValidResults))
+  def observingModeWithFilter(f: F2Filter): ObservingMode =
+    val d = f match
+      case F2Filter.J | F2Filter.H | F2Filter.JH | F2Filter.HK =>
+        F2Disperser.R1200JH
+      case _                                                   => F2Disperser.R3000
+    f2.copy(filter = f, disperser = d)
 
-  test("instrument fpu".tag(LegacyITCTest)):
-    Enumerated[F2Fpu].all.foreach: f =>
-      val result = localItc
-        .calculateIntegrationTime(
-          bodyConf(sourceDefinition, obs, f2Conf.copy(fpu = f)).asJson.noSpaces
-        )
-      assert(result.fold(allowedErrors, containsValidResults))
-
-  // Testing various SEDs
-  testSEDs("F2 spectroscopy TxC", baseParams)
-
-  // Testing user defined SED
-  testUserDefinedSED("F2 spectroscopy TxC", baseParams)
-
-  // Testing brightness units
-  testBrightnessUnits("F2 spectroscopy TxC", baseParams)
-
-  // Testing power law and blackbody
-  testPowerAndBlackbody("F2 spectroscopy TxC", baseParams)
+  def observingModeWithFpu(f: F2Fpu): ObservingMode =
+    f2.copy(fpu = f)
