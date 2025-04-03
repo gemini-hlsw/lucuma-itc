@@ -439,15 +439,15 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
 
   val allConditions =
     for {
-      iq <- Enumerated[ImageQuality.Point].all
-      ce <- Enumerated[CloudExtinction.Point].all
+      iq <- Enumerated[ImageQuality.Preset].all
+      ce <- Enumerated[CloudExtinction.Preset].all
       wv <- Enumerated[WaterVapor].all
       sb <- Enumerated[SkyBackground].all
     } yield ItcObservingConditions(iq, ce, wv, sb, 2)
 
   val conditions = ItcObservingConditions(
-    ImageQuality.Point.PointEight,
-    CloudExtinction.Point.OnePointFive,
+    ImageQuality.Preset.PointEight,
+    CloudExtinction.Preset.OnePointFive,
     WaterVapor.Median,
     SkyBackground.Bright,
     2

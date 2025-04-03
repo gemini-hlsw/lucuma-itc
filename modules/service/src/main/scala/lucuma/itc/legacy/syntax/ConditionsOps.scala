@@ -9,27 +9,27 @@ import lucuma.core.model.CloudExtinction
 import lucuma.core.model.ImageQuality
 
 trait ConditionsSyntax:
-  extension (self: ImageQuality.Point)
+  extension (self: ImageQuality.Preset)
     def ocs2Tag: String =
       self match
-        case ImageQuality.Point.PointOne     => "PERCENT_20"
-        case ImageQuality.Point.PointTwo     => "PERCENT_20"
-        case ImageQuality.Point.PointThree   => "PERCENT_20"
-        case ImageQuality.Point.PointFour    => "PERCENT_20"
-        case ImageQuality.Point.PointSix     => "PERCENT_70"
-        case ImageQuality.Point.PointEight   => "PERCENT_70"
-        case ImageQuality.Point.OnePointZero => "PERCENT_85"
-        case ImageQuality.Point.OnePointFive => "ANY"
-        case ImageQuality.Point.TwoPointZero => "ANY"
+        case ImageQuality.Preset.PointOne     => "PERCENT_20"
+        case ImageQuality.Preset.PointTwo     => "PERCENT_20"
+        case ImageQuality.Preset.PointThree   => "PERCENT_20"
+        case ImageQuality.Preset.PointFour    => "PERCENT_20"
+        case ImageQuality.Preset.PointSix     => "PERCENT_70"
+        case ImageQuality.Preset.PointEight   => "PERCENT_70"
+        case ImageQuality.Preset.OnePointZero => "PERCENT_85"
+        case ImageQuality.Preset.OnePointFive => "ANY"
+        case ImageQuality.Preset.TwoPointZero => "ANY"
 
-  extension (self: CloudExtinction.Point)
+  extension (self: CloudExtinction.Preset)
     def ocs2Tag: String =
       self match
-        case CloudExtinction.Point.PointOne                                       => "PERCENT_50"
-        case CloudExtinction.Point.PointThree                                     => "PERCENT_70"
-        case CloudExtinction.Point.PointFive | CloudExtinction.Point.OnePointZero => "PERCENT_80"
-        case CloudExtinction.Point.OnePointFive | CloudExtinction.Point.TwoPointZero |
-            CloudExtinction.Point.ThreePointZero =>
+        case CloudExtinction.Preset.PointOne                                        => "PERCENT_50"
+        case CloudExtinction.Preset.PointThree                                      => "PERCENT_70"
+        case CloudExtinction.Preset.PointFive | CloudExtinction.Preset.OnePointZero => "PERCENT_80"
+        case CloudExtinction.Preset.OnePointFive | CloudExtinction.Preset.TwoPointZero |
+            CloudExtinction.Preset.ThreePointZero =>
           "ANY"
 
   extension (self: WaterVapor)

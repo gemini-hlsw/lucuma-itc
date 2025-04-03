@@ -233,8 +233,8 @@ object WiringSuite:
           atWavelength
         ),
         ConstraintSet(
-          ImageQuality.Point.PointOne,
-          CloudExtinction.Point.PointOne,
+          ImageQuality.Preset.PointOne,
+          CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
           AirMass.Default
@@ -281,8 +281,8 @@ object WiringSuite:
           atWavelength
         ),
         ConstraintSet(
-          ImageQuality.Point.PointOne,
-          CloudExtinction.Point.PointOne,
+          ImageQuality.Preset.PointOne,
+          CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
           AirMass.Default
@@ -320,8 +320,8 @@ object WiringSuite:
           atWavelength
         ),
         ConstraintSet(
-          ImageQuality.Point.PointOne,
-          CloudExtinction.Point.PointOne,
+          ImageQuality.Preset.PointOne,
+          CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
           AirMass.Default
@@ -357,8 +357,8 @@ object WiringSuite:
         TimeSpan.fromSeconds(1).get,
         NonNegInt.unsafeFrom(5),
         ConstraintSet(
-          ImageQuality.Point.PointOne,
-          CloudExtinction.Point.PointOne,
+          ImageQuality.Preset.PointOne,
+          CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
           AirMass.Default
@@ -406,8 +406,8 @@ object WiringSuite:
           atWavelength
         ),
         ConstraintSet(
-          ImageQuality.Point.PointOne,
-          CloudExtinction.Point.PointOne,
+          ImageQuality.Preset.PointOne,
+          CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
           AirMass.Default

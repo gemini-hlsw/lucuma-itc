@@ -46,8 +46,8 @@ case class GmosSImagingParams(filter: GmosSouthFilter) extends ImagingParams
     derives Encoder.AsObject
 
 case class ItcObservingConditions(
-  iq:      ImageQuality.Point,
-  cc:      CloudExtinction.Point,
+  iq:      ImageQuality.Preset,
+  cc:      CloudExtinction.Preset,
   wv:      WaterVapor,
   sb:      SkyBackground,
   airmass: Double

@@ -17,8 +17,8 @@ import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.ConstraintSetInput.NominalConstraints
 
 final case class ConstraintSetInput(
-  cloudExtinction: Option[CloudExtinction.Point],
-  imageQuality:    Option[ImageQuality.Point],
+  cloudExtinction: Option[CloudExtinction.Preset],
+  imageQuality:    Option[ImageQuality.Preset],
   skyBackground:   Option[SkyBackground],
   waterVapor:      Option[WaterVapor],
   elevationRange:  Option[ElevationRangeInput]
@@ -42,8 +42,8 @@ object ConstraintSetInput {
 
   val NominalConstraints: ConstraintSet =
     ConstraintSet(
-      cloudExtinction = CloudExtinction.Point.PointThree,
-      imageQuality = ImageQuality.Point.PointEight,
+      cloudExtinction = CloudExtinction.Preset.PointThree,
+      imageQuality = ImageQuality.Preset.PointEight,
       skyBackground = SkyBackground.Bright,
       waterVapor = WaterVapor.Wet,
       elevationRange = ElevationRange.AirMass.Default
@@ -58,11 +58,11 @@ object ConstraintSetInput {
       ElevationRangeInput.Default.some
     )
 
-  val CloudExtinctionBinding: Matcher[CloudExtinction.Point] =
-    enumeratedBinding[CloudExtinction.Point]
+  val CloudExtinctionPresetBinding: Matcher[CloudExtinction.Preset] =
+    enumeratedBinding[CloudExtinction.Preset]
 
-  val ImageQualityBinding: Matcher[ImageQuality.Point] =
-    enumeratedBinding[ImageQuality.Point]
+  val ImageQualityPresetBinding: Matcher[ImageQuality.Preset] =
+    enumeratedBinding[ImageQuality.Preset]
 
   val SkyBackgroundBinding: Matcher[SkyBackground] =
     enumeratedBinding[SkyBackground]
@@ -73,8 +73,8 @@ object ConstraintSetInput {
   val Binding: Matcher[ConstraintSetInput] =
     ObjectFieldsBinding.rmap {
       case List(
-            ImageQualityBinding.Option("imageQuality", rImage),
-            CloudExtinctionBinding.Option("cloudExtinction", rCloud),
+            ImageQualityPresetBinding.Option("imageQuality", rImage),
+            CloudExtinctionPresetBinding.Option("cloudExtinction", rCloud),
             SkyBackgroundBinding.Option("skyBackground", rSky),
             WaterVaporBinding.Option("waterVapor", rWater),
             ElevationRangeInput.Binding.Option("elevationRange", rElevation)
