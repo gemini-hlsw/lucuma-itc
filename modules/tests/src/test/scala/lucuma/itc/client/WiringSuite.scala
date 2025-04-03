@@ -13,7 +13,6 @@ import coulomb.syntax.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
-import lucuma.core.enums.CloudExtinction
 import lucuma.core.enums.F2Disperser
 import lucuma.core.enums.F2Filter
 import lucuma.core.enums.F2Fpu
@@ -27,7 +26,6 @@ import lucuma.core.enums.GmosNorthGrating
 import lucuma.core.enums.GmosRoi
 import lucuma.core.enums.GmosXBinning
 import lucuma.core.enums.GmosYBinning
-import lucuma.core.enums.ImageQuality
 import lucuma.core.enums.SkyBackground
 import lucuma.core.enums.WaterVapor
 import lucuma.core.math.BrightnessUnits.Brightness
@@ -47,10 +45,12 @@ import lucuma.core.math.units.KilometersPerSecond
 import lucuma.core.math.units.VegaMagnitude
 import lucuma.core.math.units.WattsPerMeter2
 import lucuma.core.math.units.WattsPerMeter2Micrometer
+import lucuma.core.model.CloudExtinction
 import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange.AirMass
 import lucuma.core.model.EmissionLine
 import lucuma.core.model.ExposureTimeMode
+import lucuma.core.model.ImageQuality
 import lucuma.core.model.SourceProfile
 import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.SpectralDefinition.EmissionLines
@@ -233,8 +233,8 @@ object WiringSuite:
           atWavelength
         ),
         ConstraintSet(
-          ImageQuality.PointOne,
-          CloudExtinction.PointOne,
+          ImageQuality.Preset.PointOne,
+          CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
           AirMass.Default
@@ -281,8 +281,8 @@ object WiringSuite:
           atWavelength
         ),
         ConstraintSet(
-          ImageQuality.PointOne,
-          CloudExtinction.PointOne,
+          ImageQuality.Preset.PointOne,
+          CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
           AirMass.Default
@@ -320,8 +320,8 @@ object WiringSuite:
           atWavelength
         ),
         ConstraintSet(
-          ImageQuality.PointOne,
-          CloudExtinction.PointOne,
+          ImageQuality.Preset.PointOne,
+          CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
           AirMass.Default
@@ -357,8 +357,8 @@ object WiringSuite:
         TimeSpan.fromSeconds(1).get,
         NonNegInt.unsafeFrom(5),
         ConstraintSet(
-          ImageQuality.PointOne,
-          CloudExtinction.PointOne,
+          ImageQuality.Preset.PointOne,
+          CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
           AirMass.Default
@@ -406,8 +406,8 @@ object WiringSuite:
           atWavelength
         ),
         ConstraintSet(
-          ImageQuality.PointOne,
-          CloudExtinction.PointOne,
+          ImageQuality.Preset.PointOne,
+          CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
           AirMass.Default

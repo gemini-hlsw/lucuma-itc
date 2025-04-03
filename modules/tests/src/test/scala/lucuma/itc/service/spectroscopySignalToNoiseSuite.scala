@@ -6,6 +6,8 @@ package lucuma.itc.service
 import cats.syntax.all.*
 import io.circe.literal.*
 import lucuma.core.enums.*
+import lucuma.core.model.CloudExtinction
+import lucuma.core.model.ImageQuality
 import lucuma.core.syntax.string.*
 import lucuma.core.util.Enumerated
 
@@ -472,15 +474,15 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
 
   val allConditions =
     for {
-      iq <- Enumerated[ImageQuality].all
-      ce <- Enumerated[CloudExtinction].all
+      iq <- Enumerated[ImageQuality.Preset].all
+      ce <- Enumerated[CloudExtinction.Preset].all
       wv <- Enumerated[WaterVapor].all
       sb <- Enumerated[SkyBackground].all
     } yield ItcObservingConditions(iq, ce, wv, sb, 2)
 
   val conditions = ItcObservingConditions(
-    ImageQuality.PointEight,
-    CloudExtinction.OnePointFive,
+    ImageQuality.Preset.PointEight,
+    CloudExtinction.Preset.OnePointFive,
     WaterVapor.Median,
     SkyBackground.Bright,
     2
