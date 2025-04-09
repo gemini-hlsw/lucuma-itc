@@ -47,7 +47,7 @@ import lucuma.core.math.units.WattsPerMeter2
 import lucuma.core.math.units.WattsPerMeter2Micrometer
 import lucuma.core.model.CloudExtinction
 import lucuma.core.model.ConstraintSet
-import lucuma.core.model.ElevationRange.AirMass
+import lucuma.core.model.ElevationRange
 import lucuma.core.model.EmissionLine
 import lucuma.core.model.ExposureTimeMode
 import lucuma.core.model.ImageQuality
@@ -237,7 +237,7 @@ object WiringSuite:
           CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
-          AirMass.Default
+          ElevationRange.ByAirMass.Default
         ),
         InstrumentMode.GmosNorthSpectroscopy(
           Wavelength.Min,
@@ -285,7 +285,7 @@ object WiringSuite:
           CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
-          AirMass.Default
+          ElevationRange.ByAirMass.Default
         ),
         InstrumentMode.Flamingos2Spectroscopy(
           F2Disperser.R3000,
@@ -324,7 +324,7 @@ object WiringSuite:
           CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
-          AirMass.Default
+          ElevationRange.ByAirMass.Default
         ),
         InstrumentMode.GmosNorthImaging(
           GmosNorthFilter.GPrime,
@@ -361,7 +361,7 @@ object WiringSuite:
           CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
-          AirMass.Default
+          ElevationRange.ByAirMass.Default
         ),
         InstrumentMode.GmosNorthSpectroscopy(
           Wavelength.Min,
@@ -410,7 +410,7 @@ object WiringSuite:
           CloudExtinction.Preset.PointOne,
           SkyBackground.Darkest,
           WaterVapor.VeryDry,
-          AirMass.Default
+          ElevationRange.ByAirMass.Default
         ),
         InstrumentMode.GmosNorthSpectroscopy(
           Wavelength.Min,

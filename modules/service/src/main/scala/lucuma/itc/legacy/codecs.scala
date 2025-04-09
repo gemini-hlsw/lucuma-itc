@@ -54,12 +54,12 @@ private[legacy] object codecs:
     Encoder.forProduct5("exactiq", "exactcc", "wv", "sb", "airmass") { a =>
       (Json.obj(
          "arcsec"     -> Json.fromBigDecimal(
-           a.iq.toImageQuality.toArcSeconds.value.toBigDecimal(MathContext.DECIMAL32)
+           a.iq.toImageQuality.toArcSeconds.round(MathContext.DECIMAL32)
          )
        ),
        Json.obj(
          "extinction" -> Json.fromBigDecimal(
-           BigDecimal(a.cc.toCloudExtinction.toVegaMagnitude.value.toDouble)
+           BigDecimal(a.cc.toCloudExtinction.toVegaMagnitude.toDouble)
          )
        ),
        a.wv.ocs2Tag,
