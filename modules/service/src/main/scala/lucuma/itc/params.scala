@@ -58,22 +58,24 @@ object ItcObservingConditions {
   val AirMassBuckets = Vector(BigDecimal(1.2), BigDecimal(1.5), BigDecimal(2.0))
 
   def fromConstraints(constraints: ConstraintSet): Either[String, ItcObservingConditions] =
-    val airmass = constraints.elevationRange match {
-      case ElevationRange.AirMass(min, max) if max.value >= min.value   =>
-        AirMassBuckets.find(max.value <= _).getOrElse(AirMassBuckets.last).asRight
-      case ElevationRange.AirMass(min, max)                             =>
-        Left("Maximum airmass must be greater than minimum airmass")
-      case ElevationRange.HourAngle(min, max) if max.value >= min.value =>
-        max.value.asRight
-      case ElevationRange.HourAngle(min, max)                           =>
-        Left(s"Hour Angle max value $max must be more than the min value $min")
-    }
+    val airmass: Either[String, BigDecimal] =
+      constraints.elevationRange match
+        case ElevationRange.ByAirMass(min, max) if max.toBigDecimal >= min.toBigDecimal   =>
+          AirMassBuckets.find(max.toBigDecimal <= _).getOrElse(AirMassBuckets.last).asRight
+        case ElevationRange.ByAirMass(min, max)                                           =>
+          Left("Maximum airmass must be greater than minimum airmass")
+        case ElevationRange.ByHourAngle(min, max) if max.toBigDecimal >= min.toBigDecimal =>
+          max.toBigDecimal.asRight
+        case ElevationRange.ByHourAngle(min, max)                                         =>
+          Left(s"Hour Angle max value $max must be more than the min value $min")
+
     airmass.map(a =>
-      ItcObservingConditions(constraints.imageQuality,
-                             constraints.cloudExtinction,
-                             constraints.waterVapor,
-                             constraints.skyBackground,
-                             a.toDouble
+      ItcObservingConditions(
+        constraints.imageQuality,
+        constraints.cloudExtinction,
+        constraints.waterVapor,
+        constraints.skyBackground,
+        a.toDouble
       )
     )
 }

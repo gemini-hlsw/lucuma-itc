@@ -46,7 +46,7 @@ object ConstraintSetInput {
       imageQuality = ImageQuality.Preset.PointEight,
       skyBackground = SkyBackground.Bright,
       waterVapor = WaterVapor.Wet,
-      elevationRange = ElevationRange.AirMass.Default
+      elevationRange = ElevationRange.ByAirMass.Default
     )
 
   val Default: ConstraintSetInput =

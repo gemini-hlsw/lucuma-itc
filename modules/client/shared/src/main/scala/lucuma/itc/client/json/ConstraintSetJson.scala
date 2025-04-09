@@ -19,20 +19,20 @@ given Encoder[ConstraintSet] with
       "skyBackground"   -> a.skyBackground.asScreamingJson,
       "waterVapor"      -> a.waterVapor.asScreamingJson,
       "elevationRange"  -> (a.elevationRange match {
-        case ElevationRange.AirMass(min, max)             =>
+        case ElevationRange.ByAirMass(min, max)             =>
           Json.obj(
             "airMass" ->
               Json.obj(
-                "min" -> min.value.asJson,
-                "max" -> max.value.asJson
+                "min" -> min.toBigDecimal.asJson,
+                "max" -> max.toBigDecimal.asJson
               )
           )
-        case ElevationRange.HourAngle(minHours, maxHours) =>
+        case ElevationRange.ByHourAngle(minHours, maxHours) =>
           Json.obj(
             "hourAngle" ->
               Json.obj(
-                "minHours" -> minHours.value.asJson,
-                "maxHours" -> maxHours.value.asJson
+                "minHours" -> minHours.toBigDecimal.asJson,
+                "maxHours" -> maxHours.toBigDecimal.asJson
               )
           )
       })
