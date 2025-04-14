@@ -4,7 +4,6 @@
 package lucuma.itc.client.json
 
 import cats.syntax.either.*
-import clue.BigNumberEncoders.given
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength
@@ -14,9 +13,8 @@ import lucuma.itc.client.*
 
 // Decoders for the client don't need to be as generic as the ones for the server.
 private[client] object encoders:
-  given Encoder[TimeSpan] = t =>
+  given Encoder[TimeSpan]   = t =>
     Json.obj("microseconds" -> TimeSpan.FromMicroseconds.reverseGet(t).asJson)
-
   given Encoder[Wavelength] = w => Json.obj("picometers" -> w.toPicometers.value.value.asJson)
 
   given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[ExposureTimeMode] = {
