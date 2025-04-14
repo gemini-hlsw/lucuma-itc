@@ -14,6 +14,8 @@ import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.client.json.encoders.given
 import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
+import monocle.Focus
+import monocle.Lens
 
 case class SpectroscopyParameters(
   exposureTimeMode: ExposureTimeMode,
@@ -21,7 +23,16 @@ case class SpectroscopyParameters(
   mode:             InstrumentMode
 ) derives Eq
 
-object SpectroscopyParameters {
+object SpectroscopyParameters:
+  val exposureTimeMode: Lens[SpectroscopyParameters, ExposureTimeMode] =
+    Focus[SpectroscopyParameters](_.exposureTimeMode)
+
+  val constraints: Lens[SpectroscopyParameters, ConstraintSet] =
+    Focus[SpectroscopyParameters](_.constraints)
+
+  val mode: Lens[SpectroscopyParameters, InstrumentMode] =
+    Focus[SpectroscopyParameters](_.mode)
+
   given Encoder[SpectroscopyParameters] with
     def apply(a: SpectroscopyParameters): Json =
       Json
@@ -31,7 +42,6 @@ object SpectroscopyParameters {
           "mode"             -> a.mode.asJson
         )
         .dropNullValues
-}
 
 case class SpectroscopyInput(
   parameters: SpectroscopyParameters,
@@ -39,8 +49,13 @@ case class SpectroscopyInput(
 ) derives Eq:
   export parameters.*
 
-object SpectroscopyInput {
+object SpectroscopyInput:
+  val parameters: Lens[SpectroscopyInput, SpectroscopyParameters] =
+    Focus[SpectroscopyInput](_.parameters)
+
+  val asterism: Lens[SpectroscopyInput, NonEmptyList[TargetInput]] =
+    Focus[SpectroscopyInput](_.asterism)
+
   given Encoder[SpectroscopyInput] with
     def apply(a: SpectroscopyInput): Json =
       Json.obj("asterism" -> a.asterism.asJson).deepMerge(a.parameters.asJson)
-}
