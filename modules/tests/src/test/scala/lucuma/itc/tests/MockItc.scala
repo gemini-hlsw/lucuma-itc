@@ -32,7 +32,7 @@ object MockItc extends Itc[IO]:
     exposureCount: NonNegInt
   ): IO[TargetIntegrationTime] =
     TargetIntegrationTime(
-      Zipper.one(IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined)),
+      Zipper.one(IntegrationTime(exposureTime, 10.refined)),
       Band.R.asLeft,
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),

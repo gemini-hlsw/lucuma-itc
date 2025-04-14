@@ -201,6 +201,34 @@ class WiringSuite extends ClientSuite:
       ).asRight
     )
 
+  test("ItcClient spectroscopy with exposure time mode"):
+    val toTC = SpectroscopyInput.parameters
+      .andThen(SpectroscopyParameters.exposureTimeMode)
+      .replace(
+        ExposureTimeMode
+          .TimeAndCountMode(TimeSpan.fromSeconds(1).get, 10.refined, atWavelength)
+      )(WiringSuite.GmosSpectroscopyInputData)
+    spectroscopy(
+      toTC,
+      ClientCalculationResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+          BuildInfo.ocslibHash.some
+        ),
+        AsterismIntegrationTimeOutcomes:
+          NonEmptyChain:
+            TargetIntegrationTimeOutcome:
+              TargetIntegrationTime(
+                Zipper.fromNel(NonEmptyList.one(selected)),
+                Band.R.asLeft,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
+              ).asRight
+      ).asRight
+    )
+
   test("ItcClient spectroscopy with emission lines basic wiring and sanity check"):
     spectroscopyEmissionLines(
       WiringSuite.SpectroscopyEmissionLinesInput,
@@ -215,6 +243,39 @@ class WiringSuite extends ClientSuite:
               TargetIntegrationTime(
                 Zipper.fromNel(NonEmptyList.one(selected)),
                 Wavelength.unsafeFromIntPicometers(650000).asRight,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
+              ).asRight
+      ).asRight
+    )
+
+  val selectedLarge = IntegrationTime(
+    TimeSpan.FromString.getOption("PT1000000S").get,
+    NonNegInt.unsafeFrom(10)
+  )
+
+  test("ItcClient spectroscopy with large exposure time, shortcut 5331"):
+    val toTC = SpectroscopyInput.parameters
+      .andThen(SpectroscopyParameters.exposureTimeMode)
+      .replace(
+        ExposureTimeMode
+          .TimeAndCountMode(TimeSpan.fromSeconds(1000000).get, 10.refined, atWavelength)
+      )(WiringSuite.GmosSpectroscopyInputData)
+    spectroscopy(
+      toTC,
+      ClientCalculationResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+          BuildInfo.ocslibHash.some
+        ),
+        AsterismIntegrationTimeOutcomes:
+          NonEmptyChain:
+            TargetIntegrationTimeOutcome:
+              TargetIntegrationTime(
+                Zipper.fromNel(NonEmptyList.one(selectedLarge)),
+                Band.R.asLeft,
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                                 TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
