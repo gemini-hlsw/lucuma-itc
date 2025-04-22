@@ -499,12 +499,12 @@ input ConstraintSetInput {
   """
   The imageQuality field is required when creating a new instance of ConstraintSet, but optional when editing
   """
-  imageQuality: ImageQuality
+  imageQuality: ImageQualityPreset
 
   """
   The cloudExtinction field is required when creating a new instance of ConstraintSet, but optional when editing
   """
-  cloudExtinction: CloudExtinction
+  cloudExtinction: CloudExtinctionPreset
 
   """
   The skyBackground field is required when creating a new instance of ConstraintSet, but optional when editing
@@ -830,7 +830,7 @@ input ExposureTimeModeInput {
 
 """Time And Count exposure time mode parameters"""
 input TimeAndCountExposureTimeModeInput {
-  """Exposure time."""
+  """Exposure time, which must be greater than zero."""
   time: TimeSpanInput!
 
   """Exposure count."""
@@ -1211,11 +1211,8 @@ type GmosNorthExecutionConfig {
   """GMOS North static configuration"""
   static: GmosNorthStatic!
 
-  """
-  GMOS North acquisition execution sequence.  Pass `true` to (re)start
-  acquisition from the initial step.
-  """
-  acquisition(reset: Boolean = false): GmosNorthExecutionSequence
+  """GMOS North acquisition execution sequence"""
+  acquisition: GmosNorthExecutionSequence
 
   """GMOS North science execution"""
   science: GmosNorthExecutionSequence
@@ -1375,11 +1372,8 @@ type GmosSouthExecutionConfig {
   """GMOS South static configuration"""
   static: GmosSouthStatic!
 
-  """
-  GMOS South acquisition execution sequence.  Pass `true` to (re)start
-  acquisition from the initial step.
-  """
-  acquisition(reset: Boolean = false): GmosSouthExecutionSequence
+  """GMOS South acquisition execution sequence."""
+  acquisition: GmosSouthExecutionSequence
 
   """GMOS South science execution"""
   science: GmosSouthExecutionSequence
@@ -1970,6 +1964,12 @@ type RecordGmosSouthStepResult {
 type RecordGmosSouthVisitResult {
   """The newly added visit record itself."""
   visit: Visit!
+}
+
+"""The result of resetting the acquisition sequence."""
+type ResetAcquisitionResult {
+  """The observation whose acquisition was reset."""
+  observation: Observation!
 }
 
 """Science step"""
@@ -2705,26 +2705,26 @@ enum ChargeClass {
 }
 
 """Cloud extinction"""
-enum CloudExtinction {
-  """CloudExtinction PointOne"""
+enum CloudExtinctionPreset {
+  """CloudExtinctionPreset PointOne"""
   POINT_ONE
 
-  """CloudExtinction PointThree"""
+  """CloudExtinctionPreset PointThree"""
   POINT_THREE
 
-  """CloudExtinction PointFive"""
+  """CloudExtinctionPreset PointFive"""
   POINT_FIVE
 
-  """CloudExtinction OnePointZero"""
+  """CloudExtinctionPreset OnePointZero"""
   ONE_POINT_ZERO
 
-  """CloudExtinction OnePointFive"""
+  """CloudExtinctionPreset OnePointFive"""
   ONE_POINT_FIVE
 
-  """CloudExtinction TwoPointZero"""
+  """CloudExtinctionPreset TwoPointZero"""
   TWO_POINT_ZERO
 
-  """CloudExtinction ThreePointZero"""
+  """CloudExtinctionPreset ThreePointZero"""
   THREE_POINT_ZERO
 }
 
@@ -2735,14 +2735,17 @@ enum ObservingModeType {
 
   """ObservingModeType GmosSouthLongSlit"""
   GMOS_SOUTH_LONG_SLIT
+
+  """ObservingModeType Flamingos2LongSlit"""
+  FLAMINGOS_2LONG_SLIT
 }
 
 type ConstraintSet {
   """Image quality"""
-  imageQuality: ImageQuality!
+  imageQuality: ImageQualityPreset!
 
   """Cloud extinction"""
-  cloudExtinction: CloudExtinction!
+  cloudExtinction: CloudExtinctionPreset!
 
   """Sky background"""
   skyBackground: SkyBackground!
@@ -3248,10 +3251,10 @@ type ExposureTimeMode {
 """Flamingos2 Disperser"""
 enum Flamingos2Disperser {
   """Flamingos2Disperser R=1200 (J + H) grism"""
-  R1200JH
+  R1200_JH
 
   """Flamingos2Disperser R=1200 (H + K) grism"""
-  R1200HK
+  R1200_HK
 
   """Flamingos2Disperser R=3000 (J or H or K) grism"""
   R3000
@@ -3312,6 +3315,186 @@ enum Flamingos2Fpu {
 
   """Flamingos2Fpu 8-Pixel Long Slit"""
   LONG_SLIT_8
+}
+
+"""Flamingos2 Read Mode"""
+enum Flamingos2ReadMode {
+  """Flamingos2ReadMode Bright"""
+  BRIGHT
+
+  """Flamingos2ReadMode Medium"""
+  MEDIUM
+
+  """Flamingos2ReadMode Faint"""
+  FAINT
+}
+
+"""Flamingos2 Decker"""
+enum Flamingos2Decker {
+  """Flamingos2Decker Imaging"""
+  IMAGING
+
+  """Flamingos2Decker LongSlit"""
+  LONG_SLIT
+
+  """Flamingos2Decker MOS"""
+  MOS
+}
+
+"""Flamingos2 Readout Mode"""
+enum Flamingos2ReadoutMode {
+  """Flamingos2ReadoutMode Science"""
+  SCIENCE
+
+  """Flamingos2ReadoutMode Engineering"""
+  ENGINEERING
+}
+
+"""Flamingos2 Reads"""
+enum Flamingos2Reads {
+  """Flamingos2Reads Reads 1"""
+  READS_1
+
+  """Flamingos2Reads Reads 3"""
+  READS_3
+
+  """Flamingos2Reads Reads 4"""
+  READS_4
+
+  """Flamingos2Reads Reads 5"""
+  READS_5
+
+  """Flamingos2Reads Reads 6"""
+  READS_6
+
+  """Flamingos2Reads Reads 7"""
+  READS_7
+
+  """Flamingos2Reads Reads 8"""
+  READS_8
+
+  """Flamingos2Reads Reads 9"""
+  READS_9
+
+  """Flamingos2Reads Reads 10"""
+  READS_10
+
+  """Flamingos2Reads Reads 11"""
+  READS_11
+
+  """Flamingos2Reads Reads 12"""
+  READS_12
+
+  """Flamingos2Reads Reads 13"""
+  READS_13
+
+  """Flamingos2Reads Reads 14"""
+  READS_14
+
+  """Flamingos2Reads Reads 15"""
+  READS_15
+
+  """Flamingos2Reads Reads 16"""
+  READS_16
+}
+
+"""Flamingos2 South Long Slit mode"""
+type Flamingos2LongSlit {
+  """
+  The disperser field must be specified.  It cannot be unset with a null value.
+  """
+  disperser: Flamingos2Disperser!
+
+  """
+  The filter field must be specified.  It cannot be unset with a null value.
+  """
+  filter: Flamingos2Filter!
+
+  """
+  The fpu field must be either specified or skipped altogether.  It cannot be unset with a null value.
+  """
+  fpu: Flamingos2Fpu!
+
+  """
+  The read mode is either explicitly specified in explicitReadMode or else taken
+  from defaultReadMode
+  """
+  readMode: Flamingos2ReadMode!
+
+  """Default read mode, calculated based on the exposure time"""
+  defaultReadMode: Flamingos2ReadMode!
+
+  """
+  Optional explicitly specified F2 ReadMode. If set it overrides the
+  default.
+  """
+  explicitReadMode: Flamingos2ReadMode
+
+  """
+  F2 reads, either explicitly specified in explicitReads or else taken
+  from the defaultXReads
+  """
+  reads: Flamingos2Reads!
+
+  """
+  Default reads, calculated from the selected read mode which in
+  turn is based on the exposure time
+  """
+  defaultReads: Flamingos2Reads!
+
+  """
+  Optional explicitly specified F2 Reads. If set it overrides the
+  default.
+  """
+  explicitReads: Flamingos2Reads
+
+  """
+  The decker field is either explicitly specified in explicitDecker or else taken
+  from defaultDecker
+  """
+  decker: Flamingos2Decker!
+
+  """Default decker, calculated based on the exposure time"""
+  defaultDecker: Flamingos2Decker!
+
+  """
+  Optional explicitly specified F2 Decker. If set it overrides the
+  default.
+  """
+  explicitDecker: Flamingos2Decker
+
+  """
+  The readoutMode field is either explicitly specified in explicitReadoutMode or else taken
+  from defaultReadoutMode
+  """
+  readoutMode: Flamingos2ReadoutMode!
+
+  """Default readout mode, science"""
+  defaultReadoutMode: Flamingos2ReadoutMode!
+
+  """
+  Optional explicitly specified F2 Readout mode. If set it overrides the
+  default.
+  """
+  explicitReadoutMode: Flamingos2ReadoutMode
+
+  """
+  The disperser as it was initially selected.  See the `disperser` field for the
+  disperser that will be used in the observation.
+  """
+  initialDisperser: Flamingos2Disperser!
+
+  """
+  The filter as it was initially selected (if any).  See the `filter` field
+  for the filter that will be used in the observation.
+  """
+  initialFilter: Flamingos2Filter!
+
+  """
+  The FPU as it was initially selected.  See the `fpu` field for the FPU that
+  will be used in the observation.
+  """
+  initialFpu: Flamingos2Fpu!
 }
 
 """Metadata for `enum FilterType`"""
@@ -4278,32 +4461,32 @@ type HourAngleRange {
 }
 
 """Image quality"""
-enum ImageQuality {
-  """ImageQuality PointOne"""
+enum ImageQualityPreset {
+  """ImageQualityPreset PointOne"""
   POINT_ONE
 
-  """ImageQuality PointTwo"""
+  """ImageQualityPreset PointTwo"""
   POINT_TWO
 
-  """ImageQuality PointThree"""
+  """ImageQualityPreset PointThree"""
   POINT_THREE
 
-  """ImageQuality PointFour"""
+  """ImageQualityPreset PointFour"""
   POINT_FOUR
 
-  """ImageQuality PointSix"""
+  """ImageQualityPreset PointSix"""
   POINT_SIX
 
-  """ImageQuality PointEight"""
+  """ImageQualityPreset PointEight"""
   POINT_EIGHT
 
-  """ImageQuality OnePointZero"""
+  """ImageQualityPreset OnePointZero"""
   ONE_POINT_ZERO
 
-  """ImageQuality OnePointFive"""
+  """ImageQualityPreset OnePointFive"""
   ONE_POINT_FIVE
 
-  """ImageQuality TwoPointZero"""
+  """ImageQualityPreset TwoPointZero"""
   TWO_POINT_ZERO
 }
 
@@ -4430,12 +4613,24 @@ type ItcResultSet {
   index: NonNegInt!
 }
 
+"""Calculated signal to noise at a specific wavelength"""
+type SignalToNoiseAt {
+  """Single exposure signal to noise"""
+  single: SignalToNoise!
+
+  """Total exposure signal to noise"""
+  total: SignalToNoise!
+
+  """Wavelength sn was calculated at"""
+  wavelength: Wavelength!
+}
+
 """A single ITC call result."""
 type ItcResult {
   targetId: TargetId!
   exposureTime: TimeSpan!
   exposureCount: NonNegInt!
-  signalToNoise: SignalToNoise
+  signalToNoiseAt: SignalToNoiseAt
 }
 
 type LineFluxIntegrated {
@@ -4635,12 +4830,6 @@ type Observation {
   """Program configuration requests applicable to this observation."""
   configurationRequests: [ConfigurationRequest!]!
   workflow: ObservationWorkflow!
-
-  """
-  When true, a user has taken action to explicitly mark the observation complete
-  regardless of how many steps have been executed and which steps may remain.
-  """
-  declaredComplete: Boolean!
 }
 
 enum ExecutionState {
@@ -4675,8 +4864,8 @@ type Configuration {
 }
 
 type ConfigurationConditions {
-  imageQuality: ImageQuality!
-  cloudExtinction: CloudExtinction!
+  imageQuality: ImageQualityPreset!
+  cloudExtinction: CloudExtinctionPreset!
   skyBackground: SkyBackground!
   waterVapor: WaterVapor!
 }
@@ -5259,6 +5448,9 @@ type ObservingMode {
 
   """GMOS South Long Slit mode"""
   gmosSouthLongSlit: GmosSouthLongSlit
+
+  """Flamingos 2 Long Slit mode"""
+  flamingos2LongSlit: Flamingos2LongSlit
 }
 
 type ObservingModeGroup {
@@ -5397,7 +5589,7 @@ enum SequenceCommand {
 }
 
 type SequenceDigest {
-  """ObserveClass of the whole sequence. """
+  """ObserveClass of the whole sequence."""
   observeClass: ObserveClass!
 
   """Time estimate for the whole sequence."""
@@ -6684,7 +6876,10 @@ interface TimeChargeDiscount {
   interval: TimestampInterval!
 
   """Time amount to discount from the program."""
-  program: TimeSpan!
+  program: TimeSpan! @deprecated(reason: "renamed to 'amount'")
+
+  """Time amount to discount from the program."""
+  amount: TimeSpan!
 
   """Additional detail."""
   comment: String!
@@ -6700,7 +6895,10 @@ type TimeChargeDaylightDiscount implements TimeChargeDiscount {
   interval: TimestampInterval!
 
   """Time amount to discount from the program."""
-  program: TimeSpan!
+  program: TimeSpan! @deprecated(reason: "renamed to 'amount'")
+
+  """Time amount to discount from the program."""
+  amount: TimeSpan!
 
   """Additional detail."""
   comment: String!
@@ -6718,10 +6916,35 @@ type TimeChargeNoDataDiscount implements TimeChargeDiscount {
   interval: TimestampInterval!
 
   """Time amount to discount from the program."""
-  program: TimeSpan!
+  program: TimeSpan! @deprecated(reason: "renamed to 'amount'")
+
+  """Time amount to discount from the program."""
+  amount: TimeSpan!
 
   """Additional detail."""
   comment: String!
+}
+
+"""
+A time charge discount that is applied when part of the observation is executed
+after an overlapping chargeable observation is started.  For example, when
+writing out datasets while slewing to a new target.
+"""
+type TimeChargeOverlapDiscount implements TimeChargeDiscount {
+  """The interval during which this discount applies."""
+  interval: TimestampInterval!
+
+  """Time amount to discount from the program."""
+  program: TimeSpan! @deprecated(reason: "renamed to 'amount'")
+
+  """Time amount to discount from the program."""
+  amount: TimeSpan!
+
+  """Additional detail."""
+  comment: String!
+
+  """The overlapping observation."""
+  observation: Observation!
 }
 
 type TimeChargeQaDiscount implements TimeChargeDiscount {
@@ -6729,7 +6952,10 @@ type TimeChargeQaDiscount implements TimeChargeDiscount {
   interval: TimestampInterval!
 
   """Time amount to discount from the program."""
-  program: TimeSpan!
+  program: TimeSpan! @deprecated(reason: "renamed to 'amount'")
+
+  """Time amount to discount from the program."""
+  amount: TimeSpan!
 
   """Additional detail."""
   comment: String!
@@ -6901,6 +7127,9 @@ type Visit {
 
   """Created by Observe at time."""
   created: Timestamp!
+
+  """Site of the visit."""
+  site: Site!
 
   """Time interval during which this visit executed."""
   interval: TimestampInterval
@@ -7354,18 +7583,6 @@ type IntegrationTime {
 
   """Calculate exposures count"""
   exposureCount: NonNegInt!
-}
-
-"""Calculated signal to noise at a specific wavelength"""
-type SignalToNoiseAt {
-  """Single exposure signal to noise"""
-  single: SignalToNoise!
-
-  """Total exposure signal to noise"""
-  total: SignalToNoise!
-
-  """Wavelength sn was calculated at"""
-  wavelength: Wavelength!
 }
 
 type CalculationResult {

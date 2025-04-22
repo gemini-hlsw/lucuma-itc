@@ -309,18 +309,6 @@ type IntegrationTime {
   exposureCount: NonNegInt!
 }
 
-"""Calculated signal to noise at a specific wavelength"""
-type SignalToNoiseAt {
-  """Single exposure signal to noise"""
-  single: SignalToNoise!
-
-  """Total exposure signal to noise"""
-  total: SignalToNoise!
-
-  """Wavelength sn was calculated at"""
-  wavelength: Wavelength!
-}
-
 type CalculationResult {
   """server and data versions"""
   versions: ItcVersions!
