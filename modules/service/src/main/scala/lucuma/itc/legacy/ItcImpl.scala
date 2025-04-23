@@ -121,6 +121,8 @@ object ItcImpl {
             _ <- T.put("itc.exposureDuration" -> exposureDuration.value.toInt)
             _ <- T.put("itc.exposures" -> exposureCount)
             _ <- T.put("itc.level" -> level.map(_.value).orEmpty)
+            _ <- L.info("spectroscopy graph request:")
+            _ <- L.info(request.noSpaces) // Request to the legacy itc
             r <- itcLocal.calculateGraphs(request.noSpaces)
           yield TargetGraphsCalcResult.fromLegacy(r.ccds, r.groups, atWavelength, bandOrLine)
 
@@ -154,9 +156,7 @@ object ItcImpl {
                    _      <- T.put("itc.query" -> request.spaces2)
                    _      <- T.put("itc.sigma" -> signalToNoise.toBigDecimal.toDouble)
                    _      <- L.info(request.noSpaces) // Request to the legacy itc
-                   _      <- L.info(
-                               s"Spectroscopy: Signal to noise mode ${request.noSpaces}"
-                             ) // Request to the legacy itc
+                   _      <- L.info("spectroscopy time request:")
                    a      <- itcLocal.calculateIntegrationTime(request.noSpaces)
                    result <- convertIntegrationTimeRemoteResult(a, bandOrLine)
                  yield result
