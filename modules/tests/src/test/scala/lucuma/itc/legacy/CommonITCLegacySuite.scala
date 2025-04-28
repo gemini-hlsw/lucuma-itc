@@ -58,6 +58,7 @@ trait CommonITCLegacySuite extends FunSuite:
     err.exists(_.contains("Invalid S/N")) || err.exists(_.contains("do not overlap")) ||
       err.exists(_.contains("Unsupported configuration")) ||
       err.exists(_.contains("Unsupported calculation method")) ||
+      err.exists(_.matches("Configuration would require \\d* exposures")) ||
       err.exists(_.contains("target is too bright")) ||
       err.exists(_.contains("Signal = 0")) ||
       err.exists(_.contains("Redshifted SED")) ||
@@ -67,6 +68,7 @@ trait CommonITCLegacySuite extends FunSuite:
     err.exists(_.contains("Invalid S/N")) || err.exists(_.contains("do not overlap")) ||
       err.exists(_.contains("Unsupported configuration")) ||
       err.exists(_.contains("Unsupported calculation method")) ||
+      err.exists(_.matches("Configuration would require \\d* exposures")) ||
       err.exists(_.contains("target is too bright")) ||
       err.exists(_.contains("Invalid SignalToNoise value"))
 
