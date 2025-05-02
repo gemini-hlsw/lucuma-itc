@@ -276,7 +276,7 @@ private[legacy] object codecs:
       case s: CoolStarModel           =>
         Json.obj("Library" -> Json.obj("LibraryStar" -> Json.fromString(s.ocs2Tag)))
       case PlanetaryNebula(s)         =>
-        Json.obj("Library" -> Json.obj("LibraryStar" -> Json.fromString(s.ocs2Tag)))
+        Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
       case Galaxy(s)                  =>
         Json.obj("Library" -> Json.obj("LibraryNonStar" -> Json.fromString(s.ocs2Tag)))
       case Planet(s)                  =>
