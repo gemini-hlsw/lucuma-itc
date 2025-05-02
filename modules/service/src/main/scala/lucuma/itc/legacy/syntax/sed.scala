@@ -19,8 +19,8 @@ trait PlanetaryNebulaSpectrumSyntax:
   extension (self: PlanetaryNebulaSpectrum)
     def ocs2Tag: String =
       self match
-        case PlanetaryNebulaSpectrum.NGC7009 => "O5V"
-        case PlanetaryNebulaSpectrum.IC5117  => "O8III"
+        case PlanetaryNebulaSpectrum.NGC7009 => "Planetary-nebula"
+        case PlanetaryNebulaSpectrum.IC5117  => "Planetary-nebula2"
 
 object planetarynebula extends PlanetaryNebulaSpectrumSyntax
 
