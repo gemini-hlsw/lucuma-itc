@@ -43,8 +43,8 @@ object ItcImpl {
 
   def build[F[_]: MonadThrow: Logger: Trace](itcLocal: FLocalItc[F]): Itc[F] =
     new Itc[F] {
-      val L = Logger[F]
       val T = Trace[F]
+      val L = Logger[F]
 
       private def fromLegacy(sn: lucuma.itc.legacy.SignalToNoiseAt): SignalToNoiseAt =
         SignalToNoiseAt(sn.wavelength, sn.single, sn.total)

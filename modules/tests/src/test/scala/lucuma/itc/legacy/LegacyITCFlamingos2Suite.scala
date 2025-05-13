@@ -13,22 +13,22 @@ import lucuma.itc.service.ObservingMode
 import munit.FunSuite
 
 /**
- * This is a unit test for F2 imaging mode in the legacy ITC, ensuring all possible combinations of
- * parameters can be parsed. The ITC may still return an error but we want to ensure it can parse
- * the values.
+ * This is a unit test for Flamingos2 imaging mode in the legacy ITC, ensuring all possible
+ * combinations of parameters can be parsed. The ITC may still return an error but we want to ensure
+ * it can parse the values.
  */
 trait LegacyITCFlamingos2Suite extends FunSuite with CommonITCLegacySuite:
 
   def analysisMethod: AnalysisMethod
 
-  def observingModeWithFilter(f: F2Filter): ObservingMode
+  def observingModeWithFilter(f: Flamingos2Filter): ObservingMode
 
-  def observingModeWithFpu(f: F2Fpu): ObservingMode
+  def observingModeWithFpu(f: Flamingos2Fpu): ObservingMode
 
   def title: String
 
-  test(s"$title - F2 filter".tag(LegacyITCTest)):
-    Enumerated[F2Filter].all.foreach: f =>
+  test(s"$title - Flamingos2 filter".tag(LegacyITCTest)):
+    Enumerated[Flamingos2Filter].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(
           bodyConf(sourceDefinition,
@@ -39,8 +39,8 @@ trait LegacyITCFlamingos2Suite extends FunSuite with CommonITCLegacySuite:
         )
       assert(result.fold(allowedErrors, containsValidResults))
 
-  test(s"$title - F2 fpu".tag(LegacyITCTest)):
-    Enumerated[F2Fpu].all.foreach: f =>
+  test(s"$title - Flamingos2 fpu".tag(LegacyITCTest)):
+    Enumerated[Flamingos2Fpu].all.foreach: f =>
       val result = localItc
         .calculateIntegrationTime(
           bodyConf(sourceDefinition, obs, observingModeWithFpu(f)).asJson.noSpaces

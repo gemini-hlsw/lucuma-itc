@@ -12,9 +12,9 @@ import munit.FunSuite
 import scala.concurrent.duration.*
 
 /**
- * This is a unit test for F2 imaging mode in the legacy ITC, ensuring all possible combinations of
- * parameters can be parsed. The ITC may still return an error but we want to ensure it can parse
- * the values.
+ * This is a unit test for Flamingos2 imaging mode in the legacy ITC, ensuring all possible
+ * combinations of parameters can be parsed. The ITC may still return an error but we want to ensure
+ * it can parse the values.
  */
 class LegacyITCFlamingos2ImgExpTimeSuite extends LegacyITCFlamingos2Suite:
 
@@ -31,14 +31,14 @@ class LegacyITCFlamingos2ImgExpTimeSuite extends LegacyITCFlamingos2Suite:
     analysisMethod = analysisMethod
   )
 
-  lazy val f2 = ObservingMode.ImagingMode.Flamingos2(F2Filter.J)
+  lazy val f2 = ObservingMode.ImagingMode.Flamingos2(Flamingos2Filter.J)
 
   override def instrument = ItcInstrumentDetails(f2)
 
-  override def title = "F2 Imaging TxC"
+  override def title = "Flamingos2 Imaging TxC"
 
-  def observingModeWithFilter(f: F2Filter): ObservingMode =
+  def observingModeWithFilter(f: Flamingos2Filter): ObservingMode =
     f2.copy(filter = f)
 
-  def observingModeWithFpu(f: F2Fpu): ObservingMode =
+  def observingModeWithFpu(f: Flamingos2Fpu): ObservingMode =
     f2

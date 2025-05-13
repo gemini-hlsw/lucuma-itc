@@ -4,13 +4,13 @@
 package lucuma.itc.input
 
 import cats.syntax.all.*
-import lucuma.core.enums.F2Filter
+import lucuma.core.enums.Flamingos2Filter
 import lucuma.odb.graphql.binding.*
 
-case class Flamingos2ImagingInput(filter: F2Filter) extends InstrumentModesInput
+case class Flamingos2ImagingInput(filter: Flamingos2Filter) extends InstrumentModesInput
 
 object Flamingos2ImagingInput:
   val binding: Matcher[Flamingos2ImagingInput] =
     ObjectFieldsBinding.rmap:
-      case List(F2FilterBinding("filter", filter)) =>
+      case List(Flamingos2FilterBinding("filter", filter)) =>
         filter.map(f => Flamingos2ImagingInput(f))

@@ -31,10 +31,10 @@ case class GmosSSpectroscopyParams(
   filter:            Option[GmosSouthFilter]
 ) extends SpectroscopyParams derives Encoder.AsObject
 
-case class F2SpectroscopyParams(
-  disperser: F2Disperser,
-  fpu:       F2Fpu,
-  filter:    F2Filter
+case class Flamingos2SpectroscopyParams(
+  disperser: Flamingos2Disperser,
+  fpu:       Flamingos2Fpu,
+  filter:    Flamingos2Filter
 ) extends SpectroscopyParams derives Encoder.AsObject
 
 sealed trait ImagingParams
