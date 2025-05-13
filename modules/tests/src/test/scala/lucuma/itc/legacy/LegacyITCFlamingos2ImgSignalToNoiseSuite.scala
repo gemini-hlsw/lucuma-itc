@@ -10,9 +10,9 @@ import lucuma.itc.service.ObservingMode
 import munit.FunSuite
 
 /**
- * This is a unit test for F2 imaging mode in the legacy ITC, ensuring all possible combinations of
- * parameters can be parsed. The ITC may still return an error but we want to ensure it can parse
- * the values.
+ * This is a unit test for Flamingos2 imaging mode in the legacy ITC, ensuring all possible
+ * combinations of parameters can be parsed. The ITC may still return an error but we want to ensure
+ * it can parse the values.
  */
 class LegacyITCFlamingos2ImgSignalToNoiseSuite extends LegacyITCFlamingos2Suite:
 
@@ -29,14 +29,14 @@ class LegacyITCFlamingos2ImgSignalToNoiseSuite extends LegacyITCFlamingos2Suite:
     analysisMethod = analysisMethod
   )
 
-  lazy val f2 = ObservingMode.ImagingMode.Flamingos2(F2Filter.J)
+  lazy val f2 = ObservingMode.ImagingMode.Flamingos2(Flamingos2Filter.J)
 
   override def instrument = ItcInstrumentDetails(f2)
 
-  override def title = "F2 Imaging S/N"
+  override def title = "Flamingos2 Imaging S/N"
 
-  def observingModeWithFilter(f: F2Filter): ObservingMode =
+  def observingModeWithFilter(f: Flamingos2Filter): ObservingMode =
     f2.copy(filter = f)
 
-  def observingModeWithFpu(f: F2Fpu): ObservingMode =
+  def observingModeWithFpu(f: Flamingos2Fpu): ObservingMode =
     f2

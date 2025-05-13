@@ -121,9 +121,9 @@ object ObservingMode {
         )
 
     case class Flamingos2(
-      disperser: F2Disperser,
-      filter:    F2Filter,
-      fpu:       F2Fpu
+      disperser: Flamingos2Disperser,
+      filter:    Flamingos2Filter,
+      fpu:       Flamingos2Fpu
     ) extends SpectroscopyMode derives Hash {
 
       override def analysisMethod: AnalysisMethod =
@@ -140,7 +140,7 @@ object ObservingMode {
       given Encoder[Flamingos2] = a =>
         Json.obj(
           ("instrument", a.instrument.asJson),
-          ("params", F2SpectroscopyParams(a.disperser, a.fpu, a.filter).asJson)
+          ("params", Flamingos2SpectroscopyParams(a.disperser, a.fpu, a.filter).asJson)
         )
 
   }
@@ -197,7 +197,7 @@ object ObservingMode {
           ("params", GmosSImagingParams(a.filter).asJson)
         )
 
-    case class Flamingos2(filter: F2Filter) extends ImagingMode {
+    case class Flamingos2(filter: Flamingos2Filter) extends ImagingMode {
       val instrument: Instrument = Instrument.Flamingos2
 
       def analysisMethod: ItcObservationDetails.AnalysisMethod =

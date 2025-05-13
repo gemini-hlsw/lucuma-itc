@@ -172,30 +172,30 @@ trait GmosSouthFpuSyntax:
 
 object gmossouthfpu extends GmosSouthFpuSyntax
 
-trait F2DisperserSyntax:
-  import lucuma.core.enums.F2Disperser
-  extension (self: F2Disperser) def ocs2Tag: String = self.shortName
+trait Flamingos2DisperserSyntax:
+  import lucuma.core.enums.Flamingos2Disperser
+  extension (self: Flamingos2Disperser) def ocs2Tag: String = self.shortName
 
-object f2disperser extends F2DisperserSyntax
+object flamingos2disperser extends Flamingos2DisperserSyntax
 
-trait F2FilterSyntax:
-  import lucuma.core.enums.F2Filter
-  extension (self: F2Filter)
+trait Flamingos2FilterSyntax:
+  import lucuma.core.enums.Flamingos2Filter
+  extension (self: Flamingos2Filter)
     def ocs2Tag: String =
       self match
-        case F2Filter.JLow   => "J_LOW"
-        case F2Filter.KLong  => "K_LONG"
-        case F2Filter.KShort => "K_SHORT"
-        case F2Filter.KBlue  => "K_BLUE"
-        case F2Filter.KRed   => "K_RED"
-        case _               => self.tag
+        case Flamingos2Filter.JLow   => "J_LOW"
+        case Flamingos2Filter.KLong  => "K_LONG"
+        case Flamingos2Filter.KShort => "K_SHORT"
+        case Flamingos2Filter.KBlue  => "K_BLUE"
+        case Flamingos2Filter.KRed   => "K_RED"
+        case _                       => self.tag
 
-object f2filter extends F2FilterSyntax
+object flamingos2filter extends Flamingos2FilterSyntax
 
-trait F2FpuSyntax:
-  import lucuma.core.enums.F2Fpu
-  import lucuma.core.enums.F2Fpu.*
-  extension (self: F2Fpu)
+trait Flamingos2FpuSyntax:
+  import lucuma.core.enums.Flamingos2Fpu
+  import lucuma.core.enums.Flamingos2Fpu.*
+  extension (self: Flamingos2Fpu)
     def ocs2Tag: String =
       self match
         case Pinhole       => "PINHOLE"
@@ -207,4 +207,4 @@ trait F2FpuSyntax:
         case LongSlit6     => "LONGSLIT_6"
         case LongSlit8     => "LONGSLIT_8"
 
-object f2fpu extends F2FpuSyntax
+object flamingos2fpu extends Flamingos2FpuSyntax

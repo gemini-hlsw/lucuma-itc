@@ -34,21 +34,21 @@ class LegacyITCFlamingos2SpecTimeAndCountSuite extends LegacyITCFlamingos2Suite:
 
   lazy val f2 =
     ObservingMode.SpectroscopyMode.Flamingos2(
-      F2Disperser.R3000,
-      F2Filter.J,
-      F2Fpu.LongSlit2
+      Flamingos2Disperser.R3000,
+      Flamingos2Filter.J,
+      Flamingos2Fpu.LongSlit2
     )
 
   override def instrument = ItcInstrumentDetails(f2)
 
-  override def title = "F2 Spectroscopy S/N"
+  override def title = "Flamingos2 Spectroscopy S/N"
 
-  def observingModeWithFilter(f: F2Filter): ObservingMode =
+  def observingModeWithFilter(f: Flamingos2Filter): ObservingMode =
     val d = f match
-      case F2Filter.J | F2Filter.H | F2Filter.JH | F2Filter.HK =>
-        F2Disperser.R1200JH
-      case _                                                   => F2Disperser.R3000
+      case Flamingos2Filter.J | Flamingos2Filter.H | Flamingos2Filter.JH | Flamingos2Filter.HK =>
+        Flamingos2Disperser.R1200JH
+      case _                                                                                   => Flamingos2Disperser.R3000
     f2.copy(filter = f, disperser = d)
 
-  def observingModeWithFpu(f: F2Fpu): ObservingMode =
+  def observingModeWithFpu(f: Flamingos2Fpu): ObservingMode =
     f2.copy(fpu = f)

@@ -13,9 +13,9 @@ import io.circe.DecodingFailure
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
-import lucuma.core.enums.F2Disperser
-import lucuma.core.enums.F2Filter
-import lucuma.core.enums.F2Fpu
+import lucuma.core.enums.Flamingos2Disperser
+import lucuma.core.enums.Flamingos2Filter
+import lucuma.core.enums.Flamingos2Fpu
 import lucuma.core.enums.GmosNorthFilter
 import lucuma.core.enums.GmosNorthGrating
 import lucuma.core.enums.GmosRoi
@@ -100,9 +100,9 @@ object InstrumentMode {
       yield GmosSouthSpectroscopy(cw, g, f, u, d, r)
 
   case class Flamingos2Spectroscopy(
-    disperser: F2Disperser,
-    filter:    F2Filter,
-    fpu:       F2Fpu
+    disperser: Flamingos2Disperser,
+    filter:    Flamingos2Filter,
+    fpu:       Flamingos2Fpu
   ) extends InstrumentMode derives Eq
 
   object Flamingos2Spectroscopy:
@@ -118,9 +118,9 @@ object InstrumentMode {
 
     given Decoder[Flamingos2Spectroscopy] = c =>
       for
-        g <- c.downField("disperser").as[F2Disperser]
-        f <- c.downField("filter").as[F2Filter]
-        u <- c.downField("fpu").as[F2Fpu]
+        g <- c.downField("disperser").as[Flamingos2Disperser]
+        f <- c.downField("filter").as[Flamingos2Filter]
+        u <- c.downField("fpu").as[Flamingos2Fpu]
       yield Flamingos2Spectroscopy(g, f, u)
 
   case class GmosNorthImaging(

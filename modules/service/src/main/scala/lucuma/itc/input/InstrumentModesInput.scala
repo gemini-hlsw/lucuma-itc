@@ -18,30 +18,31 @@ object InstrumentModesInput:
             GmosSSpectroscopyInput.binding.Option("gmosSSpectroscopy", gmosSSpectroscopy),
             GmosNImagingInput.binding.Option("gmosNImaging", gmosNImaging),
             GmosSImagingInput.binding.Option("gmosSImaging", gmosSImaging),
-            F2SpectroscopyInput.binding.Option("flamingos2Spectroscopy", f2Spectroscopy),
-            Flamingos2ImagingInput.binding.Option("flamingos2Imaging", f2Imaging)
+            Flamingos2SpectroscopyInput.binding
+              .Option("flamingos2Spectroscopy", flamingos2Spectroscopy),
+            Flamingos2ImagingInput.binding.Option("flamingos2Imaging", flamingos2Imaging)
           ) =>
         (gmosNSpectroscopy,
          gmosSSpectroscopy,
          gmosNImaging,
          gmosSImaging,
-         f2Spectroscopy,
-         f2Imaging
+         flamingos2Spectroscopy,
+         flamingos2Imaging
         ).parTupled
           .flatMap {
             case (gmosNSpectroscopy,
                   gmosSSpectroscopy,
                   gmosNImaging,
                   gmosSImaging,
-                  f2Spectroscopy,
-                  f2Imaging
-                ) =>
+                  flamingos2Spectroscopy,
+                  flamingos2Imaging
+                )      =>
               oneOrFail(
-                gmosNSpectroscopy -> "gmosNSpectroscopy",
-                gmosSSpectroscopy -> "gmosSSpectroscopy",
-                gmosNImaging      -> "gmosNImaging",
-                gmosSImaging      -> "gmosSImaging",
-                f2Spectroscopy    -> "flamingos2Spectroscopy",
-                f2Imaging         -> "flamingos2Imaging"
+                gmosNSpectroscopy      -> "gmosNSpectroscopy",
+                gmosSSpectroscopy      -> "gmosSSpectroscopy",
+                gmosNImaging           -> "gmosNImaging",
+                gmosSImaging           -> "gmosSImaging",
+                flamingos2Spectroscopy -> "flamingos2Spectroscopy",
+                flamingos2Imaging      -> "flamingos2Imaging"
               )
           }

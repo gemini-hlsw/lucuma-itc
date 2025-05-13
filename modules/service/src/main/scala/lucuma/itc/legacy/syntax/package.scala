@@ -10,9 +10,9 @@ object all
     with lucuma.itc.legacy.syntax.GmosNorthGratingSyntax
     with lucuma.itc.legacy.syntax.GmosNorthFpuSyntax
     with lucuma.itc.legacy.syntax.GmosSouthFpuSyntax
-    with lucuma.itc.legacy.syntax.F2FpuSyntax
-    with lucuma.itc.legacy.syntax.F2DisperserSyntax
-    with lucuma.itc.legacy.syntax.F2FilterSyntax
+    with lucuma.itc.legacy.syntax.Flamingos2FpuSyntax
+    with lucuma.itc.legacy.syntax.Flamingos2DisperserSyntax
+    with lucuma.itc.legacy.syntax.Flamingos2FilterSyntax
     with lucuma.itc.legacy.syntax.ConditionsSyntax
     with lucuma.itc.legacy.syntax.CoolStarModelSyntax
     with lucuma.itc.legacy.syntax.StellarLibrarySpectrumSyntax

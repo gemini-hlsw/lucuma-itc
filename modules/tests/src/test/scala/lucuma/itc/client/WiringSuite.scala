@@ -13,9 +13,9 @@ import coulomb.syntax.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
-import lucuma.core.enums.F2Disperser
-import lucuma.core.enums.F2Filter
-import lucuma.core.enums.F2Fpu
+import lucuma.core.enums.Flamingos2Disperser
+import lucuma.core.enums.Flamingos2Filter
+import lucuma.core.enums.Flamingos2Fpu
 import lucuma.core.enums.GalaxySpectrum.Spiral
 import lucuma.core.enums.GmosAmpCount
 import lucuma.core.enums.GmosAmpGain
@@ -349,9 +349,9 @@ object WiringSuite:
           ElevationRange.ByAirMass.Default
         ),
         InstrumentMode.Flamingos2Spectroscopy(
-          F2Disperser.R3000,
-          F2Filter.J,
-          F2Fpu.LongSlit2
+          Flamingos2Disperser.R3000,
+          Flamingos2Filter.J,
+          Flamingos2Fpu.LongSlit2
         )
       ),
       NonEmptyList.of(

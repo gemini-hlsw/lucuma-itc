@@ -73,7 +73,7 @@ object AsterismSpectroscopyTimeRequest:
           Result.success:
             ObservingMode.SpectroscopyMode
               .GmosSouth(centralWavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode, roi)
-        case F2SpectroscopyInput(
+        case Flamingos2SpectroscopyInput(
               disperser,
               filter,
               fpu
