@@ -14,6 +14,8 @@ import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.client.json.encoders.given
 import lucuma.itc.client.json.given
 import lucuma.itc.client.json.syntax.*
+import monocle.Focus
+import monocle.Lens
 
 case class ImagingParameters(
   exposureTimeMode: ExposureTimeMode,
@@ -31,6 +33,15 @@ object ImagingParameters {
           "mode"             -> a.mode.asJson
         )
         .dropNullValues
+
+  val exposureTimeMode: Lens[ImagingParameters, ExposureTimeMode] =
+    Focus[ImagingParameters](_.exposureTimeMode)
+
+  val constraints: Lens[ImagingParameters, ConstraintSet] =
+    Focus[ImagingParameters](_.constraints)
+
+  val mode: Lens[ImagingParameters, InstrumentMode] =
+    Focus[ImagingParameters](_.mode)
 }
 
 final case class ImagingInput(
@@ -40,6 +51,11 @@ final case class ImagingInput(
   export parameters.*
 
 object ImagingInput {
+  val parameters: Lens[ImagingInput, ImagingParameters] =
+    Focus[ImagingInput](_.parameters)
+
+  val asterism: Lens[ImagingInput, NonEmptyList[TargetInput]] =
+    Focus[ImagingInput](_.asterism)
 
   given Encoder[ImagingInput] with
     def apply(a: ImagingInput): Json =

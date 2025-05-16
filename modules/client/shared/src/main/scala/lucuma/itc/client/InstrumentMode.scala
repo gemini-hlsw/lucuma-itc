@@ -161,17 +161,40 @@ object InstrumentMode {
         c <- c.downField("ccdMode").as[Option[GmosCcdMode]]
       yield GmosSouthImaging(f, c)
 
+  case class Flamingos2Imaging(
+    filter: Flamingos2Filter
+  ) extends InstrumentMode derives Eq
+
+  object Flamingos2Imaging:
+
+    given Encoder[Flamingos2Imaging] = a =>
+      Json.fromFields(
+        List(
+          "filter" -> a.filter.asJson
+        )
+      )
+
+    given Decoder[Flamingos2Imaging] = c =>
+      for f <- c.downField("filter").as[Flamingos2Filter]
+      yield Flamingos2Imaging(f)
+
   val gmosNorthSpectroscopy: Prism[InstrumentMode, GmosNorthSpectroscopy] =
     GenPrism[InstrumentMode, GmosNorthSpectroscopy]
 
   val gmosSouthSpectroscopy: Prism[InstrumentMode, GmosSouthSpectroscopy] =
     GenPrism[InstrumentMode, GmosSouthSpectroscopy]
 
+  val flamingos2Spectroscopy: Prism[InstrumentMode, Flamingos2Spectroscopy] =
+    GenPrism[InstrumentMode, Flamingos2Spectroscopy]
+
   val gmosNorthImaging: Prism[InstrumentMode, GmosNorthImaging] =
     GenPrism[InstrumentMode, GmosNorthImaging]
 
   val gmosSouthImaging: Prism[InstrumentMode, GmosSouthImaging] =
     GenPrism[InstrumentMode, GmosSouthImaging]
+
+  val flamingos2Imaging: Prism[InstrumentMode, Flamingos2Imaging] =
+    GenPrism[InstrumentMode, Flamingos2Imaging]
 
   given Encoder[InstrumentMode] = a =>
     a match
@@ -185,6 +208,8 @@ object InstrumentMode {
         Json.obj("gmosSImaging" -> a.asJson)
       case a @ Flamingos2Spectroscopy(_, _, _)         =>
         Json.obj("flamingos2Spectroscopy" -> a.asJson)
+      case a @ Flamingos2Imaging(_)                    =>
+        Json.obj("flamingos2Imaging" -> a.asJson)
 
   given Decoder[InstrumentMode] = c =>
     for
@@ -193,13 +218,15 @@ object InstrumentMode {
       ni <- c.downField("gmosNImaging").as[Option[GmosNorthImaging]]
       si <- c.downField("gmosSImaging").as[Option[GmosSouthImaging]]
       fs <- c.downField("flamingos2Spectroscopy").as[Option[Flamingos2Spectroscopy]]
-      m  <- (ns, ss, ni, si, fs) match
-              case (Some(n), None, None, None, None) => (n: InstrumentMode).asRight
-              case (None, Some(s), None, None, None) => (s: InstrumentMode).asRight
-              case (None, None, Some(s), None, None) => (s: InstrumentMode).asRight
-              case (None, None, None, Some(s), None) => (s: InstrumentMode).asRight
-              case (None, None, None, None, Some(s)) => (s: InstrumentMode).asRight
-              case _                                 =>
+      fi <- c.downField("flamingos2Imaging").as[Option[Flamingos2Imaging]]
+      m  <- (ns, ss, ni, si, fs, fi) match
+              case (Some(n), None, None, None, None, None) => (n: InstrumentMode).asRight
+              case (None, Some(s), None, None, None, None) => (s: InstrumentMode).asRight
+              case (None, None, Some(s), None, None, None) => (s: InstrumentMode).asRight
+              case (None, None, None, Some(s), None, None) => (s: InstrumentMode).asRight
+              case (None, None, None, None, Some(s), None) => (s: InstrumentMode).asRight
+              case (None, None, None, None, None, Some(s)) => (s: InstrumentMode).asRight
+              case _                                       =>
                 DecodingFailure("Expected exactly one of 'gmosN' or 'gmosS' or 'flamingos2'.",
                                 c.history
                 ).asLeft
@@ -213,5 +240,6 @@ object InstrumentMode {
         case (x0: GmosNorthImaging, y0: GmosNorthImaging)             => x0 === y0
         case (x0: GmosSouthImaging, y0: GmosSouthImaging)             => x0 === y0
         case (x0: Flamingos2Spectroscopy, y0: Flamingos2Spectroscopy) => x0 === y0
+        case (x0: Flamingos2Imaging, y0: Flamingos2Imaging)           => x0 === y0
         case _                                                        => false
 }
