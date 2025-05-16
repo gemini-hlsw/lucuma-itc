@@ -149,6 +149,56 @@ class WiringSuite extends ClientSuite:
       ).asRight
     )
 
+  test("ItcClient imaging f2 basic wiring and sanity check for s/n"):
+    imaging(
+      WiringSuite.Flamingos2ImagingInputData,
+      ClientCalculationResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+          BuildInfo.ocslibHash.some
+        ),
+        AsterismIntegrationTimeOutcomes:
+          NonEmptyChain:
+            TargetIntegrationTimeOutcome:
+              TargetIntegrationTime(
+                Zipper.fromNel(NonEmptyList.one(selected)),
+                Band.R.asLeft,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
+              ).asRight
+      ).asRight
+    )
+
+  test("ItcClient imaging f2 basic wiring and sanity check for txc"):
+    val toITC = ImagingInput.parameters
+      .andThen(ImagingParameters.exposureTimeMode)
+      .replace(
+        ExposureTimeMode
+          .TimeAndCountMode(TimeSpan.fromSeconds(1).get, 10.refined, atWavelength)
+      )(WiringSuite.Flamingos2ImagingInputData)
+    imaging(
+      toITC,
+      ClientCalculationResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+          BuildInfo.ocslibHash.some
+        ),
+        AsterismIntegrationTimeOutcomes:
+          NonEmptyChain:
+            TargetIntegrationTimeOutcome:
+              TargetIntegrationTime(
+                Zipper.fromNel(NonEmptyList.one(selected)),
+                Band.R.asLeft,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
+              ).asRight
+      ).asRight
+    )
+
   test("ItcClient spectroscopy graph wiring and sanity check"):
     spectroscopyGraphs(
       WiringSuite.GraphInput,
@@ -353,6 +403,41 @@ object WiringSuite:
           Flamingos2Filter.J,
           Flamingos2Fpu.LongSlit2
         )
+      ),
+      NonEmptyList.of(
+        TargetInput(
+          SourceProfile.Point(
+            BandNormalized[Integrated](
+              Galaxy(Spiral).some,
+              SortedMap(
+                Band.R ->
+                  Measure(
+                    BrightnessValue.unsafeFrom(BigDecimal(10.0)),
+                    TaggedUnit[VegaMagnitude, Brightness[Integrated]].unit
+                  ).tag
+              )
+            )
+          ),
+          RadialVelocity.fromMetersPerSecond.getOption(1.0).get
+        )
+      )
+    )
+
+  val Flamingos2ImagingInputData: ImagingInput =
+    ImagingInput(
+      ImagingParameters(
+        ExposureTimeMode.SignalToNoiseMode(
+          SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+          atWavelength
+        ),
+        ConstraintSet(
+          ImageQuality.Preset.PointOne,
+          CloudExtinction.Preset.PointOne,
+          SkyBackground.Darkest,
+          WaterVapor.VeryDry,
+          ElevationRange.ByAirMass.Default
+        ),
+        InstrumentMode.Flamingos2Imaging(Flamingos2Filter.J)
       ),
       NonEmptyList.of(
         TargetInput(
