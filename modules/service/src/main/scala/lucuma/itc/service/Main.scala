@@ -9,6 +9,8 @@ import cats.Functor
 import cats.Parallel
 import cats.data.Kleisli
 import cats.effect.*
+import cats.effect.std.SecureRandom
+import cats.effect.std.UUIDGen
 import cats.syntax.all.*
 import com.comcast.ip4s.*
 import dev.profunktor.redis4cats.Redis
@@ -89,10 +91,12 @@ object Main extends IOApp with ItcCacheOrRemote {
    * A resource that yields a Natchez tracing entry point, either a Honeycomb endpoint if `config`
    * is defined, otherwise a log endpoint.
    */
-  def entryPointResource[F[_]: Sync: Logger](
+  def entryPointResource[F[_]: Sync: Logger: SecureRandom](
     config: Option[HoneycombConfig]
   ): Resource[F, EntryPoint[F]] =
-    config.fold(Log.entryPoint(ServiceName).pure[Resource[F, *]]): cfg =>
+    config.fold(
+      Log.entryPoint(ServiceName).pure[Resource[F, *]]
+    ): cfg =>
       Honeycomb.entryPoint(ServiceName): cb =>
         Sync[F].blocking:
           cb.setWriteKey(cfg.writeKey)
