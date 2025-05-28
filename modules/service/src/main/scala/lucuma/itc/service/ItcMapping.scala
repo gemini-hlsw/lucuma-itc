@@ -13,7 +13,7 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import grackle.*
 import grackle.circe.CirceMapping
 import io.circe.syntax.*
-import lucuma.core.enums.{ExecutionEnvironment as _, *}
+import lucuma.core.enums.ExecutionEnvironment as _
 import lucuma.core.math.SignalToNoise
 import lucuma.core.util.TimeSpan
 import lucuma.itc.*
@@ -24,20 +24,18 @@ import lucuma.itc.service.config.*
 import lucuma.itc.service.encoders.given
 import lucuma.itc.service.requests.*
 import lucuma.itc.service.syntax.all.*
-import natchez.Trace
 import org.typelevel.log4cats.Logger
 
 import scala.io.Source
 import scala.util.Using
 
-import Query.*
 import QueryCompiler.*
 
 object ItcMapping extends ItcCacheOrRemote with Version {
 
   // In principle this is a pure operation because resources are constant values, but the potential
   // for error in dev is high and it's nice to handle failures in `F`.
-  def loadSchema[F[_]: Sync: Logger]: F[Schema] =
+  def loadSchema[F[_]: Sync]: F[Schema] =
     Sync[F]
       .defer:
         Using(Source.fromResource("graphql/itc.graphql", getClass().getClassLoader())): src =>
@@ -47,7 +45,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           )
         .liftTo[F]
 
-  def versions[F[_]: Applicative: Logger](
+  def versions[F[_]: Applicative](
     environment: ExecutionEnvironment
   ): F[Result[ItcVersions]] =
     Result(ItcVersions(version(environment).value, BuildInfo.ocslibHash.some)).pure[F]
@@ -76,7 +74,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
   def calculateSpectroscopyIntegrationTime[F[
     _
-  ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
+  ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
     environment:     ExecutionEnvironment,
     cache:           BinaryEffectfulCache[F],
     itc:             Itc[F]
@@ -103,7 +101,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
   def calculateImagingIntegrationTime[F[
     _
-  ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
+  ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
     environment: ExecutionEnvironment,
     cache:       BinaryEffectfulCache[F],
     itc:         Itc[F]
@@ -176,7 +174,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     )
   }
 
-  def spectroscopyGraphs[F[_]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
+  def spectroscopyGraphs[F[_]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
     environment: ExecutionEnvironment,
     cache:       BinaryEffectfulCache[F],
     itc:         Itc[F]
@@ -220,7 +218,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
 
   def spectroscopyIntegrationTimeAndGraphs[F[
     _
-  ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
+  ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
     environment:     ExecutionEnvironment,
     cache:           BinaryEffectfulCache[F],
     itc:             Itc[F]
@@ -256,7 +254,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             s"Error calculating spectroscopy integration time and graph for input: $asterismRequest"
       .toGraphQLErrors
 
-  def apply[F[_]: Sync: Logger: Parallel: Trace: CustomSed.Resolver](
+  def apply[F[_]: Sync: Logger: Parallel: CustomSed.Resolver](
     environment: ExecutionEnvironment,
     cache:       BinaryEffectfulCache[F],
     itc:         Itc[F]

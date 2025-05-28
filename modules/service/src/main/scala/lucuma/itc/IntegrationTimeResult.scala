@@ -3,7 +3,6 @@
 
 package lucuma.itc
 
-import cats.syntax.all.*
 import io.circe.Encoder
 
 sealed trait IntegrationTimeError extends RuntimeException {

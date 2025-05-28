@@ -33,7 +33,6 @@ import lucuma.itc.TotalSN
 import lucuma.itc.legacy.syntax.all.*
 import lucuma.itc.service.ItcObservingConditions
 import lucuma.itc.service.ObservingMode
-import lucuma.itc.service.ObservingMode.SpectroscopyMode.*
 import lucuma.itc.service.syntax.all.given
 
 import java.math.MathContext

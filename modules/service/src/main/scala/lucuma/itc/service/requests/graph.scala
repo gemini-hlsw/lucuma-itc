@@ -7,11 +7,9 @@ import cats.*
 import cats.data.NonEmptyChain
 import cats.derived.*
 import cats.syntax.all.*
-import eu.timepit.refined.*
-import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.numeric.NonNegInt
 import grackle.*
-import lucuma.core.enums.{ExecutionEnvironment as _, *}
+import lucuma.core.enums.ExecutionEnvironment as _
 import lucuma.core.math.Wavelength
 import lucuma.core.model.sequence.gmos.GmosFpuMask
 import lucuma.core.util.TimeSpan

@@ -3,7 +3,6 @@
 
 package lucuma.itc.input
 
-import cats.syntax.all.*
 import lucuma.core.enums.Flamingos2Filter
 import lucuma.odb.graphql.binding.*
 

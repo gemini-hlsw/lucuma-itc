@@ -47,7 +47,7 @@ object AsterismIntegrationTimeOutcomes extends NewType[NonEmptyChain[TargetInteg
 type AsterismIntegrationTimeOutcomes = AsterismIntegrationTimeOutcomes.Type
 
 object TargetGraphsOutcome extends NewType[Either[Error, TargetGraphsResult]]:
-  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[TargetGraphsOutcome] =
+  given (using Encoder[Wavelength]): Encoder[TargetGraphsOutcome] =
     _.value match
       case Left(e)  => e.asJson
       case Right(t) => t.asJson

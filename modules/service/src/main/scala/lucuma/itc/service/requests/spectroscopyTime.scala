@@ -8,9 +8,7 @@ import cats.data.NonEmptyChain
 import cats.derived.*
 import cats.syntax.all.*
 import grackle.*
-import lucuma.core.enums.{ExecutionEnvironment as _, *}
-import lucuma.core.math.SignalToNoise
-import lucuma.core.math.Wavelength
+import lucuma.core.enums.ExecutionEnvironment as _
 import lucuma.core.model.ExposureTimeMode
 import lucuma.core.model.sequence.gmos.GmosFpuMask
 import lucuma.itc.*

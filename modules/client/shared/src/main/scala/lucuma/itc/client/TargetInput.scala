@@ -4,7 +4,6 @@
 package lucuma.itc.client
 
 import cats.Eq
-import cats.syntax.either.*
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.math.RadialVelocity

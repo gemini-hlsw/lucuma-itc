@@ -4,7 +4,6 @@
 package lucuma.itc.cache
 
 import cats.effect.Async
-import cats.effect.MonadCancelThrow
 import cats.syntax.all.*
 import dev.profunktor.redis4cats.algebra.Flush
 import dev.profunktor.redis4cats.algebra.StringCommands
@@ -14,7 +13,7 @@ import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.*
 
-trait RedisEffectfulCache[F[_]: MonadCancelThrow: Trace: Logger](
+trait RedisEffectfulCache[F[_]](
   redis:                      StringCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]],
   protected val keySemaphore: KeySemaphore[F, Array[Byte]]
 ) extends BinaryEffectfulCache[F]:

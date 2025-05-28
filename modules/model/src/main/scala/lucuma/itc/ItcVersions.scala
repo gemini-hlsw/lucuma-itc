@@ -5,7 +5,6 @@ package lucuma.itc
 
 import cats.Eq
 import cats.derived.*
-import cats.syntax.eq.*
 import io.circe.Decoder
 import io.circe.Encoder
 

@@ -5,7 +5,6 @@ package lucuma.itc.service
 
 import cats.data.NonEmptyList
 import coulomb.*
-import coulomb.units.si.prefixes.*
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.numeric.PosLong
@@ -26,7 +25,7 @@ private[service] object encoders:
 
   // TODO get this directly from odb schemas
   given Encoder[TimeSpan] =
-    Encoder { (ts: TimeSpan) =>
+    Encoder.instance { (ts: TimeSpan) =>
       Json.obj(
         "microseconds" -> TimeSpan.FromMicroseconds.reverseGet(ts).asJson,
         "milliseconds" -> TimeSpan.FromMilliseconds.reverseGet(ts).asJson,
