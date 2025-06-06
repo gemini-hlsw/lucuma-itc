@@ -99,7 +99,7 @@ private[legacy] object codecs:
           "grating"           -> Json.obj("DisperserNorth" -> Json.fromString(a.disperser.ocs2Tag)),
           "fpMask"            -> Json.obj("FPUnitNorth" -> Json.fromString(a.fpu.builtin.ocs2Tag)),
           "spectralBinning"   -> Json.fromInt(
-            a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.One).count
+            a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.One).count.value
           ),
           "site"              -> Json.fromString("GN"),
           "ccdType"           -> Json.fromString("HAMAMATSU"),
@@ -109,7 +109,8 @@ private[legacy] object codecs:
           "builtinROI"        -> Json.fromString(
             a.roi.getOrElse(GmosRoi.FullFrame).tag.toScreamingSnakeCase
           ),
-          "spatialBinning"    -> Json.fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.One).count),
+          "spatialBinning"    -> Json
+            .fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.One).count.value),
           "customSlitWidth"   -> Json.Null,
           "ampGain"           -> Json.fromString(
             a.ccdMode.map(_.ampGain).getOrElse(GmosAmpGain.Low).tag.toUpperCase
@@ -128,7 +129,7 @@ private[legacy] object codecs:
       "grating"           -> Json.obj("DisperserNorth" -> "MIRROR".asJson),
       "fpMask"            -> Json.obj("FPUnitNorth" -> "FPU_NONE".asJson),
       "spectralBinning"   -> Json.fromInt(
-        a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.Two).count
+        a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.Two).count.value
       ),
       "site"              -> Json.fromString("GN"),
       "ccdType"           -> Json.fromString("HAMAMATSU"),
@@ -136,7 +137,8 @@ private[legacy] object codecs:
         a.ccdMode.map(_.ampReadMode).getOrElse(GmosAmpReadMode.Fast).tag.toUpperCase
       ),
       "builtinROI"        -> Json.fromString("FULL_FRAME"),
-      "spatialBinning"    -> Json.fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.Two).count),
+      "spatialBinning"    -> Json
+        .fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.Two).count.value),
       "customSlitWidth"   -> Json.Null,
       "ampGain"           -> Json.fromString(
         a.ccdMode.map(_.ampGain).getOrElse(GmosAmpGain.Low).tag.toUpperCase
@@ -155,7 +157,7 @@ private[legacy] object codecs:
       "grating"           -> Json.obj("DisperserSouth" -> Json.fromString(a.disperser.ocs2Tag)),
       "fpMask"            -> Json.obj("FPUnitSouth" -> Json.fromString(a.fpu.builtin.ocs2Tag)),
       "spectralBinning"   -> Json.fromInt(
-        a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.One).count
+        a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.One).count.value
       ),
       "site"              -> Json.fromString("GS"),
       "ccdType"           -> Json.fromString("HAMAMATSU"),
@@ -165,7 +167,9 @@ private[legacy] object codecs:
       "builtinROI"        -> Json.fromString(
         a.roi.getOrElse(GmosRoi.FullFrame).tag.toScreamingSnakeCase
       ),
-      "spatialBinning"    -> Json.fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.One).count),
+      "spatialBinning"    -> Json.fromInt(
+        a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.One).count.value
+      ),
       "customSlitWidth"   -> Json.Null,
       "ampGain"           -> Json.fromString(
         a.ccdMode.map(_.ampGain).getOrElse(GmosAmpGain.Low).tag.toUpperCase
@@ -205,7 +209,7 @@ private[legacy] object codecs:
           "grating"           -> Json.obj("DisperserSouth" -> "MIRROR".asJson),
           "fpMask"            -> Json.obj("FPUnitSouth" -> "FPU_NONE".asJson),
           "spectralBinning"   -> Json.fromInt(
-            a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.Two).count
+            a.ccdMode.map(_.xBin).getOrElse(GmosXBinning.Two).count.value
           ),
           "site"              -> Json.fromString("GS"),
           "ccdType"           -> Json.fromString("HAMAMATSU"),
@@ -213,7 +217,9 @@ private[legacy] object codecs:
             a.ccdMode.map(_.ampReadMode).getOrElse(GmosAmpReadMode.Fast).tag.toUpperCase
           ),
           "builtinROI"        -> Json.fromString("FULL_FRAME"),
-          "spatialBinning"    -> Json.fromInt(a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.Two).count),
+          "spatialBinning"    -> Json.fromInt(
+            a.ccdMode.map(_.yBin).getOrElse(GmosYBinning.Two).count.value
+          ),
           "customSlitWidth"   -> Json.Null,
           "ampGain"           -> Json.fromString(
             a.ccdMode.map(_.ampGain).getOrElse(GmosAmpGain.Low).tag.toUpperCase
