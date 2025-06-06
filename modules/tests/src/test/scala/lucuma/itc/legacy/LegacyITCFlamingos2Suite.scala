@@ -7,7 +7,6 @@ import io.circe.syntax.*
 import lucuma.core.enums.*
 import lucuma.core.util.Enumerated
 import lucuma.itc.legacy.codecs.given
-import lucuma.itc.service.ItcObservationDetails
 import lucuma.itc.service.ItcObservationDetails.AnalysisMethod
 import lucuma.itc.service.ObservingMode
 import munit.FunSuite

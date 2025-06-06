@@ -7,8 +7,6 @@ import boopickle.DefaultBasic.*
 import cats.Hash
 import cats.effect.MonadCancelThrow
 import cats.syntax.all.*
-import natchez.Trace
-import org.typelevel.log4cats.Logger
 
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
@@ -19,11 +17,11 @@ import scala.concurrent.duration.FiniteDuration
  *
  * Values are stored in binary via boopickle.
  */
-trait BinaryEffectfulCache[F[_]: MonadCancelThrow: Trace: Logger]
+trait BinaryEffectfulCache[F[_]: MonadCancelThrow]
     extends EffectfulCache[F, Array[Byte], Array[Byte]]:
   protected val KeyCharset = Charset.forName("UTF8")
 
-  private def keyToBinary[K1: Hash](key: K1, keyPrefix: String = ""): Array[Byte] =
+  private def keyToBinary[K1: Hash](key: K1, keyPrefix: String): Array[Byte] =
     val hash: Int      = Hash[K1].hash(key)
     val keyStr: String = s"$keyPrefix:$hash"
     keyStr.getBytes(KeyCharset)

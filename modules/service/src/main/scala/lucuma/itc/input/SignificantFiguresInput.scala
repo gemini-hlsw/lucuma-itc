@@ -4,7 +4,6 @@
 package lucuma.itc.input
 
 import cats.syntax.parallel.*
-import eu.timepit.refined.types.numeric.PosInt
 import lucuma.itc.SignificantFigures
 import lucuma.odb.graphql.binding.*
 

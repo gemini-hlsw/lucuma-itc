@@ -7,7 +7,6 @@ import cats.Hash
 import cats.implicits.*
 import eu.timepit.refined.*
 import eu.timepit.refined.api.Refined
-import eu.timepit.refined.api.Validate
 import lucuma.core.enums.GmosAmpCount
 import lucuma.core.enums.GmosAmpGain
 import lucuma.core.enums.GmosAmpReadMode
@@ -25,7 +24,7 @@ import java.time.Duration
 
 given hashEnumerated[A: Enumerated]: Hash[A] = Hash.by(summon[Enumerated[A]].tag)
 
-given hashRefined[A: Hash, B](using Validate[A, B]): Hash[A Refined B] =
+given hashRefined[A: Hash, B]: Hash[A Refined B] =
   Hash.by(_.value)
 
 given Hash[Redshift]        = Hash.by(_.z)

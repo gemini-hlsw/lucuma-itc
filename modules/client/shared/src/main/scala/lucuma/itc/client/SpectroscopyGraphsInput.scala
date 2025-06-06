@@ -17,7 +17,6 @@ import lucuma.core.math.Wavelength
 import lucuma.core.model.ConstraintSet
 import lucuma.core.util.TimeSpan
 import lucuma.itc.client.json.given
-import lucuma.itc.client.json.syntax.*
 
 case class SpectroscopyGraphParameters(
   atWavelength:       Wavelength,

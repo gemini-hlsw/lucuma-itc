@@ -6,7 +6,6 @@ package lucuma.itc.service
 import boopickle.DefaultBasic.*
 import buildinfo.BuildInfo
 import cats.*
-import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.*
@@ -14,7 +13,6 @@ import lucuma.itc.cache.BinaryEffectfulCache
 import lucuma.itc.input.customSed.CustomSed
 import lucuma.itc.service.redis.given
 import lucuma.itc.service.requests.*
-import natchez.Trace
 import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.*
@@ -31,7 +29,7 @@ trait ItcCacheOrRemote extends Version:
   // key from being evicted, which will cause the cache to flush.
   private val TTL: Option[FiniteDuration] = FiniteDuration(365, DAYS).some
 
-  private def requestGraphs[F[_]: Functor](
+  private def requestGraphs[F[_]](
     itc: Itc[F]
   )(request: TargetGraphRequest): F[TargetGraphsCalcResult] =
     itc
@@ -47,7 +45,7 @@ trait ItcCacheOrRemote extends Version:
   /**
    * Request a graph
    */
-  def graphsFromCacheOrRemote[F[_]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
+  def graphsFromCacheOrRemote[F[_]: MonadThrow: Parallel: CustomSed.Resolver](
     request: TargetGraphRequest
   )(
     itc:     Itc[F],
@@ -58,7 +56,7 @@ trait ItcCacheOrRemote extends Version:
       .flatMap: r =>
         cache.getOrInvokeBinary(r, requestGraphs(itc)(r), TTL, "itc:graph:spec")
 
-  private def requestSpecSNCalc[F[_]: MonadThrow](itc: Itc[F])(
+  private def requestSpecSNCalc[F[_]](itc: Itc[F])(
     calcRequest: TargetSpectroscopyTimeRequest,
     mode:        ExposureTimeMode.TimeAndCountMode
   ): F[TargetIntegrationTime] =
@@ -72,7 +70,7 @@ trait ItcCacheOrRemote extends Version:
         mode.count
       )
 
-  private def requestSpecTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
+  private def requestSpecTimeCalc[F[_]](itc: Itc[F])(
     calcRequest: TargetSpectroscopyTimeRequest,
     mode:        ExposureTimeMode.SignalToNoiseMode
   ): F[TargetIntegrationTime] =
@@ -90,7 +88,7 @@ trait ItcCacheOrRemote extends Version:
    */
   def spectroscopyFromCacheOrRemote[F[
     _
-  ]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver](
+  ]: MonadThrow: Parallel: CustomSed.Resolver](
     calcRequest: TargetSpectroscopyTimeRequest
   )(
     itc:         Itc[F],
@@ -105,7 +103,7 @@ trait ItcCacheOrRemote extends Version:
           case m @ ExposureTimeMode.TimeAndCountMode(_, _, _) =>
             cache.getOrInvokeBinary(r, requestSpecSNCalc(itc)(r, m), TTL, "itc:calc:spec:tc")
 
-  private def requestImgTimeCalc[F[_]: MonadThrow](itc: Itc[F])(
+  private def requestImgTimeCalc[F[_]](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest,
     mode:        ExposureTimeMode.SignalToNoiseMode
   ): F[TargetIntegrationTime] =
@@ -118,7 +116,7 @@ trait ItcCacheOrRemote extends Version:
         mode.value
       )
 
-  private def requestImgSNCalc[F[_]: MonadThrow](itc: Itc[F])(
+  private def requestImgSNCalc[F[_]](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest,
     mode:        ExposureTimeMode.TimeAndCountMode
   ): F[TargetIntegrationTime] =
@@ -136,7 +134,7 @@ trait ItcCacheOrRemote extends Version:
    * Request exposure time calculation for imaging
    */
   def imagingFromCacheOrRemote[
-    F[_]: MonadThrow: Parallel: Logger: Trace: Clock: CustomSed.Resolver
+    F[_]: MonadThrow: Parallel: CustomSed.Resolver
   ](
     calcRequest: TargetImagingTimeRequest
   )(
@@ -158,8 +156,7 @@ trait ItcCacheOrRemote extends Version:
    * flush the cache.
    */
   def checkVersionToPurge[F[_]: MonadThrow: Logger](
-    cache: BinaryEffectfulCache[F],
-    itc:   Itc[F]
+    cache: BinaryEffectfulCache[F]
   ): F[Unit] = {
     val L      = Logger[F]
     val result = for

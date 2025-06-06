@@ -132,7 +132,7 @@ object Main extends IOApp with ItcCacheOrRemote {
       itc                        <- Resource.eval(ItcImpl.build(FLocalItc[F](itc)).pure[F])
       redis                      <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
       cache                      <- Resource.eval(RedisEffectfulCache[F](redis))
-      _                          <- Resource.eval(checkVersionToPurge[F](cache, itc))
+      _                          <- Resource.eval(checkVersionToPurge[F](cache))
       customSedResolver          <- CustomSedOdbAttachmentResolver[F](cfg.odbBaseUrl, cfg.odbServiceToken)
       given CustomSed.Resolver[F] = CustomSedCachedResolver(customSedResolver, cache, CustomSedTTL)
       mapping                    <- Resource.eval(ItcMapping[F](cfg.environment, cache, itc))
@@ -162,7 +162,7 @@ object Main extends IOApp with ItcCacheOrRemote {
   // Build a custom class loader to read and call the legacy ocs2 libs
   // without affecting the current classes. This is mostly because ocs2 uses scala 2.11
   // and it will conflict with the current scala 3 classes
-  def legacyItcLoader[F[_]: Sync: Logger](config: Config): F[LocalItc] =
+  def legacyItcLoader[F[_]: Sync](config: Config): F[LocalItc] =
     Sync[F]
       .blocking:
         val dir      =

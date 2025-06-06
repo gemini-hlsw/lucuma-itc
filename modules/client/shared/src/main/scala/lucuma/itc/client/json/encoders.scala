@@ -3,7 +3,6 @@
 
 package lucuma.itc.client.json
 
-import cats.syntax.either.*
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength

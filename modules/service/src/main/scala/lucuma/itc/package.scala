@@ -4,7 +4,6 @@
 package lucuma.itc
 
 import cats.data.NonEmptyList
-import cats.syntax.all.*
 import io.circe.*
 import io.circe.syntax.*
 import lucuma.core.math.SignalToNoise

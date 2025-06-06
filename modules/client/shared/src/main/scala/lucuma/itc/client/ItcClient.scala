@@ -58,7 +58,8 @@ object ItcClient {
                         SpectroscopyIntegrationTimeAndGraphsInput,
                         SpectroscopyIntegrationTimeAndGraphsResult
         ]
-      http              <- Http4sHttpClient.of[F, Unit](uri)(Async[F], Http4sHttpBackend(client), Logger[F])
+      http              <-
+        Http4sHttpClient.of[F, Unit](uri)(using Async[F], Http4sHttpBackend(client), Logger[F])
     yield new ItcClient[F] {
 
       override def spectroscopy(
