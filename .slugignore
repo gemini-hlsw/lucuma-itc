@@ -1,0 +1,38 @@
+# Documentation files
+*.md
+README.md
+integration.md
+
+# Image files
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# Test directories and files
+**/test/**
+**/tests/**
+modules/benchmarks/
+modules/testkit/
+
+# Development files
+flake.nix
+flake.lock
+fetchODBSchema.mjs
+fetchODBSchema.sh
+update.sh
+schemastitcher.js
+
+# Build artifacts not needed at runtime
+target/
+project/target/
+project/project/
+
+# Node.js files (if not needed for runtime)
+package.json
+package-lock.json
+node_modules/
+
+# Git files
+.git/
+.gitignore
