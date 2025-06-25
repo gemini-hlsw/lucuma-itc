@@ -14,6 +14,8 @@ import org.http4s.Uri
 import org.http4s.client.Client
 import org.typelevel.log4cats.Logger
 
+import scala.language.implicitConversions
+
 /**
  * Client for calling the ITC on the JVM.
  */
