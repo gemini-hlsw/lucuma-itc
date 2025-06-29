@@ -3,6 +3,7 @@
 
 package lucuma.itc.service
 
+import cats.data.NonEmptyList
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
@@ -20,6 +21,10 @@ case class CalculationResult(
   exposureTimeMode: ExposureTimeMode
 )
 
+case class MultiCalculationResult(
+  all: NonEmptyList[CalculationResult]
+)
+
 object CalculationResult:
   given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[CalculationResult] = r =>
     Json
@@ -31,3 +36,9 @@ object CalculationResult:
         "brightestIndex"   -> r.targetTimes.brightestIndex.asJson,
         "brightest"        -> r.targetTimes.brightest.asJson
       )
+
+object MultiCalculationResult:
+  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[MultiCalculationResult] = r =>
+    Json.obj(
+      "all" -> r.all.asJson
+    )

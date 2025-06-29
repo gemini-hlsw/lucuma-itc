@@ -6,6 +6,7 @@ package lucuma.itc.service
 import buildinfo.BuildInfo
 import cats.*
 import cats.data.NonEmptyChain
+import cats.data.NonEmptyList
 import cats.effect.*
 import cats.syntax.all.*
 import eu.timepit.refined.*
@@ -132,6 +133,24 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       .onError: t =>
         Logger[F]
           .error(t)(s"Error calculating imaging integration time for input: $asterismRequest")
+      .toGraphQLErrors
+
+  def calculateMultiImagingIntegrationTime[F[
+    _
+  ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
+    environment: ExecutionEnvironment,
+    cache:       BinaryEffectfulCache[F],
+    itc:         Itc[F]
+  )(asterismRequests: NonEmptyList[AsterismImagingTimeRequest]): F[Result[MultiCalculationResult]] =
+    asterismRequests
+      .parTraverse: request =>
+        calculateImagingIntegrationTime(environment, cache, itc)(request)
+      .map: results =>
+        val calculationResults = results.traverse(identity)
+        calculationResults.map(MultiCalculationResult.apply)
+      .onError: t =>
+        Logger[F]
+          .error(t)(s"Error calculating multi-imaging integration time for requests: $asterismRequests")
       .toGraphQLErrors
 
   private def buildTargetGraphsResult(significantFigures: Option[SignificantFigures])(
@@ -291,7 +310,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                     .getR[ImagingInput]("input")
                     .flatMap(AsterismImagingTimeRequest.fromInput)
                     .flatTraverse:
-                      calculateImagingIntegrationTime(environment, cache, itc)
+                      calculateMultiImagingIntegrationTime(environment, cache, itc)
                     .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("spectroscopyGraphs") { (_, env) =>

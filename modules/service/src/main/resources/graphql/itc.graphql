@@ -7548,7 +7548,7 @@ type Query {
   Given an instrument and an imaging mode,
   return the integration time and the S/N for the given targets.
   """
-  imaging(input: ImagingInput!): CalculationResult!
+  imaging(input: ImagingInput!): MultiCalculationResult!
 
   """
   Given an instrument and a mode, return the graph data for the given targets.
@@ -7764,7 +7764,7 @@ input ImagingInput {
   constraints: ConstraintSetInput!
 
   """Instrument modes"""
-  mode: InstrumentModesInput!
+  mode: [InstrumentModesInput!]!
 }
 
 """Params for significant figures on each axis"""
@@ -7827,6 +7827,11 @@ type IntegrationTime {
 
   """Calculate exposures count"""
   exposureCount: NonNegInt!
+}
+
+type MultiCalculationResult {
+  """each requested mode result"""
+  all: [CalculationResult!]!
 }
 
 type CalculationResult {
