@@ -240,6 +240,23 @@ lazy val tests = project
       "org.scalameta" %%% "munit"                  % munitVersion               % Test,
       "org.typelevel" %%% "discipline-munit"       % disciplineMunitVersion     % Test
     ),
+    testFrameworks += MUnitFramework
+  )
+
+lazy val legacyTests = project
+  .in(file("modules/legacy-tests"))
+  .enablePlugins(NoPublishPlugin)
+  .dependsOn(service, client.jvm, testkit.jvm)
+  .settings(
+    name := "lucuma-itc-legacy-tests",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %%% "munit-cats-effect"      % munitCatsEffectVersion     % Test,
+      "com.lihaoyi"   %%% "pprint"                 % pprintVersion              % Test,
+      "org.http4s"     %% "http4s-jdk-http-client" % http4sJdkHttpClientVersion % Test,
+      "org.typelevel" %%% "log4cats-slf4j"         % log4catsVersion            % Test,
+      "org.scalameta" %%% "munit"                  % munitVersion               % Test,
+      "org.typelevel" %%% "discipline-munit"       % disciplineMunitVersion     % Test
+    ),
     Test / testOptions ++= {
       if (sys.env.get("CI").isDefined) Seq(Tests.Argument("munit.ExcludeTags", "LegacyItcTest"))
       else Seq()
