@@ -71,7 +71,7 @@ trait ClientSuite extends CatsEffectSuite:
 
   def imaging(
     in:       ImagingInput,
-    expected: Either[String, ClientCalculationResult]
+    expected: Either[String, ClientMultiCalculationResult]
   ): IO[Unit] =
     bandNormalizedClient.use:
       _.imaging(in).attempt

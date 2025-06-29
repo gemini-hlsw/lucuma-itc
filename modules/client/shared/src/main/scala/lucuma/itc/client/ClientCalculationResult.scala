@@ -4,6 +4,7 @@
 package lucuma.itc.client
 
 import cats.Eq
+import cats.data.NonEmptyList
 import cats.derived.*
 import cats.syntax.eq.*
 import io.circe.Decoder
@@ -31,3 +32,14 @@ object ClientCalculationResult:
   given Eq[ClientCalculationResult] with
     def eqv(x: ClientCalculationResult, y: ClientCalculationResult): Boolean =
       x.versions === y.versions && x.targetTimes === y.targetTimes
+
+case class ClientMultiCalculationResult(
+  all: NonEmptyList[ClientCalculationResult]
+) derives Eq
+
+object ClientMultiCalculationResult:
+  given Decoder[ClientMultiCalculationResult] with
+    def apply(c: HCursor): Decoder.Result[ClientMultiCalculationResult] =
+      for
+        all <- c.downField("all").as[NonEmptyList[ClientCalculationResult]]
+      yield ClientMultiCalculationResult(all)

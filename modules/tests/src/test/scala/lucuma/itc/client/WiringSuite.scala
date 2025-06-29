@@ -130,44 +130,52 @@ class WiringSuite extends ClientSuite:
   test("ItcClient imaging basic wiring and sanity check"):
     imaging(
       WiringSuite.GmosImagingInputData,
-      ClientCalculationResult(
-        ItcVersions(
-          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          BuildInfo.ocslibHash.some
-        ),
-        AsterismIntegrationTimeOutcomes:
-          NonEmptyChain:
-            TargetIntegrationTimeOutcome:
-              TargetIntegrationTime(
-                Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R.asLeft,
-                SignalToNoiseAt(atWavelength,
-                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
-              ).asRight
+      ClientMultiCalculationResult(
+        NonEmptyList.one(
+          ClientCalculationResult(
+            ItcVersions(
+              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              BuildInfo.ocslibHash.some
+            ),
+            AsterismIntegrationTimeOutcomes:
+              NonEmptyChain:
+                TargetIntegrationTimeOutcome:
+                  TargetIntegrationTime(
+                    Zipper.fromNel(NonEmptyList.one(selected)),
+                    Band.R.asLeft,
+                    SignalToNoiseAt(atWavelength,
+                                    SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                    TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                    ).some
+                  ).asRight
+          )
+        )
       ).asRight
     )
 
   test("ItcClient imaging f2 basic wiring and sanity check for s/n"):
     imaging(
       WiringSuite.Flamingos2ImagingInputData,
-      ClientCalculationResult(
-        ItcVersions(
-          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          BuildInfo.ocslibHash.some
-        ),
-        AsterismIntegrationTimeOutcomes:
-          NonEmptyChain:
-            TargetIntegrationTimeOutcome:
-              TargetIntegrationTime(
-                Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R.asLeft,
-                SignalToNoiseAt(atWavelength,
-                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
-              ).asRight
+      ClientMultiCalculationResult(
+        NonEmptyList.one(
+          ClientCalculationResult(
+            ItcVersions(
+              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              BuildInfo.ocslibHash.some
+            ),
+            AsterismIntegrationTimeOutcomes:
+              NonEmptyChain:
+                TargetIntegrationTimeOutcome:
+                  TargetIntegrationTime(
+                    Zipper.fromNel(NonEmptyList.one(selected)),
+                    Band.R.asLeft,
+                    SignalToNoiseAt(atWavelength,
+                                    SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                    TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                    ).some
+                  ).asRight
+          )
+        )
       ).asRight
     )
 
@@ -180,22 +188,26 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.Flamingos2ImagingInputData)
     imaging(
       toITC,
-      ClientCalculationResult(
-        ItcVersions(
-          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          BuildInfo.ocslibHash.some
-        ),
-        AsterismIntegrationTimeOutcomes:
-          NonEmptyChain:
-            TargetIntegrationTimeOutcome:
-              TargetIntegrationTime(
-                Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R.asLeft,
-                SignalToNoiseAt(atWavelength,
-                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
-              ).asRight
+      ClientMultiCalculationResult(
+        NonEmptyList.one(
+          ClientCalculationResult(
+            ItcVersions(
+              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              BuildInfo.ocslibHash.some
+            ),
+            AsterismIntegrationTimeOutcomes:
+              NonEmptyChain:
+                TargetIntegrationTimeOutcome:
+                  TargetIntegrationTime(
+                    Zipper.fromNel(NonEmptyList.one(selected)),
+                    Band.R.asLeft,
+                    SignalToNoiseAt(atWavelength,
+                                    SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                    TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                    ).some
+                  ).asRight
+          )
+        )
       ).asRight
     )
 
@@ -437,7 +449,9 @@ object WiringSuite:
           WaterVapor.VeryDry,
           ElevationRange.ByAirMass.Default
         ),
-        InstrumentMode.Flamingos2Imaging(Flamingos2Filter.J)
+        NonEmptyList.one(
+          InstrumentMode.Flamingos2Imaging(Flamingos2Filter.J)
+        )
       ),
       NonEmptyList.of(
         TargetInput(
@@ -472,9 +486,11 @@ object WiringSuite:
           WaterVapor.VeryDry,
           ElevationRange.ByAirMass.Default
         ),
-        InstrumentMode.GmosNorthImaging(
-          GmosNorthFilter.GPrime,
-          none
+        NonEmptyList.one(
+          InstrumentMode.GmosNorthImaging(
+            GmosNorthFilter.GPrime,
+            none
+          )
         )
       ),
       NonEmptyList.of(

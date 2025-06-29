@@ -82,7 +82,7 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
 }
 
 object ImagingIntegrationTime extends GraphQLOperation[Unit] {
-  type Data      = ClientCalculationResult
+  type Data      = ClientMultiCalculationResult
   type Variables = ImagingInput
 
   override val document: String =
@@ -126,14 +126,16 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
 
       query Imaging($spec: ImagingInput!) {
         imaging(input: $spec) {
-          versions {
-            serverVersion
-            dataVersion
+          all {
+            versions {
+              serverVersion
+              dataVersion
+            }
+            targetTimes {
+              ...TargetIntegrationTimeOutcomeFields
+            }
+            brightestIndex
           }
-          targetTimes {
-            ...TargetIntegrationTimeOutcomeFields
-          }
-          brightestIndex
         }
       }
     """
@@ -145,8 +147,8 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
       )
     }
 
-  override val dataDecoder: Decoder[ClientCalculationResult] =
-    (c: HCursor) => c.downField("imaging").as[ClientCalculationResult]
+  override val dataDecoder: Decoder[ClientMultiCalculationResult] =
+    (c: HCursor) => c.downField("imaging").as[ClientMultiCalculationResult]
 }
 
 object SpectroscopyGraphsQuery extends GraphQLOperation[Unit] {
