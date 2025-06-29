@@ -62,7 +62,7 @@ trait ClientSuite extends CatsEffectSuite:
 
   def spectroscopy(
     in:       SpectroscopyInput,
-    expected: Either[String, ClientCalculationResult]
+    expected: Either[String, ClientMultiCalculationResult]
   ): IO[Unit] =
     bandNormalizedClient.use:
       _.spectroscopy(in).attempt
@@ -97,7 +97,7 @@ trait ClientSuite extends CatsEffectSuite:
 
   def spectroscopyEmissionLines(
     in:       SpectroscopyInput,
-    expected: Either[String, ClientCalculationResult]
+    expected: Either[String, ClientMultiCalculationResult]
   ): IO[Unit] =
     emissionLineClient.use:
       _.spectroscopy(in).attempt

@@ -7542,7 +7542,7 @@ type Query {
   Given an instrument and a spectroscopy mode,
   return the integration time and the S/N for the given targets.
   """
-  spectroscopy(input: SpectroscopyInput!): CalculationResult!
+  spectroscopy(input: SpectroscopyInput!): MultiCalculationResult!
 
   """
   Given an instrument and an imaging mode,

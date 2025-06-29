@@ -86,44 +86,52 @@ class WiringSuite extends ClientSuite:
   test("ItcClient spectroscopy basic wiring and sanity check"):
     spectroscopy(
       WiringSuite.GmosSpectroscopyInputData,
-      ClientCalculationResult(
-        ItcVersions(
-          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          BuildInfo.ocslibHash.some
-        ),
-        AsterismIntegrationTimeOutcomes:
-          NonEmptyChain:
-            TargetIntegrationTimeOutcome:
-              TargetIntegrationTime(
-                Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R.asLeft,
-                SignalToNoiseAt(atWavelength,
-                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
-              ).asRight
+      ClientMultiCalculationResult(
+        NonEmptyList.one(
+          ClientCalculationResult(
+            ItcVersions(
+              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              BuildInfo.ocslibHash.some
+            ),
+            AsterismIntegrationTimeOutcomes:
+              NonEmptyChain:
+                TargetIntegrationTimeOutcome:
+                  TargetIntegrationTime(
+                    Zipper.fromNel(NonEmptyList.one(selected)),
+                    Band.R.asLeft,
+                    SignalToNoiseAt(atWavelength,
+                                    SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                    TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                    ).some
+                  ).asRight
+          )
+        )
       ).asRight
     )
 
   test("ItcClient flamingos2 spectroscopy basic wiring and sanity check"):
     spectroscopy(
       WiringSuite.Flamingos2SpectroscopyInputData,
-      ClientCalculationResult(
-        ItcVersions(
-          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          BuildInfo.ocslibHash.some
-        ),
-        AsterismIntegrationTimeOutcomes:
-          NonEmptyChain:
-            TargetIntegrationTimeOutcome:
-              TargetIntegrationTime(
-                Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R.asLeft,
-                SignalToNoiseAt(atWavelength,
-                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
-              ).asRight
+      ClientMultiCalculationResult(
+        NonEmptyList.one(
+          ClientCalculationResult(
+            ItcVersions(
+              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              BuildInfo.ocslibHash.some
+            ),
+            AsterismIntegrationTimeOutcomes:
+              NonEmptyChain:
+                TargetIntegrationTimeOutcome:
+                  TargetIntegrationTime(
+                    Zipper.fromNel(NonEmptyList.one(selected)),
+                    Band.R.asLeft,
+                    SignalToNoiseAt(atWavelength,
+                                    SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                    TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                    ).some
+                  ).asRight
+          )
+        )
       ).asRight
     )
 
@@ -272,44 +280,52 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.GmosSpectroscopyInputData)
     spectroscopy(
       toTC,
-      ClientCalculationResult(
-        ItcVersions(
-          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          BuildInfo.ocslibHash.some
-        ),
-        AsterismIntegrationTimeOutcomes:
-          NonEmptyChain:
-            TargetIntegrationTimeOutcome:
-              TargetIntegrationTime(
-                Zipper.fromNel(NonEmptyList.one(selected)),
-                Band.R.asLeft,
-                SignalToNoiseAt(atWavelength,
-                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
-              ).asRight
+      ClientMultiCalculationResult(
+        NonEmptyList.one(
+          ClientCalculationResult(
+            ItcVersions(
+              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              BuildInfo.ocslibHash.some
+            ),
+            AsterismIntegrationTimeOutcomes:
+              NonEmptyChain:
+                TargetIntegrationTimeOutcome:
+                  TargetIntegrationTime(
+                    Zipper.fromNel(NonEmptyList.one(selected)),
+                    Band.R.asLeft,
+                    SignalToNoiseAt(atWavelength,
+                                    SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                    TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                    ).some
+                  ).asRight
+          )
+        )
       ).asRight
     )
 
   test("ItcClient spectroscopy with emission lines basic wiring and sanity check"):
     spectroscopyEmissionLines(
       WiringSuite.SpectroscopyEmissionLinesInput,
-      ClientCalculationResult(
-        ItcVersions(
-          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          BuildInfo.ocslibHash.some
-        ),
-        AsterismIntegrationTimeOutcomes:
-          NonEmptyChain:
-            TargetIntegrationTimeOutcome:
-              TargetIntegrationTime(
-                Zipper.fromNel(NonEmptyList.one(selected)),
-                Wavelength.unsafeFromIntPicometers(650000).asRight,
-                SignalToNoiseAt(atWavelength,
-                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
-              ).asRight
+      ClientMultiCalculationResult(
+        NonEmptyList.one(
+          ClientCalculationResult(
+            ItcVersions(
+              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              BuildInfo.ocslibHash.some
+            ),
+            AsterismIntegrationTimeOutcomes:
+              NonEmptyChain:
+                TargetIntegrationTimeOutcome:
+                  TargetIntegrationTime(
+                    Zipper.fromNel(NonEmptyList.one(selected)),
+                    Wavelength.unsafeFromIntPicometers(650000).asRight,
+                    SignalToNoiseAt(atWavelength,
+                                    SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                    TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                    ).some
+                  ).asRight
+          )
+        )
       ).asRight
     )
 
@@ -327,22 +343,26 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.GmosSpectroscopyInputData)
     spectroscopy(
       toTC,
-      ClientCalculationResult(
-        ItcVersions(
-          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
-          BuildInfo.ocslibHash.some
-        ),
-        AsterismIntegrationTimeOutcomes:
-          NonEmptyChain:
-            TargetIntegrationTimeOutcome:
-              TargetIntegrationTime(
-                Zipper.fromNel(NonEmptyList.one(selectedLarge)),
-                Band.R.asLeft,
-                SignalToNoiseAt(atWavelength,
-                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
-                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
-              ).asRight
+      ClientMultiCalculationResult(
+        NonEmptyList.one(
+          ClientCalculationResult(
+            ItcVersions(
+              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              BuildInfo.ocslibHash.some
+            ),
+            AsterismIntegrationTimeOutcomes:
+              NonEmptyChain:
+                TargetIntegrationTimeOutcome:
+                  TargetIntegrationTime(
+                    Zipper.fromNel(NonEmptyList.one(selectedLarge)),
+                    Band.R.asLeft,
+                    SignalToNoiseAt(atWavelength,
+                                    SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                    TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                    ).some
+                  ).asRight
+          )
+        )
       ).asRight
     )
 

@@ -68,27 +68,29 @@ class customSedSuite extends GraphQLSuite {
               }
             }
           }) {
-            mode {
-              ... on SpectroscopyMode {
-                instrument
-                params {
-                  ... on GmosNSpectroscopyParams {
-                    grating
-                    centralWavelength {
-                      nanometers
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosNSpectroscopyParams {
+                      grating
+                      centralWavelength {
+                        nanometers
+                      }
                     }
                   }
                 }
               }
-            }
-            brightest {
-              selected {
-                exposureCount
-                exposureTime {
-                  seconds
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
                 }
+                band
               }
-              band
             }
           }
         }
@@ -97,24 +99,26 @@ class customSedSuite extends GraphQLSuite {
         {
           "data": {
             "spectroscopy" : {
-              "mode" : {
-                "instrument" : "GMOS_NORTH",
-                "params": {
-                  "grating": "B1200_G5301",
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
-                  }
-                }
-              },
-              "brightest": {
-                "selected" : {
-                  "exposureCount" : 10,
-                  "exposureTime" : {
-                    "seconds" : 1.000000
+              "all": [{
+                "mode" : {
+                  "instrument" : "GMOS_NORTH",
+                  "params": {
+                    "grating": "B1200_G5301",
+                    "centralWavelength" : {
+                      "nanometers" : 60.000
+                    }
                   }
                 },
-                "band": "R"
-              }
+                "brightest": {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
+                    }
+                  },
+                  "band": "R"
+                }
+              }]
             }
           }
         }
@@ -179,27 +183,29 @@ class customSedSuite extends GraphQLSuite {
               }
             }
           }) {
-            mode {
-              ... on SpectroscopyMode {
-                instrument
-                params {
-                  ... on GmosNSpectroscopyParams {
-                    grating
-                    centralWavelength {
-                      nanometers
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosNSpectroscopyParams {
+                      grating
+                      centralWavelength {
+                        nanometers
+                      }
                     }
                   }
                 }
               }
-            }
-            brightest {
-              selected {
-                exposureCount
-                exposureTime {
-                  seconds
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
                 }
+                band
               }
-              band
             }
           }
         }
@@ -208,24 +214,26 @@ class customSedSuite extends GraphQLSuite {
         {
           "data": {
             "spectroscopy" : {
-              "mode" : {
-                "instrument" : "GMOS_NORTH",
-                "params": {
-                  "grating": "B1200_G5301",
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
-                  }
-                }
-              },
-              "brightest": {
-                "selected" : {
-                  "exposureCount" : 10,
-                  "exposureTime" : {
-                    "seconds" : 1.000000
+              "all": [{
+                "mode" : {
+                  "instrument" : "GMOS_NORTH",
+                  "params": {
+                    "grating": "B1200_G5301",
+                    "centralWavelength" : {
+                      "nanometers" : 60.000
+                    }
                   }
                 },
-                "band": "R"
-              }
+                "brightest": {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
+                    }
+                  },
+                  "band": "R"
+                }
+              }]
             }
           }
         }
@@ -290,27 +298,29 @@ class customSedSuite extends GraphQLSuite {
               }
             }
           }) {
-            mode {
-              ... on SpectroscopyMode {
-                instrument
-                params {
-                  ... on GmosNSpectroscopyParams {
-                    grating
-                    centralWavelength {
-                      nanometers
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosNSpectroscopyParams {
+                      grating
+                      centralWavelength {
+                        nanometers
+                      }
                     }
                   }
                 }
               }
-            }
-            brightest {
-              selected {
-                exposureCount
-                exposureTime {
-                  seconds
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
                 }
+                band
               }
-              band
             }
           }
         }
@@ -332,16 +342,20 @@ class customSedSuite extends GraphQLSuite {
           ],
           "data": {
             "spectroscopy" : {
-              "mode" : {
-                "instrument" : "GMOS_NORTH",
-                "params" : {
-                  "grating" : "B1200_G5301",
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
-                  }
+              "all" : [
+                {
+                  "mode" : {
+                    "instrument" : "GMOS_NORTH",
+                    "params" : {
+                      "grating" : "B1200_G5301",
+                      "centralWavelength" : {
+                        "nanometers" : 60.000
+                      }
+                    }
+                  },
+                  "brightest" : null
                 }
-              },
-              "brightest" : null
+              ]
             }
           }
         }
@@ -406,27 +420,29 @@ class customSedSuite extends GraphQLSuite {
               }
             }
           }) {
-            mode {
-              ... on SpectroscopyMode {
-                instrument
-                params {
-                  ... on GmosNSpectroscopyParams {
-                    grating
-                    centralWavelength {
-                      nanometers
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosNSpectroscopyParams {
+                      grating
+                      centralWavelength {
+                        nanometers
+                      }
                     }
                   }
                 }
               }
-            }
-            brightest {
-              selected {
-                exposureCount
-                exposureTime {
-                  seconds
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
                 }
+                band
               }
-              band
             }
           }
         }
@@ -448,16 +464,20 @@ class customSedSuite extends GraphQLSuite {
           ],
           "data": {
             "spectroscopy" : {
-              "mode" : {
-                "instrument" : "GMOS_NORTH",
-                "params" : {
-                  "grating" : "B1200_G5301",
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
-                  }
+              "all" : [
+                {
+                  "mode" : {
+                    "instrument" : "GMOS_NORTH",
+                    "params" : {
+                      "grating" : "B1200_G5301",
+                      "centralWavelength" : {
+                        "nanometers" : 60.000
+                      }
+                    }
+                  },
+                  "brightest" : null
                 }
-              },
-              "brightest" : null
+              ]
             }
           }
         }

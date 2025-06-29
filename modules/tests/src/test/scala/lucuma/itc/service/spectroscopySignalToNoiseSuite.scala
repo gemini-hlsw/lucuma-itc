@@ -74,32 +74,34 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             }
           }) {
-            mode {
-              ... on SpectroscopyMode {
-                instrument
-                params {
-                  ... on GmosNSpectroscopyParams {
-                    grating
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosNSpectroscopyParams {
+                      grating
+                    }
                   }
                 }
               }
-            }
-            exposureTimeMode {
-              signalToNoise {
-                value
-                at {
-                  nanometers
+              exposureTimeMode {
+                signalToNoise {
+                  value
+                  at {
+                    nanometers
+                  }
                 }
               }
-            }
-            brightest {
-              selected {
-                exposureCount
-                exposureTime {
-                  seconds
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
                 }
+                band
               }
-              band
             }
           }
         }
@@ -108,27 +110,29 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
         {
           "data": {
             "spectroscopy" : {
-              "mode" : {
-                "instrument" : "GMOS_NORTH",
-                "params": {
-                  "grating": "B1200_G5301"
-                }
-              },
-              "exposureTimeMode": {
-                "signalToNoise": {
-                  "value": 2,
-                  "at": { "nanometers": 60.000 }
-                }
-              },
-              "brightest": {
-                "selected" : {
-                  "exposureCount" : 10,
-                  "exposureTime" : {
-                    "seconds" : 1.000000
+              "all": [{
+                "mode" : {
+                  "instrument" : "GMOS_NORTH",
+                  "params": {
+                    "grating": "B1200_G5301"
                   }
                 },
-                "band": "R"
-              }
+                "exposureTimeMode": {
+                  "signalToNoise": {
+                    "value": 2,
+                    "at": { "nanometers": 60.000 }
+                  }
+                },
+                "brightest": {
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
+                    }
+                  },
+                  "band": "R"
+                }
+              }]
             }
           }
         }
@@ -198,6 +202,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             }
           }) {
+            all {
               mode {
                 ... on SpectroscopyMode {
                   instrument
@@ -227,6 +232,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                   }
                 }
               }
+            }
           }
         }
         """,
@@ -234,6 +240,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
         {
           "data": {
             "spectroscopy" : {
+              "all": [{
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
                   "params": {
@@ -257,7 +264,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                     }
                   }
                 }
-              }
+              }]
+            }
           }
         }
         """
@@ -321,6 +329,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             }
           }) {
+            all {
               mode {
                 ... on SpectroscopyMode {
                   instrument
@@ -351,6 +360,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                   }
                 }
               }
+            }
           }
         }
         """,
@@ -358,6 +368,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
         {
           "data": {
             "spectroscopy" : {
+              "all": [{
                 "mode" : {
                   "instrument" : "FLAMINGOS2",
                   "params": {
@@ -384,7 +395,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                     }
                   }
                 }
-              }
+              }]
+            }
           }
         }
         """
@@ -394,7 +406,17 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
   test("gmos north case with variables") {
     query(
       """
-        query($spectroscopy: SpectroscopyInput) {\n          spectroscopy(input: $spectroscopy) {\n            mode {\n ... on SpectroscopyMode {\n                instrument\n              }\n       }\n            }\n        }\n
+        query($spectroscopy: SpectroscopyInput) {
+          spectroscopy(input: $spectroscopy) {
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                }
+              }
+            }
+          }
+        }
       """,
       """
         {
@@ -460,12 +482,13 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
       json"""
         {
           "data": {
-            "spectroscopy" :
-              {
+            "spectroscopy" : {
+              "all": [{
                 "mode" : {
                   "instrument" : "GMOS_NORTH"
                 }
-              }
+              }]
+            }
           }
         }
         """
@@ -550,40 +573,42 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             }
           }) {
-                mode {
-                  ... on SpectroscopyMode {
-                    instrument
-                    params {
-                      ... on GmosNSpectroscopyParams {
-                        grating
-                      }
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosNSpectroscopyParams {
+                      grating
                     }
                   }
-                }
-                exposureTimeMode {
-                  signalToNoise {
-                    value
-                    at {
-                      nanometers
-                    }
-                  }
-                }
-                brightest {
-                  selected {
-                    exposureCount
-                    exposureTime {
-                      seconds
-                    }
                 }
               }
+              exposureTimeMode {
+                signalToNoise {
+                  value
+                  at {
+                    nanometers
+                  }
+                }
+              }
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
+                }
+              }
+            }
           }
         }
         """,
         json"""
         {
           "data": {
-            "spectroscopy" :
-              {
+            "spectroscopy" : {
+              "all": [{
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
                   "params": {
@@ -604,7 +629,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                     }
                   }
                 }
-              }
+              }]
+            }
           }
         }
         """
@@ -673,6 +699,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             }
           }) {
+            all {
               mode {
                 ... on SpectroscopyMode {
                   instrument
@@ -699,6 +726,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                   }
                 }
               }
+            }
           }
         }
         """,
@@ -777,40 +805,42 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             }
           }) {
-                mode {
-                  ... on SpectroscopyMode {
-                    instrument
-                    params {
-                      ... on GmosNSpectroscopyParams {
-                        grating
-                      }
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosNSpectroscopyParams {
+                      grating
                     }
                   }
                 }
-                exposureTimeMode {
-                  signalToNoise {
-                    value
-                    at {
-                      nanometers
-                    }
+              }
+              exposureTimeMode {
+                signalToNoise {
+                  value
+                  at {
+                    nanometers
                   }
                 }
-                brightest {
-                  selected {
-                    exposureCount
-                    exposureTime {
-                      seconds
-                    }
+              }
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
                   }
                 }
+              }
+            }
           }
         }
         """,
         json"""
         {
           "data": {
-            "spectroscopy" :
-              {
+            "spectroscopy" : {
+              "all": [{
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
                   "params": {
@@ -831,7 +861,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                     }
                   }
                 }
-              }
+              }]
+            }
           }
         }
         """
@@ -906,43 +937,45 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             }
           }) {
-                mode {
-                  ... on SpectroscopyMode {
-                    instrument
-                    params {
-                      ... on GmosSSpectroscopyParams {
-                        grating
-                        centralWavelength {
-                          nanometers
-                        }
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosSSpectroscopyParams {
+                      grating
+                      centralWavelength {
+                        nanometers
                       }
                     }
                   }
                 }
-                exposureTimeMode {
-                  signalToNoise {
-                    value
-                    at {
-                      nanometers
-                    }
+              }
+              exposureTimeMode {
+                signalToNoise {
+                  value
+                  at {
+                    nanometers
                   }
                 }
-                brightest {
-                  selected {
-                    exposureCount
-                    exposureTime {
-                      seconds
-                    }
+              }
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
                   }
                 }
+              }
+            }
           }
         }
         """,
         json"""
         {
           "data": {
-            "spectroscopy" :
-              {
+            "spectroscopy" : {
+              "all": [{
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
                   "params": {
@@ -966,7 +999,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                     }
                   }
                 }
-              }
+              }]
+            }
           }
         }
         """
@@ -1041,42 +1075,44 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                 }
               }
             }) {
-                  mode {
-                    ... on SpectroscopyMode {
-                      instrument
-                      params {
-                        ... on GmosNSpectroscopyParams {
-                          fpu {
-                            builtin
-                          }
+              all {
+                mode {
+                  ... on SpectroscopyMode {
+                    instrument
+                    params {
+                      ... on GmosNSpectroscopyParams {
+                        fpu {
+                          builtin
                         }
                       }
                     }
                   }
-                  exposureTimeMode {
-                    signalToNoise {
-                      value
-                      at {
-                        nanometers
-                      }
+                }
+                exposureTimeMode {
+                  signalToNoise {
+                    value
+                    at {
+                      nanometers
                     }
                   }
-                  brightest {
-                    selected {
-                      exposureCount
-                      exposureTime {
-                        seconds
-                      }
+                }
+                brightest {
+                  selected {
+                    exposureCount
+                    exposureTime {
+                      seconds
                     }
                   }
+                }
+              }
             }
           }
       """,
         json"""
         {
           "data": {
-            "spectroscopy" :
-              {
+            "spectroscopy" : {
+              "all": [{
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
                   "params": {
@@ -1099,7 +1135,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                     }
                   }
                 }
-              }
+              }]
+            }
           }
         }
         """
@@ -1169,45 +1206,47 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             }
           }) {
-                mode {
-                  ... on SpectroscopyMode {
-                    instrument
-                    params {
-                      ... on GmosSSpectroscopyParams {
-                        fpu {
-                          builtin
-                        }
-                        centralWavelength {
-                          nanometers
-                        }
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosSSpectroscopyParams {
+                      fpu {
+                        builtin
+                      }
+                      centralWavelength {
+                        nanometers
                       }
                     }
                   }
                 }
-                exposureTimeMode {
-                  signalToNoise {
-                    value
-                    at {
-                      nanometers
-                    }
+              }
+              exposureTimeMode {
+                signalToNoise {
+                  value
+                  at {
+                    nanometers
                   }
                 }
-                brightest {
-                  selected {
-                    exposureCount
-                    exposureTime {
-                      seconds
-                    }
+              }
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
                   }
                 }
+              }
             }
+          }
         }
         """,
         json"""
         {
           "data": {
-            "spectroscopy" :
-              {
+            "spectroscopy" : {
+              "all": [{
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
                   "params": {
@@ -1233,7 +1272,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                     }
                   }
                 }
-              }
+              }]
+            }
           }
         }
         """
@@ -1295,7 +1335,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                 centralWavelength: {
                   nanometers: 60,
                 },
-                filter: ${d.tag.toScreamingSnakeCase}
+                filter: ${d.tag.toScreamingSnakeCase},
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
@@ -1303,43 +1343,45 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             }
           }) {
-                mode {
-                  ... on SpectroscopyMode {
-                    instrument
-                    params {
-                      ... on GmosNSpectroscopyParams {
-                        filter
-                        centralWavelength {
-                          nanometers
-                        }
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosNSpectroscopyParams {
+                      filter
+                      centralWavelength {
+                        nanometers
                       }
                     }
                   }
                 }
-                exposureTimeMode {
-                  signalToNoise {
-                    value
-                    at {
-                      nanometers
-                    }
+              }
+              exposureTimeMode {
+                signalToNoise {
+                  value
+                  at {
+                    nanometers
                   }
                 }
-                brightest {
-                  selected {
-                      exposureCount
-                      exposureTime {
-                        seconds
-                      }
+              }
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
                   }
                 }
+              }
+            }
           }
         }
         """,
         json"""
         {
           "data": {
-            "spectroscopy" :
-              {
+            "spectroscopy" : {
+              "all": [{
                 "mode" : {
                   "instrument" : "GMOS_NORTH",
                   "params": {
@@ -1363,7 +1405,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                     }
                   }
                 }
-              }
+              }]
+            }
           }
         }
         """
@@ -1425,7 +1468,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                 centralWavelength: {
                   nanometers: 60,
                 },
-                filter: ${d.tag.toScreamingSnakeCase}
+                filter: ${d.tag.toScreamingSnakeCase},
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
@@ -1433,43 +1476,45 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             }
           }) {
-                mode {
-                  ... on SpectroscopyMode {
-                    instrument
-                    params {
-                      ... on GmosSSpectroscopyParams {
-                        filter
-                        centralWavelength {
-                          nanometers
-                        }
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosSSpectroscopyParams {
+                      filter
+                      centralWavelength {
+                        nanometers
                       }
                     }
                   }
                 }
-                exposureTimeMode {
-                  signalToNoise {
-                    value
-                    at {
-                      nanometers
-                    }
+              }
+              exposureTimeMode {
+                signalToNoise {
+                  value
+                  at {
+                    nanometers
                   }
                 }
-                brightest {
-                  selected {
-                      exposureCount
-                      exposureTime {
-                        seconds
-                      }
+              }
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
                   }
                 }
+              }
+            }
           }
         }
         """,
         json"""
         {
           "data": {
-            "spectroscopy" :
-              {
+            "spectroscopy" : {
+              "all": [{
                 "mode" : {
                   "instrument" : "GMOS_SOUTH",
                   "params": {
@@ -1493,7 +1538,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                     }
                   }
                 }
-              }
+              }]
+            }
           }
         }
         """
@@ -1581,39 +1627,41 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             }
           }) {
-            mode {
-              ... on SpectroscopyMode {
-                instrument
-                params {
-                  ... on GmosNSpectroscopyParams {
-                    grating
-                    centralWavelength {
-                      nanometers
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosNSpectroscopyParams {
+                      grating
+                      centralWavelength {
+                        nanometers
+                      }
                     }
                   }
                 }
               }
-            }
-            exposureTimeMode {
-              signalToNoise {
-                value
-                at {
-                  nanometers
-                }
-              }
-            }
-            targetTimes {
-              ...on TargetIntegrationTime {
-                selected {
-                  exposureCount
-                  exposureTime {
-                    seconds
+              exposureTimeMode {
+                signalToNoise {
+                  value
+                  at {
+                    nanometers
                   }
                 }
-                band
               }
+              targetTimes {
+                ...on TargetIntegrationTime {
+                  selected {
+                    exposureCount
+                    exposureTime {
+                      seconds
+                    }
+                  }
+                  band
+                }
+              }
+              brightestIndex
             }
-            brightestIndex
           }
         }
         """,
@@ -1621,42 +1669,44 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
         {
           "data": {
             "spectroscopy" : {
-              "mode" : {
-                "instrument" : "GMOS_NORTH",
-                "params": {
-                  "grating": "B1200_G5301",
-                  "centralWavelength" : {
-                    "nanometers" : 600.000
+              "all": [{
+                "mode" : {
+                  "instrument" : "GMOS_NORTH",
+                  "params": {
+                    "grating": "B1200_G5301",
+                    "centralWavelength" : {
+                      "nanometers" : 600.000
+                    }
                   }
-                }
-              },
-              "exposureTimeMode": {
-                "signalToNoise": {
-                  "value": 2,
-                  "at": { "nanometers": 60.000 }
-                }
-              },
-              "targetTimes": [
-                {
-                  "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
-                    }
-                  },
-                  "band": "R"
                 },
-                {
-                  "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
-                    }
+                "exposureTimeMode": {
+                  "signalToNoise": {
+                    "value": 2,
+                    "at": { "nanometers": 60.000 }
+                  }
+                },
+                "targetTimes": [
+                  {
+                    "selected" : {
+                      "exposureCount" : 10,
+                      "exposureTime" : {
+                        "seconds" : 1.000000
+                      }
+                    },
+                    "band": "R"
                   },
-                  "band": "R"
-                }
-              ],
-              "brightestIndex": 0
+                  {
+                    "selected" : {
+                      "exposureCount" : 10,
+                      "exposureTime" : {
+                        "seconds" : 1.000000
+                      }
+                    },
+                    "band": "R"
+                  }
+                ],
+                "brightestIndex": 0
+              }]
             }
           }
         }

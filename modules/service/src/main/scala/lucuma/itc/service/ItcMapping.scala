@@ -301,8 +301,9 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                   env
                     .getR[SpectroscopyInput]("input")
                     .flatMap(AsterismSpectroscopyTimeRequest.fromInput)
-                    .flatTraverse:
-                      calculateSpectroscopyIntegrationTime[F](environment, cache, itc)
+                    .flatTraverse: request =>
+                      calculateSpectroscopyIntegrationTime[F](environment, cache, itc)(request)
+                        .map(_.map(result => MultiCalculationResult(NonEmptyList.one(result))))
                     .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("imaging") { (_, env) =>

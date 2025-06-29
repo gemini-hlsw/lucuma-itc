@@ -68,24 +68,26 @@ class errorChannelSuite extends FailingCalculationSuite:
               }
             }
           }) {
-            mode {
-              ... on SpectroscopyMode {
-                instrument
-                params {
-                  ... on GmosNSpectroscopyParams {
-                    grating
-                    centralWavelength {
-                      nanometers
+            all {
+              mode {
+                ... on SpectroscopyMode {
+                  instrument
+                  params {
+                    ... on GmosNSpectroscopyParams {
+                      grating
+                      centralWavelength {
+                        nanometers
+                      }
                     }
                   }
                 }
               }
-            }
-            brightest {
-              selected {
-                exposureCount
-                exposureTime {
-                  seconds
+              brightest {
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
                 }
               }
             }
@@ -107,16 +109,18 @@ class errorChannelSuite extends FailingCalculationSuite:
           }],
           "data": {
             "spectroscopy" : {
-              "mode" : {
-                "instrument" : "GMOS_NORTH",
-                "params" : {
-                  "grating" : "B1200_G5301",
-                  "centralWavelength" : {
-                    "nanometers" : 60.000
+              "all": [{
+                "mode" : {
+                  "instrument" : "GMOS_NORTH",
+                  "params" : {
+                    "grating" : "B1200_G5301",
+                    "centralWavelength" : {
+                      "nanometers" : 60.000
+                    }
                   }
-                }
-              },
-              "brightest" : null
+                },
+                "brightest" : null
+              }]
             }
           }
         }
