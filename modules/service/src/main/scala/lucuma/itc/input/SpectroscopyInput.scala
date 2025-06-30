@@ -45,11 +45,10 @@ object SpectroscopyInput:
             InstrumentModesInput.Binding.List("modes", modes)
           ) =>
         (exposureTimeMode, asterism, constraints, modes)
-          .parMapN: (exp, ast, con, modes) =>
+          .parFlatMapN: (exp, ast, con, modes) =>
             NonEmptyList.fromList(modes) match
               case Some(nel) => Result.success(apply(exp, ast, con, nel))
               case None      => Result.failure("At least one imaging mode is required")
-          .flatMap(identity)
 
 case class SpectroscopyIntegrationTimeAndGraphsInput(
   exposureTimeMode:   ExposureTimeMode,
