@@ -76,7 +76,6 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   def calculateSpectroscopyIntegrationTime[F[
     _
   ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
-    environment:     ExecutionEnvironment,
     cache:           BinaryEffectfulCache[F],
     itc:             Itc[F]
   )(
@@ -90,7 +89,6 @@ object ItcMapping extends ItcCacheOrRemote with Version {
               result.leftMap(buildError)
       .map: (targetOutcomes: NonEmptyChain[TargetIntegrationTimeOutcome]) =>
         CalculationResult(
-          ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
           asterismRequest.specMode,
           AsterismIntegrationTimeOutcomes(targetOutcomes),
           asterismRequest.exposureTimeMode
@@ -103,9 +101,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   def calculateImagingIntegrationTime[F[
     _
   ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
-    environment: ExecutionEnvironment,
-    cache:       BinaryEffectfulCache[F],
-    itc:         Itc[F]
+    cache: BinaryEffectfulCache[F],
+    itc:   Itc[F]
   )(asterismRequest: AsterismImagingTimeRequest): F[Result[CalculationResult]] =
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetImagingTimeRequest) =>
@@ -125,7 +122,6 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                       integrationTime
       .map: (targetOutcomes: NonEmptyChain[TargetIntegrationTimeOutcome]) =>
         CalculationResult(
-          ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
           asterismRequest.imagingMode,
           AsterismIntegrationTimeOutcomes(targetOutcomes),
           asterismRequest.exposureTimeMode
@@ -144,10 +140,12 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   )(asterismRequests: NonEmptyList[AsterismImagingTimeRequest]): F[Result[ModesResult]] =
     asterismRequests
       .parTraverse: request =>
-        calculateImagingIntegrationTime(environment, cache, itc)(request)
+        calculateImagingIntegrationTime(cache, itc)(request)
       .map: results =>
         val calculationResults = results.traverse(identity)
-        calculationResults.map(ModesResult.apply)
+        calculationResults.map(
+          ModesResult(ItcVersions(version(environment).value, BuildInfo.ocslibHash.some), _)
+        )
       .onError: t =>
         Logger[F]
           .error(t)(
@@ -247,7 +245,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     asterismRequest: AsterismSpectroscopyTimeRequest,
     figures:         Option[SignificantFigures]
   ): F[Result[SpectroscopyTimeAndGraphsResult]] =
-    ResultT(calculateSpectroscopyIntegrationTime(environment, cache, itc)(asterismRequest))
+    ResultT(calculateSpectroscopyIntegrationTime(cache, itc)(asterismRequest))
       .flatMap: (specTimeResults: CalculationResult) =>
         specTimeResults.targetTimes.partitionErrors
           .bimap(
@@ -265,7 +263,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           .bisequence
           .map: (timesOrGraphs: Either[AsterismIntegrationTimeOutcomes, AsterismTimeAndGraphs]) =>
             SpectroscopyTimeAndGraphsResult(
-              specTimeResults.versions,
+              ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
               AsterismTimesAndGraphsOutcomes(timesOrGraphs)
             )
       .value
@@ -304,8 +302,16 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                     .getR[SpectroscopyInput]("input")
                     .flatMap(AsterismSpectroscopyTimeRequest.fromInput)
                     .flatTraverse: request =>
-                      calculateSpectroscopyIntegrationTime[F](environment, cache, itc)(request)
-                        .map(_.map(result => ModesResult(NonEmptyList.one(result))))
+                      calculateSpectroscopyIntegrationTime[F](cache, itc)(request)
+                        .map(
+                          _.map(result =>
+                            ModesResult(ItcVersions(version(environment).value,
+                                                    BuildInfo.ocslibHash.some
+                                        ),
+                                        NonEmptyList.one(result)
+                            )
+                          )
+                        )
                     .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("imaging") { (_, env) =>

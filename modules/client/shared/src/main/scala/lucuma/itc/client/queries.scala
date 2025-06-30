@@ -58,11 +58,11 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
 
       query Spectroscopy($spec: SpectroscopyInput!) {
         spectroscopy(input: $spec) {
+          versions {
+            serverVersion
+            dataVersion
+          }
           all {
-            versions {
-              serverVersion
-              dataVersion
-            }
             targetTimes {
               ...TargetIntegrationTimeOutcomeFields
             }
@@ -128,11 +128,11 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
 
       query Imaging($spec: ImagingInput!) {
         imaging(input: $spec) {
+          versions {
+            serverVersion
+            dataVersion
+          }
           all {
-            versions {
-              serverVersion
-              dataVersion
-            }
             targetTimes {
               ...TargetIntegrationTimeOutcomeFields
             }

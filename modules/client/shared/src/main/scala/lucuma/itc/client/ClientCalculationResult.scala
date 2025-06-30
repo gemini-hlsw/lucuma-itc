@@ -16,29 +16,28 @@ import lucuma.itc.TargetIntegrationTimeOutcome
 import lucuma.itc.client.json.decoders.given
 
 case class ClientCalculationResult(
-  versions:    ItcVersions,
   targetTimes: AsterismIntegrationTimeOutcomes
 ) derives Eq
 
 object ClientCalculationResult:
   given Decoder[ClientCalculationResult] with
     def apply(c: HCursor): Decoder.Result[ClientCalculationResult] =
-      for
-        v <- c.downField("versions").as[ItcVersions]
-        t <-
-          c.downField("targetTimes").as[AsterismIntegrationTimeOutcomes]
-      yield ClientCalculationResult(v, t)
+      for t <- c.downField("targetTimes").as[AsterismIntegrationTimeOutcomes]
+      yield ClientCalculationResult(t)
 
   given Eq[ClientCalculationResult] with
     def eqv(x: ClientCalculationResult, y: ClientCalculationResult): Boolean =
-      x.versions === y.versions && x.targetTimes === y.targetTimes
+      x.targetTimes === y.targetTimes
 
 case class ClientModesResult(
-  all: NonEmptyList[ClientCalculationResult]
+  versions: ItcVersions,
+  all:      NonEmptyList[ClientCalculationResult]
 ) derives Eq
 
 object ClientModesResult:
   given Decoder[ClientModesResult] with
     def apply(c: HCursor): Decoder.Result[ClientModesResult] =
-      for all <- c.downField("all").as[NonEmptyList[ClientCalculationResult]]
-      yield ClientModesResult(all)
+      for
+        v   <- c.downField("versions").as[ItcVersions]
+        all <- c.downField("all").as[NonEmptyList[ClientCalculationResult]]
+      yield ClientModesResult(v, all)

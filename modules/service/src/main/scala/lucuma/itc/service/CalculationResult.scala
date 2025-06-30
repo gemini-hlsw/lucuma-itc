@@ -15,21 +15,20 @@ import lucuma.itc.ItcVersions
 import lucuma.itc.encoders.given
 
 case class CalculationResult(
-  versions:         ItcVersions,
   mode:             ObservingMode,
   targetTimes:      AsterismIntegrationTimeOutcomes,
   exposureTimeMode: ExposureTimeMode
 )
 
 case class ModesResult(
-  all: NonEmptyList[CalculationResult]
+  versions: ItcVersions,
+  all:      NonEmptyList[CalculationResult]
 )
 
 object CalculationResult:
   given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[CalculationResult] = r =>
     Json
       .obj(
-        "versions"         -> r.versions.asJson,
         "mode"             -> r.mode.asJson,
         "exposureTimeMode" -> r.exposureTimeMode.asJson,
         "targetTimes"      -> r.targetTimes.asJson,
@@ -40,5 +39,6 @@ object CalculationResult:
 object ModesResult:
   given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[ModesResult] = r =>
     Json.obj(
-      "all" -> r.all.asJson
+      "versions" -> r.versions.asJson,
+      "all"      -> r.all.asJson
     )

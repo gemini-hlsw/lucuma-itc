@@ -8119,14 +8119,14 @@ type IntegrationTime {
 }
 
 type ModesResult {
+  """server and data versions"""
+  versions: ItcVersions!
+
   """each requested mode result"""
   all: [CalculationResult!]!
 }
 
 type CalculationResult {
-  """server and data versions"""
-  versions: ItcVersions!
-
   """queried mode"""
   mode: ITCObservingMode!
 

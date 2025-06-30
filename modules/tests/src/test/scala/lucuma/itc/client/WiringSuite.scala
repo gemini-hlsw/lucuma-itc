@@ -87,14 +87,14 @@ class WiringSuite extends ClientSuite:
     spectroscopy(
       WiringSuite.GmosSpectroscopyInputData,
       ClientModesResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(
+            Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+          ),
+          BuildInfo.ocslibHash.some
+        ),
         NonEmptyList.one(
           ClientCalculationResult(
-            ItcVersions(
-              versionDateTimeFormatter.format(
-                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
-              ),
-              BuildInfo.ocslibHash.some
-            ),
             AsterismIntegrationTimeOutcomes:
               NonEmptyChain:
                 TargetIntegrationTimeOutcome:
@@ -115,14 +115,14 @@ class WiringSuite extends ClientSuite:
     spectroscopy(
       WiringSuite.Flamingos2SpectroscopyInputData,
       ClientModesResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(
+            Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+          ),
+          BuildInfo.ocslibHash.some
+        ),
         NonEmptyList.one(
           ClientCalculationResult(
-            ItcVersions(
-              versionDateTimeFormatter.format(
-                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
-              ),
-              BuildInfo.ocslibHash.some
-            ),
             AsterismIntegrationTimeOutcomes:
               NonEmptyChain:
                 TargetIntegrationTimeOutcome:
@@ -143,14 +143,14 @@ class WiringSuite extends ClientSuite:
     imaging(
       WiringSuite.GmosImagingInputData,
       ClientModesResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(
+            Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+          ),
+          BuildInfo.ocslibHash.some
+        ),
         NonEmptyList.one(
           ClientCalculationResult(
-            ItcVersions(
-              versionDateTimeFormatter.format(
-                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
-              ),
-              BuildInfo.ocslibHash.some
-            ),
             AsterismIntegrationTimeOutcomes:
               NonEmptyChain:
                 TargetIntegrationTimeOutcome:
@@ -171,14 +171,14 @@ class WiringSuite extends ClientSuite:
     imaging(
       WiringSuite.Flamingos2ImagingInputData,
       ClientModesResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(
+            Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+          ),
+          BuildInfo.ocslibHash.some
+        ),
         NonEmptyList.one(
           ClientCalculationResult(
-            ItcVersions(
-              versionDateTimeFormatter.format(
-                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
-              ),
-              BuildInfo.ocslibHash.some
-            ),
             AsterismIntegrationTimeOutcomes:
               NonEmptyChain:
                 TargetIntegrationTimeOutcome:
@@ -205,14 +205,14 @@ class WiringSuite extends ClientSuite:
     imaging(
       toITC,
       ClientModesResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(
+            Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+          ),
+          BuildInfo.ocslibHash.some
+        ),
         NonEmptyList.one(
           ClientCalculationResult(
-            ItcVersions(
-              versionDateTimeFormatter.format(
-                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
-              ),
-              BuildInfo.ocslibHash.some
-            ),
             AsterismIntegrationTimeOutcomes:
               NonEmptyChain:
                 TargetIntegrationTimeOutcome:
@@ -291,14 +291,14 @@ class WiringSuite extends ClientSuite:
     spectroscopy(
       toTC,
       ClientModesResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(
+            Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+          ),
+          BuildInfo.ocslibHash.some
+        ),
         NonEmptyList.one(
           ClientCalculationResult(
-            ItcVersions(
-              versionDateTimeFormatter.format(
-                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
-              ),
-              BuildInfo.ocslibHash.some
-            ),
             AsterismIntegrationTimeOutcomes:
               NonEmptyChain:
                 TargetIntegrationTimeOutcome:
@@ -319,14 +319,14 @@ class WiringSuite extends ClientSuite:
     spectroscopyEmissionLines(
       WiringSuite.SpectroscopyEmissionLinesInput,
       ClientModesResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(
+            Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+          ),
+          BuildInfo.ocslibHash.some
+        ),
         NonEmptyList.one(
           ClientCalculationResult(
-            ItcVersions(
-              versionDateTimeFormatter.format(
-                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
-              ),
-              BuildInfo.ocslibHash.some
-            ),
             AsterismIntegrationTimeOutcomes:
               NonEmptyChain:
                 TargetIntegrationTimeOutcome:
@@ -358,14 +358,14 @@ class WiringSuite extends ClientSuite:
     spectroscopy(
       toTC,
       ClientModesResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(
+            Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+          ),
+          BuildInfo.ocslibHash.some
+        ),
         NonEmptyList.one(
           ClientCalculationResult(
-            ItcVersions(
-              versionDateTimeFormatter.format(
-                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
-              ),
-              BuildInfo.ocslibHash.some
-            ),
             AsterismIntegrationTimeOutcomes:
               NonEmptyChain:
                 TargetIntegrationTimeOutcome:
