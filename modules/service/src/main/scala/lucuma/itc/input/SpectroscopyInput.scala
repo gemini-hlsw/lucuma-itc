@@ -13,19 +13,19 @@ sealed trait SpectroscopyTimeInput:
   def exposureTimeMode: ExposureTimeMode
   def asterism: List[TargetDataInput]
   def constraints: ConstraintSetInput
-  def mode: InstrumentModesInput
+  def modes: List[InstrumentModesInput]
 
 object SpectroscopyTimeInput:
   def unapply(
     arg: SpectroscopyTimeInput
-  ): (ExposureTimeMode, List[TargetDataInput], ConstraintSetInput, InstrumentModesInput) =
-    (arg.exposureTimeMode, arg.asterism, arg.constraints, arg.mode)
+  ): (ExposureTimeMode, List[TargetDataInput], ConstraintSetInput, List[InstrumentModesInput]) =
+    (arg.exposureTimeMode, arg.asterism, arg.constraints, arg.modes)
 
 case class SpectroscopyInput(
   exposureTimeMode: ExposureTimeMode,
   asterism:         List[TargetDataInput],
   constraints:      ConstraintSetInput,
-  mode:             InstrumentModesInput
+  modes:            List[InstrumentModesInput]
 ) extends SpectroscopyTimeInput
 
 object SpectroscopyInput:
@@ -36,9 +36,9 @@ object SpectroscopyInput:
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
             TargetDataInput.Binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
-            InstrumentModesInput.Binding("mode", mode)
+            InstrumentModesInput.Binding.List("modes", modes)
           ) =>
-        (exposureTimeMode, asterism, constraints, mode)
+        (exposureTimeMode, asterism, constraints, modes)
           .parMapN(apply)
 
 case class SpectroscopyIntegrationTimeAndGraphsInput(
@@ -47,7 +47,7 @@ case class SpectroscopyIntegrationTimeAndGraphsInput(
   constraints:        ConstraintSetInput,
   mode:               InstrumentModesInput,
   significantFigures: Option[SignificantFigures]
-) extends SpectroscopyTimeInput
+)
 
 object SpectroscopyIntegrationTimeAndGraphsInput:
 

@@ -86,7 +86,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient spectroscopy basic wiring and sanity check"):
     spectroscopy(
       WiringSuite.GmosSpectroscopyInputData,
-      ClientModesResult(
+      ClientMultiModeResult(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -114,7 +114,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient flamingos2 spectroscopy basic wiring and sanity check"):
     spectroscopy(
       WiringSuite.Flamingos2SpectroscopyInputData,
-      ClientModesResult(
+      ClientMultiModeResult(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -142,7 +142,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient imaging basic wiring and sanity check"):
     imaging(
       WiringSuite.GmosImagingInputData,
-      ClientModesResult(
+      ClientMultiModeResult(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -170,7 +170,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient imaging f2 basic wiring and sanity check for s/n"):
     imaging(
       WiringSuite.Flamingos2ImagingInputData,
-      ClientModesResult(
+      ClientMultiModeResult(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -204,7 +204,7 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.Flamingos2ImagingInputData)
     imaging(
       toITC,
-      ClientModesResult(
+      ClientMultiModeResult(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -290,7 +290,7 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.GmosSpectroscopyInputData)
     spectroscopy(
       toTC,
-      ClientModesResult(
+      ClientMultiModeResult(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -318,7 +318,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient spectroscopy with emission lines basic wiring and sanity check"):
     spectroscopyEmissionLines(
       WiringSuite.SpectroscopyEmissionLinesInput,
-      ClientModesResult(
+      ClientMultiModeResult(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -357,7 +357,7 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.GmosSpectroscopyInputData)
     spectroscopy(
       toTC,
-      ClientModesResult(
+      ClientMultiModeResult(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -398,19 +398,21 @@ object WiringSuite:
           WaterVapor.VeryDry,
           ElevationRange.ByAirMass.Default
         ),
-        InstrumentMode.GmosNorthSpectroscopy(
-          Wavelength.Min,
-          GmosNorthGrating.B1200_G5301,
-          GmosNorthFilter.GPrime.some,
-          GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
-          GmosCcdMode(
-            GmosXBinning.Two,
-            GmosYBinning.Two,
-            GmosAmpCount.Twelve,
-            GmosAmpGain.High,
-            GmosAmpReadMode.Fast
-          ).some,
-          GmosRoi.FullFrame.some
+        NonEmptyList.one(
+          InstrumentMode.GmosNorthSpectroscopy(
+            Wavelength.Min,
+            GmosNorthGrating.B1200_G5301,
+            GmosNorthFilter.GPrime.some,
+            GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
+            GmosCcdMode(
+              GmosXBinning.Two,
+              GmosYBinning.Two,
+              GmosAmpCount.Twelve,
+              GmosAmpGain.High,
+              GmosAmpReadMode.Fast
+            ).some,
+            GmosRoi.FullFrame.some
+          )
         )
       ),
       NonEmptyList.of(
@@ -446,10 +448,12 @@ object WiringSuite:
           WaterVapor.VeryDry,
           ElevationRange.ByAirMass.Default
         ),
-        InstrumentMode.Flamingos2Spectroscopy(
-          Flamingos2Disperser.R3000,
-          Flamingos2Filter.J,
-          Flamingos2Fpu.LongSlit2
+        NonEmptyList.one(
+          InstrumentMode.Flamingos2Spectroscopy(
+            Flamingos2Disperser.R3000,
+            Flamingos2Filter.J,
+            Flamingos2Fpu.LongSlit2
+          )
         )
       ),
       NonEmptyList.of(
@@ -610,19 +614,21 @@ object WiringSuite:
           WaterVapor.VeryDry,
           ElevationRange.ByAirMass.Default
         ),
-        InstrumentMode.GmosNorthSpectroscopy(
-          Wavelength.Min,
-          GmosNorthGrating.B1200_G5301,
-          GmosNorthFilter.GPrime.some,
-          GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
-          GmosCcdMode(
-            GmosXBinning.Two,
-            GmosYBinning.Two,
-            GmosAmpCount.Twelve,
-            GmosAmpGain.High,
-            GmosAmpReadMode.Fast
-          ).some,
-          GmosRoi.FullFrame.some
+        NonEmptyList.one(
+          InstrumentMode.GmosNorthSpectroscopy(
+            Wavelength.Min,
+            GmosNorthGrating.B1200_G5301,
+            GmosNorthFilter.GPrime.some,
+            GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
+            GmosCcdMode(
+              GmosXBinning.Two,
+              GmosYBinning.Two,
+              GmosAmpCount.Twelve,
+              GmosAmpGain.High,
+              GmosAmpReadMode.Fast
+            ).some,
+            GmosRoi.FullFrame.some
+          )
         )
       ),
       NonEmptyList.of(

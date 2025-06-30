@@ -5,6 +5,7 @@ package lucuma.itc.service.requests
 
 import cats.*
 import cats.data.NonEmptyChain
+import cats.data.NonEmptyList
 import cats.derived.*
 import cats.syntax.all.*
 import grackle.*
@@ -42,53 +43,87 @@ case class AsterismSpectroscopyTimeRequest(
     asterism.map:
       TargetSpectroscopyTimeRequest(_, parameters)
 
-object AsterismSpectroscopyTimeRequest:
-  def fromInput(input: SpectroscopyTimeInput): Result[AsterismSpectroscopyTimeRequest] = {
-    val SpectroscopyTimeInput(exposureTimeMode, asterism, constraints, mode) =
-      input
+def convertMode(mode: InstrumentModesInput): Result[ObservingMode.SpectroscopyMode] =
+  mode match
+    case GmosNSpectroscopyInput(
+          centralWavelength,
+          grating,
+          GmosFpuMask.Builtin(fpu),
+          filter,
+          ccdMode,
+          roi
+        ) =>
+      Result.success:
+        ObservingMode.SpectroscopyMode
+          .GmosNorth(centralWavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode, roi)
+    case GmosSSpectroscopyInput(
+          centralWavelength,
+          grating,
+          GmosFpuMask.Builtin(fpu),
+          filter,
+          ccdMode,
+          roi
+        ) =>
+      Result.success:
+        ObservingMode.SpectroscopyMode
+          .GmosSouth(centralWavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode, roi)
+    case Flamingos2SpectroscopyInput(
+          disperser,
+          filter,
+          fpu
+        ) =>
+      Result.success:
+        ObservingMode.SpectroscopyMode.Flamingos2(disperser, filter, fpu)
+    case _ =>
+      Result.failure("Invalid spectroscopy mode")
 
-    val modeResult: Result[ObservingMode.SpectroscopyMode] =
-      mode match
-        case GmosNSpectroscopyInput(
-              centralWavelength,
-              grating,
-              GmosFpuMask.Builtin(fpu),
-              filter,
-              ccdMode,
-              roi
-            ) =>
-          Result.success:
-            ObservingMode.SpectroscopyMode
-              .GmosNorth(centralWavelength, grating, GmosNorthFpuParam(fpu), filter, ccdMode, roi)
-        case GmosSSpectroscopyInput(
-              centralWavelength,
-              grating,
-              GmosFpuMask.Builtin(fpu),
-              filter,
-              ccdMode,
-              roi
-            ) =>
-          Result.success:
-            ObservingMode.SpectroscopyMode
-              .GmosSouth(centralWavelength, grating, GmosSouthFpuParam(fpu), filter, ccdMode, roi)
-        case Flamingos2SpectroscopyInput(
-              disperser,
-              filter,
-              fpu
-            ) =>
-          Result.success:
-            ObservingMode.SpectroscopyMode.Flamingos2(disperser, filter, fpu)
-        case _ =>
-          Result.failure("Invalid spectroscopy mode")
+object AsterismSpectroscopyTimeRequest:
+  def fromInput(
+    input: SpectroscopyTimeInput
+  ): Result[NonEmptyList[AsterismSpectroscopyTimeRequest]] = {
+    val SpectroscopyTimeInput(exposureTimeMode, asterism, constraints, modes) =
+      input
 
     val conditionsResult: Result[ItcObservingConditions] =
       constraints.create
         .flatMap(c => Result.fromEither(ItcObservingConditions.fromConstraints(c)))
 
-    (asterism.targetInputsToData, modeResult, conditionsResult).parMapN:
-      (asterism, mode, conditions) =>
+    val modesResult: Result[NonEmptyList[ObservingMode.SpectroscopyMode]] =
+      NonEmptyList.fromList(modes) match
+        case None      => Result.failure("At least one spectroscopy mode must be provided")
+        case Some(nel) => nel.traverse(convertMode)
+
+    (asterism.targetInputsToData, modesResult, conditionsResult).parMapN:
+      (asterism, modes, conditions) =>
+        modes.map: mode =>
+          AsterismSpectroscopyTimeRequest(
+            asterism,
+            SpectroscopyTimeParameters(exposureTimeMode, mode, conditions)
+          )
+  }
+
+  def fromInput(
+    input: SpectroscopyIntegrationTimeAndGraphsInput
+  ): Result[AsterismSpectroscopyTimeRequest] = {
+    val SpectroscopyIntegrationTimeAndGraphsInput(exposureTimeMode,
+                                                  asterism,
+                                                  constraints,
+                                                  modes,
+                                                  _
+    ) =
+      input
+
+    val conditionsResult: Result[ItcObservingConditions] =
+      constraints.create
+        .flatMap(c => Result.fromEither(ItcObservingConditions.fromConstraints(c)))
+
+    val modesResult: Result[ObservingMode.SpectroscopyMode] =
+      convertMode(modes)
+
+    (asterism.targetInputsToData, modesResult, conditionsResult).parMapN:
+      (asterism, modes, conditions) =>
         AsterismSpectroscopyTimeRequest(
           asterism,
-          SpectroscopyTimeParameters(exposureTimeMode, mode, conditions)
+          SpectroscopyTimeParameters(exposureTimeMode, modes, conditions)
         )
   }

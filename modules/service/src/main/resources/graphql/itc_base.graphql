@@ -13,7 +13,7 @@ type Query {
   """
   spectroscopy(
     input: SpectroscopyInput!
-  ): ModesResult!
+  ): MultiModeResult!
 
   """
   Given an instrument and an imaging mode,
@@ -21,7 +21,7 @@ type Query {
   """
   imaging(
     input: ImagingInput!
-  ): ModesResult!
+  ): MultiModeResult!
 
   """
   Given an instrument and a mode, return the graph data for the given targets.
@@ -219,7 +219,7 @@ input SpectroscopyInput {
   constraints: ConstraintSetInput!
 
   """Instrument modes"""
-  mode: InstrumentModesInput!
+  modes: [InstrumentModesInput!]!
 }
 
 input TargetInput {
@@ -243,7 +243,7 @@ input ImagingInput {
   constraints: ConstraintSetInput!
 
   """Instrument modes"""
-  mode: [InstrumentModesInput!]!
+  modes: [InstrumentModesInput!]!
 }
 
 """Params for significant figures on each axis"""
@@ -309,7 +309,7 @@ type IntegrationTime {
   exposureCount: NonNegInt!
 }
 
-type ModesResult {
+type MultiModeResult {
   """server and data versions"""
   versions: ItcVersions!
 

@@ -27,7 +27,7 @@ trait ArbIntegrationTimeInput {
       for
         ex <- arbitrary[ExposureTimeMode]
         cs <- arbitrary[ConstraintSet]
-        im <- arbitrary[InstrumentMode]
+        im <- arbitrary[NonEmptyList[InstrumentMode]]
       yield SpectroscopyParameters(ex, cs, im)
 
   given Arbitrary[SpectroscopyInput] =
@@ -39,9 +39,9 @@ trait ArbIntegrationTimeInput {
 
   given Cogen[SpectroscopyInput] =
     Cogen[
-      (ExposureTimeMode, List[TargetInput], ConstraintSet, InstrumentMode)
+      (ExposureTimeMode, List[TargetInput], ConstraintSet, List[InstrumentMode])
     ].contramap: a =>
-      (a.exposureTimeMode, a.asterism.toList, a.constraints, a.mode)
+      (a.exposureTimeMode, a.asterism.toList, a.constraints, a.modes.toList)
 
   given Arbitrary[ImagingParameters] =
     Arbitrary:
@@ -67,7 +67,7 @@ trait ArbIntegrationTimeInput {
         List[InstrumentMode]
       )
     ].contramap: a =>
-      (a.exposureTimeMode, a.asterism.toList, a.constraints, a.mode.toList)
+      (a.exposureTimeMode, a.asterism.toList, a.constraints, a.modes.toList)
 }
 
 object ArbIntegrationTimeInput extends ArbIntegrationTimeInput

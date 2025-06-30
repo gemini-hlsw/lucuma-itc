@@ -64,7 +64,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -75,7 +75,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 },
                 grating: B1200_G5301
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -238,7 +238,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosSSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -249,7 +249,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 },
                 grating: B1200_G5321
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -416,7 +416,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
               }
             },
-            "mode": {
+            "modes": [{
               "gmosNSpectroscopy": {
                 "centralWavelength": {
                   "nanometers": "600"
@@ -427,7 +427,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 },
                 "grating": "B1200_G5301"
               }
-            }
+            }]
           }
         }
         """,
@@ -515,7 +515,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -526,7 +526,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 },
                 grating: B1200_G5301
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -678,7 +678,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -689,7 +689,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 },
                 grating: B1200_G5301
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -792,7 +792,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -803,7 +803,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 },
                 grating: ${d.tag.toScreamingSnakeCase}
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -961,7 +961,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosSSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -972,7 +972,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 },
                 grating: ${d.tag.toScreamingSnakeCase}
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -1130,7 +1130,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   }
                 }
               },
-              mode: {
+              modes: [{
                 gmosNSpectroscopy: {
                   centralWavelength: {
                     nanometers: 60,
@@ -1141,7 +1141,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   },
                   grating: B1200_G5301
                 }
-              }
+              }]
             }) {
             all {
               mode {
@@ -1298,7 +1298,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosSSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60,
@@ -1309,7 +1309,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 },
                 grating: B1200_G5321
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -1466,18 +1466,18 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60,
                 },
-                filter: ${d.tag.toScreamingSnakeCase}
+                filter: ${d.tag.toScreamingSnakeCase},
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
                 grating: B1200_G5301
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -1624,18 +1624,18 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosSSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60,
                 },
-                filter: ${d.tag.toScreamingSnakeCase}
+                filter: ${d.tag.toScreamingSnakeCase},
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
                 grating: B1200_G5321
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -1812,7 +1812,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 600
@@ -1823,7 +1823,7 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 },
                 grating: B1200_G5301
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -2006,13 +2006,13 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               flamingos2Spectroscopy: {
                 filter: Y,
                 fpu: LONG_SLIT_1,
                 disperser: R3000
               }
-            }
+            }]
           }) {
             all {
               mode {

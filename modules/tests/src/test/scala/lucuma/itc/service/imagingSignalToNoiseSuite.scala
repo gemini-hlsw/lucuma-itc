@@ -83,7 +83,7 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
                 }
               }
             },
-            mode: [{
+            modes: [{
               gmosNImaging: {
                 filter: G_PRIME
               }
@@ -248,7 +248,7 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
                 }
               }
             },
-            mode: [{
+            modes: [{
               gmosNImaging: {
                 filter: G_PRIME
               }
@@ -411,7 +411,7 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
                 }
               }
             },
-            mode: [{
+            modes: [{
               flamingos2Imaging: {
                 filter: H
               }

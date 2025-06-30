@@ -59,7 +59,7 @@ class emissionLineSuite extends GraphQLEmissionLineSuite {
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -70,7 +70,7 @@ class emissionLineSuite extends GraphQLEmissionLineSuite {
                 },
                 grating: B1200_G5301
               }
-            }
+            }]
           }) {
             all {
               mode {

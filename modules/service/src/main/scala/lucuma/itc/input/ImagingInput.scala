@@ -14,7 +14,7 @@ case class ImagingInput(
   exposureTimeMode: ExposureTimeMode,
   asterism:         List[TargetDataInput],
   constraints:      ConstraintSetInput,
-  mode:             NonEmptyList[InstrumentModesInput]
+  modes:            NonEmptyList[InstrumentModesInput]
 )
 
 object ImagingInput:
@@ -25,9 +25,9 @@ object ImagingInput:
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
             TargetDataInput.Binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
-            InstrumentModesInput.Binding.List("mode", mode)
+            InstrumentModesInput.Binding.List("modes", modes)
           ) =>
-        (exposureTimeMode, asterism, constraints, mode)
+        (exposureTimeMode, asterism, constraints, modes)
           .parMapN: (exp, ast, con, modes) =>
             NonEmptyList.fromList(modes) match
               case Some(nel) => Result.success(apply(exp, ast, con, nel))

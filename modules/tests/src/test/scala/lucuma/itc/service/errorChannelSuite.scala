@@ -55,7 +55,7 @@ class errorChannelSuite extends FailingCalculationSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -66,7 +66,7 @@ class errorChannelSuite extends FailingCalculationSuite:
                 },
                 grating: B1200_G5301
               }
-            }
+            }]
           }) {
             all {
               mode {

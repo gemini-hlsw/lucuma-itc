@@ -55,7 +55,7 @@ class customSedSuite extends GraphQLSuite {
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -66,7 +66,7 @@ class customSedSuite extends GraphQLSuite {
                 },
                 grating: B1200_G5301
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -170,7 +170,7 @@ class customSedSuite extends GraphQLSuite {
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -181,7 +181,7 @@ class customSedSuite extends GraphQLSuite {
                 },
                 grating: B1200_G5301
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -285,7 +285,7 @@ class customSedSuite extends GraphQLSuite {
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -296,7 +296,7 @@ class customSedSuite extends GraphQLSuite {
                 },
                 grating: B1200_G5301
               }
-            }
+            }]
           }) {
             all {
               mode {
@@ -407,7 +407,7 @@ class customSedSuite extends GraphQLSuite {
                 }
               }
             },
-            mode: {
+            modes: [{
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -418,7 +418,7 @@ class customSedSuite extends GraphQLSuite {
                 },
                 grating: B1200_G5301
               }
-            }
+            }]
           }) {
             all {
               mode {

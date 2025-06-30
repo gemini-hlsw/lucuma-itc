@@ -86,7 +86,7 @@ class imagingTimeAndCountSuite extends GraphImagingQLSuite:
                 }
               }
             },
-            mode: [{
+            modes: [{
               flamingos2Imaging: {
                 filter: H
               }
