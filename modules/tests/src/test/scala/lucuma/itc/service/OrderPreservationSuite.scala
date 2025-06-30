@@ -298,4 +298,3 @@ class OrderPreservationSuite extends GraphQLSuite:
         }
       """
     )
-

@@ -8124,7 +8124,9 @@ type AllResults {
   """server and data versions"""
   versions: ItcVersions!
 
-  """each requested mode result, returned in the same order as the input modes"""
+  """
+  each requested mode result, returned in the same order as the input modes
+  """
   all: [CalculationResult!]!
 }
 
