@@ -21,7 +21,7 @@ type Query {
   """
   imaging(
     input: ImagingInput!
-  ): MultiCalculationResult!
+  ): ModeResult!
 
   """
   Given an instrument and a mode, return the graph data for the given targets.
@@ -309,7 +309,7 @@ type IntegrationTime {
   exposureCount: NonNegInt!
 }
 
-type MultiCalculationResult {
+type ModeResult {
   """each requested mode result"""
   all: [CalculationResult!]!
 }

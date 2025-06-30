@@ -141,16 +141,18 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     environment: ExecutionEnvironment,
     cache:       BinaryEffectfulCache[F],
     itc:         Itc[F]
-  )(asterismRequests: NonEmptyList[AsterismImagingTimeRequest]): F[Result[MultiCalculationResult]] =
+  )(asterismRequests: NonEmptyList[AsterismImagingTimeRequest]): F[Result[ModeResult]] =
     asterismRequests
       .parTraverse: request =>
         calculateImagingIntegrationTime(environment, cache, itc)(request)
       .map: results =>
         val calculationResults = results.traverse(identity)
-        calculationResults.map(MultiCalculationResult.apply)
+        calculationResults.map(ModeResult.apply)
       .onError: t =>
         Logger[F]
-          .error(t)(s"Error calculating multi-imaging integration time for requests: $asterismRequests")
+          .error(t)(
+            s"Error calculating multi-imaging integration time for requests: $asterismRequests"
+          )
       .toGraphQLErrors
 
   private def buildTargetGraphsResult(significantFigures: Option[SignificantFigures])(
@@ -303,7 +305,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                     .flatMap(AsterismSpectroscopyTimeRequest.fromInput)
                     .flatTraverse: request =>
                       calculateSpectroscopyIntegrationTime[F](environment, cache, itc)(request)
-                        .map(_.map(result => MultiCalculationResult(NonEmptyList.one(result))))
+                        .map(_.map(result => ModeResult(NonEmptyList.one(result))))
                     .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("imaging") { (_, env) =>

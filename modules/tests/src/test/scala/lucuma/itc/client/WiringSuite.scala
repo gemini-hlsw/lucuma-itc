@@ -86,11 +86,13 @@ class WiringSuite extends ClientSuite:
   test("ItcClient spectroscopy basic wiring and sanity check"):
     spectroscopy(
       WiringSuite.GmosSpectroscopyInputData,
-      ClientMultiCalculationResult(
+      ClientModeResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
-              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              versionDateTimeFormatter.format(
+                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+              ),
               BuildInfo.ocslibHash.some
             ),
             AsterismIntegrationTimeOutcomes:
@@ -112,11 +114,13 @@ class WiringSuite extends ClientSuite:
   test("ItcClient flamingos2 spectroscopy basic wiring and sanity check"):
     spectroscopy(
       WiringSuite.Flamingos2SpectroscopyInputData,
-      ClientMultiCalculationResult(
+      ClientModeResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
-              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              versionDateTimeFormatter.format(
+                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+              ),
               BuildInfo.ocslibHash.some
             ),
             AsterismIntegrationTimeOutcomes:
@@ -138,11 +142,13 @@ class WiringSuite extends ClientSuite:
   test("ItcClient imaging basic wiring and sanity check"):
     imaging(
       WiringSuite.GmosImagingInputData,
-      ClientMultiCalculationResult(
+      ClientModeResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
-              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              versionDateTimeFormatter.format(
+                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+              ),
               BuildInfo.ocslibHash.some
             ),
             AsterismIntegrationTimeOutcomes:
@@ -164,11 +170,13 @@ class WiringSuite extends ClientSuite:
   test("ItcClient imaging f2 basic wiring and sanity check for s/n"):
     imaging(
       WiringSuite.Flamingos2ImagingInputData,
-      ClientMultiCalculationResult(
+      ClientModeResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
-              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              versionDateTimeFormatter.format(
+                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+              ),
               BuildInfo.ocslibHash.some
             ),
             AsterismIntegrationTimeOutcomes:
@@ -196,11 +204,13 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.Flamingos2ImagingInputData)
     imaging(
       toITC,
-      ClientMultiCalculationResult(
+      ClientModeResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
-              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              versionDateTimeFormatter.format(
+                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+              ),
               BuildInfo.ocslibHash.some
             ),
             AsterismIntegrationTimeOutcomes:
@@ -280,11 +290,13 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.GmosSpectroscopyInputData)
     spectroscopy(
       toTC,
-      ClientMultiCalculationResult(
+      ClientModeResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
-              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              versionDateTimeFormatter.format(
+                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+              ),
               BuildInfo.ocslibHash.some
             ),
             AsterismIntegrationTimeOutcomes:
@@ -306,11 +318,13 @@ class WiringSuite extends ClientSuite:
   test("ItcClient spectroscopy with emission lines basic wiring and sanity check"):
     spectroscopyEmissionLines(
       WiringSuite.SpectroscopyEmissionLinesInput,
-      ClientMultiCalculationResult(
+      ClientModeResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
-              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              versionDateTimeFormatter.format(
+                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+              ),
               BuildInfo.ocslibHash.some
             ),
             AsterismIntegrationTimeOutcomes:
@@ -343,11 +357,13 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.GmosSpectroscopyInputData)
     spectroscopy(
       toTC,
-      ClientMultiCalculationResult(
+      ClientModeResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
-              versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+              versionDateTimeFormatter.format(
+                Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
+              ),
               BuildInfo.ocslibHash.some
             ),
             AsterismIntegrationTimeOutcomes:

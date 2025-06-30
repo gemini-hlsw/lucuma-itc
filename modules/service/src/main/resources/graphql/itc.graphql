@@ -7542,13 +7542,13 @@ type Query {
   Given an instrument and a spectroscopy mode,
   return the integration time and the S/N for the given targets.
   """
-  spectroscopy(input: SpectroscopyInput!): MultiCalculationResult!
+  spectroscopy(input: SpectroscopyInput!): ModeResult!
 
   """
   Given an instrument and an imaging mode,
   return the integration time and the S/N for the given targets.
   """
-  imaging(input: ImagingInput!): MultiCalculationResult!
+  imaging(input: ImagingInput!): ModeResult!
 
   """
   Given an instrument and a mode, return the graph data for the given targets.
@@ -7829,7 +7829,7 @@ type IntegrationTime {
   exposureCount: NonNegInt!
 }
 
-type MultiCalculationResult {
+type ModeResult {
   """each requested mode result"""
   all: [CalculationResult!]!
 }

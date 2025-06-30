@@ -46,8 +46,8 @@ trait ArbIntegrationTimeInput {
   given Arbitrary[ImagingParameters] =
     Arbitrary:
       for {
-        ex <- arbitrary[ExposureTimeMode]
-        cs <- arbitrary[ConstraintSet]
+        ex    <- arbitrary[ExposureTimeMode]
+        cs    <- arbitrary[ConstraintSet]
         modes <- arbitrary[NonEmptyList[InstrumentMode]]
       } yield ImagingParameters(ex, cs, modes)
 
