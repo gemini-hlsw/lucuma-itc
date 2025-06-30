@@ -20,7 +20,7 @@ case class CalculationResult(
   exposureTimeMode: ExposureTimeMode
 )
 
-case class MultiModeResult(
+case class AllResults(
   versions: ItcVersions,
   all:      NonEmptyList[CalculationResult]
 )
@@ -36,8 +36,8 @@ object CalculationResult:
         "brightest"        -> r.targetTimes.brightest.asJson
       )
 
-object MultiModeResult:
-  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[MultiModeResult] = r =>
+object AllResults:
+  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[AllResults] = r =>
     Json.obj(
       "versions" -> r.versions.asJson,
       "all"      -> r.all.asJson

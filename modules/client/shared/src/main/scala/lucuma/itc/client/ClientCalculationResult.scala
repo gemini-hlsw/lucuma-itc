@@ -29,15 +29,15 @@ object ClientCalculationResult:
     def eqv(x: ClientCalculationResult, y: ClientCalculationResult): Boolean =
       x.targetTimes === y.targetTimes
 
-case class ClientMultiModeResult(
+case class ClientAllResults(
   versions: ItcVersions,
   all:      NonEmptyList[ClientCalculationResult]
 ) derives Eq
 
-object ClientMultiModeResult:
-  given Decoder[ClientMultiModeResult] with
-    def apply(c: HCursor): Decoder.Result[ClientMultiModeResult] =
+object ClientAllResults:
+  given Decoder[ClientAllResults] with
+    def apply(c: HCursor): Decoder.Result[ClientAllResults] =
       for
         v   <- c.downField("versions").as[ItcVersions]
         all <- c.downField("all").as[NonEmptyList[ClientCalculationResult]]
-      yield ClientMultiModeResult(v, all)
+      yield ClientAllResults(v, all)

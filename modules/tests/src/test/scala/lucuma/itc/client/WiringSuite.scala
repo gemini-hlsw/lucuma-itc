@@ -86,7 +86,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient spectroscopy basic wiring and sanity check"):
     spectroscopy(
       WiringSuite.GmosSpectroscopyInputData,
-      ClientMultiModeResult(
+      ClientAllResults(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -114,7 +114,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient flamingos2 spectroscopy basic wiring and sanity check"):
     spectroscopy(
       WiringSuite.Flamingos2SpectroscopyInputData,
-      ClientMultiModeResult(
+      ClientAllResults(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -142,7 +142,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient imaging basic wiring and sanity check"):
     imaging(
       WiringSuite.GmosImagingInputData,
-      ClientMultiModeResult(
+      ClientAllResults(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -170,7 +170,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient imaging f2 basic wiring and sanity check for s/n"):
     imaging(
       WiringSuite.Flamingos2ImagingInputData,
-      ClientMultiModeResult(
+      ClientAllResults(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -204,7 +204,7 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.Flamingos2ImagingInputData)
     imaging(
       toITC,
-      ClientMultiModeResult(
+      ClientAllResults(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -290,7 +290,7 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.GmosSpectroscopyInputData)
     spectroscopy(
       toTC,
-      ClientMultiModeResult(
+      ClientAllResults(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -318,7 +318,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient spectroscopy with emission lines basic wiring and sanity check"):
     spectroscopyEmissionLines(
       WiringSuite.SpectroscopyEmissionLinesInput,
-      ClientMultiModeResult(
+      ClientAllResults(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
@@ -357,7 +357,7 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.GmosSpectroscopyInputData)
     spectroscopy(
       toTC,
-      ClientMultiModeResult(
+      ClientAllResults(
         ItcVersions(
           versionDateTimeFormatter.format(
             Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)
