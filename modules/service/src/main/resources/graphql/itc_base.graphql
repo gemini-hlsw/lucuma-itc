@@ -10,6 +10,7 @@ type Query {
   """
   Given an instrument and a spectroscopy mode,
   return the integration time and the S/N for the given targets.
+  Results are returned in the same order as the modes in the input.
   """
   spectroscopy(
     input: SpectroscopyInput!
@@ -18,6 +19,7 @@ type Query {
   """
   Given an instrument and an imaging mode,
   return the integration time and the S/N for the given targets.
+  Results are returned in the same order as the modes in the input.
   """
   imaging(
     input: ImagingInput!
@@ -313,7 +315,7 @@ type AllResults {
   """server and data versions"""
   versions: ItcVersions!
 
-  """each requested mode result"""
+  """each requested mode result, returned in the same order as the input modes"""
   all: [CalculationResult!]!
 }
 

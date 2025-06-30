@@ -134,10 +134,12 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     itc:         Itc[F]
   )(asterismRequests: NonEmptyList[AsterismSpectroscopyTimeRequest]): F[Result[AllResults]] =
     asterismRequests
-      .parTraverse: request =>
-        spectroscopyIntegrationTime(cache, itc)(request)
-      .map: results =>
-        val calculationResults = results.traverse(identity)
+      .zipWithIndex
+      .parTraverse: (request, index) =>
+        spectroscopyIntegrationTime(cache, itc)(request).map((_, index))
+      .map: indexedResults =>
+        val sortedResults = indexedResults.sortBy(_._2).map(_._1)
+        val calculationResults = sortedResults.traverse(identity)
         calculationResults.map(
           AllResults(ItcVersions(version(environment).value, BuildInfo.ocslibHash.some), _)
         )
@@ -154,10 +156,12 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     itc:         Itc[F]
   )(asterismRequests: NonEmptyList[AsterismImagingTimeRequest]): F[Result[AllResults]] =
     asterismRequests
-      .parTraverse: request =>
-        imagingIntegrationTime(cache, itc)(request)
-      .map: results =>
-        val calculationResults = results.traverse(identity)
+      .zipWithIndex
+      .parTraverse: (request, index) =>
+        imagingIntegrationTime(cache, itc)(request).map((_, index))
+      .map: indexedResults =>
+        val sortedResults = indexedResults.sortBy(_._2).map(_._1)
+        val calculationResults = sortedResults.traverse(identity)
         calculationResults.map(
           AllResults(ItcVersions(version(environment).value, BuildInfo.ocslibHash.some), _)
         )
