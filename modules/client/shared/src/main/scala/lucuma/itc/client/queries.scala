@@ -14,7 +14,7 @@ import lucuma.itc.ItcVersions
 import lucuma.itc.client.json.decoders.given
 
 object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
-  type Data      = ClientModeResult
+  type Data      = ClientModesResult
   type Variables = SpectroscopyInput
 
   override val document: String =
@@ -79,12 +79,12 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
       )
     }
 
-  override val dataDecoder: Decoder[ClientModeResult] =
-    (c: HCursor) => c.downField("spectroscopy").as[ClientModeResult]
+  override val dataDecoder: Decoder[ClientModesResult] =
+    (c: HCursor) => c.downField("spectroscopy").as[ClientModesResult]
 }
 
 object ImagingIntegrationTime extends GraphQLOperation[Unit] {
-  type Data      = ClientModeResult
+  type Data      = ClientModesResult
   type Variables = ImagingInput
 
   override val document: String =
@@ -149,8 +149,8 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
       )
     }
 
-  override val dataDecoder: Decoder[ClientModeResult] =
-    (c: HCursor) => c.downField("imaging").as[ClientModeResult]
+  override val dataDecoder: Decoder[ClientModesResult] =
+    (c: HCursor) => c.downField("imaging").as[ClientModesResult]
 }
 
 object SpectroscopyGraphsQuery extends GraphQLOperation[Unit] {

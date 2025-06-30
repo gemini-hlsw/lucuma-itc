@@ -21,7 +21,7 @@ case class CalculationResult(
   exposureTimeMode: ExposureTimeMode
 )
 
-case class ModeResult(
+case class ModesResult(
   all: NonEmptyList[CalculationResult]
 )
 
@@ -37,8 +37,8 @@ object CalculationResult:
         "brightest"        -> r.targetTimes.brightest.asJson
       )
 
-object ModeResult:
-  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[ModeResult] = r =>
+object ModesResult:
+  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[ModesResult] = r =>
     Json.obj(
       "all" -> r.all.asJson
     )

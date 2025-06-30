@@ -86,7 +86,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient spectroscopy basic wiring and sanity check"):
     spectroscopy(
       WiringSuite.GmosSpectroscopyInputData,
-      ClientModeResult(
+      ClientModesResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
@@ -114,7 +114,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient flamingos2 spectroscopy basic wiring and sanity check"):
     spectroscopy(
       WiringSuite.Flamingos2SpectroscopyInputData,
-      ClientModeResult(
+      ClientModesResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
@@ -142,7 +142,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient imaging basic wiring and sanity check"):
     imaging(
       WiringSuite.GmosImagingInputData,
-      ClientModeResult(
+      ClientModesResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
@@ -170,7 +170,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient imaging f2 basic wiring and sanity check for s/n"):
     imaging(
       WiringSuite.Flamingos2ImagingInputData,
-      ClientModeResult(
+      ClientModesResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
@@ -204,7 +204,7 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.Flamingos2ImagingInputData)
     imaging(
       toITC,
-      ClientModeResult(
+      ClientModesResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
@@ -290,7 +290,7 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.GmosSpectroscopyInputData)
     spectroscopy(
       toTC,
-      ClientModeResult(
+      ClientModesResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
@@ -318,7 +318,7 @@ class WiringSuite extends ClientSuite:
   test("ItcClient spectroscopy with emission lines basic wiring and sanity check"):
     spectroscopyEmissionLines(
       WiringSuite.SpectroscopyEmissionLinesInput,
-      ClientModeResult(
+      ClientModesResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(
@@ -357,7 +357,7 @@ class WiringSuite extends ClientSuite:
       )(WiringSuite.GmosSpectroscopyInputData)
     spectroscopy(
       toTC,
-      ClientModeResult(
+      ClientModesResult(
         NonEmptyList.one(
           ClientCalculationResult(
             ItcVersions(

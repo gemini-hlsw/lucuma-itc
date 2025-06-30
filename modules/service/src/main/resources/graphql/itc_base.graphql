@@ -13,7 +13,7 @@ type Query {
   """
   spectroscopy(
     input: SpectroscopyInput!
-  ): CalculationResult!
+  ): ModesResult!
 
   """
   Given an instrument and an imaging mode,
@@ -21,7 +21,7 @@ type Query {
   """
   imaging(
     input: ImagingInput!
-  ): ModeResult!
+  ): ModesResult!
 
   """
   Given an instrument and a mode, return the graph data for the given targets.
@@ -309,7 +309,7 @@ type IntegrationTime {
   exposureCount: NonNegInt!
 }
 
-type ModeResult {
+type ModesResult {
   """each requested mode result"""
   all: [CalculationResult!]!
 }
