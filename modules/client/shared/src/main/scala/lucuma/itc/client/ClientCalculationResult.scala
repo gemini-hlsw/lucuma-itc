@@ -35,9 +35,8 @@ case class ClientAllResults(
 ) derives Eq
 
 object ClientAllResults:
-  given Decoder[ClientAllResults] with
-    def apply(c: HCursor): Decoder.Result[ClientAllResults] =
-      for
-        v   <- c.downField("versions").as[ItcVersions]
-        all <- c.downField("all").as[NonEmptyList[ClientCalculationResult]]
-      yield ClientAllResults(v, all)
+  given Decoder[ClientAllResults] = c =>
+    for
+      v   <- c.downField("versions").as[ItcVersions]
+      all <- c.downField("all").as[NonEmptyList[ClientCalculationResult]]
+    yield ClientAllResults(v, all)

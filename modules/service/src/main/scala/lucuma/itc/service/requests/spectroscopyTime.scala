@@ -89,9 +89,7 @@ object AsterismSpectroscopyTimeRequest:
         .flatMap(c => Result.fromEither(ItcObservingConditions.fromConstraints(c)))
 
     val modesResult: Result[NonEmptyList[ObservingMode.SpectroscopyMode]] =
-      NonEmptyList.fromList(modes) match
-        case None      => Result.failure("At least one spectroscopy mode must be provided")
-        case Some(nel) => nel.traverse(convertMode)
+      modes.traverse(convertMode)
 
     (asterism.targetInputsToData, modesResult, conditionsResult).parMapN:
       (asterism, modes, conditions) =>

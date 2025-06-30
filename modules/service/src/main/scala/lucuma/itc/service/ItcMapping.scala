@@ -73,9 +73,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       f.handleError: t =>
         Result.failure(Problem(t.getMessage))
 
-  def calculateSpectroscopyIntegrationTime[F[
-    _
-  ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
+  private def spectroscopyIntegrationTime[F[_]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
     cache:           BinaryEffectfulCache[F],
     itc:             Itc[F]
   )(
@@ -99,9 +97,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
             s"Error calculating spectroscopy integration time for input: $asterismRequest"
       .toGraphQLErrors
 
-  def calculateImagingIntegrationTime[F[
-    _
-  ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
+  private def imagingIntegrationTime[F[_]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
     cache: BinaryEffectfulCache[F],
     itc:   Itc[F]
   )(asterismRequest: AsterismImagingTimeRequest): F[Result[CalculationResult]] =
@@ -132,16 +128,14 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           .error(t)(s"Error calculating imaging integration time for input: $asterismRequest")
       .toGraphQLErrors
 
-  def calculateMultiSpectroscopyIntegrationTime[F[
-    _
-  ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
+  def calculateSpectroscopyIntegrationTime[F[_]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
     environment: ExecutionEnvironment,
     cache:       BinaryEffectfulCache[F],
     itc:         Itc[F]
   )(asterismRequests: NonEmptyList[AsterismSpectroscopyTimeRequest]): F[Result[AllResults]] =
     asterismRequests
       .parTraverse: request =>
-        calculateSpectroscopyIntegrationTime(cache, itc)(request)
+        spectroscopyIntegrationTime(cache, itc)(request)
       .map: results =>
         val calculationResults = results.traverse(identity)
         calculationResults.map(
@@ -154,16 +148,14 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           )
       .toGraphQLErrors
 
-  def calculateMultiImagingIntegrationTime[F[
-    _
-  ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
+  def calculateImagingIntegrationTime[F[_]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
     environment: ExecutionEnvironment,
     cache:       BinaryEffectfulCache[F],
     itc:         Itc[F]
   )(asterismRequests: NonEmptyList[AsterismImagingTimeRequest]): F[Result[AllResults]] =
     asterismRequests
       .parTraverse: request =>
-        calculateImagingIntegrationTime(cache, itc)(request)
+        imagingIntegrationTime(cache, itc)(request)
       .map: results =>
         val calculationResults = results.traverse(identity)
         calculationResults.map(
@@ -268,7 +260,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     asterismRequest: AsterismSpectroscopyTimeRequest,
     figures:         Option[SignificantFigures]
   ): F[Result[SpectroscopyTimeAndGraphsResult]] =
-    ResultT(calculateSpectroscopyIntegrationTime(cache, itc)(asterismRequest))
+    ResultT(spectroscopyIntegrationTime(cache, itc)(asterismRequest))
       .flatMap: (specTimeResults: CalculationResult) =>
         specTimeResults.targetTimes.partitionErrors
           .bimap(
@@ -325,7 +317,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                     .getR[SpectroscopyInput]("input")
                     .flatMap(AsterismSpectroscopyTimeRequest.fromInput)
                     .flatTraverse:
-                      calculateMultiSpectroscopyIntegrationTime(environment, cache, itc)
+                      calculateSpectroscopyIntegrationTime(environment, cache, itc)
                     .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("imaging") { (_, env) =>
@@ -333,7 +325,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                     .getR[ImagingInput]("input")
                     .flatMap(AsterismImagingTimeRequest.fromInput)
                     .flatTraverse:
-                      calculateMultiImagingIntegrationTime(environment, cache, itc)
+                      calculateImagingIntegrationTime(environment, cache, itc)
                     .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("spectroscopyGraphs") { (_, env) =>
