@@ -16,6 +16,7 @@ modules/benchmarks/
 modules/testkit/
 modules/legacy-tests/
 modules/**/target/
+**/target/
 
 # Development files
 flake.nix
@@ -24,6 +25,7 @@ fetchODBSchema.mjs
 fetchODBSchema.sh
 update.sh
 schemastitcher.js
+sbt-launch.jar
 
 # Build artifacts not needed at runtime
 target/
