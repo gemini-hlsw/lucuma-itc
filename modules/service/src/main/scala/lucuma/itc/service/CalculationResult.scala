@@ -3,6 +3,7 @@
 
 package lucuma.itc.service
 
+import cats.data.NonEmptyList
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
@@ -14,20 +15,30 @@ import lucuma.itc.ItcVersions
 import lucuma.itc.encoders.given
 
 case class CalculationResult(
-  versions:         ItcVersions,
   mode:             ObservingMode,
   targetTimes:      AsterismIntegrationTimeOutcomes,
   exposureTimeMode: ExposureTimeMode
+)
+
+case class AllResults(
+  versions: ItcVersions,
+  all:      NonEmptyList[CalculationResult]
 )
 
 object CalculationResult:
   given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[CalculationResult] = r =>
     Json
       .obj(
-        "versions"         -> r.versions.asJson,
         "mode"             -> r.mode.asJson,
         "exposureTimeMode" -> r.exposureTimeMode.asJson,
         "targetTimes"      -> r.targetTimes.asJson,
         "brightestIndex"   -> r.targetTimes.brightestIndex.asJson,
         "brightest"        -> r.targetTimes.brightest.asJson
       )
+
+object AllResults:
+  given (using Encoder[Wavelength], Encoder[TimeSpan]): Encoder[AllResults] = r =>
+    Json.obj(
+      "versions" -> r.versions.asJson,
+      "all"      -> r.all.asJson
+    )

@@ -4,6 +4,7 @@
 package lucuma.itc.client
 
 import cats.Eq
+import cats.data.NonEmptyList
 import cats.derived.*
 import cats.syntax.eq.*
 import io.circe.Decoder
@@ -15,19 +16,27 @@ import lucuma.itc.TargetIntegrationTimeOutcome
 import lucuma.itc.client.json.decoders.given
 
 case class ClientCalculationResult(
-  versions:    ItcVersions,
   targetTimes: AsterismIntegrationTimeOutcomes
 ) derives Eq
 
 object ClientCalculationResult:
   given Decoder[ClientCalculationResult] with
     def apply(c: HCursor): Decoder.Result[ClientCalculationResult] =
-      for
-        v <- c.downField("versions").as[ItcVersions]
-        t <-
-          c.downField("targetTimes").as[AsterismIntegrationTimeOutcomes]
-      yield ClientCalculationResult(v, t)
+      for t <- c.downField("targetTimes").as[AsterismIntegrationTimeOutcomes]
+      yield ClientCalculationResult(t)
 
   given Eq[ClientCalculationResult] with
     def eqv(x: ClientCalculationResult, y: ClientCalculationResult): Boolean =
-      x.versions === y.versions && x.targetTimes === y.targetTimes
+      x.targetTimes === y.targetTimes
+
+case class ClientAllResults(
+  versions: ItcVersions,
+  all:      NonEmptyList[ClientCalculationResult]
+) derives Eq
+
+object ClientAllResults:
+  given Decoder[ClientAllResults] = c =>
+    for
+      v   <- c.downField("versions").as[ItcVersions]
+      all <- c.downField("all").as[NonEmptyList[ClientCalculationResult]]
+    yield ClientAllResults(v, all)

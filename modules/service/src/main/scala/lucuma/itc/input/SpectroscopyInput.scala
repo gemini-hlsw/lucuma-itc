@@ -3,7 +3,9 @@
 
 package lucuma.itc.input
 
+import cats.data.NonEmptyList
 import cats.syntax.all.*
+import grackle.Result
 import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.SignificantFigures
 import lucuma.odb.graphql.binding.*
@@ -13,19 +15,23 @@ sealed trait SpectroscopyTimeInput:
   def exposureTimeMode: ExposureTimeMode
   def asterism: List[TargetDataInput]
   def constraints: ConstraintSetInput
-  def mode: InstrumentModesInput
+  def modes: NonEmptyList[InstrumentModesInput]
 
 object SpectroscopyTimeInput:
   def unapply(
     arg: SpectroscopyTimeInput
-  ): (ExposureTimeMode, List[TargetDataInput], ConstraintSetInput, InstrumentModesInput) =
-    (arg.exposureTimeMode, arg.asterism, arg.constraints, arg.mode)
+  ): (ExposureTimeMode,
+      List[TargetDataInput],
+      ConstraintSetInput,
+      NonEmptyList[InstrumentModesInput]
+  ) =
+    (arg.exposureTimeMode, arg.asterism, arg.constraints, arg.modes)
 
 case class SpectroscopyInput(
   exposureTimeMode: ExposureTimeMode,
   asterism:         List[TargetDataInput],
   constraints:      ConstraintSetInput,
-  mode:             InstrumentModesInput
+  modes:            NonEmptyList[InstrumentModesInput]
 ) extends SpectroscopyTimeInput
 
 object SpectroscopyInput:
@@ -36,10 +42,13 @@ object SpectroscopyInput:
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
             TargetDataInput.Binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
-            InstrumentModesInput.Binding("mode", mode)
+            InstrumentModesInput.Binding.List("modes", modes)
           ) =>
-        (exposureTimeMode, asterism, constraints, mode)
-          .parMapN(apply)
+        (exposureTimeMode, asterism, constraints, modes)
+          .parFlatMapN: (exp, ast, con, modes) =>
+            NonEmptyList.fromList(modes) match
+              case Some(nel) => Result.success(apply(exp, ast, con, nel))
+              case None      => Result.failure("At least one imaging mode is required")
 
 case class SpectroscopyIntegrationTimeAndGraphsInput(
   exposureTimeMode:   ExposureTimeMode,
@@ -47,7 +56,7 @@ case class SpectroscopyIntegrationTimeAndGraphsInput(
   constraints:        ConstraintSetInput,
   mode:               InstrumentModesInput,
   significantFigures: Option[SignificantFigures]
-) extends SpectroscopyTimeInput
+)
 
 object SpectroscopyIntegrationTimeAndGraphsInput:
 

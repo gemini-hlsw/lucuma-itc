@@ -23,12 +23,12 @@ trait ItcClient[F[_]] {
   def spectroscopy(
     input:    SpectroscopyInput,
     useCache: Boolean = true
-  ): F[ClientCalculationResult]
+  ): F[ClientAllResults]
 
   def imaging(
     input:    ImagingInput,
     useCache: Boolean = true
-  ): F[ClientCalculationResult]
+  ): F[ClientAllResults]
 
   def spectroscopyGraphs(
     input:    SpectroscopyGraphsInput,
@@ -51,8 +51,8 @@ object ItcClient {
     client: Client[F]
   ): F[ItcClient[F]] =
     for
-      specCache         <- ItcCache.simple[F, SpectroscopyInput, ClientCalculationResult]
-      imgCache          <- ItcCache.simple[F, ImagingInput, ClientCalculationResult]
+      specCache         <- ItcCache.simple[F, SpectroscopyInput, ClientAllResults]
+      imgCache          <- ItcCache.simple[F, ImagingInput, ClientAllResults]
       graphCache        <-
         ItcCache.simple[F, SpectroscopyGraphsInput, SpectroscopyGraphsResult]
       timeAndGraphCache <-
@@ -67,8 +67,8 @@ object ItcClient {
       override def spectroscopy(
         input:    SpectroscopyInput,
         useCache: Boolean = true
-      ): F[ClientCalculationResult] = {
-        val callOut: F[ClientCalculationResult] =
+      ): F[ClientAllResults] = {
+        val callOut: F[ClientAllResults] =
           http
             .request(SpectroscopyIntegrationTime)
             .withInput(input)
@@ -85,8 +85,8 @@ object ItcClient {
       override def imaging(
         input:    ImagingInput,
         useCache: Boolean = true
-      ): F[ClientCalculationResult] = {
-        val callOut: F[ClientCalculationResult] =
+      ): F[ClientAllResults] = {
+        val callOut: F[ClientAllResults] =
           http
             .request(ImagingIntegrationTime)
             .withInput(input)

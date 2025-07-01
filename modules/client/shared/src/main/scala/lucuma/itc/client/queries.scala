@@ -14,7 +14,7 @@ import lucuma.itc.ItcVersions
 import lucuma.itc.client.json.decoders.given
 
 object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
-  type Data      = ClientCalculationResult
+  type Data      = ClientAllResults
   type Variables = SpectroscopyInput
 
   override val document: String =
@@ -62,10 +62,12 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
             serverVersion
             dataVersion
           }
-          targetTimes {
-            ...TargetIntegrationTimeOutcomeFields
+          all {
+            targetTimes {
+              ...TargetIntegrationTimeOutcomeFields
+            }
+            brightestIndex
           }
-          brightestIndex
         }
       }
     """
@@ -77,12 +79,12 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
       )
     }
 
-  override val dataDecoder: Decoder[ClientCalculationResult] =
-    (c: HCursor) => c.downField("spectroscopy").as[ClientCalculationResult]
+  override val dataDecoder: Decoder[ClientAllResults] =
+    (c: HCursor) => c.downField("spectroscopy").as[ClientAllResults]
 }
 
 object ImagingIntegrationTime extends GraphQLOperation[Unit] {
-  type Data      = ClientCalculationResult
+  type Data      = ClientAllResults
   type Variables = ImagingInput
 
   override val document: String =
@@ -130,10 +132,12 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
             serverVersion
             dataVersion
           }
-          targetTimes {
-            ...TargetIntegrationTimeOutcomeFields
+          all {
+            targetTimes {
+              ...TargetIntegrationTimeOutcomeFields
+            }
+            brightestIndex
           }
-          brightestIndex
         }
       }
     """
@@ -145,8 +149,8 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
       )
     }
 
-  override val dataDecoder: Decoder[ClientCalculationResult] =
-    (c: HCursor) => c.downField("imaging").as[ClientCalculationResult]
+  override val dataDecoder: Decoder[ClientAllResults] =
+    (c: HCursor) => c.downField("imaging").as[ClientAllResults]
 }
 
 object SpectroscopyGraphsQuery extends GraphQLOperation[Unit] {

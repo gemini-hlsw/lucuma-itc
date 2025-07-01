@@ -86,45 +86,47 @@ class imagingTimeAndCountSuite extends GraphImagingQLSuite:
                 }
               }
             },
-            mode: {
+            modes: [{
               flamingos2Imaging: {
                 filter: H
               }
-            }
+            }]
           }) {
-            mode {
-              __typename
-              ... on ImagingMode {
-                instrument
-                params {
-                  ... on Flamingos2ImagingParams {
-                    filter
+            all {
+              mode {
+                __typename
+                ... on ImagingMode {
+                  instrument
+                  params {
+                    ... on Flamingos2ImagingParams {
+                      filter
+                    }
                   }
                 }
               }
-            }
-            exposureTimeMode {
-              timeAndCount {
-                time {
-                  seconds
-                }
-                count
-                at {
-                  nanometers
-                }
-              }
-            }
-            brightest {
-              all {
-                exposureCount
-                exposureTime {
-                  seconds
+              exposureTimeMode {
+                timeAndCount {
+                  time {
+                    seconds
+                  }
+                  count
+                  at {
+                    nanometers
+                  }
                 }
               }
-              selected {
-                exposureCount
-                exposureTime {
-                  seconds
+              brightest {
+                all {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
+                }
+                selected {
+                  exposureCount
+                  exposureTime {
+                    seconds
+                  }
                 }
               }
             }
@@ -135,36 +137,38 @@ class imagingTimeAndCountSuite extends GraphImagingQLSuite:
         {
           "data": {
             "imaging" : {
-              "mode" : {
-                "__typename" : "ImagingMode",
-                "instrument" : "FLAMINGOS2",
-                "params": {
-                  "filter": "H"
-                }
-              },
-              "exposureTimeMode": {
-                "timeAndCount": {
-                  "time": {
-                    "seconds": 2
-                  },
-                  "count": 3,
-                  "at": { "nanometers": 600.000 }
-                }
-              },
-              "brightest" : {
-                "all" : [{
-                  "exposureCount" : 10,
-                  "exposureTime" : {
-                    "seconds" : 1.000000
+              "all" : [{
+                "mode" : {
+                  "__typename" : "ImagingMode",
+                  "instrument" : "FLAMINGOS2",
+                  "params": {
+                    "filter": "H"
                   }
-                }],
-                "selected" : {
-                  "exposureCount" : 10,
-                  "exposureTime" : {
-                    "seconds" : 1.000000
+                },
+                "exposureTimeMode": {
+                  "timeAndCount": {
+                    "time": {
+                      "seconds": 2
+                    },
+                    "count": 3,
+                    "at": { "nanometers": 600.000 }
+                  }
+                },
+                "brightest" : {
+                  "all" : [{
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
+                    }
+                  }],
+                  "selected" : {
+                    "exposureCount" : 10,
+                    "exposureTime" : {
+                      "seconds" : 1.000000
+                    }
                   }
                 }
-              }
+              }]
             }
           }
         }
