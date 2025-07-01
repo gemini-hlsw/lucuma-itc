@@ -15,6 +15,7 @@ integration.md
 modules/benchmarks/
 modules/testkit/
 modules/legacy-tests/
+modules/service/ocslib/
 modules/**/target/
 **/target/
 
