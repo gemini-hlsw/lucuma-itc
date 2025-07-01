@@ -14,6 +14,8 @@ integration.md
 **/tests/**
 modules/benchmarks/
 modules/testkit/
+modules/legacy-tests/
+modules/**/target/
 
 # Development files
 flake.nix
