@@ -3,9 +3,7 @@
 
 package lucuma.itc.input
 
-import cats.data.NonEmptyList
 import cats.syntax.all.*
-import grackle.Result
 import lucuma.core.model.ExposureTimeMode
 import lucuma.odb.graphql.binding.*
 import lucuma.odb.graphql.input.*
@@ -14,7 +12,7 @@ case class ImagingInput(
   exposureTimeMode: ExposureTimeMode,
   asterism:         List[TargetDataInput],
   constraints:      ConstraintSetInput,
-  modes:            NonEmptyList[InstrumentModesInput]
+  mode:             InstrumentModesInput
 )
 
 object ImagingInput:
@@ -25,10 +23,7 @@ object ImagingInput:
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
             TargetDataInput.Binding.List("asterism", asterism),
             ConstraintSetInput.Binding("constraints", constraints),
-            InstrumentModesInput.Binding.List("modes", modes)
+            InstrumentModesInput.Binding("mode", mode)
           ) =>
-        (exposureTimeMode, asterism, constraints, modes)
-          .parFlatMapN: (exp, ast, con, modes) =>
-            NonEmptyList.fromList(modes) match
-              case Some(nel) => Result.success(apply(exp, ast, con, nel))
-              case None      => Result.failure("At least one imaging mode is required")
+        (exposureTimeMode, asterism, constraints, mode)
+          .parMapN(apply)

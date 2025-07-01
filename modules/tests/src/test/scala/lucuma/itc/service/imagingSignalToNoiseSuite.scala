@@ -83,44 +83,42 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
                 }
               }
             },
-            modes: [{
+            mode: {
               gmosNImaging: {
                 filter: G_PRIME
               }
-            }]
+            }
           }) {
-            all {
-              mode {
-                __typename
-                ... on ImagingMode {
-                  instrument
-                  params {
-                    ... on GmosNImagingParams {
-                      filter
-                    }
+            mode {
+              __typename
+              ... on ImagingMode {
+                instrument
+                params {
+                  ... on GmosNImagingParams {
+                    filter
                   }
                 }
               }
-              exposureTimeMode {
-                signalToNoise {
-                  value
-                  at {
-                    picometers
-                  }
+            }
+            exposureTimeMode {
+              signalToNoise {
+                value
+                at {
+                  picometers
                 }
               }
-              brightest {
-                all {
-                  exposureCount
-                  exposureTime {
-                    seconds
-                  }
+            }
+            brightest {
+              all {
+                exposureCount
+                exposureTime {
+                  seconds
                 }
-                selected {
-                  exposureCount
-                  exposureTime {
-                    seconds
-                  }
+              }
+              selected {
+                exposureCount
+                exposureTime {
+                  seconds
                 }
               }
             }
@@ -131,40 +129,38 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
         {
           "data": {
             "imaging" : {
-              "all" : [{
-                "mode" : {
-                  "__typename" : "ImagingMode",
-                  "instrument" : "GMOS_NORTH",
-                  "params": {
-                    "filter": "G_PRIME"
+              "mode" : {
+                "__typename" : "ImagingMode",
+                "instrument" : "GMOS_NORTH",
+                "params": {
+                  "filter": "G_PRIME"
+                }
+              },
+              "exposureTimeMode": {
+                "signalToNoise": {
+                  "value": 600,
+                  "at": { "picometers": 530000 }
+                }
+              },
+              "brightest" : {
+                "all" : [{
+                  "exposureCount" : 10,
+                  "exposureTime" : {
+                    "seconds" : 1.000000
                   }
-                },
-                "exposureTimeMode": {
-                  "signalToNoise": {
-                    "value": 600,
-                    "at": { "picometers": 530000 }
+                }, {
+                  "exposureCount" : 5,
+                  "exposureTime" : {
+                    "seconds" : 2.000000
                   }
-                },
-                "brightest" : {
-                  "all" : [{
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
-                    }
-                  }, {
-                    "exposureCount" : 5,
-                    "exposureTime" : {
-                      "seconds" : 2.000000
-                    }
-                  }],
-                  "selected" : {
-                    "exposureCount" : 5,
-                    "exposureTime" : {
-                      "seconds" : 2.000000
-                    }
+                }],
+                "selected" : {
+                  "exposureCount" : 5,
+                  "exposureTime" : {
+                    "seconds" : 2.000000
                   }
                 }
-              }]
+              }
             }
           }
         }
@@ -248,14 +244,13 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
                 }
               }
             },
-            modes: [{
+            mode: {
               gmosNImaging: {
                 filter: G_PRIME
               }
-            }]
+            }
           }) {
-            all {
-              mode {
+            mode {
               __typename
               ... on ImagingMode {
                 instrument
@@ -266,7 +261,7 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
                 }
               }
             }
-              exposureTimeMode {
+            exposureTimeMode {
               timeAndCount {
                 time {
                   seconds
@@ -277,7 +272,7 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
                 }
               }
             }
-              brightest {
+            brightest {
               all {
                 exposureCount
                 exposureTime {
@@ -292,15 +287,13 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
               }
             }
           }
-          }
         }
         """,
       json"""
         {
           "data": {
             "imaging" : {
-              "all" : [{
-                "mode" : {
+              "mode" : {
                 "__typename" : "ImagingMode",
                 "instrument" : "GMOS_NORTH",
                 "params": {
@@ -328,7 +321,6 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
                   }
                 }
               }
-              }]
             }
           }
         }
@@ -411,14 +403,13 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
                 }
               }
             },
-            modes: [{
+            mode: {
               flamingos2Imaging: {
                 filter: H
               }
-            }]
+            }
           }) {
-            all {
-              mode {
+            mode {
               __typename
               ... on ImagingMode {
                 instrument
@@ -429,7 +420,7 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
                 }
               }
             }
-              exposureTimeMode {
+            exposureTimeMode {
               signalToNoise {
                 value
                 at {
@@ -437,7 +428,7 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
                 }
               }
             }
-              brightest {
+            brightest {
               all {
                 exposureCount
                 exposureTime {
@@ -452,15 +443,13 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
               }
             }
           }
-          }
         }
         """,
       json"""
         {
           "data": {
             "imaging" : {
-              "all" : [{
-                "mode" : {
+              "mode" : {
                 "__typename" : "ImagingMode",
                 "instrument" : "FLAMINGOS2",
                 "params": {
@@ -492,7 +481,6 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
                   }
                 }
               }
-              }]
             }
           }
         }

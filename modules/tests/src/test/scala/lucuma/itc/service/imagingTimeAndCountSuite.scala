@@ -86,47 +86,45 @@ class imagingTimeAndCountSuite extends GraphImagingQLSuite:
                 }
               }
             },
-            modes: [{
+            mode: {
               flamingos2Imaging: {
                 filter: H
               }
-            }]
+            }
           }) {
-            all {
-              mode {
-                __typename
-                ... on ImagingMode {
-                  instrument
-                  params {
-                    ... on Flamingos2ImagingParams {
-                      filter
-                    }
+            mode {
+              __typename
+              ... on ImagingMode {
+                instrument
+                params {
+                  ... on Flamingos2ImagingParams {
+                    filter
                   }
                 }
               }
-              exposureTimeMode {
-                timeAndCount {
-                  time {
-                    seconds
-                  }
-                  count
-                  at {
-                    nanometers
-                  }
+            }
+            exposureTimeMode {
+              timeAndCount {
+                time {
+                  seconds
+                }
+                count
+                at {
+                  nanometers
                 }
               }
-              brightest {
-                all {
-                  exposureCount
-                  exposureTime {
-                    seconds
-                  }
+            }
+            brightest {
+              all {
+                exposureCount
+                exposureTime {
+                  seconds
                 }
-                selected {
-                  exposureCount
-                  exposureTime {
-                    seconds
-                  }
+              }
+              selected {
+                exposureCount
+                exposureTime {
+                  seconds
                 }
               }
             }
@@ -137,38 +135,36 @@ class imagingTimeAndCountSuite extends GraphImagingQLSuite:
         {
           "data": {
             "imaging" : {
-              "all" : [{
-                "mode" : {
-                  "__typename" : "ImagingMode",
-                  "instrument" : "FLAMINGOS2",
-                  "params": {
-                    "filter": "H"
+              "mode" : {
+                "__typename" : "ImagingMode",
+                "instrument" : "FLAMINGOS2",
+                "params": {
+                  "filter": "H"
+                }
+              },
+              "exposureTimeMode": {
+                "timeAndCount": {
+                  "time": {
+                    "seconds": 2
+                  },
+                  "count": 3,
+                  "at": { "nanometers": 600.000 }
+                }
+              },
+              "brightest" : {
+                "all" : [{
+                  "exposureCount" : 10,
+                  "exposureTime" : {
+                    "seconds" : 1.000000
                   }
-                },
-                "exposureTimeMode": {
-                  "timeAndCount": {
-                    "time": {
-                      "seconds": 2
-                    },
-                    "count": 3,
-                    "at": { "nanometers": 600.000 }
-                  }
-                },
-                "brightest" : {
-                  "all" : [{
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
-                    }
-                  }],
-                  "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
-                    }
+                }],
+                "selected" : {
+                  "exposureCount" : 10,
+                  "exposureTime" : {
+                    "seconds" : 1.000000
                   }
                 }
-              }]
+              }
             }
           }
         }

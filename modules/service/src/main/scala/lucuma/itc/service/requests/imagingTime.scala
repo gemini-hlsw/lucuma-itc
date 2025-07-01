@@ -5,7 +5,6 @@ package lucuma.itc.service.requests
 
 import cats.*
 import cats.data.NonEmptyChain
-import cats.data.NonEmptyList
 import cats.derived.*
 import cats.syntax.all.*
 import grackle.*
@@ -41,15 +40,15 @@ case class AsterismImagingTimeRequest(
       TargetImagingTimeRequest(_, parameters)
 
 object AsterismImagingTimeRequest:
-  def fromInput(input: ImagingInput): Result[NonEmptyList[AsterismImagingTimeRequest]] = {
+  def fromInput(input: ImagingInput): Result[AsterismImagingTimeRequest] = {
     val ImagingInput(
       exposureTimeMode,
       asterism,
       constraints,
-      modes
+      mode
     ) = input
 
-    def convertMode(mode: InstrumentModesInput): Result[ObservingMode.ImagingMode] =
+    val modeResult: Result[ObservingMode.ImagingMode] =
       mode match
         case GmosNImagingInput(filter, ccdMode) =>
           Result.success:
@@ -67,14 +66,10 @@ object AsterismImagingTimeRequest:
       constraints.create
         .flatMap(c => Result.fromEither(ItcObservingConditions.fromConstraints(c)))
 
-    val modesResult: Result[NonEmptyList[ObservingMode.ImagingMode]] =
-      modes.traverse(convertMode)
-
-    (asterism.targetInputsToData, modesResult, conditionsResult).parMapN:
-      (asterism, modes, conditions) =>
-        modes.map: mode =>
-          AsterismImagingTimeRequest(
-            asterism,
-            ImagingTimeParameters(exposureTimeMode, mode, conditions)
-          )
+    (asterism.targetInputsToData, modeResult, conditionsResult).parMapN:
+      (asterism, mode, conditions) =>
+        AsterismImagingTimeRequest(
+          asterism,
+          ImagingTimeParameters(exposureTimeMode, mode, conditions)
+        )
   }

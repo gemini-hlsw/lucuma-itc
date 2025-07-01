@@ -10,20 +10,18 @@ type Query {
   """
   Given an instrument and a spectroscopy mode,
   return the integration time and the S/N for the given targets.
-  Results are returned in the same order as the modes in the input.
   """
   spectroscopy(
     input: SpectroscopyInput!
-  ): AllResults!
+  ): CalculationResult!
 
   """
   Given an instrument and an imaging mode,
   return the integration time and the S/N for the given targets.
-  Results are returned in the same order as the modes in the input.
   """
   imaging(
     input: ImagingInput!
-  ): AllResults!
+  ): CalculationResult!
 
   """
   Given an instrument and a mode, return the graph data for the given targets.
@@ -221,7 +219,7 @@ input SpectroscopyInput {
   constraints: ConstraintSetInput!
 
   """Instrument modes"""
-  modes: [InstrumentModesInput!]!
+  mode: InstrumentModesInput!
 }
 
 input TargetInput {
@@ -245,7 +243,7 @@ input ImagingInput {
   constraints: ConstraintSetInput!
 
   """Instrument modes"""
-  modes: [InstrumentModesInput!]!
+  mode: InstrumentModesInput!
 }
 
 """Params for significant figures on each axis"""
@@ -311,15 +309,10 @@ type IntegrationTime {
   exposureCount: NonNegInt!
 }
 
-type AllResults {
+type CalculationResult {
   """server and data versions"""
   versions: ItcVersions!
 
-  """each requested mode result, returned in the same order as the input modes"""
-  all: [CalculationResult!]!
-}
-
-type CalculationResult {
   """queried mode"""
   mode: ITCObservingMode!
 
