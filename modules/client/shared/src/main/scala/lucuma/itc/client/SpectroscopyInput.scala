@@ -19,7 +19,7 @@ import monocle.Lens
 case class SpectroscopyParameters(
   exposureTimeMode: ExposureTimeMode,
   constraints:      ConstraintSet,
-  modes:            NonEmptyList[InstrumentMode]
+  mode:             InstrumentMode
 ) derives Eq
 
 object SpectroscopyParameters:
@@ -29,8 +29,8 @@ object SpectroscopyParameters:
   val constraints: Lens[SpectroscopyParameters, ConstraintSet] =
     Focus[SpectroscopyParameters](_.constraints)
 
-  val modes: Lens[SpectroscopyParameters, NonEmptyList[InstrumentMode]] =
-    Focus[SpectroscopyParameters](_.modes)
+  val mode: Lens[SpectroscopyParameters, InstrumentMode] =
+    Focus[SpectroscopyParameters](_.mode)
 
   given Encoder[SpectroscopyParameters] with
     def apply(a: SpectroscopyParameters): Json =
@@ -38,7 +38,7 @@ object SpectroscopyParameters:
         .obj(
           "exposureTimeMode" -> a.exposureTimeMode.asJson,
           "constraints"      -> a.constraints.asJson,
-          "modes"            -> a.modes.asJson
+          "mode"             -> a.mode.asJson
         )
         .dropNullValues
 

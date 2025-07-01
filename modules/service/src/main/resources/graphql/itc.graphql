@@ -1011,10 +1011,10 @@ enum GmosAmpCount {
 """CCD Readout Configuration"""
 type GmosCcdMode {
   """GMOS X-binning"""
-  xBin: GmosBinning!
+  xBin: GmosXBinning!
 
   """GMOS Y-binning"""
-  yBin: GmosBinning!
+  yBin: GmosYBinning!
 
   """GMOS Amp Count"""
   ampCount: GmosAmpCount!
@@ -1029,10 +1029,10 @@ type GmosCcdMode {
 """GMOS CCD readout input parameters"""
 input GmosCcdModeInput {
   """X Binning, defaults to 'ONE'."""
-  xBin: GmosBinning
+  xBin: GmosXBinning
 
   """Y Binning, defaults to 'ONE'."""
-  yBin: GmosBinning
+  yBin: GmosYBinning
 
   """Amp Count, defaults to 'TWELVE'."""
   ampCount: GmosAmpCount
@@ -1856,14 +1856,11 @@ type FastTurnaround implements ProposalType {
   """
   minPercentTime: IntPercent!
 
-  """Program User that will be selected as a reviewer for this program"""
-  reviewer: ProgramUser
-
   """
-  Program User that will be selected as a mentor for this program.
-  Required when the reviewer does not have PhD educational status.
+  Partner associated with this FT proposal.  This is optional until submission,
+  by which time it must be defined.
   """
-  mentor: ProgramUser
+  piAffiliation: Partner
 }
 
 """Proposal properties for Large Program CallForProposals."""
@@ -2803,12 +2800,6 @@ enum ObservingModeType {
 
   """ObservingModeType Flamingos2LongSlit"""
   FLAMINGOS_2LONG_SLIT
-
-  """ObservingModeType GmosNorthImaging"""
-  GMOS_NORTH_IMAGING
-
-  """ObservingModeType GmosSouthImaging"""
-  GMOS_SOUTH_IMAGING
 }
 
 type ConstraintSet {
@@ -3156,14 +3147,7 @@ type Execution {
   If a sequence cannot be generated for this observation, `null` is returned
   along with warning messages.
   """
-  digest: ExecutionDigest @deprecated(reason: "will be updated with a CalculatedExecutionDigest result, use calculatedDigest for now")
-
-  """
-  Calculations dependent on the sequence, such as planned time and offsets.
-  If a sequence cannot be generated for this observation, `null` is returned
-  along with warning messages.
-  """
-  calculatedDigest: CalculatedExecutionDigest
+  digest: ExecutionDigest
 
   """
   Full execution config, including acquisition and science sequences.  If a
@@ -3252,12 +3236,6 @@ type ExecutionConfig {
   instrument: Instrument!
 
   """
-  Flamingos 2 execution config.  This will be null unless the `instrument` is
-  `FLAMINGOS2`.
-  """
-  flamingos2: Flamingos2ExecutionConfig
-
-  """
   GMOS North execution config.  This will be null unless the `instrument` is
   `GMOS_NORTH`.
   """
@@ -3321,15 +3299,6 @@ type ExecutionDigest {
 
   """Science sequence summary."""
   science: SequenceDigest
-}
-
-"""Wraps an ExecutionDigest with the background calculation state."""
-type CalculatedExecutionDigest {
-  """Background calculation state."""
-  state: CalculationState!
-
-  """The current execution digest itself."""
-  value: ExecutionDigest
 }
 
 """Exposure time mode, either signal to noise or fixed"""
@@ -3450,24 +3419,18 @@ type Flamingos2Dynamic {
   """Flamingos 2 Lyot Wheel."""
   lyotWheel: Flamingos2LyotWheel!
 
-  """Flamingos 2 FPU, if any."""
-  fpu: Flamingos2FpuMask
+  """Flamingos 2 mask, if any."""
+  mask: Flamingos2Mask
 
-  """Flamingos 2 decker."""
-  decker: Flamingos2Decker!
+  """Readout mode, if specified."""
+  readoutMode: Flamingos2ReadoutMode
 
-  """Flamingos 2 readout mode."""
-  readoutMode: Flamingos2ReadoutMode!
-
-  """Flamingos 2 reads."""
-  reads: Flamingos2Reads!
-
-  """Central wavelength, which is taken from the filter wavelength."""
-  centralWavelength: Wavelength!
+  """Reads, if specified."""
+  reads: Flamingos2Reads
 }
 
 """Flamingos 2 mask option, either builtin or custom mask"""
-type Flamingos2FpuMask {
+type Flamingos2Mask {
   """The custom mask, if in use"""
   customMask: Flamingos2CustomMask
 
@@ -3657,7 +3620,7 @@ enum Flamingos2Reads {
   READS_16
 }
 
-"""Flamingos2 Long Slit mode"""
+"""Flamingos2 South Long Slit mode"""
 type Flamingos2LongSlit {
   """Flamingos2 Disperser"""
   disperser: Flamingos2Disperser!
@@ -3709,21 +3672,6 @@ type Flamingos2LongSlit {
   default.
   """
   explicitReadoutMode: Flamingos2ReadoutMode
-
-  """
-  Spatial offsets, either explicitly specified in explicitSpatialOffsets
-  or else taken from defaultSpatialOffsets
-  """
-  spatialOffsets: [Offset!]!
-
-  """Default spatial offsets."""
-  defaultSpatialOffsets: [Offset!]!
-
-  """
-  Optional explicitly specified spatial offsets. If set it overrides the
-  the default.
-  """
-  explicitSpatialOffsets: [Offset!]
 
   """
   The disperser as it was initially selected.  See the `disperser` field for the
@@ -4046,34 +3994,34 @@ type GmosNorthLongSlit {
   GMOS X-Binning, either explicitly specified in explicitXBin or else taken
   from the defaultXBin.
   """
-  xBin: GmosBinning!
+  xBin: GmosXBinning!
 
   """
   Default GMOS X-Binning, calculated from the effective slit size which in
   turn is based on the selected FPU, target source profile and image quality.
   """
-  defaultXBin: GmosBinning!
+  defaultXBin: GmosXBinning!
 
   """
   Optional explicitly specified GMOS X-Binning. If set it overrides the
   default.
   """
-  explicitXBin: GmosBinning
+  explicitXBin: GmosXBinning
 
   """
   GMOS Y-Binning, either explicitly specified in explicitYBin or else taken
   from the defaultYBin.
   """
-  yBin: GmosBinning!
+  yBin: GmosYBinning!
 
   """Default GMOS Y-Binning (TWO)."""
-  defaultYBin: GmosBinning!
+  defaultYBin: GmosYBinning!
 
   """
   Optional explicitly specified GMOS Y-Binning. If set it overrides the
   default.
   """
-  explicitYBin: GmosBinning
+  explicitYBin: GmosYBinning
 
   """
   GMOS amp read mode, either explicitly specified in explicitAmpReadMode or
@@ -4174,90 +4122,6 @@ type GmosNorthLongSlit {
   field for the wavelength that will be used in the observation.
   """
   initialCentralWavelength: Wavelength!
-}
-
-"""GMOS North Imaging mode"""
-type GmosNorthImaging {
-  """GMOS North Filters for imaging mode (multiple filters allowed)"""
-  filters: [GmosNorthFilter!]!
-
-  """
-  Initial GMOS North Filters that were used when creating the imaging mode
-  """
-  initialFilters: [GmosNorthFilter!]!
-
-  """
-  GMOS Binning, either explicitly specified in explicitBin or else taken
-  from the defaultBin. XBinning == YBinning = Binning
-  """
-  bin: GmosBinning!
-
-  """Default GMOS Binning (TWO)."""
-  defaultBin: GmosBinning!
-
-  """
-  Optional explicitly specified GMOS Binning. If set it overrides the
-  default.
-  """
-  explicitBin: GmosBinning
-
-  """
-  GMOS amp read mode, either explicitly specified in explicitAmpReadMode or
-  else taken from the defaultAmpReadMode.
-  """
-  ampReadMode: GmosAmpReadMode!
-
-  """Default GmosAmpReadMode (SLOW)."""
-  defaultAmpReadMode: GmosAmpReadMode!
-
-  """
-  Optional explicitly specified GMOS amp read mode. If set it overrides the
-  default.
-  """
-  explicitAmpReadMode: GmosAmpReadMode
-
-  """
-  GMOS amp read gain, either explicitly specified in explicitAmpGain or else
-  taken from the defaultAmpGain.
-  """
-  ampGain: GmosAmpGain!
-
-  """Default GMOS amp gain (LOW)."""
-  defaultAmpGain: GmosAmpGain!
-
-  """
-  Optional explicitly specified GMOS amp gain.  If set it override the default.
-  """
-  explicitAmpGain: GmosAmpGain
-
-  """
-  GMOS ROI, either explicitly specified in explicitRoi or else taken from the
-  defaultRoi.
-  """
-  roi: GmosRoi!
-
-  """Default GMOS ROI (FULL_FRAME)."""
-  defaultRoi: GmosRoi!
-
-  """
-  Optional explicitly specified GMOS ROI.  If set it overrides the default.
-  """
-  explicitRoi: GmosRoi
-
-  """
-  Spacial offsets, either explicitly specified in explicitSpatialOffsets
-  or else taken from defaultSpatialOffsets
-  """
-  spatialOffsets: [Offset!]!
-
-  """Default spatial offsets."""
-  defaultSpatialOffsets: [Offset!]!
-
-  """
-  Optional explicitly specified spatial offsets. If set it overrides the
-  the default.
-  """
-  explicitSpatialOffsets: [Offset!]
 }
 
 """GMOS Region Of Interest"""
@@ -4470,34 +4334,34 @@ type GmosSouthLongSlit {
   GMOS X-Binning, either explicitly specified in explicitXBin or else taken
   from the defaultXBin.
   """
-  xBin: GmosBinning!
+  xBin: GmosXBinning!
 
   """
   Default GMOS X-Binning, calculated from the effective slit size which in
   turn is based on the selected FPU, target source profile and image quality.
   """
-  defaultXBin: GmosBinning!
+  defaultXBin: GmosXBinning!
 
   """
   Optional explicitly specified GMOS X-Binning. If set it overrides the
   default.
   """
-  explicitXBin: GmosBinning
+  explicitXBin: GmosXBinning
 
   """
   GMOS Y-Binning, either explicitly specified in explicitYBin or else taken
   from the defaultYBin.
   """
-  yBin: GmosBinning!
+  yBin: GmosYBinning!
 
   """Default GMOS Y-Binning (TWO)."""
-  defaultYBin: GmosBinning!
+  defaultYBin: GmosYBinning!
 
   """
   Optional explicitly specified GMOS Y-Binning. If set it overrides the
   default.
   """
-  explicitYBin: GmosBinning
+  explicitYBin: GmosYBinning
 
   """
   GMOS amp read mode, either explicitly specified in explicitAmpReadMode or
@@ -4600,99 +4464,27 @@ type GmosSouthLongSlit {
   initialCentralWavelength: Wavelength!
 }
 
-"""GMOS South Imaging mode"""
-type GmosSouthImaging {
-  """GMOS South Filters for imaging mode (multiple filters allowed)"""
-  filters: [GmosSouthFilter!]!
-
-  """
-  Initial GMOS South Filters that were used when creating the imaging mode
-  """
-  initialFilters: [GmosSouthFilter!]!
-
-  """
-  GMOS Binning, either explicitly specified in explicitBin or else taken
-  from the defaultBin. XBinning == YBinning = Binning
-  """
-  bin: GmosBinning!
-
-  """Default GMOS Binning (TWO)."""
-  defaultBin: GmosBinning!
-
-  """
-  Optional explicitly specified GMOS Binning. If set it overrides the
-  default.
-  """
-  explicitBin: GmosBinning
-
-  """
-  GMOS amp read mode, either explicitly specified in explicitAmpReadMode or
-  else taken from the defaultAmpReadMode.
-  """
-  ampReadMode: GmosAmpReadMode!
-
-  """Default GmosAmpReadMode (SLOW)."""
-  defaultAmpReadMode: GmosAmpReadMode!
-
-  """
-  Optional explicitly specified GMOS amp read mode. If set it overrides the
-  default.
-  """
-  explicitAmpReadMode: GmosAmpReadMode
-
-  """
-  GMOS amp read gain, either explicitly specified in explicitAmpGain or else
-  taken from the defaultAmpGain.
-  """
-  ampGain: GmosAmpGain!
-
-  """Default GMOS amp gain (LOW)."""
-  defaultAmpGain: GmosAmpGain!
-
-  """
-  Optional explicitly specified GMOS amp gain.  If set it override the default.
-  """
-  explicitAmpGain: GmosAmpGain
-
-  """
-  GMOS ROI, either explicitly specified in explicitRoi or else taken from the
-  defaultRoi.
-  """
-  roi: GmosRoi!
-
-  """Default GMOS ROI (FULL_FRAME)."""
-  defaultRoi: GmosRoi!
-
-  """
-  Optional explicitly specified GMOS ROI.  If set it overrides the default.
-  """
-  explicitRoi: GmosRoi
-
-  """
-  Spacial offsets, either explicitly specified in explicitSpatialOffsets
-  or else taken from defaultSpatialOffsets
-  """
-  spatialOffsets: [Offset!]!
-
-  """Default spatial offsets."""
-  defaultSpatialOffsets: [Offset!]!
-
-  """
-  Optional explicitly specified spatial offsets. If set it overrides the
-  the default.
-  """
-  explicitSpatialOffsets: [Offset!]
-}
-
-"""GMOS Binning"""
-enum GmosBinning {
-  """GmosBinning One"""
+"""GMOS X Binning"""
+enum GmosXBinning {
+  """GmosXBinning One"""
   ONE
 
-  """GmosBinning Two"""
+  """GmosXBinning Two"""
   TWO
 
-  """GmosBinning Four"""
+  """GmosXBinning Four"""
+  FOUR
+}
+
+"""GMOS Y Binning"""
+enum GmosYBinning {
+  """GmosYBinning One"""
+  ONE
+
+  """GmosYBinning Two"""
+  TWO
+
+  """GmosYBinning Four"""
   FOUR
 }
 
@@ -4761,7 +4553,8 @@ type Group {
   are required and which are not fully defined, the remaining time estimate
   cannot be calculated.
   """
-  timeEstimateRange: CalculatedCategorizedTimeRange
+  timeEstimateRange: CategorizedTimeRange
+  timeEstimateRange2: CalculatedCategorizedTimeRange
 
   """
   Prepared time by band ignoring `minimumRequired`, for observations that can be
@@ -4769,7 +4562,8 @@ type Group {
   fully defined such that a sequence can be generated for it.  All defined
   observations in every band present in the group are included.
   """
-  timeEstimateBanded: [CalculatedBandedTime!]!
+  timeEstimateBanded: [BandedTime!]!
+  timeEstimateBanded2: [CalculatedBandedTime!]!
   existence: Existence!
   system: Boolean!
 }
@@ -4824,7 +4618,6 @@ enum GuideProbe {
   PWFS_1
   PWFS_2
   GMOS_OIWFS
-  FLAMINGOS2_OIWFS
 }
 
 """
@@ -5000,32 +4793,6 @@ type SpectroscopyConfigOptionFlamingos2 {
   fpu: Flamingos2Fpu!
   disperser: Flamingos2Disperser!
   filter: Flamingos2Filter!
-}
-
-type ImagingScienceRequirements {
-  """
-  minimumFov, which may be unset by assigning a null value, or ignored by
-  skipping it altogether.
-  """
-  minimumFov: Angle
-
-  """
-  narrowFilters, which may be unset by assigning a null value, or ignored by
-  skipping it altogether.
-  """
-  narrowFilters: Boolean
-
-  """
-  broadFilters, which may be unset by assigning a null value, or ignored by
-  skipping it altogether.
-  """
-  broadFilters: Boolean
-
-  """
-  combinedFilters, which may be unset by assigning a null value, or ignored by
-  skipping it altogether.
-  """
-  combinedFilters: Boolean
 }
 
 """Describes an instrument configuration option for imaging."""
@@ -5291,18 +5058,7 @@ type Observation {
 
   """Program configuration requests applicable to this observation."""
   configurationRequests: [ConfigurationRequest!]!
-  workflow: ObservationWorkflow! @deprecated(reason: "will be updated with a CalculatedObservationWorkflow result, use calculatedWorkflow for now")
-
-  """
-  Obtains the current observation workflow state and valid transitions (and any
-  validation errors). Because this calculation is expensive, it is performed in
-  the background when something relevant changes and may be in a state of flux
-  when queried.  The calculation state in the result can be used to determine
-  whether a pending update is expected.
-  
-  NOTE: Temporary - will replace the 'workflow' field.
-  """
-  calculatedWorkflow: CalculatedObservationWorkflow
+  workflow: ObservationWorkflow!
 }
 
 enum ExecutionState {
@@ -5637,7 +5393,8 @@ type Program {
   are required and which are not fully defined, the remaining time estimate
   cannot be calculated.
   """
-  timeEstimateRange: CalculatedCategorizedTimeRange
+  timeEstimateRange: CategorizedTimeRange
+  timeEstimateRange2: CalculatedCategorizedTimeRange
 
   """
   Prepared time by band ignoring `minimumRequired` in groups, for observations
@@ -5645,7 +5402,8 @@ type Program {
   must be fully defined such that a sequence can be generated for it.  All
   defined observations in every band present in the program are included.
   """
-  timeEstimateBanded: [CalculatedBandedTime!]!
+  timeEstimateBanded: [BandedTime!]!
+  timeEstimateBanded2: [CalculatedBandedTime!]!
 
   """
   Program-wide time charge, summing all corrected observation time charges.
@@ -5922,12 +5680,6 @@ type ObservingMode {
   """GMOS South Long Slit mode"""
   gmosSouthLongSlit: GmosSouthLongSlit
 
-  """GMOS North Imaging mode"""
-  gmosNorthImaging: GmosNorthImaging
-
-  """GMOS South Imaging mode"""
-  gmosSouthImaging: GmosSouthImaging
-
   """Flamingos 2 Long Slit mode"""
   flamingos2LongSlit: Flamingos2LongSlit
 }
@@ -6001,18 +5753,10 @@ enum ScienceSubtype {
 
 type ScienceRequirements {
   """Science mode"""
-  mode: ScienceMode
+  mode: ScienceMode!
 
-  """Requested exposure time mode."""
-  exposureTimeMode: ExposureTimeMode
-
-  """
-  Spectroscopy requirements, if mode is Spectroscopy, this mode must be set
-  """
-  spectroscopy: SpectroscopyScienceRequirements
-
-  """Imaging requirements, if mode is Imaging, this mode must be set"""
-  imaging: ImagingScienceRequirements
+  """Spectroscopy requirements"""
+  spectroscopy: SpectroscopyScienceRequirements!
 }
 
 type ScienceRequirementsGroup {
@@ -6279,6 +6023,9 @@ type SpectroscopyScienceRequirements {
 
   """Requested resolution"""
   resolution: PosInt
+
+  """Requested exposure time mode."""
+  exposureTimeMode: ExposureTimeMode
 
   """Wavelength range"""
   wavelengthCoverage: Wavelength
@@ -7180,36 +6927,6 @@ type Target {
 
   """Nonsidereal tracking information, if this is a nonsidereal target"""
   nonsidereal: Nonsidereal
-
-  """Target of opportunity range information, if this a TOO target"""
-  opportunity: Opportunity
-}
-
-type Opportunity {
-  region: Region!
-}
-
-enum ArcType {
-  EMPTY
-  FULL
-  PARTIAL
-}
-
-type RightAscensionArc {
-  type: ArcType!
-  start: RightAscension
-  end: RightAscension
-}
-
-type DeclinationArc {
-  type: ArcType!
-  start: Declination
-  end: Declination
-}
-
-type Region {
-  rightAscensionArc: RightAscensionArc!
-  declinationArc: DeclinationArc!
 }
 
 type TargetEnvironment {
@@ -7813,12 +7530,6 @@ type ObservationWorkflow {
   validationErrors: [ObservationValidation!]!
 }
 
-type CalculatedObservationWorkflow {
-  """The current state of the background calculation."""
-  state: CalculationState!
-  value: ObservationWorkflow!
-}
-
 """
 ##########
 ITC schema
@@ -7830,16 +7541,14 @@ type Query {
   """
   Given an instrument and a spectroscopy mode,
   return the integration time and the S/N for the given targets.
-  Results are returned in the same order as the modes in the input.
   """
-  spectroscopy(input: SpectroscopyInput!): AllResults!
+  spectroscopy(input: SpectroscopyInput!): CalculationResult!
 
   """
   Given an instrument and an imaging mode,
   return the integration time and the S/N for the given targets.
-  Results are returned in the same order as the modes in the input.
   """
-  imaging(input: ImagingInput!): AllResults!
+  imaging(input: ImagingInput!): CalculationResult!
 
   """
   Given an instrument and a mode, return the graph data for the given targets.
@@ -8032,7 +7741,7 @@ input SpectroscopyInput {
   constraints: ConstraintSetInput!
 
   """Instrument modes"""
-  modes: [InstrumentModesInput!]!
+  mode: InstrumentModesInput!
 }
 
 input TargetInput {
@@ -8055,7 +7764,7 @@ input ImagingInput {
   constraints: ConstraintSetInput!
 
   """Instrument modes"""
-  modes: [InstrumentModesInput!]!
+  mode: InstrumentModesInput!
 }
 
 """Params for significant figures on each axis"""
@@ -8120,17 +7829,10 @@ type IntegrationTime {
   exposureCount: NonNegInt!
 }
 
-type AllResults {
+type CalculationResult {
   """server and data versions"""
   versions: ItcVersions!
 
-  """
-  each requested mode result, returned in the same order as the input modes
-  """
-  all: [CalculationResult!]!
-}
-
-type CalculationResult {
   """queried mode"""
   mode: ITCObservingMode!
 

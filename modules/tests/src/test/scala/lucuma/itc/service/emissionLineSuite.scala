@@ -59,7 +59,7 @@ class emissionLineSuite extends GraphQLEmissionLineSuite {
                 }
               }
             },
-            modes: [{
+            mode: {
               gmosNSpectroscopy: {
                 centralWavelength: {
                   nanometers: 60
@@ -70,31 +70,29 @@ class emissionLineSuite extends GraphQLEmissionLineSuite {
                 },
                 grating: B1200_G5301
               }
-            }]
+            }
           }) {
-            all {
-              mode {
-                ... on SpectroscopyMode {
-                  instrument
-                  params {
-                    ... on GmosNSpectroscopyParams {
-                      grating
-                      centralWavelength {
-                        nanometers
-                      }
+            mode {
+              ... on SpectroscopyMode {
+                instrument
+                params {
+                  ... on GmosNSpectroscopyParams {
+                    grating
+                    centralWavelength {
+                      nanometers
                     }
                   }
                 }
               }
-              brightest {
-                selected {
-                  exposureCount
-                  exposureTime {
-                    seconds
-                  }
+            }
+            brightest {
+              selected {
+                exposureCount
+                exposureTime {
+                  seconds
                 }
-                emissionLine { picometers }
               }
+              emissionLine { picometers }
             }
           }
         }
@@ -103,28 +101,26 @@ class emissionLineSuite extends GraphQLEmissionLineSuite {
         {
           "data": {
             "spectroscopy" : {
-              "all": [{
-                "mode" : {
-                  "instrument" : "GMOS_NORTH",
-                  "params": {
-                    "grating": "B1200_G5301",
-                    "centralWavelength" : {
-                      "nanometers" : 60.000
-                    }
-                  }
-                },
-                "brightest": {
-                  "selected" : {
-                    "exposureCount" : 10,
-                    "exposureTime" : {
-                      "seconds" : 1.000000
-                    }
-                  },
-                  "emissionLine": {
-                    "picometers": 650000
+              "mode" : {
+                "instrument" : "GMOS_NORTH",
+                "params": {
+                  "grating": "B1200_G5301",
+                  "centralWavelength" : {
+                    "nanometers" : 60.000
                   }
                 }
-              }]
+              },
+              "brightest": {
+                "selected" : {
+                  "exposureCount" : 10,
+                  "exposureTime" : {
+                    "seconds" : 1.000000
+                  }
+                },
+                "emissionLine": {
+                  "picometers": 650000
+                }
+              }
             }
           }
         }

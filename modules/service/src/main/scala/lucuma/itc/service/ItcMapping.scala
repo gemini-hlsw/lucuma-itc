@@ -6,7 +6,6 @@ package lucuma.itc.service
 import buildinfo.BuildInfo
 import cats.*
 import cats.data.NonEmptyChain
-import cats.data.NonEmptyList
 import cats.effect.*
 import cats.syntax.all.*
 import eu.timepit.refined.*
@@ -73,7 +72,10 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       f.handleError: t =>
         Result.failure(Problem(t.getMessage))
 
-  private def spectroscopyIntegrationTime[F[_]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
+  def calculateSpectroscopyIntegrationTime[F[
+    _
+  ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
+    environment:     ExecutionEnvironment,
     cache:           BinaryEffectfulCache[F],
     itc:             Itc[F]
   )(
@@ -87,6 +89,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
               result.leftMap(buildError)
       .map: (targetOutcomes: NonEmptyChain[TargetIntegrationTimeOutcome]) =>
         CalculationResult(
+          ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
           asterismRequest.specMode,
           AsterismIntegrationTimeOutcomes(targetOutcomes),
           asterismRequest.exposureTimeMode
@@ -95,11 +98,13 @@ object ItcMapping extends ItcCacheOrRemote with Version {
         Logger[F]
           .error(t):
             s"Error calculating spectroscopy integration time for input: $asterismRequest"
-      .toGraphQLErrors
 
-  private def imagingIntegrationTime[F[_]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
-    cache: BinaryEffectfulCache[F],
-    itc:   Itc[F]
+  def calculateImagingIntegrationTime[F[
+    _
+  ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
+    environment: ExecutionEnvironment,
+    cache:       BinaryEffectfulCache[F],
+    itc:         Itc[F]
   )(asterismRequest: AsterismImagingTimeRequest): F[Result[CalculationResult]] =
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetImagingTimeRequest) =>
@@ -119,6 +124,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                       integrationTime
       .map: (targetOutcomes: NonEmptyChain[TargetIntegrationTimeOutcome]) =>
         CalculationResult(
+          ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
           asterismRequest.imagingMode,
           AsterismIntegrationTimeOutcomes(targetOutcomes),
           asterismRequest.exposureTimeMode
@@ -126,48 +132,6 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       .onError: t =>
         Logger[F]
           .error(t)(s"Error calculating imaging integration time for input: $asterismRequest")
-      .toGraphQLErrors
-
-  def calculateSpectroscopyIntegrationTime[F[_]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
-    environment: ExecutionEnvironment,
-    cache:       BinaryEffectfulCache[F],
-    itc:         Itc[F]
-  )(asterismRequests: NonEmptyList[AsterismSpectroscopyTimeRequest]): F[Result[AllResults]] =
-    asterismRequests.zipWithIndex
-      .parTraverse: (request, index) =>
-        spectroscopyIntegrationTime(cache, itc)(request).map((_, index))
-      .map: indexedResults =>
-        val sortedResults      = indexedResults.sortBy(_._2).map(_._1)
-        val calculationResults = sortedResults.traverse(identity)
-        calculationResults.map(
-          AllResults(ItcVersions(version(environment).value, BuildInfo.ocslibHash.some), _)
-        )
-      .onError: t =>
-        Logger[F]
-          .error(t)(
-            s"Error calculating multi-spectroscopy integration time for requests: $asterismRequests"
-          )
-      .toGraphQLErrors
-
-  def calculateImagingIntegrationTime[F[_]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
-    environment: ExecutionEnvironment,
-    cache:       BinaryEffectfulCache[F],
-    itc:         Itc[F]
-  )(asterismRequests: NonEmptyList[AsterismImagingTimeRequest]): F[Result[AllResults]] =
-    asterismRequests.zipWithIndex
-      .parTraverse: (request, index) =>
-        imagingIntegrationTime(cache, itc)(request).map((_, index))
-      .map: indexedResults =>
-        val sortedResults      = indexedResults.sortBy(_._2).map(_._1)
-        val calculationResults = sortedResults.traverse(identity)
-        calculationResults.map(
-          AllResults(ItcVersions(version(environment).value, BuildInfo.ocslibHash.some), _)
-        )
-      .onError: t =>
-        Logger[F]
-          .error(t)(
-            s"Error calculating multi-imaging integration time for requests: $asterismRequests"
-          )
       .toGraphQLErrors
 
   private def buildTargetGraphsResult(significantFigures: Option[SignificantFigures])(
@@ -262,7 +226,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     asterismRequest: AsterismSpectroscopyTimeRequest,
     figures:         Option[SignificantFigures]
   ): F[Result[SpectroscopyTimeAndGraphsResult]] =
-    ResultT(spectroscopyIntegrationTime(cache, itc)(asterismRequest))
+    ResultT(calculateSpectroscopyIntegrationTime(environment, cache, itc)(asterismRequest))
       .flatMap: (specTimeResults: CalculationResult) =>
         specTimeResults.targetTimes.partitionErrors
           .bimap(
@@ -280,7 +244,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
           .bisequence
           .map: (timesOrGraphs: Either[AsterismIntegrationTimeOutcomes, AsterismTimeAndGraphs]) =>
             SpectroscopyTimeAndGraphsResult(
-              ItcVersions(version(environment).value, BuildInfo.ocslibHash.some),
+              specTimeResults.versions,
               AsterismTimesAndGraphsOutcomes(timesOrGraphs)
             )
       .value
@@ -319,7 +283,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                     .getR[SpectroscopyInput]("input")
                     .flatMap(AsterismSpectroscopyTimeRequest.fromInput)
                     .flatTraverse:
-                      calculateSpectroscopyIntegrationTime(environment, cache, itc)
+                      calculateSpectroscopyIntegrationTime[F](environment, cache, itc)
                     .toGraphQLErrors
                 },
                 RootEffect.computeEncodable("imaging") { (_, env) =>
@@ -345,8 +309,8 @@ object ItcMapping extends ItcCacheOrRemote with Version {
                       AsterismSpectroscopyTimeRequest
                         .fromInput(input)
                         .map((_, input.significantFigures))
-                    .flatTraverse: (request, fig) =>
-                      spectroscopyIntegrationTimeAndGraphs(environment, cache, itc)(request, fig)
+                    .flatTraverse: (tr, fig) =>
+                      spectroscopyIntegrationTimeAndGraphs(environment, cache, itc)(tr, fig)
                     .toGraphQLErrors
                 }
               )

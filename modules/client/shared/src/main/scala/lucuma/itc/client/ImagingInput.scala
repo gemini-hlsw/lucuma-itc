@@ -19,7 +19,7 @@ import monocle.Lens
 case class ImagingParameters(
   exposureTimeMode: ExposureTimeMode,
   constraints:      ConstraintSet,
-  modes:            NonEmptyList[InstrumentMode]
+  mode:             InstrumentMode
 ) derives Eq
 
 object ImagingParameters {
@@ -29,7 +29,7 @@ object ImagingParameters {
         .obj(
           "exposureTimeMode" -> a.exposureTimeMode.asJson,
           "constraints"      -> a.constraints.asJson,
-          "modes"            -> a.modes.asJson
+          "mode"             -> a.mode.asJson
         )
         .dropNullValues
 
@@ -39,8 +39,8 @@ object ImagingParameters {
   val constraints: Lens[ImagingParameters, ConstraintSet] =
     Focus[ImagingParameters](_.constraints)
 
-  val modes: Lens[ImagingParameters, NonEmptyList[InstrumentMode]] =
-    Focus[ImagingParameters](_.modes)
+  val mode: Lens[ImagingParameters, InstrumentMode] =
+    Focus[ImagingParameters](_.mode)
 }
 
 final case class ImagingInput(
