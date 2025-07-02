@@ -32,6 +32,14 @@ pull_request_rules:
       add:
       - client
       remove: []
+- name: Label deploy PRs
+  conditions:
+  - files~=^deploy/
+  actions:
+    label:
+      add:
+      - deploy
+      remove: []
 - name: Label legacy-tests PRs
   conditions:
   - files~=^modules/legacy-tests/

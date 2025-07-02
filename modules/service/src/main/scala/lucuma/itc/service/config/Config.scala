@@ -16,8 +16,7 @@ final case class Config(
   redisUrl:        Uri,
   odbBaseUrl:      Uri,
   odbServiceToken: String,
-  honeycomb:       Option[HoneycombConfig],
-  dyno:            Option[String]
+  honeycomb:       Option[HoneycombConfig]
 )
 
 object Config:
@@ -40,6 +39,5 @@ object Config:
        .as[Uri],
      envOrProp("ODB_BASE_URL").as[Uri],
      envOrProp("ODB_SERVICE_JWT"),
-     HoneycombConfig.config.option,
-     env("DYNO").option
+     HoneycombConfig.config.option
     ).parMapN(Config.apply)
