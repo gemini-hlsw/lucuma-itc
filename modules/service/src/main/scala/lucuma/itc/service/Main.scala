@@ -170,7 +170,6 @@ object Main extends IOApp with ItcCacheOrRemote {
             override def accept(file: File): Boolean =
               file.getName().endsWith(".jar");
           })
-        jarFiles.foreach(println(_))
         LocalItc:
           new ReverseClassLoader(jarFiles.map(_.toURI.toURL), ClassLoader.getSystemClassLoader())
 
