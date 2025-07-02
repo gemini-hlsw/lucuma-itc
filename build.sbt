@@ -46,8 +46,9 @@ ThisBuild / dockerBaseImage := "eclipse-temurin:17-jre"
 
 val herokuToken = "HEROKU_API_KEY" -> "${{ secrets.HEROKU_API_KEY }}"
 
-ThisBuild / githubWorkflowSbtCommand := "sbt -v -J-Xmx6g"
+ThisBuild / githubWorkflowSbtCommand   := "sbt -v -J-Xmx6g"
 ThisBuild / githubWorkflowEnv += herokuToken
+ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec(JavaSpec.Distribution.Zulu, "21"))
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -219,7 +220,7 @@ lazy val deployedAppSettings = Seq(
   // Launch options
   Universal / javaOptions ++= Seq(
     // -J params will be added as jvm parameters
-    "-J-Xmx1024m",
+    "-J-Xmx2048m",
     "-J-Xms256m",
     // Support remote JMX access
     "-J-Dcom.sun.management.jmxremote",

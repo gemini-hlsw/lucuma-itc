@@ -165,11 +165,12 @@ object Main extends IOApp with ItcCacheOrRemote {
   def legacyItcLoader[F[_]: Sync]: F[LocalItc] =
     Sync[F]
       .blocking:
-        val jarFiles =
+        val jarFiles: Array[File] =
           new File("ocslib").listFiles(new FileFilter() {
             override def accept(file: File): Boolean =
               file.getName().endsWith(".jar");
           })
+        jarFiles.foreach(println(_))
         LocalItc:
           new ReverseClassLoader(jarFiles.map(_.toURI.toURL), ClassLoader.getSystemClassLoader())
 
