@@ -62,6 +62,20 @@ lazy val commonSettings = lucumaGlobalSettings ++ Seq(
   Test / parallelExecution := false // tests run fine in parallel but output is nicer this way
 )
 
+lazy val CheckoutFullWithLfs: WorkflowStep =
+  WorkflowStep.Use(
+    UseRef.Public("actions", "checkout", "v4"),
+    name = Some("Checkout current branch (full)"),
+    params = Map("fetch-depth" -> "0", "lfs" -> "true")
+  )
+
+ThisBuild / githubWorkflowJobSetup := {
+  List(CheckoutFullWithLfs) :::
+    WorkflowStep.SetupSbt ::
+    WorkflowStep.SetupJava(githubWorkflowJavaVersions.value.toList) :::
+    githubWorkflowGeneratedCacheSteps.value.toList
+}
+
 lazy val sbtDockerPublishLocal =
   WorkflowStep.Sbt(
     List("clean", "deploy/docker:publishLocal"),
