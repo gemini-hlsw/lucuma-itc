@@ -74,6 +74,7 @@ object Main extends IOApp with ItcCacheOrRemote {
             | redis-url ${cfg.redisUrl}
             | port ${cfg.port}
             | data checksum ${BuildInfo.ocslibHash}
+            | version (git commit) ${BuildInfo.gitHeadCommit}
             |
             |""".stripMargin
     banner.linesIterator.toList.traverse_(Logger[F].info(_))
