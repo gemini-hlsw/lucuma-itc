@@ -180,8 +180,8 @@ object Main extends IOApp with ItcCacheOrRemote {
    */
   def server(cfg: Config)(using Logger[IO]): Resource[IO, ExitCode] =
     for
-      cl <- Resource.eval(legacyItcLoader[IO])
       _  <- Resource.eval(banner[IO](cfg))
+      cl <- Resource.eval(legacyItcLoader[IO])
       ep <- entryPointResource[IO](cfg.honeycomb)
       ap <- ep.wsLiftR(routes(cfg, cl)).map(_.map(_.orNotFound))
       _  <- serverResource(ap, cfg)
