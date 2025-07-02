@@ -16,6 +16,7 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
 
 concurrency:
@@ -52,7 +53,7 @@ jobs:
 
       - name: sbt update
         if: matrix.java == 'temurin@17' && steps.setup-java-temurin-17.outputs.cache-hit == 'false'
-        run: sbt +update
+        run: sbt -v -J-Xmx6g +update
 
       - name: Validate GraphQL schema changes
         if: github.event_name == 'pull_request'
@@ -62,29 +63,29 @@ jobs:
           approve-label: expected-breaking-change
 
       - name: Check that workflows are up to date
-        run: sbt githubWorkflowCheck
+        run: sbt -v -J-Xmx6g githubWorkflowCheck
 
       - name: Check headers and formatting
         if: matrix.java == 'temurin@17' && matrix.os == 'ubuntu-22.04'
-        run: sbt '++ ${{ matrix.scala }}' headerCheckAll scalafmtCheckAll 'project /' scalafmtSbtCheck lucumaScalafmtCheck lucumaScalafixCheck
+        run: sbt -v -J-Xmx6g '++ ${{ matrix.scala }}' headerCheckAll scalafmtCheckAll 'project /' scalafmtSbtCheck lucumaScalafmtCheck lucumaScalafixCheck
 
       - name: Check scalafix lints
         if: matrix.java == 'temurin@17' && matrix.os == 'ubuntu-22.04'
-        run: sbt '++ ${{ matrix.scala }}' 'scalafixAll --check'
+        run: sbt -v -J-Xmx6g '++ ${{ matrix.scala }}' 'scalafixAll --check'
 
       - name: Test
-        run: sbt '++ ${{ matrix.scala }}' test
+        run: sbt -v -J-Xmx6g '++ ${{ matrix.scala }}' test
 
       - name: Check binary compatibility
         if: matrix.java == 'temurin@17' && matrix.os == 'ubuntu-22.04'
-        run: sbt '++ ${{ matrix.scala }}' mimaReportBinaryIssues
+        run: sbt -v -J-Xmx6g '++ ${{ matrix.scala }}' mimaReportBinaryIssues
 
       - name: Generate API documentation
         if: matrix.java == 'temurin@17' && matrix.os == 'ubuntu-22.04'
-        run: sbt '++ ${{ matrix.scala }}' doc
+        run: sbt -v -J-Xmx6g '++ ${{ matrix.scala }}' doc
 
       - name: Aggregate coverage reports
-        run: sbt '++ ${{ matrix.scala }}' coverageReport coverageAggregate
+        run: sbt -v -J-Xmx6g '++ ${{ matrix.scala }}' coverageReport coverageAggregate
 
       - name: Upload code coverage data
         uses: codecov/codecov-action@v4
@@ -118,7 +119,7 @@ jobs:
 
       - name: sbt update
         if: matrix.java == 'temurin@17' && steps.setup-java-temurin-17.outputs.cache-hit == 'false'
-        run: sbt +update
+        run: sbt -v -J-Xmx6g +update
 
       - name: Import signing key
         if: env.PGP_SECRET != '' && env.PGP_PASSPHRASE == ''
@@ -142,7 +143,7 @@ jobs:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_CREDENTIAL_HOST: ${{ secrets.SONATYPE_CREDENTIAL_HOST }}
-        run: sbt tlCiRelease
+        run: sbt -v -J-Xmx6g tlCiRelease
 
   deploy:
     name: Build and publish Docker image / Deploy to Heroku
@@ -173,10 +174,10 @@ jobs:
 
       - name: sbt update
         if: matrix.java == 'temurin@17' && steps.setup-java-temurin-17.outputs.cache-hit == 'false'
-        run: sbt +update
+        run: sbt -v -J-Xmx6g +update
 
       - name: Build and Publish Docker image
-        run: 'sbt ''++ ${{ matrix.scala }}'' clean deploy/docker:publishLocal'
+        run: 'sbt -v -J-Xmx6g ''++ ${{ matrix.scala }}'' clean deploy/docker:publishLocal'
 
       - name: Deploy and release app in Heroku
         run: |
