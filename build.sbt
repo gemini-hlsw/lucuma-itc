@@ -37,9 +37,12 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.7.1"
 ThisBuild / crossScalaVersions  := Seq("3.7.1")
-ThisBuild / tlBaseVersion       := "0.39"
+ThisBuild / tlBaseVersion       := "0.40"
 ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
+
+ThisBuild / dockerExposedPorts ++= Seq(6060)
+ThisBuild / dockerBaseImage := "eclipse-temurin:17-jre"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -53,6 +56,28 @@ addCommandAlias(
 lazy val commonSettings = lucumaGlobalSettings ++ Seq(
   Test / parallelExecution := false // tests run fine in parallel but output is nicer this way
 )
+
+lazy val sbtDockerPublishLocal =
+  WorkflowStep.Sbt(
+    List("clean", "deploy/docker:publishLocal"),
+    name = Some("Build and Publish Docker image")
+  )
+
+lazy val herokuRelease =
+  WorkflowStep.Run(
+    List(
+      "npm install -g heroku",
+      "heroku container:login",
+      "docker tag noirlab/gpp-itc registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc-dev' }}/web",
+      "docker push registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc-dev' }}/web",
+      "heroku container:release web -a ${{ vars.HEROKU_APP_NAME || 'itc-dev' }} -v"
+    ),
+    name = Some("Deploy and release app in Heroku")
+  )
+
+val mainCond                 = "github.ref == 'refs/heads/main'"
+val geminiRepoCond           = "startsWith(github.repository, 'gemini')"
+def allConds(conds: String*) = conds.mkString("(", " && ", ")")
 
 ThisBuild / watchOnTermination := { (action, cmd, times, state) =>
   val projNames = cmd
@@ -80,6 +105,19 @@ ThisBuild / githubWorkflowBuildPreamble +=
       "approve-label" -> "expected-breaking-change"
     ),
     cond = Some("github.event_name == 'pull_request'")
+  )
+
+ThisBuild / githubWorkflowAddedJobs +=
+  WorkflowJob(
+    "deploy",
+    "Build and publish Docker image / Deploy to Heroku",
+    githubWorkflowJobSetup.value.toList :::
+      sbtDockerPublishLocal ::
+      herokuRelease ::
+      Nil,
+    scalas = List(scalaVersion.value),
+    javas = githubWorkflowJavaVersions.value.toList.take(1),
+    cond = Some(allConds(mainCond, geminiRepoCond))
   )
 
 // Basic model classes
@@ -157,13 +195,73 @@ lazy val service = project
       "herokuSourceVersion" -> sys.env.get("SOURCE_VERSION"),
       "buildDateTime"       -> System.currentTimeMillis(),
       ocslibHash
-    ),
-    Universal / mappings ++= {
-      val dir = baseDirectory.value / "ocslib"
-      (dir ** AllPassFilter).pair(relativeTo(dir.getParentFile))
-    }
+    )
   )
-  .enablePlugins(JavaAppPackaging, BuildInfoPlugin, NoPublishPlugin)
+  .enablePlugins(BuildInfoPlugin)
+
+lazy val deployedAppSettings = Seq(
+  description                     := "ITC Server",
+  // Main class for launching
+  Compile / mainClass             := Some("lucuma.itc.service.Main"),
+  // Name of the launch script
+  executableScriptName            := "itc-service",
+  // No javadocs
+  Compile / packageDoc / mappings := Seq(),
+  // Don't create launchers for Windows
+  makeBatScripts                  := Seq.empty,
+  // Specify a different name for the config file
+  bashScriptConfigLocation        := Some("${app_home}/../conf/launcher.args"),
+  // Launch options
+  Universal / javaOptions ++= Seq(
+    // -J params will be added as jvm parameters
+    "-J-Xmx1024m",
+    "-J-Xms256m",
+    // Support remote JMX access
+    "-J-Dcom.sun.management.jmxremote",
+    "-J-Dcom.sun.management.jmxremote.authenticate=false",
+    "-J-Dcom.sun.management.jmxremote.port=2407",
+    "-J-Dcom.sun.management.jmxremote.ssl=false",
+    // Ensure the locale is correctly set
+    "-J-Duser.language=en",
+    "-J-Duser.country=US",
+    // Support remote debugging
+    "-J-Xdebug",
+    "-J-Xnoagent",
+    "-J-XX:+HeapDumpOnOutOfMemoryError",
+    // Make sure the application exits on OOM
+    "-J-XX:+ExitOnOutOfMemoryError",
+    "-J-XX:+CrashOnOutOfMemoryError",
+    "-J-XX:HeapDumpPath=/tmp",
+    "-J-Xrunjdwp:transport=dt_socket,address=8457,server=y,suspend=n"
+  ),
+  Compile / packageDoc / mappings := Seq(),
+  Compile / doc / sources         := Seq.empty,
+  Universal / mappings ++= {
+    val dir = (service / baseDirectory).value / "ocslib"
+    (dir ** AllPassFilter).pair(relativeTo(dir.getParentFile))
+  }
+)
+
+/**
+ * Project for the ITC server app for development
+ */
+lazy val deploy = project
+  .in(file("deploy"))
+  .enablePlugins(NoPublishPlugin)
+  .enablePlugins(DockerPlugin)
+  .enablePlugins(JavaServerAppPackaging)
+  .enablePlugins(GitBranchPrompt)
+  .dependsOn(service)
+  .settings(deployedAppSettings: _*)
+  .settings(
+    description            := "ITC Server",
+    Docker / packageName   := "gpp-itc",
+    Docker / daemonUserUid := Some("3624"),
+    Docker / daemonUser    := "software",
+    dockerBuildOptions ++= Seq("--platform", "linux/amd64"),
+    dockerUpdateLatest     := true,
+    dockerUsername         := Some("noirlab")
+  )
 
 lazy val client = crossProject(JVMPlatform, JSPlatform)
   .in(file("modules/client"))

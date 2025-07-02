@@ -162,19 +162,16 @@ object Main extends IOApp with ItcCacheOrRemote {
   // Build a custom class loader to read and call the legacy ocs2 libs
   // without affecting the current classes. This is mostly because ocs2 uses scala 2.11
   // and it will conflict with the current scala 3 classes
-  def legacyItcLoader[F[_]: Sync](config: Config): F[LocalItc] =
+  def legacyItcLoader[F[_]: Sync]: F[LocalItc] =
     Sync[F]
       .blocking:
-        val dir      =
-          if (config.dyno.isDefined) "modules/service/target/universal/stage/ocslib" else "ocslib"
         val jarFiles =
-          new File(dir).listFiles(new FileFilter() {
+          new File("ocslib").listFiles(new FileFilter() {
             override def accept(file: File): Boolean =
               file.getName().endsWith(".jar");
           })
-        LocalItc(
+        LocalItc:
           new ReverseClassLoader(jarFiles.map(_.toURI.toURL), ClassLoader.getSystemClassLoader())
-        )
 
   /**
    * Our main server, as a resource that starts up our server on acquire and shuts it all down in
@@ -182,7 +179,7 @@ object Main extends IOApp with ItcCacheOrRemote {
    */
   def server(cfg: Config)(using Logger[IO]): Resource[IO, ExitCode] =
     for
-      cl <- Resource.eval(legacyItcLoader[IO](cfg))
+      cl <- Resource.eval(legacyItcLoader[IO])
       _  <- Resource.eval(banner[IO](cfg))
       ep <- entryPointResource[IO](cfg.honeycomb)
       ap <- ep.wsLiftR(routes(cfg, cl)).map(_.map(_.orNotFound))

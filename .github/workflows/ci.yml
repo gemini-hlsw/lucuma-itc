@@ -143,3 +143,45 @@ jobs:
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_CREDENTIAL_HOST: ${{ secrets.SONATYPE_CREDENTIAL_HOST }}
         run: sbt tlCiRelease
+
+  deploy:
+    name: Build and publish Docker image / Deploy to Heroku
+    if: (github.ref == 'refs/heads/main' && startsWith(github.repository, 'gemini'))
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        scala: [3.7.1]
+        java: [temurin@17]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout current branch (full)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Setup Java (temurin@17)
+        id: setup-java-temurin-17
+        if: matrix.java == 'temurin@17'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: sbt
+
+      - name: sbt update
+        if: matrix.java == 'temurin@17' && steps.setup-java-temurin-17.outputs.cache-hit == 'false'
+        run: sbt +update
+
+      - name: Build and Publish Docker image
+        run: 'sbt ''++ ${{ matrix.scala }}'' clean deploy/docker:publishLocal'
+
+      - name: Deploy and release app in Heroku
+        run: |
+          npm install -g heroku
+          heroku container:login
+          docker tag noirlab/gpp-itc registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc-dev' }}/web
+          docker push registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc-dev' }}/web
+          heroku container:release web -a ${{ vars.HEROKU_APP_NAME || 'itc-dev' }} -v
