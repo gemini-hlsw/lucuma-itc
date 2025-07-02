@@ -44,6 +44,11 @@ ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fail
 ThisBuild / dockerExposedPorts ++= Seq(6060)
 ThisBuild / dockerBaseImage := "eclipse-temurin:17-jre"
 
+val herokuToken = "HEROKU_API_KEY" -> "${{ secrets.HEROKU_API_KEY }}"
+
+ThisBuild / githubWorkflowSbtCommand := "sbt -v -J-Xmx6g"
+ThisBuild / githubWorkflowEnv += herokuToken
+
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 enablePlugins(NoPublishPlugin)
