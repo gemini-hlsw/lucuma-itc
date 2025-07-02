@@ -163,8 +163,7 @@ lazy val service = project
       "-Dcats.effect.tracing.mode=none"
     ),
     reStart / envVars     := Map(
-      "REDISCLOUD_URL" -> "redis://localhost",
-      "ODB_BASE_URL"   -> "https://lucuma-postgres-odb-dev.herokuapp.com"
+      "ODB_BASE_URL" -> "https://lucuma-postgres-odb-dev.herokuapp.com"
     ),
     libraryDependencies ++= Seq(
       "org.typelevel"     %% "grackle-core"          % grackleVersion,

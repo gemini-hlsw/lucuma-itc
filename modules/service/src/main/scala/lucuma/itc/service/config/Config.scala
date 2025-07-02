@@ -13,10 +13,11 @@ import org.http4s.Uri
 final case class Config(
   environment:     ExecutionEnvironment,
   port:            Int,
-  redisUrl:        Uri,
+  redisUrl:        Option[Uri],
   odbBaseUrl:      Uri,
   odbServiceToken: String,
-  honeycomb:       Option[HoneycombConfig]
+  honeycomb:       Option[HoneycombConfig],
+  inHeroku:        Boolean
 )
 
 object Config:
@@ -27,6 +28,7 @@ object Config:
     }
 
   def config: ConfigValue[Effect, Config] =
+    val dynoCheck = env("DYNO").option
     (envOrProp("LUCUMA_SSO_ENVIRONMENT")
        .as[ExecutionEnvironment]
        .default(ExecutionEnvironment.Local),
@@ -34,10 +36,20 @@ object Config:
        .or(envOrProp("PORT"))
        .or(ConfigValue.default("6060"))
        .as[Int],
-     envOrProp("REDISCLOUD_URL")
-       .or(envOrProp("REDIS_URL"))
-       .as[Uri],
+     redisUrlConfig(dynoCheck),
      envOrProp("ODB_BASE_URL").as[Uri],
      envOrProp("ODB_SERVICE_JWT"),
-     HoneycombConfig.config.option
+     HoneycombConfig.config.option,
+     dynoCheck.map(_.isDefined)
     ).parMapN(Config.apply)
+
+  private def redisUrlConfig(
+    dynoCheck: ConfigValue[Effect, Option[String]]
+  ): ConfigValue[Effect, Option[Uri]] =
+    val redisUrl = envOrProp("REDISCLOUD_URL")
+      .or(envOrProp("REDIS_URL"))
+      .as[Uri]
+
+    dynoCheck.flatMap:
+      case Some(_) => redisUrl.map(Some(_))
+      case None    => redisUrl.option

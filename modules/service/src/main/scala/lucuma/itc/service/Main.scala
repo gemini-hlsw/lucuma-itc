@@ -20,6 +20,8 @@ import fs2.compression.Compression
 import fs2.io.net.Network
 import lucuma.graphql.routes.GraphQLService
 import lucuma.graphql.routes.Routes
+import lucuma.itc.cache.BinaryEffectfulCache
+import lucuma.itc.cache.NoOpBinaryCache
 import lucuma.itc.cache.RedisEffectfulCache
 import lucuma.itc.input.customSed.CustomSed
 import lucuma.itc.input.customSed.CustomSedCachedResolver
@@ -64,6 +66,10 @@ object Main extends IOApp with ItcCacheOrRemote {
 
   /** A startup action that prints a banner. */
   def banner[F[_]: Applicative: Logger](cfg: Config): F[Unit] =
+    val redis = cfg.redisUrl.fold {
+      if (cfg.inHeroku) "required on Heroku but missing!" else "disabled (no-op cache)"
+    }("redis server at " + _.toString)
+
     val banner =
       s"""|
             |   / /_  _________  ______ ___  ____ _      (_) /______
@@ -71,7 +77,7 @@ object Main extends IOApp with ItcCacheOrRemote {
             | / / /_/ / /__/ /_/ / / / / / / /_/ /_____/ / /_/ /__
             |/_/\\__,_/\\___/\\__,_/_/ /_/ /_/\\__,_/     /_/\\__/\\___/
             |
-            | redis-url ${cfg.redisUrl}
+            | redis $redis
             | port ${cfg.port}
             | data checksum ${BuildInfo.ocslibHash}
             |
@@ -124,14 +130,25 @@ object Main extends IOApp with ItcCacheOrRemote {
       .withHttpWebSocketApp(app)
       .build
 
+  private def createCache[F[_]: Async: Trace: Logger](
+    redisUrl: Option[Uri]
+  ): Resource[F, BinaryEffectfulCache[F]] =
+    redisUrl match
+      case Some(url) =>
+        for
+          redis <- Redis[F].simple(url.toString, RedisCodec.gzip(RedisCodec.Bytes))
+          cache <- Resource.eval(RedisEffectfulCache[F](redis))
+        yield cache
+      case None      =>
+        Resource.eval(NoOpBinaryCache[F])
+
   def routes[F[_]: Async: Logger: Parallel: Trace: Compression: Network](
     cfg: Config,
     itc: LocalItc
   ): Resource[F, WebSocketBuilder2[F] => HttpRoutes[F]] =
     for
       itc                        <- Resource.eval(ItcImpl.build(FLocalItc[F](itc)).pure[F])
-      redis                      <- Redis[F].simple(cfg.redisUrl.toString, RedisCodec.gzip(RedisCodec.Bytes))
-      cache                      <- Resource.eval(RedisEffectfulCache[F](redis))
+      cache                      <- createCache[F](cfg.redisUrl)
       _                          <- Resource.eval(checkVersionToPurge[F](cache))
       customSedResolver          <- CustomSedOdbAttachmentResolver[F](cfg.odbBaseUrl, cfg.odbServiceToken)
       given CustomSed.Resolver[F] = CustomSedCachedResolver(customSedResolver, cache, CustomSedTTL)
