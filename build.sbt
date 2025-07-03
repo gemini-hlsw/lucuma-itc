@@ -323,6 +323,8 @@ lazy val benchmark = project
   )
   .dependsOn(service)
 
+val MUnitFramework = new TestFramework("munit.Framework")
+
 lazy val testkit = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
   .in(file("modules/testkit"))
@@ -374,5 +376,3 @@ lazy val legacyTests = project
     ),
     testFrameworks += MUnitFramework
   )
-
-val MUnitFramework = new TestFramework("munit.Framework")
