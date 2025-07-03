@@ -374,9 +374,5 @@ lazy val legacyTests = project
       "org.scalameta" %%% "munit"                  % munitVersion               % Test,
       "org.typelevel" %%% "discipline-munit"       % disciplineMunitVersion     % Test
     ),
-    Test / testOptions ++= {
-      if (sys.env.get("CI").isDefined) Seq(Tests.Argument("munit.ExcludeTags", "LegacyItcTest"))
-      else Seq()
-    },
     testFrameworks += MUnitFramework
   )
