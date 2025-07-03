@@ -232,7 +232,7 @@ lazy val deployedAppSettings = Seq(
   // Launch options
   Universal / javaOptions ++= Seq(
     // -J params will be added as jvm parameters
-    "-J-Xmx2048m",
+    "-J-Xmx1024m",
     "-J-Xms256m",
     // Support remote JMX access
     "-J-Dcom.sun.management.jmxremote",
