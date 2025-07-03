@@ -429,6 +429,13 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
               }
             }
             brightest {
+              signalToNoiseAt {
+                wavelength {
+                  picometers
+                }
+                single
+                total
+              }
               all {
                 exposureCount
                 exposureTime {
@@ -458,11 +465,18 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
               },
               "exposureTimeMode": {
                 "signalToNoise": {
-                  "value": 600,
+                  "value": 600.000,
                   "at": { "picometers": 1650000 }
                 }
               },
               "brightest" : {
+                "signalToNoiseAt" : {
+                  "wavelength" : {
+                    "picometers" : 1650000
+                  },
+                  "single" : 101.000,
+                  "total" : 102.000
+                },
                 "all" : [{
                   "exposureCount" : 10,
                   "exposureTime" : {

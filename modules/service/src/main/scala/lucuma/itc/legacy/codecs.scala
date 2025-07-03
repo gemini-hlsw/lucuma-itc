@@ -566,7 +566,12 @@ private[legacy] object codecs:
                .success
                .map:
                  _.as[AllExposureCalculations]
-      } yield t.map(IntegrationTimeRemoteResult(_, None))
+        s <- c.downField("ItcImagingResult")
+               .downField("signalToNoiseAt")
+               .success
+               .map:
+                 _.as[Option[SignalToNoiseAt]]
+      } yield (t, s).mapN(IntegrationTimeRemoteResult(_, _))
 
     spec
       .orElse(img)
