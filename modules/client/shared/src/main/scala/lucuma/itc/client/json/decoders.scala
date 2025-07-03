@@ -51,13 +51,6 @@ object decoders:
     c.as[Int]
       .flatMap(l => NonNegInt.from(l).leftMap(m => DecodingFailure(m, c.history)))
 
-  given Decoder[SignalToNoiseAt] = c =>
-    for {
-      w <- c.downField("wavelength").as[Wavelength]
-      s <- c.downField("single").as[SignalToNoise]
-      t <- c.downField("total").as[SignalToNoise]
-    } yield SignalToNoiseAt(w, SingleSN(s), TotalSN(t))
-
   given Decoder[IntegrationTime] = c =>
     for {
       t <- c.downField("exposureTime")
@@ -74,6 +67,13 @@ object decoders:
              .as[Int]
              .flatMap(n => NonNegInt.from(n).leftMap(m => DecodingFailure(m, c.history)))
     } yield IntegrationTime(t, n)
+
+  given Decoder[SignalToNoiseAt] = c =>
+    for {
+      w <- c.downField("wavelength").as[Wavelength]
+      s <- c.downField("single").as[SignalToNoise]
+      t <- c.downField("total").as[SignalToNoise]
+    } yield SignalToNoiseAt(w, SingleSN(s), TotalSN(t))
 
   given Decoder[TargetIntegrationTime] = c =>
     for
