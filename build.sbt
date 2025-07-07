@@ -232,8 +232,8 @@ lazy val deployedAppSettings = Seq(
   // Launch options
   Universal / javaOptions ++= Seq(
     // -J params will be added as jvm parameters
-    "-J-XX:MinRAMPercentage=80",
-    "-J-XX:MaxRAMPercentage=80",
+    "-J-Xmx768m",
+    "-J-Xms256m",
     // Support remote JMX access
     "-J-Dcom.sun.management.jmxremote",
     "-J-Dcom.sun.management.jmxremote.authenticate=false",
