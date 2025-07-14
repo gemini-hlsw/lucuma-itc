@@ -248,7 +248,9 @@ object ItcImpl {
                                         exposureTime,
                                         exposureCount
               )
-            case s @ ObservingMode.ImagingMode.Flamingos2(_) =>
+            case s @ (ObservingMode.ImagingMode.Flamingos2(_) |
+                ObservingMode.ImagingMode.GmosSouth(_, _) |
+                ObservingMode.ImagingMode.GmosNorth(_, _)) =>
               imagingSignalToNoise(target,
                                    atWavelength,
                                    s,
@@ -256,9 +258,6 @@ object ItcImpl {
                                    exposureTime,
                                    exposureCount
               )
-            case u                                           =>
-              MonadThrow[F].raiseError:
-                CalculationError(s"Mode $u not supported for signal-to-noise calculation")
 
       /**
        * Compute the exposure time and number of exposures required to achieve the desired
