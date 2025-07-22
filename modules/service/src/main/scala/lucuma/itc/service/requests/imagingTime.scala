@@ -62,11 +62,7 @@ object AsterismImagingTimeRequest:
         case _                                  =>
           Result.failure("Invalid imaging mode")
 
-    val conditionsResult: Result[ItcObservingConditions] =
-      constraints.create
-        .flatMap(c => Result.fromEither(ItcObservingConditions.fromConstraints(c)))
-
-    (asterism.targetInputsToData, modeResult, conditionsResult).parMapN:
+    (asterism.targetInputsToData, modeResult, constraints.create).parMapN:
       (asterism, mode, conditions) =>
         AsterismImagingTimeRequest(
           asterism,

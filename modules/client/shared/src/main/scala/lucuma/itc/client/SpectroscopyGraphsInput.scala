@@ -14,15 +14,13 @@ import io.circe.JsonObject
 import io.circe.refined.given
 import io.circe.syntax.*
 import lucuma.core.math.Wavelength
-import lucuma.core.model.ConstraintSet
 import lucuma.core.util.TimeSpan
-import lucuma.itc.client.json.given
 
 case class SpectroscopyGraphParameters(
   atWavelength:       Wavelength,
   exposureTime:       TimeSpan,
   exposureCount:      NonNegInt,
-  constraints:        ConstraintSet,
+  constraints:        ItcConstraintsInput,
   mode:               InstrumentMode,
   significantFigures: Option[SignificantFiguresInput]
 ) derives Eq

@@ -8071,19 +8071,19 @@ ITC-specific constraint set with flexible ImageQuality and CloudExtinction input
 """
 input ItcConstraintsInput {
   """Image quality - specify either preset or exact arcsec value"""
-  imageQuality: ImageQualityInput
+  imageQuality: ImageQualityInput!
 
   """Cloud extinction - specify either preset or exact extinction value"""
-  cloudExtinction: CloudExtinctionInput
+  cloudExtinction: CloudExtinctionInput!
 
   """Sky background"""
-  skyBackground: SkyBackground
+  skyBackground: SkyBackground!
 
   """Water vapor"""
-  waterVapor: WaterVapor
+  waterVapor: WaterVapor!
 
   """Elevation range"""
-  elevationRange: ElevationRangeInput
+  elevationRange: ElevationRangeInput!
 }
 
 """Params for spectroscopy integration time calculation"""

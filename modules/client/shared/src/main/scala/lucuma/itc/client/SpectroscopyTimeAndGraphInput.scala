@@ -9,15 +9,13 @@ import cats.derived.*
 import io.circe.Encoder
 import io.circe.JsonObject
 import io.circe.syntax.*
-import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ExposureTimeMode
 import lucuma.core.util.TimeSpan
 import lucuma.itc.client.json.encoders.given
-import lucuma.itc.client.json.given
 
 case class SpectroscopyIntegrationTimeAndGraphsParameters(
   exposureTimeMode:   ExposureTimeMode,
-  constraints:        ConstraintSet,
+  constraints:        ItcConstraintsInput,
   mode:               InstrumentMode,
   significantFigures: Option[SignificantFiguresInput]
 ) derives Eq

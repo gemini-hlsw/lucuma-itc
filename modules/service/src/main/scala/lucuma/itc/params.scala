@@ -10,7 +10,6 @@ import io.circe.*
 import lucuma.core.enums.*
 import lucuma.core.math.Wavelength
 import lucuma.core.model.CloudExtinction
-import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange
 import lucuma.core.model.ImageQuality
 import lucuma.itc.service.encoders.given
@@ -53,29 +52,17 @@ case class ItcObservingConditions(
   airmass: Double
 ) derives Hash
 
-object ItcObservingConditions {
+object ItcObservingConditions:
 
   val AirMassBuckets = Vector(BigDecimal(1.2), BigDecimal(1.5), BigDecimal(2.0))
 
-  def fromConstraints(constraints: ConstraintSet): Either[String, ItcObservingConditions] =
-    val airmass: Either[String, BigDecimal] =
-      constraints.elevationRange match
-        case ElevationRange.ByAirMass(min, max) if max.toBigDecimal >= min.toBigDecimal   =>
-          AirMassBuckets.find(max.toBigDecimal <= _).getOrElse(AirMassBuckets.last).asRight
-        case ElevationRange.ByAirMass(min, max)                                           =>
-          Left("Maximum airmass must be greater than minimum airmass")
-        case ElevationRange.ByHourAngle(min, max) if max.toBigDecimal >= min.toBigDecimal =>
-          max.toBigDecimal.asRight
-        case ElevationRange.ByHourAngle(min, max)                                         =>
-          Left(s"Hour Angle max value $max must be more than the min value $min")
-
-    airmass.map(a =>
-      ItcObservingConditions(
-        constraints.imageQuality,
-        constraints.cloudExtinction,
-        constraints.waterVapor,
-        constraints.skyBackground,
-        a.toDouble
-      )
-    )
-}
+  def airmass(er: ElevationRange): Either[String, BigDecimal] =
+    er match
+      case ElevationRange.ByAirMass(min, max) if max.toBigDecimal >= min.toBigDecimal   =>
+        AirMassBuckets.find(max.toBigDecimal <= _).getOrElse(AirMassBuckets.last).asRight
+      case ElevationRange.ByAirMass(min, max)                                           =>
+        Left("Maximum airmass must be greater than minimum airmass")
+      case ElevationRange.ByHourAngle(min, max) if max.toBigDecimal >= min.toBigDecimal =>
+        max.toBigDecimal.asRight
+      case ElevationRange.ByHourAngle(min, max)                                         =>
+        Left(s"Hour Angle max value $max must be more than the min value $min")

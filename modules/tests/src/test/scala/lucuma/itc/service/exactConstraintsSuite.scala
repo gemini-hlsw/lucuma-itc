@@ -982,7 +982,7 @@ class exactConstraintsSuite extends GraphQLSuite:
                 centralWavelength: {
                   nanometers: 600
                 },
-                filter: GG455,
+                filter: GG455
                 fpu: {
                   builtin: LONG_SLIT_0_25
                 },
@@ -1002,10 +1002,9 @@ class exactConstraintsSuite extends GraphQLSuite:
         {
           "errors": [
             {
-              "message": "Cannot specify both preset and arcsec for ImageQuality"
+              "message": "Argument 'input.constraints.imageQuality' is invalid: Expected exactly one of preset, arcsec"
             }
-          ],
-          "data": null
+          ]
         }
       """
     )
@@ -1084,10 +1083,9 @@ class exactConstraintsSuite extends GraphQLSuite:
         {
           "errors": [
             {
-              "message": "Cannot specify both preset and extinction for CloudExtinction"
+              "message": "Argument 'input.constraints.cloudExtinction' is invalid: Expected exactly one of preset, extinction"
             }
-          ],
-          "data": null
+          ]
         }
       """
     )
@@ -1325,10 +1323,9 @@ class exactConstraintsSuite extends GraphQLSuite:
         {
           "errors": [
             {
-              "message": "Must specify either preset or arcsec for ImageQuality"
+              "message": "Argument 'input.constraints.imageQuality' is invalid: Expected exactly one of preset, arcsec"
             }
-          ],
-          "data": null
+          ]
         }
       """
     )
@@ -1404,10 +1401,9 @@ class exactConstraintsSuite extends GraphQLSuite:
         {
           "errors": [
             {
-              "message": "Must specify either preset or extinction for CloudExtinction"
+              "message": "Argument 'input.constraints.cloudExtinction' is invalid: Expected exactly one of preset, extinction"
             }
-          ],
-          "data": null
+          ]
         }
       """
     )

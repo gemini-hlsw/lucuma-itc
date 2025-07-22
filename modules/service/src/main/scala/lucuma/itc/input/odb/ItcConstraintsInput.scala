@@ -4,82 +4,73 @@
 package lucuma.odb.graphql
 package input
 
-import cats.syntax.option.*
 import cats.syntax.parallel.*
+import cats.syntax.flatMap.*
 import grackle.Result
 import lucuma.core.enums.SkyBackground
 import lucuma.core.enums.WaterVapor
 import lucuma.core.model.CloudExtinction
-import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ImageQuality
 import lucuma.odb.graphql.binding.*
+import lucuma.odb.graphql.input.*
 import lucuma.odb.graphql.binding.BigDecimalBinding
 import lucuma.odb.graphql.input.ConstraintSetInput.NominalConstraints
+import lucuma.core.util.NewType
+import lucuma.itc.service.ItcObservingConditions
 
-final case class ImageQualityInput(
-  preset: Option[ImageQuality.Preset],
-  arcsec: Option[BigDecimal]
-) {
-  def toImageQuality: Result[ImageQuality] =
-    (preset, arcsec) match {
-      case (Some(p), None)    => Result(p.toImageQuality)
-      case (None, Some(a))    =>
-        ImageQuality.fromArcSeconds(a) match {
-          case Right(iq) => Result(iq)
-          case Left(err) => Result.failure(s"Invalid image quality value: $err")
-        }
-      case (Some(_), Some(_)) =>
-        Result.failure("Cannot specify both preset and arcsec for ImageQuality")
-      case (None, None)       => Result.failure("Must specify either preset or arcsec for ImageQuality")
-    }
-}
+object ImageQualityInput extends NewType[Either[ImageQuality.Preset, BigDecimal]]:
+  def preset(p: ImageQuality.Preset): ImageQualityInput = ImageQualityInput(Left(p))
+  def arcsec(a: BigDecimal): ImageQualityInput          = ImageQualityInput(Right(a))
 
-final case class CloudExtinctionInput(
-  preset:     Option[CloudExtinction.Preset],
-  extinction: Option[BigDecimal]
-) {
-  def toCloudExtinction: Result[CloudExtinction] =
-    (preset, extinction) match {
-      case (Some(p), None)    => Result(p.toCloudExtinction)
-      case (None, Some(e))    =>
-        CloudExtinction.fromVegaMagnitude(e) match {
-          case Right(ce) => Result(ce)
-          case Left(err) => Result.failure(s"Invalid cloud extinction value: $err")
-        }
-      case (Some(_), Some(_)) =>
-        Result.failure("Cannot specify both preset and extinction for CloudExtinction")
-      case (None, None)       =>
-        Result.failure("Must specify either preset or extinction for CloudExtinction")
-    }
-}
+  extension (iqi: ImageQualityInput) {
+    def toImageQuality: Result[ImageQuality] =
+      iqi.value match
+        case Left(preset)  => Result(preset.toImageQuality)
+        case Right(arcsec) =>
+          ImageQuality.fromArcSeconds(arcsec) match
+            case Right(iq) => Result(iq)
+            case Left(err) => Result.failure(s"Invalid image quality value: $err")
+  }
 
-final case class ItcConstraintsInput(
-  cloudExtinction: Option[CloudExtinctionInput],
-  imageQuality:    Option[ImageQualityInput],
-  skyBackground:   Option[SkyBackground],
-  waterVapor:      Option[WaterVapor],
-  elevationRange:  Option[ElevationRangeInput]
+type ImageQualityInput = ImageQualityInput.Type
+
+object CloudExtinctionInput extends NewType[Either[CloudExtinction.Preset, BigDecimal]]:
+  def preset(p:     CloudExtinction.Preset): CloudExtinctionInput = CloudExtinctionInput(Left(p))
+  def extinction(e: BigDecimal): CloudExtinctionInput             = CloudExtinctionInput(Right(e))
+
+  extension (cei: CloudExtinctionInput) {
+    def toCloudExtinction: Result[CloudExtinction] =
+      cei.value match
+        case Left(preset)      => Result(preset.toCloudExtinction)
+        case Right(extinction) =>
+          CloudExtinction.fromVegaMagnitude(extinction) match
+            case Right(ce) => Result(ce)
+            case Left(err) => Result.failure(s"Invalid cloud extinction value: $err")
+  }
+
+type CloudExtinctionInput = CloudExtinctionInput.Type
+
+case class ItcConstraintsInput(
+  cloudExtinction: CloudExtinctionInput,
+  imageQuality:    ImageQualityInput,
+  skyBackground:   SkyBackground,
+  waterVapor:      WaterVapor,
+  elevationRange:  ElevationRangeInput
 ) {
 
-  def create: Result[ConstraintSet] = {
-    // Use existing validation methods that properly handle mutual exclusion and range validation
-    val iqResult: Result[ImageQuality.Preset] = imageQuality match {
-      case Some(iqi) => iqi.toImageQuality.map(findClosestImageQualityPreset)
-      case None      => Result(NominalConstraints.imageQuality)
-    }
-
-    val ceResult: Result[CloudExtinction.Preset] = cloudExtinction match {
-      case Some(cei) => cei.toCloudExtinction.map(findClosestCloudExtinctionPreset)
-      case None      => Result(NominalConstraints.cloudExtinction)
-    }
-
-    val sb = skyBackground.getOrElse(NominalConstraints.skyBackground)
-    val wv = waterVapor.getOrElse(NominalConstraints.waterVapor)
-    val erResult = elevationRange.fold(Result(NominalConstraints.elevationRange))(_.create)
+  def create: Result[ItcObservingConditions] = {
+    import ImageQualityInput.*
+    import CloudExtinctionInput.*
+    val iqResult: Result[ImageQuality.Preset]    =
+      imageQuality.toImageQuality.map(findClosestImageQualityPreset)
+    val ceResult: Result[CloudExtinction.Preset] =
+      cloudExtinction.toCloudExtinction.map(findClosestCloudExtinctionPreset)
+    val erResult: Result[BigDecimal]             =
+      elevationRange.create.flatMap(e => Result.fromEither(ItcObservingConditions.airmass(e)))
 
     // Combine all validation results - if any fail, the whole operation fails
     (iqResult, ceResult, erResult).parMapN { (iq, ce, er) =>
-      ConstraintSet(iq, ce, sb, wv, er)
+      ItcObservingConditions(iq, ce, waterVapor, skyBackground, er.toDouble)
     }
   }
 
@@ -112,11 +103,11 @@ object ItcConstraintsInput {
 
   val Default: ItcConstraintsInput =
     ItcConstraintsInput(
-      CloudExtinctionInput(NominalConstraints.cloudExtinction.some, None).some,
-      ImageQualityInput(NominalConstraints.imageQuality.some, None).some,
-      NominalConstraints.skyBackground.some,
-      NominalConstraints.waterVapor.some,
-      ElevationRangeInput.Default.some
+      CloudExtinctionInput.preset(NominalConstraints.cloudExtinction),
+      ImageQualityInput.preset(NominalConstraints.imageQuality),
+      NominalConstraints.skyBackground,
+      NominalConstraints.waterVapor,
+      ElevationRangeInput.Default
     )
 
   val CloudExtinctionPresetBinding: Matcher[CloudExtinction.Preset] =
@@ -135,30 +126,46 @@ object ItcConstraintsInput {
     ObjectFieldsBinding.rmap {
       case List(
             ImageQualityPresetBinding.Option("preset", rPreset),
-            BigDecimalBinding.Nullable("arcsec", rArcsec)
+            BigDecimalBinding.Option("arcsec", rArcsec)
           ) =>
-        (rPreset, rArcsec.map(_.toOption)).parMapN(ImageQualityInput(_, _))
+        (rPreset, rArcsec).parFlatMapN { (presetOpt, arcsecOpt) =>
+          oneOrFail(
+            presetOpt -> "preset",
+            arcsecOpt -> "arcsec"
+          ).map {
+            case p: ImageQuality.Preset => ImageQualityInput.preset(p)
+            case b: BigDecimal          => ImageQualityInput.arcsec(b)
+          }
+        }
     }
 
   val CloudExtinctionInputBinding: Matcher[CloudExtinctionInput] =
     ObjectFieldsBinding.rmap {
       case List(
             CloudExtinctionPresetBinding.Option("preset", rPreset),
-            BigDecimalBinding.Nullable("extinction", rExtinction)
+            BigDecimalBinding.Option("extinction", rExtinction)
           ) =>
-        (rPreset, rExtinction.map(_.toOption)).parMapN(CloudExtinctionInput(_, _))
+        (rPreset, rExtinction).parMapN { (presetOpt, extinctionOpt) =>
+          oneOrFail(
+            presetOpt     -> "preset",
+            extinctionOpt -> "extinction"
+          ).map {
+            case p: CloudExtinction.Preset => CloudExtinctionInput.preset(p)
+            case b: BigDecimal             => CloudExtinctionInput.extinction(b)
+          }
+        }.flatten
     }
 
   val Binding: Matcher[ItcConstraintsInput] =
     ObjectFieldsBinding.rmap {
       case List(
-            ImageQualityInputBinding.Option("imageQuality", rImage),
-            CloudExtinctionInputBinding.Option("cloudExtinction", rCloud),
-            SkyBackgroundBinding.Option("skyBackground", rSky),
-            WaterVaporBinding.Option("waterVapor", rWater),
-            ElevationRangeInput.Binding.Option("elevationRange", rElevation)
+            ImageQualityInputBinding("imageQuality", rImage),
+            CloudExtinctionInputBinding("cloudExtinction", rCloud),
+            SkyBackgroundBinding("skyBackground", rSky),
+            WaterVaporBinding("waterVapor", rWater),
+            ElevationRangeInput.Binding("elevationRange", rElevation)
           ) =>
-        (rCloud, rImage, rSky, rWater, rElevation).parMapN(ItcConstraintsInput(_, _, _, _, _))
+        (rCloud, rImage, rSky, rWater, rElevation).parMapN(ItcConstraintsInput.apply)
     }
 
 }

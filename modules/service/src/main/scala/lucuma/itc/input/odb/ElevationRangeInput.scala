@@ -10,7 +10,7 @@ import grackle.Result
 import lucuma.core.model.ElevationRange
 import lucuma.odb.graphql.binding.*
 
-final case class ElevationRangeInput(
+case class ElevationRangeInput(
   airMass:   Option[AirMassRangeInput],
   hourAngle: Option[HourAngleRangeInput]
 ) {
