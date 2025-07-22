@@ -57,7 +57,9 @@ import lucuma.core.model.UnnormalizedSED.Galaxy
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.*
 import lucuma.itc.AsterismIntegrationTimeOutcomes
+import lucuma.itc.CloudExtinctionInput
 import lucuma.itc.GraphType
+import lucuma.itc.ImageQualityInput
 import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcAxis
 import lucuma.itc.ItcCcd

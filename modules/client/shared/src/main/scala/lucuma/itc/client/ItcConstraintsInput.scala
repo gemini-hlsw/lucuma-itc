@@ -11,41 +11,25 @@ import io.circe.syntax.*
 import lucuma.core.enums.SkyBackground
 import lucuma.core.enums.WaterVapor
 import lucuma.core.model.CloudExtinction
+import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange
 import lucuma.core.model.ImageQuality
-import lucuma.core.model.ConstraintSet
 import lucuma.core.util.Enumerated
-import lucuma.core.util.NewType
+import lucuma.itc.CloudExtinctionInput
+import lucuma.itc.ImageQualityInput
 import lucuma.itc.client.json.syntax.*
 import monocle.Focus
 import monocle.Lens
 
-// Import encoder instances
-import ImageQualityInput.given
-import CloudExtinctionInput.given
+given Encoder[ImageQualityInput] =
+  _.value match
+    case Left(p)  => Json.obj("preset" -> p.asScreamingJson)
+    case Right(v) => Json.obj("arcsec" -> v.asJson)
 
-object ImageQualityInput extends NewType[Either[ImageQuality.Preset, BigDecimal]]:
-
-  def preset(p: ImageQuality.Preset): ImageQualityInput = ImageQualityInput(Left(p))
-  def arcsec(a: BigDecimal): ImageQualityInput          = ImageQualityInput(Right(a))
-
-  given Encoder[ImageQualityInput] =
-    _.value match
-      case Left(p)  => Json.obj("preset" -> p.asScreamingJson)
-      case Right(v) => Json.obj("arcsec" -> v.asJson)
-
-type ImageQualityInput = ImageQualityInput.Type
-
-object CloudExtinctionInput extends NewType[Either[CloudExtinction.Preset, BigDecimal]]:
-  def preset(p:     CloudExtinction.Preset): CloudExtinctionInput = CloudExtinctionInput(Left(p))
-  def extinction(e: BigDecimal): CloudExtinctionInput             = CloudExtinctionInput(Right(e))
-
-  given Encoder[CloudExtinctionInput] =
-    _.value match
-      case Left(p)  => Json.obj("preset" -> p.asScreamingJson)
-      case Right(v) => Json.obj("extinction" -> v.asJson)
-
-type CloudExtinctionInput = CloudExtinctionInput.Type
+given Encoder[CloudExtinctionInput] =
+  _.value match
+    case Left(p)  => Json.obj("preset" -> p.asScreamingJson)
+    case Right(v) => Json.obj("extinction" -> v.asJson)
 
 case class ItcConstraintsInput(
   imageQuality:    ImageQualityInput,

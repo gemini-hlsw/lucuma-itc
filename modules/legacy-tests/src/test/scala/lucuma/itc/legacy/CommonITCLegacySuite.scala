@@ -117,8 +117,8 @@ trait CommonITCLegacySuite extends FunSuite:
 
   // Common observing conditions - this will be used in tests
   def defaultConditions = ItcObservingConditions(
-    ImageQuality.Preset.PointEight,
-    CloudExtinction.Preset.OnePointFive,
+    ImageQuality.Preset.PointEight.toImageQuality.toArcSeconds,
+    CloudExtinction.Preset.OnePointFive.toCloudExtinction.toVegaMagnitude,
     WaterVapor.Median,
     SkyBackground.Bright,
     1
@@ -163,8 +163,8 @@ trait CommonITCLegacySuite extends FunSuite:
       sourceDefinition,
       obs.copy(analysisMethod = analysis),
       ItcObservingConditions(
-        ImageQuality.Preset.PointEight,
-        CloudExtinction.Preset.OnePointFive,
+        ImageQuality.Preset.PointEight.toImageQuality.toArcSeconds,
+        CloudExtinction.Preset.OnePointFive.toCloudExtinction.toVegaMagnitude,
         WaterVapor.Median,
         SkyBackground.Dark,
         2
@@ -333,7 +333,10 @@ trait CommonITCLegacySuite extends FunSuite:
       Enumerated[ImageQuality.Preset].all.foreach: iq =>
         val result = localItc
           .calculateIntegrationTime(
-            params.copy(conditions = params.conditions.copy(iq = iq)).asJson.noSpaces
+            params
+              .copy(conditions = params.conditions.copy(iq = iq.toImageQuality.toArcSeconds))
+              .asJson
+              .noSpaces
           )
         assert(result.fold(allowedErrors, containsValidResults))
 
@@ -341,7 +344,10 @@ trait CommonITCLegacySuite extends FunSuite:
       Enumerated[CloudExtinction.Preset].all.foreach: ce =>
         val result = localItc
           .calculateIntegrationTime(
-            params.copy(conditions = params.conditions.copy(cc = ce)).asJson.noSpaces
+            params
+              .copy(conditions = params.conditions.copy(cc = ce.toCloudExtinction.toVegaMagnitude))
+              .asJson
+              .noSpaces
           )
         assert(result.fold(allowedErrors, containsValidResults))
 

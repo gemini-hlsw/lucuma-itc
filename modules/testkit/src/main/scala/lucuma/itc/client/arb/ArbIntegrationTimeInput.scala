@@ -9,11 +9,13 @@ import lucuma.core.enums.SkyBackground
 import lucuma.core.enums.WaterVapor
 import lucuma.core.model.CloudExtinction
 import lucuma.core.model.ElevationRange
-import lucuma.core.model.arb.ArbElevationRange.given
 import lucuma.core.model.ExposureTimeMode
 import lucuma.core.model.ImageQuality
+import lucuma.core.model.arb.ArbElevationRange.given
 import lucuma.core.model.arb.ArbExposureTimeMode
 import lucuma.core.util.arb.ArbEnumerated.given
+import lucuma.itc.CloudExtinctionInput
+import lucuma.itc.ImageQualityInput
 import org.scalacheck.*
 import org.scalacheck.Arbitrary.arbitrary
 
@@ -30,7 +32,6 @@ trait ArbIntegrationTimeInput {
         r      <- Gen.oneOf(preset, arcsec)
       yield r
 
-  // Arbitrary for CloudExtinctionInput with both preset and exact value possibilities
   given Arbitrary[CloudExtinctionInput] =
     Arbitrary:
       for
@@ -43,18 +44,12 @@ trait ArbIntegrationTimeInput {
   given Arbitrary[ItcConstraintsInput] =
     Arbitrary:
       for
-        imageQuality    <- arbitrary[ImageQualityInput]
-        cloudExtinction <- arbitrary[CloudExtinctionInput]
-        skyBackground   <- arbitrary[SkyBackground]
-        waterVapor      <- arbitrary[WaterVapor]
-        elevationRange  <- arbitrary[ElevationRange]
-      yield ItcConstraintsInput(
-        imageQuality = imageQuality,
-        cloudExtinction = cloudExtinction,
-        skyBackground = skyBackground,
-        waterVapor = waterVapor,
-        elevationRange = elevationRange
-      )
+        iq <- arbitrary[ImageQualityInput]
+        ce <- arbitrary[CloudExtinctionInput]
+        sb <- arbitrary[SkyBackground]
+        wv <- arbitrary[WaterVapor]
+        er <- arbitrary[ElevationRange]
+      yield ItcConstraintsInput(iq, ce, sb, wv, er)
 
   given Cogen[ItcConstraintsInput] =
     Cogen[

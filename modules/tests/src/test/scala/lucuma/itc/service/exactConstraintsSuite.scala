@@ -1163,7 +1163,7 @@ class exactConstraintsSuite extends GraphQLSuite:
         {
           "errors": [
             {
-              "message": "Invalid image quality value: Right predicate of ((600 > 0) && !(600 > 500)) failed: Predicate (600 > 500) did not fail."
+              "message": "Invalid image quality value: 6.0"
             }
           ],
           "data": null
@@ -1244,7 +1244,7 @@ class exactConstraintsSuite extends GraphQLSuite:
         {
           "errors": [
             {
-              "message": "Invalid cloud extinction value: Predicate failed: (!(6000 < 0) && !(6000 > 5000))."
+              "message": "Invalid cloud extinction value: 6.0"
             }
           ],
           "data": null

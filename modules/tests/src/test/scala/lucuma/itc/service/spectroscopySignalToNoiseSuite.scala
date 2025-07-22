@@ -490,11 +490,16 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
       ce <- Enumerated[CloudExtinction.Preset].all
       wv <- Enumerated[WaterVapor].all
       sb <- Enumerated[SkyBackground].all
-    } yield ItcObservingConditions(iq, ce, wv, sb, 2)
+    } yield ItcObservingConditions(iq.toImageQuality.toArcSeconds,
+                                   ce.toCloudExtinction.toVegaMagnitude,
+                                   wv,
+                                   sb,
+                                   2
+    )
 
   val conditions = ItcObservingConditions(
-    ImageQuality.Preset.PointEight,
-    CloudExtinction.Preset.OnePointFive,
+    ImageQuality.Preset.PointEight.toImageQuality.toArcSeconds,
+    CloudExtinction.Preset.OnePointFive.toCloudExtinction.toVegaMagnitude,
     WaterVapor.Median,
     SkyBackground.Bright,
     2
@@ -538,8 +543,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             constraints: {
-              imageQuality: { preset: ${c.iq.tag.toScreamingSnakeCase} },
-              cloudExtinction: { preset: ${c.cc.tag.toScreamingSnakeCase} },
+              imageQuality: { arcsec: ${c.iq} },
+              cloudExtinction: { extinction: ${c.cc} },
               skyBackground: ${c.sb.tag.toScreamingSnakeCase},
               waterVapor: ${c.wv.tag.toScreamingSnakeCase},
               elevationRange: {

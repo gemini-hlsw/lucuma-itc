@@ -52,15 +52,11 @@ private[legacy] object codecs:
     import lucuma.itc.legacy.syntax.conditions.*
     Encoder.forProduct5("exactiq", "exactcc", "wv", "sb", "airmass") { a =>
       (Json.obj(
-         "arcsec"     -> Json.fromBigDecimal(
-           a.iq.toImageQuality.toArcSeconds.round(MathContext.DECIMAL32)
+         "arcsec"            -> Json.fromBigDecimal(
+           a.iq.round(MathContext.DECIMAL32)
          )
        ),
-       Json.obj(
-         "extinction" -> Json.fromBigDecimal(
-           BigDecimal(a.cc.toCloudExtinction.toVegaMagnitude.toDouble)
-         )
-       ),
+       Json.obj("extinction" -> Json.fromBigDecimal(a.cc)),
        a.wv.ocs2Tag,
        a.sb.ocs2Tag,
        toItcAirmass(a.airmass)
