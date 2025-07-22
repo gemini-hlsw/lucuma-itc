@@ -40,6 +40,8 @@ case class ItcConstraintsInput(
 ) derives Eq
 
 object ItcConstraintsInput:
+  extension (cs: ConstraintSet) def toInput: ItcConstraintsInput = fromConstraintSet(cs)
+
   def fromConstraintSet(cs: ConstraintSet): ItcConstraintsInput =
     ItcConstraintsInput(
       imageQuality = ImageQualityInput.preset(cs.imageQuality),
