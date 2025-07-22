@@ -50,8 +50,12 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             constraints: {
-              imageQuality: POINT_THREE,
-              cloudExtinction: POINT_FIVE,
+              imageQuality: {
+                preset: POINT_THREE
+              },
+              cloudExtinction: {
+                preset: POINT_FIVE
+              },
               skyBackground: DARK,
               waterVapor: DRY,
               elevationRange: {
@@ -174,8 +178,12 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             constraints: {
-              imageQuality: POINT_THREE,
-              cloudExtinction: POINT_FIVE,
+              imageQuality: {
+                preset: POINT_THREE
+              },
+              cloudExtinction: {
+                preset: POINT_FIVE
+              },
               skyBackground: DARK,
               waterVapor: DRY,
               elevationRange: {
@@ -302,8 +310,12 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             constraints: {
-              imageQuality: POINT_THREE,
-              cloudExtinction: POINT_FIVE,
+              imageQuality: {
+                preset: POINT_THREE
+              },
+              cloudExtinction: {
+                preset: POINT_FIVE
+              },
               skyBackground: DARK,
               waterVapor: DRY,
               elevationRange: {
@@ -431,8 +443,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             "constraints" : {
-              "imageQuality" : "POINT_EIGHT",
-              "cloudExtinction" : "POINT_FIVE",
+              "imageQuality": {"preset": "POINT_EIGHT"},
+              "cloudExtinction": {"preset": "POINT_FIVE"},
               "skyBackground" : "DARK",
               "waterVapor" : "DRY",
               "elevationRange" : {
@@ -478,11 +490,16 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
       ce <- Enumerated[CloudExtinction.Preset].all
       wv <- Enumerated[WaterVapor].all
       sb <- Enumerated[SkyBackground].all
-    } yield ItcObservingConditions(iq, ce, wv, sb, 2)
+    } yield ItcObservingConditions(iq.toImageQuality.toArcSeconds,
+                                   ce.toCloudExtinction.toVegaMagnitude,
+                                   wv,
+                                   sb,
+                                   2
+    )
 
   val conditions = ItcObservingConditions(
-    ImageQuality.Preset.PointEight,
-    CloudExtinction.Preset.OnePointFive,
+    ImageQuality.Preset.PointEight.toImageQuality.toArcSeconds,
+    CloudExtinction.Preset.OnePointFive.toCloudExtinction.toVegaMagnitude,
     WaterVapor.Median,
     SkyBackground.Bright,
     2
@@ -526,8 +543,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             constraints: {
-              imageQuality: ${c.iq.tag.toScreamingSnakeCase},
-              cloudExtinction: ${c.cc.tag.toScreamingSnakeCase},
+              imageQuality: { arcsec: ${c.iq} },
+              cloudExtinction: { extinction: ${c.cc} },
               skyBackground: ${c.sb.tag.toScreamingSnakeCase},
               waterVapor: ${c.wv.tag.toScreamingSnakeCase},
               elevationRange: {
@@ -649,8 +666,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             constraints: {
-              imageQuality: POINT_THREE,
-              cloudExtinction: POINT_FIVE,
+              imageQuality: { preset: POINT_THREE },
+              cloudExtinction: { preset: POINT_FIVE },
               skyBackground: DARK,
               waterVapor: DRY,
               elevationRange: {
@@ -753,8 +770,12 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             constraints: {
-              imageQuality: POINT_THREE,
-              cloudExtinction: POINT_FIVE,
+              imageQuality: {
+                preset: POINT_THREE
+              },
+              cloudExtinction: {
+                preset: POINT_FIVE
+              },
               skyBackground: DARK,
               waterVapor: DRY,
               elevationRange: {
@@ -882,8 +903,12 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             constraints: {
-              imageQuality: POINT_THREE,
-              cloudExtinction: POINT_FIVE,
+              imageQuality: {
+                preset: POINT_THREE
+              },
+              cloudExtinction: {
+                preset: POINT_FIVE
+              },
               skyBackground: DARK,
               waterVapor: DRY,
               elevationRange: {
@@ -1017,8 +1042,8 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
                 }
               ],
               constraints: {
-                imageQuality: POINT_THREE,
-                cloudExtinction: POINT_FIVE,
+                imageQuality: { preset: POINT_THREE },
+                cloudExtinction: { preset: POINT_FIVE },
                 skyBackground: DARK,
                 waterVapor: DRY,
                 elevationRange: {
@@ -1145,8 +1170,12 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             constraints: {
-              imageQuality: POINT_THREE,
-              cloudExtinction: POINT_FIVE,
+              imageQuality: {
+                preset: POINT_THREE
+              },
+              cloudExtinction: {
+                preset: POINT_FIVE
+              },
               skyBackground: DARK,
               waterVapor: DRY,
               elevationRange: {
@@ -1279,8 +1308,12 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             constraints: {
-              imageQuality: POINT_THREE,
-              cloudExtinction: POINT_FIVE,
+              imageQuality: {
+                preset: POINT_THREE
+              },
+              cloudExtinction: {
+                preset: POINT_FIVE
+              },
               skyBackground: DARK,
               waterVapor: DRY,
               elevationRange: {
@@ -1409,8 +1442,12 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             constraints: {
-              imageQuality: POINT_THREE,
-              cloudExtinction: POINT_FIVE,
+              imageQuality: {
+                preset: POINT_THREE
+              },
+              cloudExtinction: {
+                preset: POINT_FIVE
+              },
               skyBackground: DARK,
               waterVapor: DRY,
               elevationRange: {
@@ -1557,8 +1594,12 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
               }
             ],
             constraints: {
-              imageQuality: POINT_THREE,
-              cloudExtinction: POINT_FIVE,
+              imageQuality: {
+                preset: POINT_THREE
+              },
+              cloudExtinction: {
+                preset: POINT_FIVE
+              },
               skyBackground: DARK,
               waterVapor: DRY,
               elevationRange: {

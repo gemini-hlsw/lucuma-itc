@@ -16,7 +16,7 @@ case class SpectroscopyGraphsInput(
   exposureTime:       TimeSpan,
   exposureCount:      NonNegInt,
   asterism:           List[TargetDataInput],
-  constraints:        ConstraintSetInput,
+  constraints:        ItcConstraintsInput,
   mode:               InstrumentModesInput,
   significantFigures: Option[SignificantFigures]
 )
@@ -30,7 +30,7 @@ object SpectroscopyGraphsInput:
             TimeSpanInput.Binding("exposureTime", exposureTime),
             NonNegIntBinding("exposureCount", exposureCount),
             TargetDataInput.Binding.List("asterism", asterism),
-            ConstraintSetInput.Binding("constraints", constraints),
+            ItcConstraintsInput.Binding("constraints", constraints),
             InstrumentModesInput.Binding("mode", mode),
             SignificantFiguresInput.Binding.Option("significantFigures", significantFigures)
           ) =>

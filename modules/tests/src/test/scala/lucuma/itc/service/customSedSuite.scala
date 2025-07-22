@@ -44,8 +44,12 @@ class customSedSuite extends GraphQLSuite {
               }
             ],
             constraints: {
-              imageQuality: POINT_EIGHT,
-              cloudExtinction: ONE_POINT_FIVE,
+              imageQuality: {
+                preset: POINT_EIGHT
+              },
+              cloudExtinction: {
+                preset: ONE_POINT_FIVE
+              },
               skyBackground: BRIGHT,
               waterVapor: MEDIAN,
               elevationRange: {
@@ -155,8 +159,12 @@ class customSedSuite extends GraphQLSuite {
               }
             ],
             constraints: {
-              imageQuality: POINT_EIGHT,
-              cloudExtinction: ONE_POINT_FIVE,
+              imageQuality: {
+                preset: POINT_EIGHT
+              },
+              cloudExtinction: {
+                preset: ONE_POINT_FIVE
+              },
               skyBackground: BRIGHT,
               waterVapor: MEDIAN,
               elevationRange: {
@@ -266,8 +274,12 @@ class customSedSuite extends GraphQLSuite {
               }
             ],
             constraints: {
-              imageQuality: POINT_EIGHT,
-              cloudExtinction: ONE_POINT_FIVE,
+              imageQuality: {
+                preset: POINT_EIGHT
+              },
+              cloudExtinction: {
+                preset: ONE_POINT_FIVE
+              },
               skyBackground: BRIGHT,
               waterVapor: MEDIAN,
               elevationRange: {
@@ -382,8 +394,12 @@ class customSedSuite extends GraphQLSuite {
               }
             ],
             constraints: {
-              imageQuality: POINT_EIGHT,
-              cloudExtinction: ONE_POINT_FIVE,
+              imageQuality: {
+                preset: POINT_EIGHT
+              },
+              cloudExtinction: {
+                preset: ONE_POINT_FIVE
+              },
               skyBackground: BRIGHT,
               waterVapor: MEDIAN,
               elevationRange: {

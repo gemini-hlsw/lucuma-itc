@@ -46,7 +46,6 @@ import lucuma.core.math.units.VegaMagnitude
 import lucuma.core.math.units.WattsPerMeter2
 import lucuma.core.math.units.WattsPerMeter2Micrometer
 import lucuma.core.model.CloudExtinction
-import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ElevationRange
 import lucuma.core.model.EmissionLine
 import lucuma.core.model.ExposureTimeMode
@@ -58,7 +57,9 @@ import lucuma.core.model.UnnormalizedSED.Galaxy
 import lucuma.core.model.sequence.gmos.GmosCcdMode
 import lucuma.core.util.*
 import lucuma.itc.AsterismIntegrationTimeOutcomes
+import lucuma.itc.CloudExtinctionInput
 import lucuma.itc.GraphType
+import lucuma.itc.ImageQualityInput
 import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcAxis
 import lucuma.itc.ItcCcd
@@ -334,6 +335,102 @@ class WiringSuite extends ClientSuite:
       ).asRight
     )
 
+  test("ItcClient spectroscopy with exact imageQuality and cloudExtinction values"):
+    spectroscopy(
+      WiringSuite.GmosSpectroscopyExactValuesInputData,
+      ClientCalculationResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+          BuildInfo.ocslibHash.some
+        ),
+        AsterismIntegrationTimeOutcomes:
+          NonEmptyChain:
+            TargetIntegrationTimeOutcome:
+              TargetIntegrationTime(
+                Zipper.fromNel(NonEmptyList.one(selected)),
+                Band.R.asLeft,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
+              ).asRight
+      ).asRight
+    )
+
+  test("ItcClient imaging with exact constraint values"):
+    imaging(
+      WiringSuite.GmosImagingExactValuesInputData,
+      ClientCalculationResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+          BuildInfo.ocslibHash.some
+        ),
+        AsterismIntegrationTimeOutcomes:
+          NonEmptyChain:
+            TargetIntegrationTimeOutcome:
+              TargetIntegrationTime(
+                Zipper.fromNel(NonEmptyList.one(selected)),
+                Band.R.asLeft,
+                SignalToNoiseAt(atWavelength,
+                                SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
+                                TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
+                ).some
+              ).asRight
+      ).asRight
+    )
+
+  test("ItcClient spectroscopy graphs with mixed preset and exact values"):
+    spectroscopyGraphs(
+      WiringSuite.GraphExactValuesInput,
+      SpectroscopyGraphsResult(
+        ItcVersions(
+          versionDateTimeFormatter.format(Instant.ofEpochMilli(buildinfo.BuildInfo.buildDateTime)),
+          BuildInfo.ocslibHash.some
+        ),
+        AsterismTargetGraphsResultOutcomes:
+          NonEmptyChain.of(
+            TargetGraphsResultOutcome:
+              TargetGraphsResult(
+                TargetGraphs(
+                  NonEmptyChain.of(
+                    ItcCcd(
+                      1,
+                      1,
+                      2,
+                      2,
+                      Wavelength.fromIntNanometers(1001).get,
+                      Wavelength.fromIntNanometers(1001).get,
+                      3,
+                      4,
+                      5,
+                      Nil
+                    )
+                  ),
+                  NonEmptyChain.of(
+                    GraphResult(
+                      GraphType.S2NGraph,
+                      List(
+                        SeriesResult(
+                          "title",
+                          SeriesDataType.FinalS2NData,
+                          List(1000.0, 1001.0),
+                          ItcAxis(1, 2, 1, 2, 2).some,
+                          ItcAxis(1000.0, 1001.0, 1000, 1001, 2).some
+                        )
+                      )
+                    )
+                  ),
+                  TotalSN(SignalToNoise.unsafeFromBigDecimalExact(1009.0)),
+                  SignalToNoise.fromInt(1001).map(TotalSN(_)),
+                  SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1003.0)),
+                  SignalToNoise.fromInt(1002).map(SingleSN(_))
+                ),
+                Band.R
+              ).asRight
+          )
+      ).asRight
+    )
+
 object WiringSuite:
 
   val GmosSpectroscopyInputData: SpectroscopyInput =
@@ -343,12 +440,12 @@ object WiringSuite:
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
           atWavelength
         ),
-        ConstraintSet(
-          ImageQuality.Preset.PointOne,
-          CloudExtinction.Preset.PointOne,
-          SkyBackground.Darkest,
-          WaterVapor.VeryDry,
-          ElevationRange.ByAirMass.Default
+        ItcConstraintsInput(
+          ImageQualityInput.preset(ImageQuality.Preset.PointOne),
+          CloudExtinctionInput.preset(CloudExtinction.Preset.PointOne),
+          skyBackground = SkyBackground.Darkest,
+          waterVapor = WaterVapor.VeryDry,
+          elevationRange = ElevationRange.ByAirMass.Default
         ),
         InstrumentMode.GmosNorthSpectroscopy(
           Wavelength.Min,
@@ -391,12 +488,12 @@ object WiringSuite:
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
           atWavelength
         ),
-        ConstraintSet(
-          ImageQuality.Preset.PointOne,
-          CloudExtinction.Preset.PointOne,
-          SkyBackground.Darkest,
-          WaterVapor.VeryDry,
-          ElevationRange.ByAirMass.Default
+        ItcConstraintsInput(
+          ImageQualityInput.preset(ImageQuality.Preset.PointOne),
+          CloudExtinctionInput.preset(CloudExtinction.Preset.PointOne),
+          skyBackground = SkyBackground.Darkest,
+          waterVapor = WaterVapor.VeryDry,
+          elevationRange = ElevationRange.ByAirMass.Default
         ),
         InstrumentMode.Flamingos2Spectroscopy(
           Flamingos2Disperser.R3000,
@@ -430,12 +527,12 @@ object WiringSuite:
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
           atWavelength
         ),
-        ConstraintSet(
-          ImageQuality.Preset.PointOne,
-          CloudExtinction.Preset.PointOne,
-          SkyBackground.Darkest,
-          WaterVapor.VeryDry,
-          ElevationRange.ByAirMass.Default
+        ItcConstraintsInput(
+          ImageQualityInput.preset(ImageQuality.Preset.PointOne),
+          CloudExtinctionInput.preset(CloudExtinction.Preset.PointOne),
+          skyBackground = SkyBackground.Darkest,
+          waterVapor = WaterVapor.VeryDry,
+          elevationRange = ElevationRange.ByAirMass.Default
         ),
         InstrumentMode.Flamingos2Imaging(Flamingos2Filter.J)
       ),
@@ -465,12 +562,12 @@ object WiringSuite:
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
           atWavelength
         ),
-        ConstraintSet(
-          ImageQuality.Preset.PointOne,
-          CloudExtinction.Preset.PointOne,
-          SkyBackground.Darkest,
-          WaterVapor.VeryDry,
-          ElevationRange.ByAirMass.Default
+        ItcConstraintsInput(
+          ImageQualityInput.preset(ImageQuality.Preset.PointOne),
+          CloudExtinctionInput.preset(CloudExtinction.Preset.PointOne),
+          skyBackground = SkyBackground.Darkest,
+          waterVapor = WaterVapor.VeryDry,
+          elevationRange = ElevationRange.ByAirMass.Default
         ),
         InstrumentMode.GmosNorthImaging(
           GmosNorthFilter.GPrime,
@@ -502,12 +599,12 @@ object WiringSuite:
         Wavelength.Min,
         TimeSpan.fromSeconds(1).get,
         NonNegInt.unsafeFrom(5),
-        ConstraintSet(
-          ImageQuality.Preset.PointOne,
-          CloudExtinction.Preset.PointOne,
-          SkyBackground.Darkest,
-          WaterVapor.VeryDry,
-          ElevationRange.ByAirMass.Default
+        ItcConstraintsInput(
+          ImageQualityInput.preset(ImageQuality.Preset.PointOne),
+          CloudExtinctionInput.preset(CloudExtinction.Preset.PointOne),
+          skyBackground = SkyBackground.Darkest,
+          waterVapor = WaterVapor.VeryDry,
+          elevationRange = ElevationRange.ByAirMass.Default
         ),
         InstrumentMode.GmosNorthSpectroscopy(
           Wavelength.Min,
@@ -551,12 +648,12 @@ object WiringSuite:
           SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
           atWavelength
         ),
-        ConstraintSet(
-          ImageQuality.Preset.PointOne,
-          CloudExtinction.Preset.PointOne,
-          SkyBackground.Darkest,
-          WaterVapor.VeryDry,
-          ElevationRange.ByAirMass.Default
+        ItcConstraintsInput(
+          ImageQualityInput.preset(ImageQuality.Preset.PointOne),
+          CloudExtinctionInput.preset(CloudExtinction.Preset.PointOne),
+          skyBackground = SkyBackground.Darkest,
+          waterVapor = WaterVapor.VeryDry,
+          elevationRange = ElevationRange.ByAirMass.Default
         ),
         InstrumentMode.GmosNorthSpectroscopy(
           Wavelength.Min,
@@ -591,6 +688,141 @@ object WiringSuite:
                 FluxDensityContinuumValue.unsafeFrom(BigDecimal(0.5)),
                 TaggedUnit[WattsPerMeter2Micrometer, FluxDensityContinuum[Integrated]].unit
               ).tag
+            )
+          ),
+          RadialVelocity.fromMetersPerSecond.getOption(1.0).get
+        )
+      )
+    )
+
+  // Test data using exact values for imageQuality and cloudExtinction
+  val GmosSpectroscopyExactValuesInputData: SpectroscopyInput =
+    SpectroscopyInput(
+      SpectroscopyParameters(
+        ExposureTimeMode.SignalToNoiseMode(
+          SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+          atWavelength
+        ),
+        ItcConstraintsInput(
+          ImageQualityInput.arcsec(BigDecimal("0.85")),
+          CloudExtinctionInput.extinction(BigDecimal("0.3")),
+          skyBackground = SkyBackground.Darkest,
+          waterVapor = WaterVapor.VeryDry,
+          elevationRange = ElevationRange.ByAirMass.Default
+        ),
+        InstrumentMode.GmosNorthSpectroscopy(
+          Wavelength.Min,
+          GmosNorthGrating.B1200_G5301,
+          GmosNorthFilter.GPrime.some,
+          GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
+          GmosCcdMode(
+            GmosXBinning.Two,
+            GmosYBinning.Two,
+            GmosAmpCount.Twelve,
+            GmosAmpGain.High,
+            GmosAmpReadMode.Fast
+          ).some,
+          GmosRoi.FullFrame.some
+        )
+      ),
+      NonEmptyList.of(
+        TargetInput(
+          SourceProfile.Point(
+            BandNormalized[Integrated](
+              Galaxy(Spiral).some,
+              SortedMap(
+                Band.R ->
+                  Measure(
+                    BrightnessValue.unsafeFrom(BigDecimal(10.0)),
+                    TaggedUnit[VegaMagnitude, Brightness[Integrated]].unit
+                  ).tag
+              )
+            )
+          ),
+          RadialVelocity.fromMetersPerSecond.getOption(1.0).get
+        )
+      )
+    )
+
+  val GmosImagingExactValuesInputData: ImagingInput =
+    ImagingInput(
+      ImagingParameters(
+        ExposureTimeMode.SignalToNoiseMode(
+          SignalToNoise.unsafeFromBigDecimalExact(BigDecimal(1)),
+          atWavelength
+        ),
+        ItcConstraintsInput(
+          ImageQualityInput.arcsec(BigDecimal("1.2")),
+          CloudExtinctionInput.extinction(BigDecimal("0.1")),
+          skyBackground = SkyBackground.Bright,
+          waterVapor = WaterVapor.Wet,
+          elevationRange = ElevationRange.ByAirMass.Default
+        ),
+        InstrumentMode.GmosNorthImaging(
+          GmosNorthFilter.GPrime,
+          none
+        )
+      ),
+      NonEmptyList.of(
+        TargetInput(
+          SourceProfile.Point(
+            BandNormalized[Integrated](
+              Galaxy(Spiral).some,
+              SortedMap(
+                Band.R ->
+                  Measure(
+                    BrightnessValue.unsafeFrom(BigDecimal(10.0)),
+                    TaggedUnit[VegaMagnitude, Brightness[Integrated]].unit
+                  ).tag
+              )
+            )
+          ),
+          RadialVelocity.fromMetersPerSecond.getOption(1.0).get
+        )
+      )
+    )
+
+  val GraphExactValuesInput: SpectroscopyGraphsInput =
+    SpectroscopyGraphsInput(
+      SpectroscopyGraphParameters(
+        Wavelength.Min,
+        TimeSpan.fromSeconds(1).get,
+        NonNegInt.unsafeFrom(5),
+        ItcConstraintsInput(
+          ImageQualityInput.arcsec(BigDecimal("0.7")),
+          CloudExtinctionInput.preset(CloudExtinction.Preset.PointFive),
+          skyBackground = SkyBackground.Dark,
+          waterVapor = WaterVapor.Median,
+          elevationRange = ElevationRange.ByAirMass.Default
+        ),
+        InstrumentMode.GmosNorthSpectroscopy(
+          Wavelength.Min,
+          GmosNorthGrating.B1200_G5301,
+          GmosNorthFilter.GPrime.some,
+          GmosFpu.North.builtin(GmosNorthFpu.LongSlit_0_25),
+          GmosCcdMode(
+            GmosXBinning.Two,
+            GmosYBinning.Two,
+            GmosAmpCount.Twelve,
+            GmosAmpGain.High,
+            GmosAmpReadMode.Fast
+          ).some,
+          GmosRoi.FullFrame.some
+        ),
+        Some(SignificantFiguresInput(2.refined, 2.refined, 2.refined))
+      ),
+      NonEmptyList.of(
+        TargetInput(
+          SourceProfile.Point(
+            BandNormalized[Integrated](
+              Galaxy(Spiral).some,
+              SortedMap(
+                Band.R ->
+                  Measure(
+                    BrightnessValue.unsafeFrom(BigDecimal(10.0)),
+                    TaggedUnit[VegaMagnitude, Brightness[Integrated]].unit
+                  ).tag
+              )
             )
           ),
           RadialVelocity.fromMetersPerSecond.getOption(1.0).get

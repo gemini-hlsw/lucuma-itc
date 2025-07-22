@@ -44,8 +44,12 @@ class errorChannelSuite extends FailingCalculationSuite:
               }
             ],
             constraints: {
-              imageQuality: POINT_THREE,
-              cloudExtinction: POINT_FIVE,
+              imageQuality: {
+                preset: POINT_THREE
+              },
+              cloudExtinction: {
+                preset: POINT_FIVE
+              },
               skyBackground: DARK,
               waterVapor: DRY,
               elevationRange: {

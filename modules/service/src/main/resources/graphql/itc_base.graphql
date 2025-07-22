@@ -206,6 +206,44 @@ input InstrumentModesInput {
   flamingos2Imaging: Flamingos2ImagingInput
 }
 
+"""Image quality input - specify either preset or exact arcsec value"""
+input ImageQualityInput {
+  """Preset image quality value"""
+  preset: ImageQualityPreset
+
+  """Exact image quality in arcseconds"""
+  arcsec: BigDecimal
+}
+
+"""
+Cloud extinction input - specify either preset or exact extinction value
+"""
+input CloudExtinctionInput {
+  """Preset cloud extinction value"""
+  preset: CloudExtinctionPreset
+
+  """Exact cloud extinction in Vega magnitudes"""
+  extinction: BigDecimal
+}
+
+"""ITC-specific constraint set with flexible ImageQuality and CloudExtinction inputs"""
+input ItcConstraintsInput {
+  """Image quality - specify either preset or exact arcsec value"""
+  imageQuality: ImageQualityInput!
+
+  """Cloud extinction - specify either preset or exact extinction value"""
+  cloudExtinction: CloudExtinctionInput!
+
+  """Sky background"""
+  skyBackground: SkyBackground!
+
+  """Water vapor"""
+  waterVapor: WaterVapor!
+
+  """Elevation range"""
+  elevationRange: ElevationRangeInput!
+}
+
 """Params for spectroscopy integration time calculation"""
 input SpectroscopyInput {
 
@@ -216,7 +254,7 @@ input SpectroscopyInput {
   asterism: [TargetInput!]!
 
   """Conditions"""
-  constraints: ConstraintSetInput!
+  constraints: ItcConstraintsInput!
 
   """Instrument modes"""
   mode: InstrumentModesInput!
@@ -240,7 +278,7 @@ input ImagingInput {
   asterism: [TargetInput!]!
 
   """Conditions"""
-  constraints: ConstraintSetInput!
+  constraints: ItcConstraintsInput!
 
   """Instrument modes"""
   mode: InstrumentModesInput!
@@ -273,7 +311,7 @@ input SpectroscopyGraphsInput {
   asterism: [TargetInput!]!
 
   """Conditions"""
-  constraints: ConstraintSetInput!
+  constraints: ItcConstraintsInput!
 
   """Instrument modes"""
   mode: InstrumentModesInput!
@@ -292,7 +330,7 @@ input SpectroscopyIntegrationTimeAndGraphsInput {
   asterism: [TargetInput!]!
 
   """Conditions"""
-  constraints: ConstraintSetInput!
+  constraints: ItcConstraintsInput!
 
   """Instrument modes"""
   mode: InstrumentModesInput!

@@ -9,16 +9,14 @@ import cats.derived.*
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
-import lucuma.core.model.ConstraintSet
 import lucuma.core.model.ExposureTimeMode
 import lucuma.itc.client.json.encoders.given
-import lucuma.itc.client.json.given
 import monocle.Focus
 import monocle.Lens
 
 case class ImagingParameters(
   exposureTimeMode: ExposureTimeMode,
-  constraints:      ConstraintSet,
+  constraints:      ItcConstraintsInput,
   mode:             InstrumentMode
 ) derives Eq
 
@@ -36,7 +34,7 @@ object ImagingParameters {
   val exposureTimeMode: Lens[ImagingParameters, ExposureTimeMode] =
     Focus[ImagingParameters](_.exposureTimeMode)
 
-  val constraints: Lens[ImagingParameters, ConstraintSet] =
+  val constraints: Lens[ImagingParameters, ItcConstraintsInput] =
     Focus[ImagingParameters](_.constraints)
 
   val mode: Lens[ImagingParameters, InstrumentMode] =

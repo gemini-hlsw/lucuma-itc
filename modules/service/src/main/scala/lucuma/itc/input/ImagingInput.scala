@@ -11,7 +11,7 @@ import lucuma.odb.graphql.input.*
 case class ImagingInput(
   exposureTimeMode: ExposureTimeMode,
   asterism:         List[TargetDataInput],
-  constraints:      ConstraintSetInput,
+  constraints:      ItcConstraintsInput,
   mode:             InstrumentModesInput
 )
 
@@ -22,7 +22,7 @@ object ImagingInput:
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
             TargetDataInput.Binding.List("asterism", asterism),
-            ConstraintSetInput.Binding("constraints", constraints),
+            ItcConstraintsInput.Binding("constraints", constraints),
             InstrumentModesInput.Binding("mode", mode)
           ) =>
         (exposureTimeMode, asterism, constraints, mode)

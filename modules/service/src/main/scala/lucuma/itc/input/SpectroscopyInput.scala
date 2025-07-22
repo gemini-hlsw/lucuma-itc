@@ -12,19 +12,19 @@ import lucuma.odb.graphql.input.*
 sealed trait SpectroscopyTimeInput:
   def exposureTimeMode: ExposureTimeMode
   def asterism: List[TargetDataInput]
-  def constraints: ConstraintSetInput
+  def constraints: ItcConstraintsInput
   def mode: InstrumentModesInput
 
 object SpectroscopyTimeInput:
   def unapply(
     arg: SpectroscopyTimeInput
-  ): (ExposureTimeMode, List[TargetDataInput], ConstraintSetInput, InstrumentModesInput) =
+  ): (ExposureTimeMode, List[TargetDataInput], ItcConstraintsInput, InstrumentModesInput) =
     (arg.exposureTimeMode, arg.asterism, arg.constraints, arg.mode)
 
 case class SpectroscopyInput(
   exposureTimeMode: ExposureTimeMode,
   asterism:         List[TargetDataInput],
-  constraints:      ConstraintSetInput,
+  constraints:      ItcConstraintsInput,
   mode:             InstrumentModesInput
 ) extends SpectroscopyTimeInput
 
@@ -35,7 +35,7 @@ object SpectroscopyInput:
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
             TargetDataInput.Binding.List("asterism", asterism),
-            ConstraintSetInput.Binding("constraints", constraints),
+            ItcConstraintsInput.Binding("constraints", constraints),
             InstrumentModesInput.Binding("mode", mode)
           ) =>
         (exposureTimeMode, asterism, constraints, mode)
@@ -44,7 +44,7 @@ object SpectroscopyInput:
 case class SpectroscopyIntegrationTimeAndGraphsInput(
   exposureTimeMode:   ExposureTimeMode,
   asterism:           List[TargetDataInput],
-  constraints:        ConstraintSetInput,
+  constraints:        ItcConstraintsInput,
   mode:               InstrumentModesInput,
   significantFigures: Option[SignificantFigures]
 ) extends SpectroscopyTimeInput
@@ -56,7 +56,7 @@ object SpectroscopyIntegrationTimeAndGraphsInput:
       case List(
             ExposureTimeModeInput.Binding("exposureTimeMode", exposureTimeMode),
             TargetDataInput.Binding.List("asterism", asterism),
-            ConstraintSetInput.Binding("constraints", constraints),
+            ItcConstraintsInput.Binding("constraints", constraints),
             InstrumentModesInput.Binding("mode", mode),
             SignificantFiguresInput.Binding.Option("significantFigures", significantFigures)
           ) =>
