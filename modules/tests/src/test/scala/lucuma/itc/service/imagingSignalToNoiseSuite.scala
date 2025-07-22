@@ -72,8 +72,12 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
               }
             ],
             constraints: {
-              imageQuality: TWO_POINT_ZERO,
-              cloudExtinction: THREE_POINT_ZERO,
+              imageQuality: {
+                preset: TWO_POINT_ZERO
+              },
+              cloudExtinction: {
+                preset: THREE_POINT_ZERO
+              },
               skyBackground: BRIGHT,
               waterVapor: WET,
               elevationRange: {
@@ -233,8 +237,12 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
               }
             ],
             constraints: {
-              imageQuality: TWO_POINT_ZERO,
-              cloudExtinction: THREE_POINT_ZERO,
+              imageQuality: {
+                preset: TWO_POINT_ZERO
+              },
+              cloudExtinction: {
+                preset: THREE_POINT_ZERO
+              },
               skyBackground: BRIGHT,
               waterVapor: WET,
               elevationRange: {
@@ -392,8 +400,12 @@ class imagingSignalToNoiseSuite extends GraphImagingQLSuite:
               }
             ],
             constraints: {
-              imageQuality: TWO_POINT_ZERO,
-              cloudExtinction: THREE_POINT_ZERO,
+              imageQuality: {
+                preset: TWO_POINT_ZERO
+              },
+              cloudExtinction: {
+                preset: THREE_POINT_ZERO
+              },
               skyBackground: BRIGHT,
               waterVapor: WET,
               elevationRange: {

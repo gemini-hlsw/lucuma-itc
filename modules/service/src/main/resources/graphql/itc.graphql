@@ -145,6 +145,37 @@ input AngleInput {
   hms: String
 }
 
+enum GcalLampType {
+  ARC
+  FLAT
+}
+
+type AtomDigest {
+  """Atom id"""
+  id: AtomId!
+
+  """
+  Observe class for this atom as a whole (combined observe class for each of
+  its steps).
+  """
+  observeClass: ObserveClass!
+
+  """Expected execution time for this atom."""
+  timeEstimate: CategorizedTime!
+
+  """Step types contained in this atom."""
+  stepTypes: [StepType!]!
+
+  """Gcal lamp types used in this atom, if any."""
+  lampTypes: [GcalLampType!]!
+}
+
+type CalculatedAtomDigests {
+  """The current state of the background calculation."""
+  state: CalculationState!
+  value: [AtomDigest!]!
+}
+
 """
 Atom-level events.  The execution of a single atom will generate multiple events.
 """
@@ -508,34 +539,6 @@ type CloneTargetResult {
 
   """The new cloned (but possibly modified) target"""
   newTarget: Target!
-}
-
-"""Constraint set creation and editing parameters"""
-input ConstraintSetInput {
-  """
-  The imageQuality field is required when creating a new instance of ConstraintSet, but optional when editing
-  """
-  imageQuality: ImageQualityPreset
-
-  """
-  The cloudExtinction field is required when creating a new instance of ConstraintSet, but optional when editing
-  """
-  cloudExtinction: CloudExtinctionPreset
-
-  """
-  The skyBackground field is required when creating a new instance of ConstraintSet, but optional when editing
-  """
-  skyBackground: SkyBackground
-
-  """
-  The waterVapor field is required when creating a new instance of ConstraintSet, but optional when editing
-  """
-  waterVapor: WaterVapor
-
-  """
-  The elevationRange field is required when creating a new instance of ConstraintSet, but optional when editing
-  """
-  elevationRange: ElevationRangeInput
 }
 
 scalar ChronicleId
@@ -1721,7 +1724,6 @@ type ProgramEdit {
 
   """Edited object"""
   value: Program!
-  id: Long! @deprecated(reason: "id is no longer computed; a constant value is returned")
 }
 
 """The role a user a plays when assigned to a program."""
@@ -2213,7 +2215,6 @@ type GroupEdit {
 
   """Edited group, or null if it's the top-level group."""
   value: Group
-  id: Long! @deprecated(reason: "id is no longer computed; a constant value is returned")
 }
 
 type TelescopeConfig {
@@ -3164,6 +3165,12 @@ type Execution {
   along with warning messages.
   """
   calculatedDigest: CalculatedExecutionDigest
+
+  """
+  A summary of pending atoms in this observation's sequence.  This is intended
+  for the scheduler, but is available generally.
+  """
+  atomDigests: CalculatedAtomDigests!
 
   """
   Full execution config, including acquisition and science sequences.  If a
@@ -4187,6 +4194,21 @@ type GmosNorthImaging {
   initialFilters: [GmosNorthFilter!]!
 
   """
+  MultipleFiltersMode, either explicitly specified in explicitMultipleFiltersMode or else taken
+  from the defaultMultipleFiltersMode.
+  """
+  multipleFiltersMode: MultipleFiltersMode!
+
+  """Default MultipleFiltersMode (GROUPED)."""
+  defaultMultipleFiltersMode: MultipleFiltersMode!
+
+  """
+  Optional explictly specified MultipleFiltersMode. If set it overrides the
+  default.
+  """
+  explicitMultipleFiltersMode: MultipleFiltersMode
+
+  """
   GMOS Binning, either explicitly specified in explicitBin or else taken
   from the defaultBin. XBinning == YBinning = Binning
   """
@@ -4609,6 +4631,21 @@ type GmosSouthImaging {
   Initial GMOS South Filters that were used when creating the imaging mode
   """
   initialFilters: [GmosSouthFilter!]!
+
+  """
+  MultipleFiltersMode, either explicitly specified in explicitMultipleFiltersMode or else taken
+  from the defaultMultipleFiltersMode.
+  """
+  multipleFiltersMode: MultipleFiltersMode!
+
+  """Default MultipleFiltersMode (GROUPED)."""
+  defaultMultipleFiltersMode: MultipleFiltersMode!
+
+  """
+  Optional explictly specified MultipleFiltersMode. If set it overrides the
+  default.
+  """
+  explicitMultipleFiltersMode: MultipleFiltersMode
 
   """
   GMOS Binning, either explicitly specified in explicitBin or else taken
@@ -5409,6 +5446,15 @@ type ConfigurationRequestSelectResult {
   hasMore: Boolean!
 }
 
+"""How sequences are generated when multiple filters are specified."""
+enum MultipleFiltersMode {
+  """Grouped filters"""
+  GROUPED
+
+  """Interleaved filters"""
+  INTERLEAVED
+}
+
 """
 Observation reference type, broken into its constituient parts and including
 a formatted label.
@@ -5900,9 +5946,6 @@ type RightAscension {
 
   """Right Ascension (RA) in degrees"""
   degrees: BigDecimal!
-
-  """Right Ascension (RA) in µas"""
-  microarcseconds: Long!
 
   """Right Ascension (RA) in µs"""
   microseconds: Long!
@@ -7396,9 +7439,6 @@ interface TimeChargeDiscount {
   interval: TimestampInterval!
 
   """Time amount to discount from the program."""
-  program: TimeSpan! @deprecated(reason: "renamed to 'amount'")
-
-  """Time amount to discount from the program."""
   amount: TimeSpan!
 
   """Additional detail."""
@@ -7413,9 +7453,6 @@ time is not charged.
 type TimeChargeDaylightDiscount implements TimeChargeDiscount {
   """The interval during which this discount applies."""
   interval: TimestampInterval!
-
-  """Time amount to discount from the program."""
-  program: TimeSpan! @deprecated(reason: "renamed to 'amount'")
 
   """Time amount to discount from the program."""
   amount: TimeSpan!
@@ -7436,9 +7473,6 @@ type TimeChargeNoDataDiscount implements TimeChargeDiscount {
   interval: TimestampInterval!
 
   """Time amount to discount from the program."""
-  program: TimeSpan! @deprecated(reason: "renamed to 'amount'")
-
-  """Time amount to discount from the program."""
   amount: TimeSpan!
 
   """Additional detail."""
@@ -7455,9 +7489,6 @@ type TimeChargeOverlapDiscount implements TimeChargeDiscount {
   interval: TimestampInterval!
 
   """Time amount to discount from the program."""
-  program: TimeSpan! @deprecated(reason: "renamed to 'amount'")
-
-  """Time amount to discount from the program."""
   amount: TimeSpan!
 
   """Additional detail."""
@@ -7470,9 +7501,6 @@ type TimeChargeOverlapDiscount implements TimeChargeDiscount {
 type TimeChargeQaDiscount implements TimeChargeDiscount {
   """The interval during which this discount applies."""
   interval: TimestampInterval!
-
-  """Time amount to discount from the program."""
-  program: TimeSpan! @deprecated(reason: "renamed to 'amount'")
 
   """Time amount to discount from the program."""
   amount: TimeSpan!
@@ -8018,6 +8046,46 @@ input InstrumentModesInput {
   flamingos2Imaging: Flamingos2ImagingInput
 }
 
+"""Image quality input - specify either preset or exact arcsec value"""
+input ImageQualityInput {
+  """Preset image quality value"""
+  preset: ImageQualityPreset
+
+  """Exact image quality in arcseconds"""
+  arcsec: BigDecimal
+}
+
+"""
+Cloud extinction input - specify either preset or exact extinction value
+"""
+input CloudExtinctionInput {
+  """Preset cloud extinction value"""
+  preset: CloudExtinctionPreset
+
+  """Exact cloud extinction in Vega magnitudes"""
+  extinction: BigDecimal
+}
+
+"""
+ITC-specific constraint set with flexible ImageQuality and CloudExtinction inputs
+"""
+input ItcConstraintsInput {
+  """Image quality - specify either preset or exact arcsec value"""
+  imageQuality: ImageQualityInput
+
+  """Cloud extinction - specify either preset or exact extinction value"""
+  cloudExtinction: CloudExtinctionInput
+
+  """Sky background"""
+  skyBackground: SkyBackground
+
+  """Water vapor"""
+  waterVapor: WaterVapor
+
+  """Elevation range"""
+  elevationRange: ElevationRangeInput
+}
+
 """Params for spectroscopy integration time calculation"""
 input SpectroscopyInput {
   """Exposure time mode."""
@@ -8027,7 +8095,7 @@ input SpectroscopyInput {
   asterism: [TargetInput!]!
 
   """Conditions"""
-  constraints: ConstraintSetInput!
+  constraints: ItcConstraintsInput!
 
   """Instrument modes"""
   mode: InstrumentModesInput!
@@ -8050,7 +8118,7 @@ input ImagingInput {
   asterism: [TargetInput!]!
 
   """Conditions"""
-  constraints: ConstraintSetInput!
+  constraints: ItcConstraintsInput!
 
   """Instrument modes"""
   mode: InstrumentModesInput!
@@ -8083,7 +8151,7 @@ input SpectroscopyGraphsInput {
   asterism: [TargetInput!]!
 
   """Conditions"""
-  constraints: ConstraintSetInput!
+  constraints: ItcConstraintsInput!
 
   """Instrument modes"""
   mode: InstrumentModesInput!
@@ -8101,7 +8169,7 @@ input SpectroscopyIntegrationTimeAndGraphsInput {
   asterism: [TargetInput!]!
 
   """Conditions"""
-  constraints: ConstraintSetInput!
+  constraints: ItcConstraintsInput!
 
   """Instrument modes"""
   mode: InstrumentModesInput!
@@ -8116,11 +8184,6 @@ type IntegrationTime {
 
   """Calculate exposures count"""
   exposureCount: NonNegInt!
-
-  """
-  calculated signal to noise at a specific wavelength. Returned only if the wavelength At is valid
-  """
-  signalToNoiseAt: SignalToNoiseAt
 }
 
 type CalculationResult {

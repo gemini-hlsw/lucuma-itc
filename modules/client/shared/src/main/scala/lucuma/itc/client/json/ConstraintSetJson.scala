@@ -14,8 +14,12 @@ import syntax.*
 given Encoder[ConstraintSet] with
   def apply(a: ConstraintSet): Json =
     Json.obj(
-      "imageQuality"    -> a.imageQuality.asScreamingJson,
-      "cloudExtinction" -> a.cloudExtinction.asScreamingJson,
+      "imageQuality"    -> Json.obj(
+        "arcsec" -> a.imageQuality.toImageQuality.toArcSeconds.asJson
+      ),
+      "cloudExtinction" -> Json.obj(
+        "extinction" -> a.cloudExtinction.toCloudExtinction.toVegaMagnitude.asJson
+      ),
       "skyBackground"   -> a.skyBackground.asScreamingJson,
       "waterVapor"      -> a.waterVapor.asScreamingJson,
       "elevationRange"  -> (a.elevationRange match {
