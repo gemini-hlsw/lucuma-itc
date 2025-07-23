@@ -235,7 +235,7 @@ lazy val deployedAppSettings = Seq(
     // The heap needs to be a lot smaller than the dyno size. This may be
     // because the JVM tricks to load the 367M of old itc jar files increases the
     // `metaspace` size by that amount. It's a nice theory, at least.
-    "-J-Xmx512m",
+    "-J-Xmx2048m",
     "-J-Xms256m",
     // Support remote JMX access
     "-J-Dcom.sun.management.jmxremote",
