@@ -85,6 +85,7 @@ object Main extends IOApp with ItcCacheOrRemote {
             | cores                : ${runtime.availableProcessors()}
             | total memory         : ${runtime.totalMemory() / 1024 / 1024} MB
             | max memory           : ${runtime.maxMemory() / 1024 / 1024} MB
+            | java version         : ${System.getProperty("java.version")}
             |""".stripMargin
     banner.linesIterator.toList.traverse_(Logger[F].info(_))
 
