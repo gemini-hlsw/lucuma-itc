@@ -344,7 +344,7 @@ type IntegrationTime {
   exposureTime: TimeSpan!
 
   """Calculate exposures count"""
-  exposureCount: NonNegInt!
+  exposureCount: PosInt!
 }
 
 type CalculationResult {

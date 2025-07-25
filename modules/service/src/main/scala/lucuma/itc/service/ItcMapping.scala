@@ -10,6 +10,7 @@ import cats.effect.*
 import cats.syntax.all.*
 import eu.timepit.refined.*
 import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.PosInt
 import grackle.*
 import grackle.circe.CirceMapping
 import io.circe.syntax.*
@@ -202,7 +203,7 @@ object ItcMapping extends ItcCacheOrRemote with Version {
     val brightestTarget: TargetIntegrationTime = integrationTimes.value.focus
     val selectedVariation: IntegrationTime     = brightestTarget.times.focus
     val expTime: TimeSpan                      = selectedVariation.exposureTime
-    val expCount: NonNegInt                    = selectedVariation.exposureCount
+    val expCount: PosInt                       = selectedVariation.exposureCount
 
     AsterismGraphRequest(
       asterismRequest.asterism,

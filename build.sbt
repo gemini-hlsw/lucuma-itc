@@ -20,7 +20,7 @@ val http4sJdkHttpClientVersion  = "0.10.0"
 val keySemaphoreVersion         = "0.3.0-M1"
 val kittensVersion              = "3.5.0"
 val log4catsVersion             = "2.7.1"
-val lucumaCoreVersion           = "0.137.1"
+val lucumaCoreVersion           = "0.137.2"
 val lucumaRefinedVersion        = "0.1.4"
 val monocleVersion              = "3.3.0"
 val munitVersion                = "1.1.1"
@@ -37,7 +37,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.7.1"
 ThisBuild / crossScalaVersions  := Seq("3.7.1")
-ThisBuild / tlBaseVersion       := "0.41"
+ThisBuild / tlBaseVersion       := "0.42"
 ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
 

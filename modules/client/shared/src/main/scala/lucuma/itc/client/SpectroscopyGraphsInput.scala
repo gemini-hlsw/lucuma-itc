@@ -7,7 +7,7 @@ import cats.Eq
 import cats.data.NonEmptyList
 import cats.derived.*
 import eu.timepit.refined.cats.*
-import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.PosInt
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.JsonObject
@@ -19,7 +19,7 @@ import lucuma.core.util.TimeSpan
 case class SpectroscopyGraphParameters(
   atWavelength:       Wavelength,
   exposureTime:       TimeSpan,
-  exposureCount:      NonNegInt,
+  exposureCount:      PosInt,
   constraints:        ItcConstraintsInput,
   mode:               InstrumentMode,
   significantFigures: Option[SignificantFiguresInput]
