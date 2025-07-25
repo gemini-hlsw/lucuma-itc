@@ -10,7 +10,7 @@ import cats.data.NonEmptyList
 import cats.syntax.either.*
 import cats.syntax.option.*
 import coulomb.syntax.*
-import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
 import lucuma.core.enums.Flamingos2Disperser
@@ -81,7 +81,7 @@ val atWavelength = Wavelength.fromIntNanometers(600).get
 class WiringSuite extends ClientSuite:
   val selected = IntegrationTime(
     TimeSpan.FromString.getOption("PT1S").get,
-    NonNegInt.unsafeFrom(10)
+    PosInt.unsafeFrom(10)
   )
 
   test("ItcClient spectroscopy basic wiring and sanity check"):
@@ -304,7 +304,7 @@ class WiringSuite extends ClientSuite:
 
   val selectedLarge = IntegrationTime(
     TimeSpan.FromString.getOption("PT1000000S").get,
-    NonNegInt.unsafeFrom(10)
+    PosInt.unsafeFrom(10)
   )
 
   test("ItcClient spectroscopy with large exposure time, shortcut 5331"):
@@ -598,7 +598,7 @@ object WiringSuite:
       SpectroscopyGraphParameters(
         Wavelength.Min,
         TimeSpan.fromSeconds(1).get,
-        NonNegInt.unsafeFrom(5),
+        PosInt.unsafeFrom(5),
         ItcConstraintsInput(
           ImageQualityInput.preset(ImageQuality.Preset.PointOne),
           CloudExtinctionInput.preset(CloudExtinction.Preset.PointOne),
@@ -787,7 +787,7 @@ object WiringSuite:
       SpectroscopyGraphParameters(
         Wavelength.Min,
         TimeSpan.fromSeconds(1).get,
-        NonNegInt.unsafeFrom(5),
+        PosInt.unsafeFrom(5),
         ItcConstraintsInput(
           ImageQualityInput.arcsec(BigDecimal("0.7")),
           CloudExtinctionInput.preset(CloudExtinction.Preset.PointFive),

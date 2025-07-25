@@ -4,7 +4,7 @@
 package lucuma.itc.input
 
 import cats.syntax.all.*
-import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.SignificantFigures
@@ -14,7 +14,7 @@ import lucuma.odb.graphql.input.*
 case class SpectroscopyGraphsInput(
   atWavelength:       Wavelength,
   exposureTime:       TimeSpan,
-  exposureCount:      NonNegInt,
+  exposureCount:      PosInt,
   asterism:           List[TargetDataInput],
   constraints:        ItcConstraintsInput,
   mode:               InstrumentModesInput,
@@ -28,7 +28,7 @@ object SpectroscopyGraphsInput:
       case List(
             WavelengthInput.Binding("atWavelength", wavelength),
             TimeSpanInput.Binding("exposureTime", exposureTime),
-            NonNegIntBinding("exposureCount", exposureCount),
+            PosIntBinding("exposureCount", exposureCount),
             TargetDataInput.Binding.List("asterism", asterism),
             ItcConstraintsInput.Binding("constraints", constraints),
             InstrumentModesInput.Binding("mode", mode),

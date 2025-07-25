@@ -6,7 +6,6 @@ package input
 
 import cats.syntax.apply.*
 import cats.syntax.parallel.*
-import eu.timepit.refined.types.numeric.NonNegInt
 import grackle.Result
 import lucuma.core.model.ExposureTimeMode
 import lucuma.core.model.ExposureTimeMode.SignalToNoiseMode
@@ -31,7 +30,7 @@ object ExposureTimeModeInput:
       ObjectFieldsBinding.rmap {
         case List(
               TimeSpanInput.Binding("time", rTime),
-              NonNegIntBinding("count", rCount),
+              PosIntBinding("count", rCount),
               WavelengthInput.Binding("at", rAt)
             ) =>
           (rTime, rCount, rAt).parMapN(TimeAndCountMode.apply)

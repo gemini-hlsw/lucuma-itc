@@ -3,7 +3,7 @@
 
 package lucuma.itc.service
 
-import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
@@ -33,7 +33,7 @@ trait Itc[F[_]]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: NonNegInt
+    exposureCount: PosInt
   ): F[TargetIntegrationTime]
 
   /**
@@ -45,7 +45,7 @@ trait Itc[F[_]]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: NonNegInt
+    exposureCount: PosInt
   ): F[TargetGraphsCalcResult]
 
 object Itc:

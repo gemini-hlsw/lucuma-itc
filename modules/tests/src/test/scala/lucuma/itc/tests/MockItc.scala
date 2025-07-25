@@ -8,7 +8,7 @@ import cats.effect.IO
 import cats.syntax.applicative.*
 import cats.syntax.either.*
 import cats.syntax.option.*
-import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
@@ -29,7 +29,7 @@ object MockItc extends Itc[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: NonNegInt
+    exposureCount: PosInt
   ): IO[TargetIntegrationTime] =
     TargetIntegrationTime(
       Zipper.one(IntegrationTime(exposureTime, 10.refined)),
@@ -62,7 +62,7 @@ object MockItc extends Itc[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: NonNegInt
+    exposureCount: PosInt
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(
@@ -107,7 +107,7 @@ object MockImagingItc extends Itc[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: NonNegInt
+    exposureCount: PosInt
   ): IO[TargetIntegrationTime] =
     TargetIntegrationTime(
       Zipper.one(IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined)),
@@ -143,7 +143,7 @@ object MockImagingItc extends Itc[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: NonNegInt
+    exposureCount: PosInt
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(
@@ -188,7 +188,7 @@ object EmissionLineMockItc extends Itc[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: NonNegInt
+    exposureCount: PosInt
   ): IO[TargetIntegrationTime] =
     TargetIntegrationTime(
       Zipper.one(IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined)),
@@ -221,7 +221,7 @@ object EmissionLineMockItc extends Itc[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: NonNegInt
+    exposureCount: PosInt
   ): IO[TargetGraphsCalcResult] =
     IO.raiseError(CalculationError("Not implemented"))
 
@@ -233,7 +233,7 @@ object FailingMockItc extends Itc[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: NonNegInt
+    exposureCount: PosInt
   ): IO[TargetIntegrationTime] =
     TargetIntegrationTime(
       Zipper.one(IntegrationTime(TimeSpan.fromSeconds(1).get, 10.refined)),
@@ -259,7 +259,7 @@ object FailingMockItc extends Itc[IO]:
     observingMode: ObservingMode,
     constraints:   ItcObservingConditions,
     exposureTime:  TimeSpan,
-    exposureCount: NonNegInt
+    exposureCount: PosInt
   ): IO[TargetGraphsCalcResult] =
     TargetGraphsCalcResult(
       NonEmptyChain.of(

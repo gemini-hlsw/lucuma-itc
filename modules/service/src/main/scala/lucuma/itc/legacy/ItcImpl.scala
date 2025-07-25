@@ -11,6 +11,7 @@ import coulomb.policy.spire.standard.given
 import coulomb.syntax.*
 import coulomb.units.si.*
 import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.PosInt
 import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.data.Zipper
@@ -75,7 +76,7 @@ object ItcImpl {
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         exposureTime:  TimeSpan,
-        exposureCount: NonNegInt
+        exposureCount: PosInt
       ): F[TargetGraphsCalcResult] =
         observingMode match
           case s @ (SpectroscopyMode.GmosNorth(_, _, _, _, _, _) |
@@ -171,7 +172,7 @@ object ItcImpl {
             TimeSpan
               .fromSeconds(r.exposureTime)
               .map(expTime =>
-                IntegrationTime(expTime, NonNegInt.unsafeFrom(r.exposureCount.value))
+                IntegrationTime(expTime, PosInt.unsafeFrom(r.exposureCount.value))
                   .pure[F]
               )
               .getOrElse:
@@ -197,7 +198,7 @@ object ItcImpl {
         observingMode: ObservingMode.SpectroscopyMode,
         constraints:   ItcObservingConditions,
         exposureTime:  TimeSpan,
-        exposureCount: NonNegInt
+        exposureCount: PosInt
       ): F[TargetIntegrationTime] =
         import lucuma.itc.legacy.*
 
@@ -234,7 +235,7 @@ object ItcImpl {
         observingMode: ObservingMode,
         constraints:   ItcObservingConditions,
         exposureTime:  TimeSpan,
-        exposureCount: NonNegInt
+        exposureCount: PosInt
       ): F[TargetIntegrationTime] =
         T.span("calculate-signal-to-noise"):
           observingMode match
@@ -306,7 +307,7 @@ object ItcImpl {
         observingMode: ObservingMode.ImagingMode,
         constraints:   ItcObservingConditions,
         exposureTime:  TimeSpan,
-        exposureCount: NonNegInt
+        exposureCount: PosInt
       ): F[TargetIntegrationTime] =
         import lucuma.itc.legacy.*
 

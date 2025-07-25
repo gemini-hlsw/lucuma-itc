@@ -7,7 +7,7 @@ import cats.*
 import cats.data.NonEmptyChain
 import cats.derived.*
 import cats.syntax.all.*
-import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.PosInt
 import grackle.*
 import lucuma.core.enums.ExecutionEnvironment as _
 import lucuma.core.math.Wavelength
@@ -27,7 +27,7 @@ case class GraphParameters(
   specMode:     ObservingMode.SpectroscopyMode,
   constraints:  ItcObservingConditions,
   expTime:      TimeSpan,
-  exp:          NonNegInt
+  exp:          PosInt
 ) derives Hash
 
 case class TargetGraphRequest(
