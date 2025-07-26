@@ -313,12 +313,13 @@ private[legacy] object codecs:
     lineflux:             LineFluxMeasure[T],
     fluxDensityContinuum: FluxDensityContinuumMeasure[T]
   ): Json =
+    // Old itc doesn't understand the last angular surface unit
     Json.obj(
       "EmissionLine" -> Json.obj(
         "wavelength" -> wavelength.asJson,
         "width"      -> lineWidth.toMeasure.shortName.asJson,
-        "flux"       -> lineflux.exact.shortName.asJson,
-        "continuum"  -> fluxDensityContinuum.exact.shortName.asJson
+        "flux"       -> lineflux.exact.shortName.replace("/arcsec²", "").asJson,
+        "continuum"  -> fluxDensityContinuum.exact.shortName.replace("/arcsec²", "").asJson
       )
     )
 
