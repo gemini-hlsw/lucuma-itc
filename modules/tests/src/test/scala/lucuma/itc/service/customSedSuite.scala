@@ -48,7 +48,7 @@ class customSedSuite extends GraphQLSuite {
                 preset: POINT_EIGHT
               },
               cloudExtinction: {
-                preset: ONE_POINT_FIVE
+                preset: ONE_POINT_ZERO
               },
               skyBackground: BRIGHT,
               waterVapor: MEDIAN,
@@ -163,7 +163,7 @@ class customSedSuite extends GraphQLSuite {
                 preset: POINT_EIGHT
               },
               cloudExtinction: {
-                preset: ONE_POINT_FIVE
+                preset: ONE_POINT_ZERO
               },
               skyBackground: BRIGHT,
               waterVapor: MEDIAN,
@@ -278,7 +278,7 @@ class customSedSuite extends GraphQLSuite {
                 preset: POINT_EIGHT
               },
               cloudExtinction: {
-                preset: ONE_POINT_FIVE
+                preset: ONE_POINT_ZERO
               },
               skyBackground: BRIGHT,
               waterVapor: MEDIAN,
@@ -398,7 +398,7 @@ class customSedSuite extends GraphQLSuite {
                 preset: POINT_EIGHT
               },
               cloudExtinction: {
-                preset: ONE_POINT_FIVE
+                preset: ONE_POINT_ZERO
               },
               skyBackground: BRIGHT,
               waterVapor: MEDIAN,
