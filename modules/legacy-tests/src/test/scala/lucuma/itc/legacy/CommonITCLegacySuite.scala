@@ -118,7 +118,7 @@ trait CommonITCLegacySuite extends FunSuite:
   // Common observing conditions - this will be used in tests
   def defaultConditions = ItcObservingConditions(
     ImageQuality.Preset.PointEight.toImageQuality.toArcSeconds,
-    CloudExtinction.Preset.OnePointFive.toCloudExtinction.toVegaMagnitude,
+    CloudExtinction.Preset.OnePointZero.toCloudExtinction.toVegaMagnitude,
     WaterVapor.Median,
     SkyBackground.Bright,
     1
@@ -164,7 +164,7 @@ trait CommonITCLegacySuite extends FunSuite:
       obs.copy(analysisMethod = analysis),
       ItcObservingConditions(
         ImageQuality.Preset.PointEight.toImageQuality.toArcSeconds,
-        CloudExtinction.Preset.OnePointFive.toCloudExtinction.toVegaMagnitude,
+        CloudExtinction.Preset.OnePointZero.toCloudExtinction.toVegaMagnitude,
         WaterVapor.Median,
         SkyBackground.Dark,
         2
