@@ -499,7 +499,7 @@ class spectroscopySignalToNoiseSuite extends GraphQLSuite:
 
   val conditions = ItcObservingConditions(
     ImageQuality.Preset.PointEight.toImageQuality.toArcSeconds,
-    CloudExtinction.Preset.OnePointFive.toCloudExtinction.toVegaMagnitude,
+    CloudExtinction.Preset.OnePointZero.toCloudExtinction.toVegaMagnitude,
     WaterVapor.Median,
     SkyBackground.Bright,
     2

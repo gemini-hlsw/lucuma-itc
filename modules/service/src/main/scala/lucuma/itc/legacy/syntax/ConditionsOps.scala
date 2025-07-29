@@ -25,11 +25,10 @@ trait ConditionsSyntax:
   extension (self: CloudExtinction.Preset)
     def ocs2Tag: String =
       self match
-        case CloudExtinction.Preset.PointOne                                        => "PERCENT_50"
-        case CloudExtinction.Preset.PointThree                                      => "PERCENT_70"
-        case CloudExtinction.Preset.PointFive | CloudExtinction.Preset.OnePointZero => "PERCENT_80"
-        case CloudExtinction.Preset.OnePointFive | CloudExtinction.Preset.TwoPointZero |
-            CloudExtinction.Preset.ThreePointZero =>
+        case CloudExtinction.Preset.PointOne | CloudExtinction.Preset.Zero               => "PERCENT_50"
+        case CloudExtinction.Preset.PointThree                                           => "PERCENT_70"
+        case CloudExtinction.Preset.PointFive | CloudExtinction.Preset.OnePointZero      => "PERCENT_80"
+        case CloudExtinction.Preset.TwoPointZero | CloudExtinction.Preset.ThreePointZero =>
           "ANY"
 
   extension (self: WaterVapor)
