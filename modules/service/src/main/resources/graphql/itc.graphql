@@ -3981,8 +3981,8 @@ enum GmosNorthGrating {
   """GmosNorthGrating B480_G5309"""
   B480_G5309
 
-  """GmosNorthGrating R400_G5305"""
-  R400_G5305
+  """GmosNorthGrating R400_G5310"""
+  R400_G5310
 
   """GmosNorthGrating R150_G5308"""
   R150_G5308
