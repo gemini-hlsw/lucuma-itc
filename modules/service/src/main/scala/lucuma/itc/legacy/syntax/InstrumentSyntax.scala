@@ -40,7 +40,7 @@ trait GmosNorthGratingSyntax:
         case R831_G5302  => "R831_G5302"
         case B480_G5309  => "B480_G5309"
         case R600_G5304  => "R600_G5304"
-        case R400_G5310  => "R400_G5310"
+        case R400_G5310  => "R400_G5305" // NEW to OLD, for now
         case R150_G5308  => "R150_G5308"
 
 object gmosnorthgrating extends GmosNorthGratingSyntax
