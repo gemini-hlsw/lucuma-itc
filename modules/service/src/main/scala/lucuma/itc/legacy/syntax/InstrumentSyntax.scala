@@ -19,7 +19,6 @@ trait GmosSouthGratingSyntax:
       self match
         case B1200_G5321 => "B1200_G5321"
         case R831_G5322  => "R831_G5322"
-        case B600_G5323  => "B600_G5323"
         case R600_G5324  => "R600_G5324"
         case B480_G5327  => "B480_G5327"
         case R400_G5325  => "R400_G5325"
