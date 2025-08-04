@@ -558,7 +558,7 @@ class exactConstraintsSuite extends GraphQLSuite:
                 fpu: {
                   builtin: LONG_SLIT_1_00
                 },
-                grating: B600_G5323
+                grating: B480_G5327
               }
             }
           }) {
