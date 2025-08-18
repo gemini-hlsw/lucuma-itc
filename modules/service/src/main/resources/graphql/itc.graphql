@@ -169,6 +169,9 @@ type AtomEvent implements ExecutionEvent {
 
   """Atom execution stage."""
   atomStage: AtomStage!
+
+  """Client id, if any."""
+  clientId: ClientId
 }
 
 enum AtomExecutionState {
@@ -487,6 +490,8 @@ Result of the program user role update, which is the updated program user itself
 type ChangeProgramUserRoleResult {
   programUser: ProgramUser!
 }
+
+scalar ClientId
 
 """
 The result of cloning an observation, containing the original and new observations.
@@ -1727,10 +1732,9 @@ type ProgramUser {
   partnerLink: PartnerLink!
 
   """
-  Profile information reported when the corresponding ORCiD profile is not set
-  or is not public.
+  The preferred profile overrides any values that may be in the Orcid profile (user.profile).
   """
-  fallbackProfile: UserProfile!
+  preferredProfile: UserProfile!
 
   """User educational status. PHD/Undergrad/Grad/Other."""
   educationalStatus: EducationalStatus
@@ -1744,8 +1748,23 @@ type ProgramUser {
   """User invitations, if any, associated with this program user."""
   invitations: [UserInvitation!]!
 
+  """Investigator affiliation."""
+  affiliation: NonEmptyString
+
   """Has access to data."""
   hasDataAccess: Boolean!
+
+  """
+  Name created preferentially from the fields of the preferred profile, falling back
+  to the Orcid profile if the preferred fields are not set.
+  """
+  displayName: String
+
+  """
+  The user's email address from the preferred profile, falling back to the Orcid profile
+  if the preferred email is not set.
+  """
+  email: String
 }
 
 """
@@ -2741,6 +2760,9 @@ enum ChargeClass {
 
 """Cloud extinction"""
 enum CloudExtinctionPreset {
+  """CloudExtinctionPreset Zero"""
+  ZERO
+
   """CloudExtinctionPreset PointOne"""
   POINT_ONE
 
@@ -2752,9 +2774,6 @@ enum CloudExtinctionPreset {
 
   """CloudExtinctionPreset OnePointZero"""
   ONE_POINT_ZERO
-
-  """CloudExtinctionPreset OnePointFive"""
-  ONE_POINT_FIVE
 
   """CloudExtinctionPreset TwoPointZero"""
   TWO_POINT_ZERO
@@ -2942,6 +2961,58 @@ type Dataset {
   isWritten: Boolean!
 }
 
+"""Database operations that provoke Chronicle table updates."""
+enum DatabaseOperation {
+  INSERT
+  UPDATE
+  DELETE
+  TRUNCATE
+}
+
+"""The Chronicle entry for dataset updates."""
+type DatasetChronicleEntry {
+  id: ChronicleId!
+  transactionId: TransactionId!
+
+  """The user who performed the insertion or update."""
+  user: User
+
+  """When the update happened."""
+  timestamp: Timestamp!
+
+  """The database operation that was performed."""
+  operation: DatabaseOperation!
+
+  """The dataset that was inserted or updated."""
+  dataset: Dataset!
+  modDatasetId: Boolean!
+  modStepId: Boolean!
+  modObservationId: Boolean!
+  modVisitId: Boolean!
+  modReference: Boolean!
+  modFilename: Boolean!
+  modQaState: Boolean!
+  modInterval: Boolean!
+  modComment: Boolean!
+  newDatasetId: DatasetId
+  newStepId: StepId
+  newObservationId: ObservationId
+  newVisitId: VisitId
+  newReference: DatasetReferenceLabel
+  newFilename: DatasetFilename
+  newQaState: DatasetQaState
+  newInterval: TimestampInterval
+  newComment: NonEmptyString
+}
+
+type DatasetChronicleEntrySelectResult {
+  """Matching entries up to the return size limit of 1000"""
+  matches: [DatasetChronicleEntry!]!
+
+  """`true` when there were additional matches that were not returned."""
+  hasMore: Boolean!
+}
+
 """
 Dataset-level events.  A single dataset will be associated with multiple events
 as it makes its way through observe, readout and write stages.
@@ -2973,6 +3044,9 @@ type DatasetEvent implements ExecutionEvent {
 
   """The associated dataset."""
   dataset: Dataset!
+
+  """Client id, if any."""
+  clientId: ClientId
 }
 
 """Dataset filename in standard format."""
@@ -3249,6 +3323,9 @@ interface ExecutionEvent {
 
   """Event type."""
   eventType: ExecutionEventType!
+
+  """Client id, if any."""
+  clientId: ClientId
 }
 
 """ExecutionEventId id formatted as `e-[1-9a-f][0-9a-f]*`"""
@@ -3674,19 +3751,19 @@ type Flamingos2LongSlit {
   explicitReadoutMode: Flamingos2ReadoutMode
 
   """
-  Spatial offsets, either explicitly specified in explicitSpatialOffsets
-  or else taken from defaultSpatialOffsets
+  Offsets, either explicitly specified in explicitOffsets
+  or else taken from defaultOffsets
   """
-  spatialOffsets: [Offset!]!
+  offsets: [Offset!]!
 
-  """Default spatial offsets."""
-  defaultSpatialOffsets: [Offset!]!
+  """Default offsets."""
+  defaultOffsets: [Offset!]!
 
   """
-  Optional explicitly specified spatial offsets. If set it overrides the
+  Optional explicitly specified offsets. If set it overrides the
   the default.
   """
-  explicitSpatialOffsets: [Offset!]
+  explicitOffsets: [Offset!]
 
   """
   The disperser as it was initially selected.  See the `disperser` field for the
@@ -4149,6 +4226,9 @@ type GmosNorthImaging {
   """
   initialFilters: [GmosNorthFilter!]!
 
+  """Spatial offsets"""
+  offsets: [Offset!]!
+
   """
   MultipleFiltersMode, either explicitly specified in explicitMultipleFiltersMode or else taken
   from the defaultMultipleFiltersMode.
@@ -4221,21 +4301,6 @@ type GmosNorthImaging {
   Optional explicitly specified GMOS ROI.  If set it overrides the default.
   """
   explicitRoi: GmosRoi
-
-  """
-  Spacial offsets, either explicitly specified in explicitSpatialOffsets
-  or else taken from defaultSpatialOffsets
-  """
-  spatialOffsets: [Offset!]!
-
-  """Default spatial offsets."""
-  defaultSpatialOffsets: [Offset!]!
-
-  """
-  Optional explicitly specified spatial offsets. If set it overrides the
-  the default.
-  """
-  explicitSpatialOffsets: [Offset!]
 }
 
 """GMOS Region Of Interest"""
@@ -4585,6 +4650,9 @@ type GmosSouthImaging {
   """
   initialFilters: [GmosSouthFilter!]!
 
+  """Spatial offsets"""
+  offsets: [Offset!]!
+
   """
   MultipleFiltersMode, either explicitly specified in explicitMultipleFiltersMode or else taken
   from the defaultMultipleFiltersMode.
@@ -4657,21 +4725,6 @@ type GmosSouthImaging {
   Optional explicitly specified GMOS ROI.  If set it overrides the default.
   """
   explicitRoi: GmosRoi
-
-  """
-  Spacial offsets, either explicitly specified in explicitSpatialOffsets
-  or else taken from defaultSpatialOffsets
-  """
-  spatialOffsets: [Offset!]!
-
-  """Default spatial offsets."""
-  defaultSpatialOffsets: [Offset!]!
-
-  """
-  Optional explicitly specified spatial offsets. If set it overrides the
-  the default.
-  """
-  explicitSpatialOffsets: [Offset!]
 }
 
 """GMOS Binning"""
@@ -6113,6 +6166,9 @@ type SequenceEvent implements ExecutionEvent {
 
   """Sequence event data."""
   command: SequenceCommand!
+
+  """Client id, if any."""
+  clientId: ClientId
 }
 
 """Type of sequence, acquisition or science"""
@@ -6212,6 +6268,9 @@ type SlewEvent implements ExecutionEvent {
 
   """Slew event data."""
   slewStage: SlewStage!
+
+  """Client id, if any."""
+  clientId: ClientId
 }
 
 """Slew stage"""
@@ -6790,6 +6849,9 @@ type StepEvent implements ExecutionEvent {
 
   """Step execution stage."""
   stepStage: StepStage!
+
+  """Client id, if any."""
+  clientId: ClientId
 }
 
 """
