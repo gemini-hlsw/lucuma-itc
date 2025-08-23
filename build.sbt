@@ -182,7 +182,7 @@ lazy val service = project
       "org.typelevel"     %% "grackle-circe"         % grackleVersion,
       "edu.gemini"        %% "lucuma-graphql-routes" % graphQLRoutesVersion,
       "org.tpolecat"      %% "natchez-honeycomb"     % natchezVersion,
-      "org.tpolecat"      %% "natchez-log"           % natchezVersion,
+      "org.tpolecat"      %% "natchez-noop"          % natchezVersion,
       "org.tpolecat"      %% "natchez-http4s"        % natchezHttp4sVersion,
       "co.fs2"            %% "fs2-core"              % fs2Version,
       "edu.gemini"        %% "lucuma-core"           % lucumaCoreVersion,

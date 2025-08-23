@@ -9,8 +9,6 @@ import cats.Functor
 import cats.Parallel
 import cats.data.Kleisli
 import cats.effect.*
-import cats.effect.std.SecureRandom
-import cats.effect.std.UUIDGen
 import cats.syntax.all.*
 import com.comcast.ip4s.*
 import dev.profunktor.redis4cats.Redis
@@ -36,7 +34,7 @@ import natchez.Trace
 import natchez.honeycomb.Honeycomb
 import natchez.http4s.NatchezMiddleware
 import natchez.http4s.implicits.*
-import natchez.log.Log
+import natchez.noop.NoopEntrypoint
 import org.http4s.*
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.headers.`Cache-Control`
@@ -100,13 +98,13 @@ object Main extends IOApp with ItcCacheOrRemote {
 
   /**
    * A resource that yields a Natchez tracing entry point, either a Honeycomb endpoint if `config`
-   * is defined, otherwise a log endpoint.
+   * is defined, otherwise an empty endpoint.
    */
-  def entryPointResource[F[_]: Sync: Logger: SecureRandom](
+  def entryPointResource[F[_]: Sync](
     config: Option[HoneycombConfig]
   ): Resource[F, EntryPoint[F]] =
     config.fold(
-      Log.entryPoint(ServiceName).pure[Resource[F, *]]
+      Resource.pure(NoopEntrypoint[F]())
     ): cfg =>
       Honeycomb.entryPoint(ServiceName): cb =>
         Sync[F].blocking:
