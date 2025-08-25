@@ -16,7 +16,8 @@ import lucuma.core.util.TimeSpan
 case class TargetIntegrationTime(
   times:           Zipper[IntegrationTime],
   bandOrLine:      Either[Band, Wavelength],
-  signalToNoiseAt: Option[SignalToNoiseAt]
+  signalToNoiseAt: Option[SignalToNoiseAt],
+  ccds:            List[ItcCcd]
 ):
   def focusIndex(index: Int): Option[TargetIntegrationTime] =
     times.focusIndex(index).map(newTimes => copy(times = newTimes))
@@ -30,7 +31,8 @@ object TargetIntegrationTime:
       .obj(
         "band"            -> t.bandOrLine.left.toOption.asJson,
         "emissionLine"    -> t.bandOrLine.toOption.asJson,
-        "signalToNoiseAt" -> t.signalToNoiseAt.asJson
+        "signalToNoiseAt" -> t.signalToNoiseAt.asJson,
+        "ccds"            -> t.ccds.asJson
       )
     // Merge common fields with times fields which are now guaranteed to be present
     t.times.asJson.deepMerge(common)

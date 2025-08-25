@@ -21,8 +21,8 @@ case class TargetTimeAndGraphsResult(
   integrationTime: TargetIntegrationTime,
   graphs:          TargetGraphs
 ) derives Decoder:
-  export integrationTime.*
-  export graphs.*
+  export integrationTime.{ccds as integrationTimeCcds, *}
+  export graphs.{ccds as graphCcds, *}
 
 object TargetTimeAndGraphsResult:
   given Order[TargetTimeAndGraphsResult] = Order.by(_.integrationTime)
