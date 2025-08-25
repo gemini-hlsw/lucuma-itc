@@ -42,7 +42,7 @@ ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
 
 ThisBuild / dockerExposedPorts ++= Seq(6060)
-ThisBuild / dockerBaseImage := "eclipse-temurin:17-jre"
+ThisBuild / dockerBaseImage := "eclipse-temurin:21-jre"
 
 val herokuToken = "HEROKU_API_KEY" -> "${{ secrets.HEROKU_API_KEY }}"
 
@@ -218,45 +218,13 @@ lazy val service = project
   .enablePlugins(BuildInfoPlugin)
 
 lazy val deployedAppSettings = Seq(
-  description                     := "ITC Server",
+  description              := "ITC Server",
   // Main class for launching
-  Compile / mainClass             := Some("lucuma.itc.service.Main"),
+  Compile / mainClass      := Some("lucuma.itc.service.Main"),
   // Name of the launch script
-  executableScriptName            := "itc-service",
-  // No javadocs
-  Compile / packageDoc / mappings := Seq(),
-  // Don't create launchers for Windows
-  makeBatScripts                  := Seq.empty,
+  executableScriptName     := "itc-service",
   // Specify a different name for the config file
-  bashScriptConfigLocation        := Some("${app_home}/../conf/launcher.args"),
-  // Launch options
-  Universal / javaOptions ++= Seq(
-    // -J params will be added as jvm parameters
-    // The heap needs to be a lot smaller than the dyno size. This may be
-    // because the JVM tricks to load the 367M of old itc jar files increases the
-    // `metaspace` size by that amount. It's a nice theory, at least.
-    "-J-Xmx512m",
-    "-J-Xms256m",
-    // Support remote JMX access
-    "-J-Dcom.sun.management.jmxremote",
-    "-J-Dcom.sun.management.jmxremote.authenticate=false",
-    "-J-Dcom.sun.management.jmxremote.port=2407",
-    "-J-Dcom.sun.management.jmxremote.ssl=false",
-    // Ensure the locale is correctly set
-    "-J-Duser.language=en",
-    "-J-Duser.country=US",
-    // Support remote debugging
-    "-J-Xdebug",
-    "-J-Xnoagent",
-    "-J-XX:+HeapDumpOnOutOfMemoryError",
-    // Make sure the application exits on OOM
-    "-J-XX:+ExitOnOutOfMemoryError",
-    "-J-XX:+CrashOnOutOfMemoryError",
-    "-J-XX:HeapDumpPath=/tmp",
-    "-J-Xrunjdwp:transport=dt_socket,address=8457,server=y,suspend=n"
-  ),
-  Compile / packageDoc / mappings := Seq(),
-  Compile / doc / sources         := Seq.empty,
+  bashScriptConfigLocation := Some("${app_home}/../conf/launcher.args"),
   Universal / mappings ++= {
     val dir = (service / baseDirectory).value / "ocslib"
     (dir ** AllPassFilter).pair(relativeTo(dir.getParentFile))
@@ -269,19 +237,18 @@ lazy val deployedAppSettings = Seq(
 lazy val deploy = project
   .in(file("deploy"))
   .enablePlugins(NoPublishPlugin)
-  .enablePlugins(DockerPlugin)
+  .enablePlugins(LucumaDockerPlugin)
   .enablePlugins(JavaServerAppPackaging)
   .enablePlugins(GitBranchPrompt)
   .dependsOn(service)
   .settings(deployedAppSettings: _*)
   .settings(
-    description            := "ITC Server",
-    Docker / packageName   := "gpp-itc",
-    Docker / daemonUserUid := Some("3624"),
-    Docker / daemonUser    := "software",
-    dockerBuildOptions ++= Seq("--platform", "linux/amd64"),
-    dockerUpdateLatest     := true,
-    dockerUsername         := Some("noirlab")
+    description              := "ITC Server",
+    Docker / packageName     := "gpp-itc",
+    // The heap needs to be a lot smaller than the dyno size. This may be
+    // because the JVM tricks to load the 367M of old itc jar files increases the
+    // `metaspace` size by that amount. It's a nice theory, at least.
+    lucumaDockerHeapSubtract := 400
   )
 
 lazy val client = crossProject(JVMPlatform, JSPlatform)
