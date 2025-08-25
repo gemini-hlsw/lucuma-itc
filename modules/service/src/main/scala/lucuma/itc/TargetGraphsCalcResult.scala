@@ -86,15 +86,18 @@ object TargetGraphsCalcResult:
               val maxFinalValue  = maxSNFinal.lift(i)
               val maxSingleValue = maxSNSingle.lift(i)
 
-              (finalWV, singleWV, maxSingleValue, maxFinalValue).mapN:
+              (finalWV, singleWV, maxSingleValue, maxFinalValue).flatMapN:
                 (maxFinalAt, maxSingleAt, maxSingleValue, maxFinalValue) =>
-                  ItcCcd(
-                    ccd.singleSNRatio,
-                    maxSingleValue,
-                    ccd.totalSNRatio,
-                    maxFinalValue,
-                    maxFinalAt,
-                    maxSingleAt,
+                  for
+                    single <- SignalToNoise.FromBigDecimalRounding.getOption(ccd.singleSNRatio)
+                    total  <- SignalToNoise.FromBigDecimalRounding.getOption(ccd.totalSNRatio)
+                  yield ItcCcd(
+                    SingleSN(single),
+                    Some(maxSingleValue),
+                    TotalSN(total),
+                    Some(maxFinalValue),
+                    Some(maxFinalAt),
+                    Some(maxSingleAt),
                     ccd.peakPixelFlux,
                     ccd.wellDepth,
                     ccd.ampGain,
@@ -103,21 +106,21 @@ object TargetGraphsCalcResult:
             .toChain
             .flattenOption
 
-    val maxTotalSNRatio: Double          =
+    val maxTotalSNRatio: Option[Double]  =
       calculatedCCDs
         .map(_.maxTotalSNRatio)
         .maximumOption
-        .getOrElse(throw UpstreamException(List("CCD List is empty")))
-    val peakFinalSNRatio: SignalToNoise  = SignalToNoise.FromBigDecimalRounding
-      .getOption(maxTotalSNRatio)
-      .getOrElse(throw UpstreamException(List("Peak Total SN is not a number")))
-    val maxSingleSNRatio: Double         = calculatedCCDs
+        .flatten
+    val peakFinalSNRatio: SignalToNoise  = maxTotalSNRatio
+      .flatMap(SignalToNoise.FromBigDecimalRounding.getOption(_))
+      .getOrElse(throw UpstreamException(List("Peak Total SN is not available")))
+    val maxSingleSNRatio: Option[Double] = calculatedCCDs
       .map(_.maxSingleSNRatio)
       .maximumOption
-      .getOrElse(throw UpstreamException(List("CCD List is empty")))
-    val peakSingleSNRatio: SignalToNoise = SignalToNoise.FromBigDecimalRounding
-      .getOption(maxSingleSNRatio)
-      .getOrElse(throw UpstreamException(List("Peak Single SN is not a number")))
+      .flatten
+    val peakSingleSNRatio: SignalToNoise = maxSingleSNRatio
+      .flatMap(SignalToNoise.FromBigDecimalRounding.getOption(_))
+      .getOrElse(throw UpstreamException(List("Peak Single SN is not available")))
 
     def wvAtRatio(seriesType: SeriesDataType): Option[SignalToNoise] =
       graphs

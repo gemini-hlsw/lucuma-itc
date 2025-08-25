@@ -40,5 +40,8 @@ case class IntegrationTimeRemoteResult(
   exposureCalculation: AllExposureCalculations,
 
   // In principle this should not be empty, but you could still use a wv outside the rang of a ccd. Rather than giving a zero SN, we just don't return anything.
-  signalToNoiseAt: Option[SignalToNoiseAt]
+  signalToNoiseAt: Option[SignalToNoiseAt],
+
+  // CCD performance data from the legacy ITC
+  ccds: NonEmptyChain[ItcRemoteCcd]
 )

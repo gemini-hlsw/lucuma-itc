@@ -304,6 +304,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     seconds
                   }
                 }
+                ccds {
+                  singleSNRatio
+                  totalSNRatio
+                  peakPixelFlux
+                  warnings {
+                    msg
+                  }
+                }
               }
           }
         }
@@ -354,7 +362,8 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     "exposureTime": {
                       "seconds": 2
                     }
-                  }
+                  },
+                  "ccds": []
                 }
               }
             }
@@ -580,7 +589,15 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     exposureTime {
                       seconds
                     }
-                }
+                  }
+                  ccds {
+                    singleSNRatio
+                    totalSNRatio
+                    peakPixelFlux
+                    warnings {
+                      msg
+                    }
+                  }
               }
           }
         }
@@ -625,7 +642,8 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     "exposureTime": {
                       "seconds": 2
                     }
-                  }
+                  },
+                  "ccds": []
                 }
               }
           }
@@ -731,6 +749,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   exposureCount
                   exposureTime {
                     seconds
+                  }
+                }
+                ccds {
+                  singleSNRatio
+                  totalSNRatio
+                  peakPixelFlux
+                  warnings {
+                    msg
                   }
                 }
               }
@@ -860,8 +886,16 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                       seconds
                     }
                   }
+                  ccds {
+                    singleSNRatio
+                    totalSNRatio
+                    peakPixelFlux
+                    warnings {
+                      msg
+                    }
+                  }
                 }
-          }
+            }
         }
         """,
         json"""
@@ -904,7 +938,8 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     "exposureTime": {
                       "seconds": 2
                     }
-                  }
+                  },
+                  "ccds": []
                 }
               }
           }
@@ -1029,6 +1064,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                       seconds
                     }
                   }
+                  ccds {
+                    singleSNRatio
+                    totalSNRatio
+                    peakPixelFlux
+                    warnings {
+                      msg
+                    }
+                  }
                 }
           }
         }
@@ -1073,7 +1116,8 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     "exposureTime": {
                       "seconds": 2
                     }
-                  }
+                  },
+                  "ccds": []
                 }
               }
           }
@@ -1200,8 +1244,16 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                         seconds
                       }
                     }
+                    ccds {
+                      singleSNRatio
+                      totalSNRatio
+                      peakPixelFlux
+                      warnings {
+                        msg
+                      }
+                    }
                   }
-            }
+              }
           }
       """,
         json"""
@@ -1246,7 +1298,8 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     "exposureTime": {
                       "seconds": 2
                     }
-                  }
+                  },
+                  "ccds": []
                 }
               }
           }
@@ -1368,6 +1421,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                       seconds
                     }
                   }
+                  ccds {
+                    singleSNRatio
+                    totalSNRatio
+                    peakPixelFlux
+                    warnings {
+                      msg
+                    }
+                  }
                 }
             }
         }
@@ -1414,7 +1475,8 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     "exposureTime": {
                       "seconds": 2
                     }
-                  }
+                  },
+                  "ccds": []
                 }
               }
           }
@@ -1531,8 +1593,16 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                         seconds
                       }
                   }
+                  ccds {
+                    singleSNRatio
+                    totalSNRatio
+                    peakPixelFlux
+                    warnings {
+                      msg
+                    }
+                  }
                 }
-          }
+            }
         }
         """,
         json"""
@@ -1572,7 +1642,8 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                       "exposureTime": {
                         "seconds": 2
                       }
-                  }
+                  },
+                  "ccds": []
                 }
               }
           }
@@ -1695,6 +1766,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                         seconds
                       }
                   }
+                  ccds {
+                    singleSNRatio
+                    totalSNRatio
+                    peakPixelFlux
+                    warnings {
+                      msg
+                    }
+                  }
                 }
           }
         }
@@ -1742,7 +1821,8 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     "exposureTime": {
                       "seconds": 2
                     }
-                  }
+                  },
+                  "ccds": []
                 }
               }
           }
@@ -1888,6 +1968,14 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   seconds
                 }
               }
+              ccds {
+                singleSNRatio
+                totalSNRatio
+                peakPixelFlux
+                warnings {
+                  msg
+                }
+              }
             }
           }
         }
@@ -1955,7 +2043,8 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                   "exposureTime": {
                     "seconds": 2.000000
                   }
-                }
+                },
+                "ccds": []
               }
             }
           }
@@ -2056,7 +2145,15 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     seconds
                   }
                 }
+                ccds {
+                  singleSNRatio
+                  totalSNRatio
+                  peakPixelFlux
+                  warnings {
+                    msg
+                }
               }
+            }
           }
         }
         """,
@@ -2088,7 +2185,8 @@ class spectroscopyTimeAndCountSuite extends GraphQLSuite:
                     "exposureTime" : {
                       "seconds" : 2.000000
                     }
-                  }
+                  },
+                  "ccds": []
                 }
               }
           }

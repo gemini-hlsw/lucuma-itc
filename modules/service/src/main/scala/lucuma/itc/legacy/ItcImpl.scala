@@ -21,10 +21,13 @@ import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.CalculationError
 import lucuma.itc.IntegrationTime
+import lucuma.itc.ItcCcd
 import lucuma.itc.Millisecond
 import lucuma.itc.SignalToNoiseAt
+import lucuma.itc.SingleSN
 import lucuma.itc.TargetGraphsCalcResult
 import lucuma.itc.TargetIntegrationTime
+import lucuma.itc.TotalSN
 import lucuma.itc.legacy.codecs.given
 import lucuma.itc.service.Itc
 import lucuma.itc.service.ItcObservingConditions
@@ -49,6 +52,23 @@ object ItcImpl {
 
       private def fromLegacy(sn: lucuma.itc.legacy.SignalToNoiseAt): SignalToNoiseAt =
         SignalToNoiseAt(sn.wavelength, sn.single, sn.total)
+
+      private def fromLegacyCcd(remoteCcd: ItcRemoteCcd): Option[ItcCcd] =
+        for
+          single <- SignalToNoise.FromBigDecimalRounding.getOption(remoteCcd.singleSNRatio)
+          total  <- SignalToNoise.FromBigDecimalRounding.getOption(remoteCcd.totalSNRatio)
+        yield ItcCcd(
+          singleSNRatio = SingleSN(single),
+          maxSingleSNRatio = None,
+          totalSNRatio = TotalSN(total),
+          maxTotalSNRatio = None,
+          wavelengthForMaxTotalSNRatio = None,
+          wavelengthForMaxSingleSNRatio = None,
+          peakPixelFlux = remoteCcd.peakPixelFlux,
+          wellDepth = remoteCcd.wellDepth,
+          ampGain = remoteCcd.ampGain,
+          warnings = remoteCcd.warnings
+        )
 
       def calculateIntegrationTime(
         target:        TargetData,
@@ -167,7 +187,7 @@ object ItcImpl {
         r:          IntegrationTimeRemoteResult,
         bandOrLine: Either[Band, Wavelength]
       ): F[TargetIntegrationTime] =
-        val tgts = r.exposureCalculation.exposures
+        val tgts          = r.exposureCalculation.exposures
           .traverse: r =>
             TimeSpan
               .fromSeconds(r.exposureTime)
@@ -186,7 +206,10 @@ object ItcImpl {
               .getOrElse:
                 MonadThrow[F].raiseError:
                   CalculationError("Selected CCD index out of bounds")
-        tgts.map(TargetIntegrationTime(_, bandOrLine, r.signalToNoiseAt.map(fromLegacy)))
+        val convertedCcds = r.ccds.toList.flatMap(fromLegacyCcd)
+        tgts.map(times =>
+          TargetIntegrationTime(times, bandOrLine, r.signalToNoiseAt.map(fromLegacy), convertedCcds)
+        )
 
       /**
        * Compute the exposure time and number of exposures required to achieve the desired
@@ -225,7 +248,8 @@ object ItcImpl {
                  yield TargetIntegrationTime(
                    Zipper.one(IntegrationTime(exposureTime, exposureCount)),
                    bandOrLine,
-                   a.signalToNoiseAt.map(fromLegacy)
+                   a.signalToNoiseAt.map(fromLegacy),
+                   a.ccds.toList.flatMap(fromLegacyCcd)
                  )
         yield r
 

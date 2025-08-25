@@ -98,12 +98,22 @@ trait ItcGraphSyntax:
     def adjustSignificantFigures(figures: SignificantFigures): ItcCcd =
       figures.ccd.fold(ccd)(c =>
         ccd.copy(
-          singleSNRatio = roundToSignificantFigures(ccd.singleSNRatio, c.value),
-          maxSingleSNRatio = roundToSignificantFigures(ccd.maxSingleSNRatio, c.value),
-          totalSNRatio = roundToSignificantFigures(ccd.totalSNRatio, c.value),
-          maxTotalSNRatio = roundToSignificantFigures(ccd.maxTotalSNRatio, c.value),
-          peakPixelFlux = roundToSignificantFigures(ccd.peakPixelFlux, c.value),
-          wellDepth = roundToSignificantFigures(ccd.wellDepth, c.value),
-          ampGain = roundToSignificantFigures(ccd.ampGain, c.value)
+          singleSNRatio = SingleSN(
+            SignalToNoise.FromBigDecimalRounding
+              .getOption(roundToSignificantFigures(ccd.singleSNRatio.value.toBigDecimal, c.value))
+              .getOrElse(ccd.singleSNRatio.value)
+          ),
+          maxSingleSNRatio =
+            ccd.maxSingleSNRatio.map(d => roundToSignificantFigures(d, c.value).toDouble),
+          totalSNRatio = TotalSN(
+            SignalToNoise.FromBigDecimalRounding
+              .getOption(roundToSignificantFigures(ccd.totalSNRatio.value.toBigDecimal, c.value))
+              .getOrElse(ccd.totalSNRatio.value)
+          ),
+          maxTotalSNRatio =
+            ccd.maxTotalSNRatio.map(d => roundToSignificantFigures(d, c.value).toDouble),
+          peakPixelFlux = roundToSignificantFigures(ccd.peakPixelFlux, c.value).toDouble,
+          wellDepth = roundToSignificantFigures(ccd.wellDepth, c.value).toDouble,
+          ampGain = roundToSignificantFigures(ccd.ampGain, c.value).toDouble
         )
       )

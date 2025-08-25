@@ -1,4 +1,4 @@
-"""
+"Single""
 ##########
 ITC schema
 ##########
@@ -379,6 +379,9 @@ type TargetIntegrationTime {
 
   selected: IntegrationTime!
 
+  """CCD performance data"""
+  ccds: [ItcCcd!]!
+
   """The band used for the time calculation, in case of a BandNormalized SED"""
   band: Band
 
@@ -490,22 +493,22 @@ type ItcWarning {
 
 type ItcCcd {
   """the final SN ratio for a single image"""
-  singleSNRatio: BigDecimal!
+  singleSNRatio: SignalToNoise!
 
   """Wavelength where we get the max singl SN"""
-  wavelengthForMaxSingleSNRatio: Wavelength!
+  wavelengthForMaxSingleSNRatio: Wavelength
 
   """the max single SN ratio for this ccd"""
-  maxSingleSNRatio:  BigDecimal!
+  maxSingleSNRatio:  BigDecimal
 
   """the total SN ratio for all images"""
-  totalSNRatio:  BigDecimal!
+  totalSNRatio:  SignalToNoise!
 
   """Wavelength where we get the max total SN"""
-  wavelengthForMaxTotalSNRatio: Wavelength!
+  wavelengthForMaxTotalSNRatio: Wavelength
 
   """the max final SN ratio for this ccd"""
-  maxTotalSNRatio:  BigDecimal!
+  maxTotalSNRatio:  BigDecimal
 
   """the highest e- count for all pixels on the CCD"""
   peakPixelFlux: BigDecimal!

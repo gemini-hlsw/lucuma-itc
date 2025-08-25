@@ -18,6 +18,7 @@ import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcGraph
 import lucuma.itc.ItcSeries
+import lucuma.itc.ItcWarning
 import lucuma.itc.SignalToNoiseAt
 import lucuma.itc.SingleSN
 import lucuma.itc.TargetIntegrationTime
@@ -80,11 +81,13 @@ object decoders:
           .orElse(c.downField("emissionLine").as[Wavelength].map(_.asRight))
       times      <- c.as[Zipper[IntegrationTime]]
       sn         <- c.downField("signalToNoiseAt").as[Option[SignalToNoiseAt]]
-    yield TargetIntegrationTime(times, bandOrLine, sn)
+      ccds       <- c.downField("ccds").as[List[ItcCcd]]
+    yield TargetIntegrationTime(times, bandOrLine, sn, ccds)
 
-  given Decoder[ItcCcd]    = deriveDecoder[ItcCcd]
-  given Decoder[ItcSeries] = deriveDecoder[ItcSeries]
-  given Decoder[ItcGraph]  = deriveDecoder[ItcGraph]
+  given Decoder[ItcCcd]     = deriveDecoder[ItcCcd]
+  given Decoder[ItcWarning] = deriveDecoder[ItcWarning]
+  given Decoder[ItcSeries]  = deriveDecoder[ItcSeries]
+  given Decoder[ItcGraph]   = deriveDecoder[ItcGraph]
 
   given Decoder[TargetIntegrationTimeOutcome] =
     Decoder[TargetIntegrationTime]

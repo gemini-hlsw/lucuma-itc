@@ -544,31 +544,41 @@ private[legacy] object codecs:
   given Decoder[IntegrationTimeRemoteResult] = (c: HCursor) =>
     val spec: Option[Decoder.Result[IntegrationTimeRemoteResult]] =
       for {
-        t <- c.downField("ItcSpectroscopyResult")
-               .downField("times")
-               .success
-               .map:
-                 _.as[AllExposureCalculations]
-        s <- c.downField("ItcSpectroscopyResult")
-               .downField("signalToNoiseAt")
-               .success
-               .map:
-                 _.as[Option[SignalToNoiseAt]]
-      } yield (t, s).mapN(IntegrationTimeRemoteResult(_, _))
+        t    <- c.downField("ItcSpectroscopyResult")
+                  .downField("times")
+                  .success
+                  .map:
+                    _.as[AllExposureCalculations]
+        s    <- c.downField("ItcSpectroscopyResult")
+                  .downField("signalToNoiseAt")
+                  .success
+                  .map:
+                    _.as[Option[SignalToNoiseAt]]
+        ccds <- c.downField("ItcSpectroscopyResult")
+                  .downField("ccds")
+                  .success
+                  .map:
+                    _.as[NonEmptyChain[ItcRemoteCcd]]
+      } yield (t, s, ccds).mapN(IntegrationTimeRemoteResult(_, _, _))
 
     val img: Option[Decoder.Result[IntegrationTimeRemoteResult]] =
       for {
-        t <- c.downField("ItcImagingResult")
-               .downField("times")
-               .success
-               .map:
-                 _.as[AllExposureCalculations]
-        s <- c.downField("ItcImagingResult")
-               .downField("signalToNoiseAt")
-               .success
-               .map:
-                 _.as[Option[SignalToNoiseAt]]
-      } yield (t, s).mapN(IntegrationTimeRemoteResult(_, _))
+        t    <- c.downField("ItcImagingResult")
+                  .downField("times")
+                  .success
+                  .map:
+                    _.as[AllExposureCalculations]
+        s    <- c.downField("ItcImagingResult")
+                  .downField("signalToNoiseAt")
+                  .success
+                  .map:
+                    _.as[Option[SignalToNoiseAt]]
+        ccds <- c.downField("ItcImagingResult")
+                  .downField("ccds")
+                  .success
+                  .map:
+                    _.as[NonEmptyChain[ItcRemoteCcd]]
+      } yield (t, s, ccds).mapN(IntegrationTimeRemoteResult(_, _, _))
 
     spec
       .orElse(img)

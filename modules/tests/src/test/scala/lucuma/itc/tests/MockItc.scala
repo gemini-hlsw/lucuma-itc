@@ -37,7 +37,8 @@ object MockItc extends Itc[IO]:
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                       TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-      ).some
+      ).some,
+      List.empty // Empty CCD list for mock
     ).pure[IO]
 
   override def calculateIntegrationTime(
@@ -53,7 +54,8 @@ object MockItc extends Itc[IO]:
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                       TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-      ).some
+      ).some,
+      List.empty
     ).pure[IO]
 
   override def calculateGraphs(
@@ -67,12 +69,12 @@ object MockItc extends Itc[IO]:
     TargetGraphsCalcResult(
       NonEmptyChain.of(
         ItcCcd(
-          1,
-          1,
-          2,
-          2,
-          Wavelength.fromIntNanometers(1001).get,
-          Wavelength.fromIntNanometers(1001).get,
+          SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1)),
+          Some(1.0),
+          TotalSN(SignalToNoise.unsafeFromBigDecimalExact(2)),
+          Some(2.0),
+          Some(Wavelength.fromIntNanometers(1001).get),
+          Some(Wavelength.fromIntNanometers(1001).get),
           3,
           4,
           5,
@@ -115,7 +117,37 @@ object MockImagingItc extends Itc[IO]:
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                       TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-      ).some
+      ).some,
+      List(
+        ItcCcd(
+          SingleSN(SignalToNoise.unsafeFromBigDecimalExact(50.5)),
+          Some(55.0),
+          TotalSN(SignalToNoise.unsafeFromBigDecimalExact(150.5)),
+          Some(160.0),
+          Some(Wavelength.fromIntNanometers(800).get),
+          Some(Wavelength.fromIntNanometers(750).get),
+          35000.0,
+          65000.0,
+          2.5,
+          List(
+            ItcWarning(
+              "Saturation. Warning: Peak pixel intensity exceeds 80% of the pixel full well depth; Peak pixel flux = 100.000%"
+            )
+          )
+        ),
+        ItcCcd(
+          SingleSN(SignalToNoise.unsafeFromBigDecimalExact(45.2)),
+          Some(48.0),
+          TotalSN(SignalToNoise.unsafeFromBigDecimalExact(135.7)),
+          Some(140.0),
+          Some(Wavelength.fromIntNanometers(850).get),
+          Some(Wavelength.fromIntNanometers(800).get),
+          28000.0,
+          65000.0,
+          2.5,
+          Nil
+        )
+      )
     ).pure[IO]
 
   override def calculateIntegrationTime(
@@ -134,7 +166,37 @@ object MockImagingItc extends Itc[IO]:
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                       TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-      ).some
+      ).some,
+      List(
+        ItcCcd(
+          SingleSN(SignalToNoise.unsafeFromBigDecimalExact(50.5)),
+          Some(55.0),
+          TotalSN(SignalToNoise.unsafeFromBigDecimalExact(150.5)),
+          Some(160.0),
+          Some(Wavelength.fromIntNanometers(800).get),
+          Some(Wavelength.fromIntNanometers(750).get),
+          35000.0,
+          65000.0,
+          2.5,
+          List(
+            ItcWarning(
+              "Saturation. Warning: Peak pixel intensity exceeds 80% of the pixel full well depth; Peak pixel flux = 100.000%"
+            )
+          )
+        ),
+        ItcCcd(
+          SingleSN(SignalToNoise.unsafeFromBigDecimalExact(45.2)),
+          Some(48.0),
+          TotalSN(SignalToNoise.unsafeFromBigDecimalExact(135.7)),
+          Some(140.0),
+          Some(Wavelength.fromIntNanometers(850).get),
+          Some(Wavelength.fromIntNanometers(800).get),
+          28000.0,
+          65000.0,
+          2.5,
+          Nil
+        )
+      )
     ).pure[IO]
 
   override def calculateGraphs(
@@ -148,12 +210,12 @@ object MockImagingItc extends Itc[IO]:
     TargetGraphsCalcResult(
       NonEmptyChain.of(
         ItcCcd(
-          1,
-          1,
-          2,
-          2,
-          Wavelength.fromIntNanometers(1001).get,
-          Wavelength.fromIntNanometers(1001).get,
+          SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1)),
+          Some(1.0),
+          TotalSN(SignalToNoise.unsafeFromBigDecimalExact(2)),
+          Some(2.0),
+          Some(Wavelength.fromIntNanometers(1001).get),
+          Some(Wavelength.fromIntNanometers(1001).get),
           3,
           4,
           5,
@@ -196,7 +258,8 @@ object EmissionLineMockItc extends Itc[IO]:
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                       TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-      ).some
+      ).some,
+      List.empty
     ).pure[IO]
 
   override def calculateIntegrationTime(
@@ -212,7 +275,8 @@ object EmissionLineMockItc extends Itc[IO]:
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                       TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-      ).some
+      ).some,
+      List.empty
     ).pure[IO]
 
   override def calculateGraphs(
@@ -241,7 +305,8 @@ object FailingMockItc extends Itc[IO]:
       SignalToNoiseAt(atWavelength,
                       SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                       TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-      ).some
+      ).some,
+      List.empty
     ).pure[IO]
 
   override def calculateIntegrationTime(
@@ -264,12 +329,12 @@ object FailingMockItc extends Itc[IO]:
     TargetGraphsCalcResult(
       NonEmptyChain.of(
         ItcCcd(
-          1,
-          1,
-          2,
-          2,
-          Wavelength.fromIntNanometers(1001).get,
-          Wavelength.fromIntNanometers(1001).get,
+          SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1)),
+          Some(1.0),
+          TotalSN(SignalToNoise.unsafeFromBigDecimalExact(2)),
+          Some(2.0),
+          Some(Wavelength.fromIntNanometers(1001).get),
+          Some(Wavelength.fromIntNanometers(1001).get),
           3,
           4,
           5,

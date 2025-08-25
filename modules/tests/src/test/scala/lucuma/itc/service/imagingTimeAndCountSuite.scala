@@ -131,6 +131,14 @@ class imagingTimeAndCountSuite extends GraphImagingQLSuite:
                   seconds
                 }
               }
+              ccds {
+                singleSNRatio
+                totalSNRatio
+                peakPixelFlux
+                warnings {
+                  msg
+                }
+              }
             }
           }
         }
@@ -167,7 +175,25 @@ class imagingTimeAndCountSuite extends GraphImagingQLSuite:
                   "exposureTime" : {
                     "seconds" : 1.000000
                   }
-                }
+                },
+                "ccds" : [
+                  {
+                    "singleSNRatio" : 50.5,
+                    "totalSNRatio" : 150.5,
+                    "peakPixelFlux" : 35000.0,
+                    "warnings" : [
+                      {
+                        "msg" : "Saturation. Warning: Peak pixel intensity exceeds 80% of the pixel full well depth; Peak pixel flux = 100.000%"
+                      }
+                    ]
+                  },
+                  {
+                    "singleSNRatio" : 45.2,
+                    "totalSNRatio" : 135.7,
+                    "peakPixelFlux" : 28000.0,
+                    "warnings" : []
+                  }
+                ]
               }
             }
           }
