@@ -41,9 +41,6 @@ ThisBuild / tlBaseVersion       := "0.43"
 ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
 
-ThisBuild / dockerExposedPorts ++= Seq(6060)
-ThisBuild / dockerBaseImage := "eclipse-temurin:21-jre"
-
 val herokuToken = "HEROKU_API_KEY" -> "${{ secrets.HEROKU_API_KEY }}"
 
 ThisBuild / githubWorkflowSbtCommand := "sbt -v -J-Xmx6g"
@@ -217,20 +214,6 @@ lazy val service = project
   )
   .enablePlugins(BuildInfoPlugin)
 
-lazy val deployedAppSettings = Seq(
-  description              := "ITC Server",
-  // Main class for launching
-  Compile / mainClass      := Some("lucuma.itc.service.Main"),
-  // Name of the launch script
-  executableScriptName     := "itc-service",
-  // Specify a different name for the config file
-  bashScriptConfigLocation := Some("${app_home}/../conf/launcher.args"),
-  Universal / mappings ++= {
-    val dir = (service / baseDirectory).value / "ocslib"
-    (dir ** AllPassFilter).pair(relativeTo(dir.getParentFile))
-  }
-)
-
 /**
  * Project for the ITC server app for development
  */
@@ -241,10 +224,20 @@ lazy val deploy = project
   .enablePlugins(JavaServerAppPackaging)
   .enablePlugins(GitBranchPrompt)
   .dependsOn(service)
-  .settings(deployedAppSettings: _*)
   .settings(
     description              := "ITC Server",
     Docker / packageName     := "gpp-itc",
+    description              := "ITC Server",
+    // Main class for launching
+    Compile / mainClass      := Some("lucuma.itc.service.Main"),
+    // Name of the launch script
+    executableScriptName     := "itc-service",
+    dockerExposedPorts ++= Seq(6060),
+    // Add the ocslib jars to the distribution
+    Universal / mappings ++= {
+      val dir = (service / baseDirectory).value / "ocslib"
+      (dir ** AllPassFilter).pair(relativeTo(dir.getParentFile))
+    },
     // The heap needs to be a lot smaller than the dyno size. This may be
     // because the JVM tricks to load the 367M of old itc jar files increases the
     // `metaspace` size by that amount. It's a nice theory, at least.
