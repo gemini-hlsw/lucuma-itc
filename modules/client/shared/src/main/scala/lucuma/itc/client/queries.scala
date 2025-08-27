@@ -38,8 +38,18 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
         }
         ccds {
           singleSNRatio
+          maxSingleSNRatio
           totalSNRatio
+          maxTotalSNRatio
+          wavelengthForMaxTotalSNRatio {
+            picometers
+          }
+          wavelengthForMaxSingleSNRatio {
+            picometers
+          }
           peakPixelFlux
+          wellDepth
+          ampGain
           warnings {
             msg
           }
@@ -114,8 +124,18 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
         }
         ccds {
           singleSNRatio
+          maxSingleSNRatio
           totalSNRatio
+          maxTotalSNRatio
+          wavelengthForMaxTotalSNRatio {
+            picometers
+          }
+          wavelengthForMaxSingleSNRatio {
+            picometers
+          }
           peakPixelFlux
+          wellDepth
+          ampGain
           warnings {
             msg
           }

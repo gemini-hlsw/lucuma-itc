@@ -255,7 +255,7 @@ class WiringSuite extends ClientSuite:
               ).asRight
           )
       ).asRight
-    )
+    ).asRight
 
   test("ItcClient spectroscopy with exposure time mode"):
     val toTC = SpectroscopyInput.parameters
@@ -439,7 +439,7 @@ class WiringSuite extends ClientSuite:
               ).asRight
           )
       ).asRight
-    )
+    ).asRight
 
 object WiringSuite:
 
