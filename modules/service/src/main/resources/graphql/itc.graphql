@@ -4177,17 +4177,37 @@ type GmosNorthLongSlit {
   explicitWavelengthDithers: [WavelengthDither!]
 
   """
+  Q offsets, either explicitly specified in explicitOffsets
+  or else taken from defaultOffsets
+  """
+  offsets: [OffsetQ!]!
+
+  """Default offsets."""
+  defaultOffsets: [OffsetQ!]!
+
+  """
+  Optional explicitly specified q offsets. If set it overrides the
+  the default.
+  """
+  explicitOffsets: [OffsetQ!]
+
+  """
   Spacial q offsets, either explicitly specified in explicitSpatialOffsets
   or else taken from defaultSpatialOffsets
+  @deprecated(reason: "Use 'offsets', 'defaultOffsets', and 'explicitOffsets' instead.")
   """
   spatialOffsets: [OffsetQ!]!
 
-  """Default spatial offsets."""
+  """
+  Default spatial offsets.
+  @deprecated(reason: "Use 'defaultOffsets' instead.")
+  """
   defaultSpatialOffsets: [OffsetQ!]!
 
   """
   Optional explicitly specified spatial q offsets. If set it overrides the
   the default.
+  @deprecated(reason: "Use 'explicitOffsets' instead.")
   """
   explicitSpatialOffsets: [OffsetQ!]
 
@@ -4601,17 +4621,37 @@ type GmosSouthLongSlit {
   explicitWavelengthDithers: [WavelengthDither!]
 
   """
+  Q offsets, either explicitly specified in explicitOffsets
+  or else taken from defaultOffsets
+  """
+  offsets: [OffsetQ!]!
+
+  """Default offsets."""
+  defaultOffsets: [OffsetQ!]!
+
+  """
+  Optional explicitly specified q offsets. If set it overrides the
+  the default.
+  """
+  explicitOffsets: [OffsetQ!]
+
+  """
   Spacial q offsets, either explicitly specified in explicitSpatialOffsets
   or else taken from defaultSpatialOffsets
+  @deprecated(reason: "Use 'offsets', 'defaultOffsets', and 'explicitOffsets' instead.")
   """
   spatialOffsets: [OffsetQ!]!
 
-  """Default spatial offsets."""
+  """
+  Default spatial offsets.
+  @deprecated(reason: "Use 'defaultOffsets' instead.")
+  """
   defaultSpatialOffsets: [OffsetQ!]!
 
   """
   Optional explicitly specified spatial q offsets. If set it overrides the
   the default.
+  @deprecated(reason: "Use 'explicitOffsets' instead.")
   """
   explicitSpatialOffsets: [OffsetQ!]
 
@@ -5370,9 +5410,15 @@ enum ExecutionState {
   DECLARED_COMPLETE
 }
 
+"""A configuration target will define either coordinates or a region."""
+type ConfigurationTarget {
+  coordinates: Coordinates
+  region: Region
+}
+
 type Configuration {
   conditions: ConfigurationConditions!
-  referenceCoordinates: Coordinates
+  target: ConfigurationTarget
   observingMode: ConfigurationObservingMode
 }
 
@@ -5388,6 +5434,9 @@ type ConfigurationObservingMode {
   mode: ObservingModeType!
   gmosNorthLongSlit: ConfigurationGmosNorthLongSlit
   gmosSouthLongSlit: ConfigurationGmosSouthLongSlit
+  gmosNorthImaging: ConfigurationGmosNorthImaging
+  gmosSouthImaging: ConfigurationGmosSouthImaging
+  flamingos2LongSlit: ConfigurationFlamingos2LongSlit
 }
 
 type ConfigurationGmosNorthLongSlit {
@@ -5396,6 +5445,18 @@ type ConfigurationGmosNorthLongSlit {
 
 type ConfigurationGmosSouthLongSlit {
   grating: GmosSouthGrating!
+}
+
+type ConfigurationGmosNorthImaging {
+  filters: [GmosNorthFilter!]!
+}
+
+type ConfigurationGmosSouthImaging {
+  filters: [GmosSouthFilter!]!
+}
+
+type ConfigurationFlamingos2LongSlit {
+  disperser: Flamingos2Disperser!
 }
 
 scalar ConfigurationRequestId
