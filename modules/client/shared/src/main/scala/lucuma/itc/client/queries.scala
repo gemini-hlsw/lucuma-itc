@@ -36,6 +36,24 @@ object SpectroscopyIntegrationTime extends GraphQLOperation[Unit] {
         selected {
           ...IntegrationTimeFields
         }
+        ccds {
+          singleSNRatio
+          maxSingleSNRatio
+          totalSNRatio
+          maxTotalSNRatio
+          wavelengthForMaxTotalSNRatio {
+            picometers
+          }
+          wavelengthForMaxSingleSNRatio {
+            picometers
+          }
+          peakPixelFlux
+          wellDepth
+          ampGain
+          warnings {
+            msg
+          }
+        }
         signalToNoiseAt {
           single
           total
@@ -103,6 +121,24 @@ object ImagingIntegrationTime extends GraphQLOperation[Unit] {
         index
         selected {
           ...IntegrationTimeFields
+        }
+        ccds {
+          singleSNRatio
+          maxSingleSNRatio
+          totalSNRatio
+          maxTotalSNRatio
+          wavelengthForMaxTotalSNRatio {
+            picometers
+          }
+          wavelengthForMaxSingleSNRatio {
+            picometers
+          }
+          peakPixelFlux
+          wellDepth
+          ampGain
+          warnings {
+            msg
+          }
         }
         signalToNoiseAt {
           single

@@ -3,7 +3,7 @@
 
 package lucuma.itc.client.json
 
-import cats.syntax.either.*
+import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.*
 import io.circe.generic.semiauto.*
@@ -14,10 +14,12 @@ import lucuma.core.math.SignalToNoise
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.Error
+import lucuma.itc.Error.given
 import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcGraph
 import lucuma.itc.ItcSeries
+import lucuma.itc.ItcWarning
 import lucuma.itc.SignalToNoiseAt
 import lucuma.itc.SingleSN
 import lucuma.itc.TargetIntegrationTime
@@ -64,6 +66,9 @@ object decoders:
              .flatMap(n => PosInt.from(n).leftMap(m => DecodingFailure(m, c.history)))
     } yield IntegrationTime(t, n)
 
+  given Decoder[SingleSN] = Decoder[SignalToNoise].map(SingleSN(_))
+  given Decoder[TotalSN]  = Decoder[SignalToNoise].map(TotalSN(_))
+
   given Decoder[SignalToNoiseAt] = c =>
     for {
       w <- c.downField("wavelength").as[Wavelength]
@@ -80,14 +85,34 @@ object decoders:
           .orElse(c.downField("emissionLine").as[Wavelength].map(_.asRight))
       times      <- c.as[Zipper[IntegrationTime]]
       sn         <- c.downField("signalToNoiseAt").as[Option[SignalToNoiseAt]]
-    yield TargetIntegrationTime(times, bandOrLine, sn)
+      ccds       <- c.downField("ccds").as[List[ItcCcd]]
+    yield TargetIntegrationTime(times, bandOrLine, sn, ccds)
 
-  given Decoder[ItcCcd]    = deriveDecoder[ItcCcd]
-  given Decoder[ItcSeries] = deriveDecoder[ItcSeries]
-  given Decoder[ItcGraph]  = deriveDecoder[ItcGraph]
+  given Decoder[ItcCcd]     = deriveDecoder[ItcCcd]
+  given Decoder[ItcWarning] = deriveDecoder[ItcWarning]
+  given Decoder[ItcSeries]  = deriveDecoder[ItcSeries]
+  given Decoder[ItcGraph]   = deriveDecoder[ItcGraph]
 
   given Decoder[TargetIntegrationTimeOutcome] =
     Decoder[TargetIntegrationTime]
       .map(_.asRight)
       .or(Decoder[Error].map(_.asLeft))
       .map(TargetIntegrationTimeOutcome(_))
+
+  given Decoder[TargetTimeAndGraphsResult] = c =>
+    for
+      graphs               <- c.downField("graphs").as[TargetGraphs]
+      integrationTimeCursor = c.downField("integrationTime")
+      bandOrLine           <-
+        integrationTimeCursor
+          .downField("band")
+          .as[Band]
+          .map(_.asLeft)
+          .orElse(integrationTimeCursor.downField("emissionLine").as[Wavelength].map(_.asRight))
+      times                <- integrationTimeCursor.as[Zipper[IntegrationTime]]
+      sn                   <- integrationTimeCursor.downField("signalToNoiseAt").as[Option[SignalToNoiseAt]]
+      ccds                 <- Right(graphs.ccds.toList)
+    yield TargetTimeAndGraphsResult(
+      TargetIntegrationTime(times, bandOrLine, sn, ccds),
+      graphs
+    )

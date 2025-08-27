@@ -101,7 +101,8 @@ class WiringSuite extends ClientSuite:
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                                 TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
+                ).some,
+                List.empty
               ).asRight
       ).asRight
     )
@@ -123,7 +124,8 @@ class WiringSuite extends ClientSuite:
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                                 TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
+                ).some,
+                List.empty
               ).asRight
       ).asRight
     )
@@ -145,7 +147,8 @@ class WiringSuite extends ClientSuite:
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                                 TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
+                ).some,
+                List.empty
               ).asRight
       ).asRight
     )
@@ -167,7 +170,8 @@ class WiringSuite extends ClientSuite:
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                                 TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
+                ).some,
+                List.empty
               ).asRight
       ).asRight
     )
@@ -195,7 +199,8 @@ class WiringSuite extends ClientSuite:
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                                 TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
+                ).some,
+                List.empty
               ).asRight
       ).asRight
     )
@@ -215,12 +220,12 @@ class WiringSuite extends ClientSuite:
                 TargetGraphs(
                   NonEmptyChain.of(
                     ItcCcd(
-                      1,
-                      1,
-                      2,
-                      2,
-                      Wavelength.fromIntNanometers(1001).get,
-                      Wavelength.fromIntNanometers(1001).get,
+                      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1)),
+                      Some(1.0),
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(2)),
+                      Some(2.0),
+                      Some(Wavelength.fromIntNanometers(1001).get),
+                      Some(Wavelength.fromIntNanometers(1001).get),
                       3,
                       4,
                       5,
@@ -250,7 +255,7 @@ class WiringSuite extends ClientSuite:
               ).asRight
           )
       ).asRight
-    )
+    ).asRight
 
   test("ItcClient spectroscopy with exposure time mode"):
     val toTC = SpectroscopyInput.parameters
@@ -275,7 +280,8 @@ class WiringSuite extends ClientSuite:
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                                 TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
+                ).some,
+                List.empty
               ).asRight
       ).asRight
     )
@@ -297,7 +303,8 @@ class WiringSuite extends ClientSuite:
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                                 TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
+                ).some,
+                List.empty
               ).asRight
       ).asRight
     )
@@ -330,7 +337,8 @@ class WiringSuite extends ClientSuite:
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                                 TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
+                ).some,
+                List.empty
               ).asRight
       ).asRight
     )
@@ -352,7 +360,8 @@ class WiringSuite extends ClientSuite:
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                                 TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
+                ).some,
+                List.empty
               ).asRight
       ).asRight
     )
@@ -374,7 +383,8 @@ class WiringSuite extends ClientSuite:
                 SignalToNoiseAt(atWavelength,
                                 SingleSN(SignalToNoise.unsafeFromBigDecimalExact(101.0)),
                                 TotalSN(SignalToNoise.unsafeFromBigDecimalExact(102.0))
-                ).some
+                ).some,
+                List.empty
               ).asRight
       ).asRight
     )
@@ -394,12 +404,12 @@ class WiringSuite extends ClientSuite:
                 TargetGraphs(
                   NonEmptyChain.of(
                     ItcCcd(
-                      1,
-                      1,
-                      2,
-                      2,
-                      Wavelength.fromIntNanometers(1001).get,
-                      Wavelength.fromIntNanometers(1001).get,
+                      SingleSN(SignalToNoise.unsafeFromBigDecimalExact(1)),
+                      Some(1.0),
+                      TotalSN(SignalToNoise.unsafeFromBigDecimalExact(2)),
+                      Some(2.0),
+                      Some(Wavelength.fromIntNanometers(1001).get),
+                      Some(Wavelength.fromIntNanometers(1001).get),
                       3,
                       4,
                       5,
@@ -429,7 +439,7 @@ class WiringSuite extends ClientSuite:
               ).asRight
           )
       ).asRight
-    )
+    ).asRight
 
 object WiringSuite:
 
