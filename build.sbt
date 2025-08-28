@@ -12,11 +12,11 @@ val cirisVersion                = "3.10.0"
 val clueVersion                 = "0.46.0"
 val disciplineMunitVersion      = "2.0.0"
 val fs2Version                  = "3.12.0"
-val gatlingVersion              = "3.14.3"
 val grackleVersion              = "0.24.0"
 val graphQLRoutesVersion        = "0.10.2"
 val http4sVersion               = "0.23.30"
 val http4sJdkHttpClientVersion  = "0.10.0"
+val jmhVersion                  = "1.37"
 val keySemaphoreVersion         = "0.3.0-M1"
 val kittensVersion              = "3.5.0"
 val log4catsVersion             = "2.7.1"
@@ -273,15 +273,17 @@ lazy val client = crossProject(JVMPlatform, JSPlatform)
 
 lazy val benchmark = project
   .in(file("modules/benchmarks"))
-  .enablePlugins(GatlingPlugin, NoPublishPlugin)
+  .enablePlugins(JmhPlugin, NoPublishPlugin)
   .settings(
     libraryDependencies ++= Seq(
-      // ("io.suzaku" %% "boopickle" % "1.4.0").cross(CrossVersion.for3Use2_13),
-      ("io.gatling" % "gatling-test-framework" % gatlingVersion)
-        .exclude("org.typelevel", "spire-macros_2.13")
-        .exclude("io.suzaku", "boopickle_2.13")
-        .exclude("org.scala-lang.modules", "scala-collection-compat_2.13")
-    )
+      "org.openjdk.jmh" % "jmh-core"                 % jmhVersion,
+      "org.openjdk.jmh" % "jmh-generator-annprocess" % jmhVersion
+    ),
+    // Add project root system property for benchmarks
+    fork       := false,
+    Jmh / fork := false,
+    javaOptions += s"-Dproject.root=${(ThisBuild / baseDirectory).value}",
+    Jmh / javaOptions += s"-Dproject.root=${(ThisBuild / baseDirectory).value}"
   )
   .dependsOn(service)
 
