@@ -111,3 +111,16 @@ node schemastitcher.js modules/service/src/main/resources/graphql/ObservationDB.
 ```
 
 The script fetchODBSchema.sh will get the latest schema from the odb dev server and do the stitching in one go
+
+## Benchmarking
+
+### Simple Performance Test
+```
+sbt "benchmark/runMain lucuma.itc.benchmarks.ItcPerformanceHarness"
+```
+
+### Using jmh
+```
+benchmark/Jmh/run lucuma.itc.benchmarks.ItcCoreBenchmark
+```
+
