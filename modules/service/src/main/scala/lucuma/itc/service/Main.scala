@@ -55,6 +55,7 @@ import java.io.FileFilter
 import java.net.URL
 import java.net.URLClassLoader
 import scala.concurrent.duration.*
+import scala.jdk.CollectionConverters.*
 import scala.util.Try
 
 // #server
@@ -88,7 +89,17 @@ object Main extends IOApp with ItcCacheOrRemote {
             | max memory           : ${runtime.maxMemory() / 1024 / 1024} MB
             | java version         : ${System.getProperty("java.version")}
             |""".stripMargin
-    banner.linesIterator.toList.traverse_(Logger[F].info(_))
+
+    val envVars = System.getenv().asScala.toList.sorted
+    val envInfo = {
+      val envLines = envVars.map { case (key, value) => s"| $key = $value" }
+      s"""|
+            | Environment Variables:
+            |${envLines.mkString("\n")}
+            |""".stripMargin
+    }
+
+    (banner + envInfo).linesIterator.toList.traverse_(Logger[F].info(_))
 
   /** A middleware that adds CORS headers. In production the origin must match the cookie domain. */
   def cors(env: ExecutionEnvironment, domain: Option[String]): CORSPolicy =
