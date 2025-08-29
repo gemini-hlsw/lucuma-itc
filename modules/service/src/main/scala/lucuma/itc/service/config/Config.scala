@@ -17,7 +17,8 @@ final case class Config(
   odbBaseUrl:      Uri,
   odbServiceToken: String,
   honeycomb:       Option[HoneycombConfig],
-  inHeroku:        Boolean
+  inHeroku:        Boolean,
+  metrics:         MetricsConfig
 )
 
 object Config:
@@ -40,7 +41,8 @@ object Config:
      envOrProp("ODB_BASE_URL").as[Uri],
      envOrProp("ODB_SERVICE_JWT"),
      HoneycombConfig.config.option,
-     dynoCheck.map(_.isDefined)
+     dynoCheck.map(_.isDefined),
+     MetricsConfig.config
     ).parMapN(Config.apply)
 
   private def redisUrlConfig(

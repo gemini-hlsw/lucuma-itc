@@ -31,6 +31,7 @@ import lucuma.itc.legacy.ItcImpl
 import lucuma.itc.legacy.LocalItc
 import lucuma.itc.service.config.*
 import lucuma.itc.service.config.ExecutionEnvironment.*
+import lucuma.itc.service.metrics.MetricsService
 import natchez.EntryPoint
 import natchez.Trace
 import natchez.honeycomb.Honeycomb
@@ -202,6 +203,7 @@ object Main extends IOApp with ItcCacheOrRemote {
   def server(cfg: Config)(using Logger[IO]): Resource[IO, ExitCode] =
     for
       _  <- Resource.eval(banner[IO](cfg))
+      _  <- MetricsService.resource[IO](cfg.metrics)
       cl <- Resource.eval(legacyItcLoader[IO])
       ep <- entryPointResource[IO](cfg.honeycomb)
       ap <- ep.wsLiftR(routes(cfg, cl)).map(_.map(_.orNotFound))
