@@ -32,8 +32,12 @@ object MetricsConfig:
       envOrProp("METRICS_PREFIX").option,
       envOrProp("METRICS_REPORTING_FREQUENCY").as[Int].default(60).map(_.seconds),
       envOrProp("GRAPHITE_URL").as[Uri].option,
-      envOrProp("GRAPHITE_API_KEY").option
-    ).parMapN: (prefix, frequency, graphiteUrl, apiKey) =>
-      val graphite = (prefix, graphiteUrl).mapN(GraphiteConfig(_, _, apiKey))
+      envOrProp("GRAPHITE_API_KEY").option,
+      env("DYNO").option
+    ).parMapN: (prefix, frequency, graphiteUrl, apiKey, dyno) =>
+      val graphite = (prefix, graphiteUrl).mapN { (basePrefix, url) =>
+        val finalPrefix = dyno.fold(basePrefix)(d => s"$basePrefix.$d")
+        GraphiteConfig(finalPrefix, url, apiKey)
+      }
 
       MetricsConfig(graphite, frequency)
