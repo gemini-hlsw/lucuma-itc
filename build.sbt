@@ -32,7 +32,7 @@ val redis4CatsVersion           = "2.0.1"
 val refinedVersion              = "0.11.3"
 val slf4jVersion                = "2.0.17"
 val spireVersion                = "0.18.0"
-val dropwizardVersion           = "4.2.25"
+val dropwizardVersion           = "4.2.35"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
