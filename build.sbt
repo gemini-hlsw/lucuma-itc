@@ -80,15 +80,21 @@ lazy val sbtDockerPublishLocal =
     name = Some("Build and Publish Docker image")
   )
 
+val environments = List("dev", "staging", "production")
+
 lazy val herokuRelease =
   WorkflowStep.Run(
     List(
       "npm install -g heroku",
-      "heroku container:login",
-      "docker tag noirlab/gpp-itc registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc-dev' }}/web",
-      "docker push registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc-dev' }}/web",
-      "heroku container:release web -a ${{ vars.HEROKU_APP_NAME || 'itc-dev' }} -v"
-    ),
+      "heroku container:login"
+    ) ++
+      environments.flatMap(env =>
+        List(
+          s"docker tag noirlab/gpp-itc registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-${env}/web",
+          s"docker push registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-${env}/web"
+        )
+      ) :+
+      s"heroku container:release web -a $${{ vars.HEROKU_APP_NAME || 'itc' }}-${environments.head} -v",
     name = Some("Deploy and release app in Heroku")
   )
 

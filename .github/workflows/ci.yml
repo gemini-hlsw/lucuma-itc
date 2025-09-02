@@ -186,6 +186,10 @@ jobs:
         run: |
           npm install -g heroku
           heroku container:login
-          docker tag noirlab/gpp-itc registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc-dev' }}/web
-          docker push registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc-dev' }}/web
-          heroku container:release web -a ${{ vars.HEROKU_APP_NAME || 'itc-dev' }} -v
+          docker tag noirlab/gpp-itc registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web
+          docker push registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web
+          docker tag noirlab/gpp-itc registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc' }}-staging/web
+          docker push registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc' }}-staging/web
+          docker tag noirlab/gpp-itc registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc' }}-production/web
+          docker push registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc' }}-production/web
+          heroku container:release web -a ${{ vars.HEROKU_APP_NAME || 'itc' }}-dev -v
