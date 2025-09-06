@@ -103,7 +103,6 @@ lazy val herokuRelease =
 
 lazy val retrieveDockerImageSha = WorkflowStep.Run(
   List(
-    "# Get Docker image SHA",
     """echo "DOCKER_IMAGE_SHA=$(docker inspect registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web:${{ github.sha }} --format={{.Id}})" >> $GITHUB_ENV"""
   ),
   name = Some("Get Docker image SHA")
@@ -157,6 +156,7 @@ ThisBuild / githubWorkflowAddedJobs +=
     githubWorkflowJobSetup.value.toList :::
       sbtDockerPublishLocal ::
       herokuRelease ::
+      retrieveDockerImageSha ::
       recordDeploymentMetadata ::
       Nil,
     scalas = List(scalaVersion.value),

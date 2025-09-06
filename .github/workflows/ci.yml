@@ -197,10 +197,9 @@ jobs:
           heroku container:release web -a ${{ vars.HEROKU_APP_NAME || 'itc' }}-dev -v
 
       - name: Get Docker image SHA
-        run: echo "DOCKER_IMAGE_SHA=$(docker inspect registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web:${{ github.sha }} --format={{.Id}})" >> $GITHUB_ENV
+        run: 'echo "DOCKER_IMAGE_SHA=$(docker inspect registry.heroku.com/${{ vars.HEROKU_APP_NAME || ''itc'' }}-dev/web:${{ github.sha }} --format={{.Id}})" >> $GITHUB_ENV'
 
       - name: Record deployment gha
-        if: github.ref == 'refs/heads/main'
         run: |
           # Create a deployment record with commit SHA and image SHA for tracking
           echo "Recording deployment: ${{ github.sha }} to ${{ github.repository }}"
