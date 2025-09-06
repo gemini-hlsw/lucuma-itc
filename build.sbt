@@ -113,7 +113,7 @@ lazy val recordDeploymentMetadata = WorkflowStep.Run(
   List(
     "# Create a deployment record with commit SHA and image SHA for tracking",
     """echo "Recording deployment: ${{ github.sha }} to ${{ github.repository }}"""",
-    """curl -X POST https://api.github.com/repos/${{ github.repository }}/deployments -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github+json" -d '{ "ref": "${{ github.sha }}", "environment": "development", "description": "ITC deployment to dev", "auto_merge": false, "required_contexts": [], "payload": { "docker_image_sha": "${{ DOCKER_IMAGE_SHA }}" } }' """
+    """curl -X POST https://api.github.com/repos/${{ github.repository }}/deployments -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github+json" -d '{ "ref": "${{ github.sha }}", "environment": "development", "description": "ITC deployment to dev", "auto_merge": false, "required_contexts": [], "payload": { "docker_image_sha": "$DOCKER_IMAGE_SHA" } }' """
   ),
   name = Some("Record deployment gha")
 )
