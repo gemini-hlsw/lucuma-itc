@@ -90,13 +90,26 @@ lazy val herokuRelease =
     ) ++
       environments.flatMap(env =>
         List(
-          s"docker tag noirlab/gpp-itc registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-${env}/web",
-          s"docker push registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-${env}/web"
+          s"docker tag noirlab/gpp-itc registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-${env}/web:$${{ github.sha }}",
+          s"docker push registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-${env}/web:$${{ github.sha }}"
         )
-      ) :+
-      s"heroku container:release web -a $${{ vars.HEROKU_APP_NAME || 'itc' }}-${environments.head} -v",
+      ) ++ List( // Retag for easy release to dev
+        s"docker tag noirlab/gpp-itc registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web",
+        s"docker push registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web",
+        s"heroku container:release web -a $${{ vars.HEROKU_APP_NAME || 'itc' }}-dev -v"
+      ),
     name = Some("Deploy and release app in Heroku")
   )
+
+lazy val recordDeploymentMetadata = WorkflowStep.Run(
+  List(
+    "# Create a deployment record with commit SHA and image SHA for tracking",
+    """echo "Recording deployment: ${{ github.sha }} to ${{ github.repository }}"""",
+    """curl -X POST https://api.github.com/repos/${{ github.repository }}/deployments -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github+json" -d '{ "ref": "${{ github.sha }}", "environment": "development", "description": "ITC deployment to dev", "auto_merge": false, "required_contexts": [], "payload": { "docker_image_sha": "$(docker inspect registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web:${{ github.sha }} --format={{.Id}})" } }' """
+  ),
+  name = Some("Record deployment gha"),
+  cond = Some(mainCond)
+)
 
 val mainCond                 = "github.ref == 'refs/heads/main'"
 val geminiRepoCond           = "startsWith(github.repository, 'gemini')"
@@ -137,6 +150,7 @@ ThisBuild / githubWorkflowAddedJobs +=
     githubWorkflowJobSetup.value.toList :::
       sbtDockerPublishLocal ::
       herokuRelease ::
+      recordDeploymentMetadata ::
       Nil,
     scalas = List(scalaVersion.value),
     javas = githubWorkflowJavaVersions.value.toList.take(1),
