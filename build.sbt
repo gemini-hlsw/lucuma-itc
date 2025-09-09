@@ -201,9 +201,6 @@ lazy val service = project
       "-Dcats.effect.stackTracing=DISABLED",
       "-Dcats.effect.tracing.mode=none"
     ),
-    reStart / envVars     := Map(
-      "ODB_BASE_URL" -> "https://lucuma-postgres-odb-dev.herokuapp.com"
-    ),
     libraryDependencies ++= Seq(
       "org.typelevel"        %% "grackle-core"          % grackleVersion,
       "org.typelevel"        %% "grackle-generic"       % grackleVersion,

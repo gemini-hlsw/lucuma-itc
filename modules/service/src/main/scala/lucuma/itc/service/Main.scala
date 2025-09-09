@@ -62,7 +62,7 @@ import scala.util.Try
 object Main extends IOApp with ItcCacheOrRemote {
   val ServiceName     = "lucuma-itc"
   val DefaultCacheTTL = 6.hours
-  val CustomSedTTL    = 1.minute
+  val CustomSedTTL    = 10.minute
 
   override protected def blockedThreadDetectionEnabled = true
 
@@ -84,22 +84,14 @@ object Main extends IOApp with ItcCacheOrRemote {
             | port                 : ${cfg.port}
             | data checksum        : ${BuildInfo.ocslibHash}
             | version (git commit) : ${BuildInfo.gitHeadCommit}
+            | odb address          : ${cfg.odbBaseUrl}
             | cores                : ${runtime.availableProcessors()}
             | total memory         : ${runtime.totalMemory() / 1024 / 1024} MB
             | max memory           : ${runtime.maxMemory() / 1024 / 1024} MB
             | java version         : ${System.getProperty("java.version")}
             |""".stripMargin
 
-    val envVars = System.getenv().asScala.toList.sorted
-    val envInfo = {
-      val envLines = envVars.map { case (key, value) => s"| $key = $value" }
-      s"""|
-            | Environment Variables:
-            |${envLines.mkString("\n")}
-            |""".stripMargin
-    }
-
-    (banner + envInfo).linesIterator.toList.traverse_(Logger[F].info(_))
+    banner.linesIterator.toList.traverse_(Logger[F].info(_))
 
   /** A middleware that adds CORS headers. In production the origin must match the cookie domain. */
   def cors(env: ExecutionEnvironment, domain: Option[String]): CORSPolicy =
