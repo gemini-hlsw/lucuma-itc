@@ -9,14 +9,9 @@ import io.circe.Encoder
 import io.circe.Json
 import io.circe.syntax.*
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.core.math.Wavelength
-import lucuma.core.util.NewType
-
-object TotalSN extends NewType[SignalToNoise]
-type TotalSN = TotalSN.Type
-
-object SingleSN extends NewType[SignalToNoise]
-type SingleSN = SingleSN.Type
 
 case class SignalToNoiseAt(
   wavelength: Wavelength,

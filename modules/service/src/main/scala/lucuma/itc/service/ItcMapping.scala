@@ -16,6 +16,8 @@ import grackle.circe.CirceMapping
 import io.circe.syntax.*
 import lucuma.core.enums.ExecutionEnvironment as _
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.core.util.TimeSpan
 import lucuma.itc.*
 import lucuma.itc.cache.BinaryEffectfulCache
