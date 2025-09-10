@@ -12,6 +12,8 @@ import eu.timepit.refined.types.numeric.PosInt
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.core.math.Wavelength
 import lucuma.core.refined.auto.*
 import lucuma.core.util.TimeSpan

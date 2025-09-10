@@ -16,6 +16,8 @@ import lucuma.core.math.Angle
 import lucuma.core.math.BrightnessUnits.*
 import lucuma.core.math.Redshift
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.syntax.*
 import lucuma.core.model.SourceProfile
@@ -28,8 +30,6 @@ import lucuma.itc.ItcGraph
 import lucuma.itc.ItcGraphGroup
 import lucuma.itc.ItcSeries
 import lucuma.itc.SeriesDataType
-import lucuma.itc.SingleSN
-import lucuma.itc.TotalSN
 import lucuma.itc.legacy.syntax.all.*
 import lucuma.itc.service.ItcObservingConditions
 import lucuma.itc.service.ObservingMode

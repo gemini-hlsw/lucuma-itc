@@ -6,10 +6,10 @@ package lucuma.itc.legacy
 import cats.data.NonEmptyChain
 import cats.syntax.all.*
 import eu.timepit.refined.types.numeric.NonNegInt
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.core.math.Wavelength
 import lucuma.itc.ItcGraphGroup
-import lucuma.itc.SingleSN
-import lucuma.itc.TotalSN
 
 case class GraphsRemoteResult(
   ccds:   NonEmptyChain[ItcRemoteCcd],
