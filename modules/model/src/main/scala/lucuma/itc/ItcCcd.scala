@@ -11,6 +11,8 @@ import io.circe.Json
 import io.circe.generic.semiauto.*
 import io.circe.syntax.*
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.core.math.Wavelength
 
 case class ItcCcd(

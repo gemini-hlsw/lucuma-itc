@@ -11,6 +11,8 @@ import lucuma.core.data.Zipper
 import lucuma.core.data.ZipperCodec.given
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.Error
@@ -21,10 +23,8 @@ import lucuma.itc.ItcGraph
 import lucuma.itc.ItcSeries
 import lucuma.itc.ItcWarning
 import lucuma.itc.SignalToNoiseAt
-import lucuma.itc.SingleSN
 import lucuma.itc.TargetIntegrationTime
 import lucuma.itc.TargetIntegrationTimeOutcome
-import lucuma.itc.TotalSN
 import lucuma.itc.client.*
 
 // Decoders for the client don't need to be as generic as the ones for the server.

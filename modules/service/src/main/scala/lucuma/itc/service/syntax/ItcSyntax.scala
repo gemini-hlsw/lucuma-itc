@@ -7,13 +7,13 @@ import cats.data.*
 import grackle.Problem
 import grackle.Query.Environment
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.itc.ItcCcd
 import lucuma.itc.ItcGraph
 import lucuma.itc.ItcGraphGroup
 import lucuma.itc.ItcSeries
 import lucuma.itc.SignificantFigures
-import lucuma.itc.SingleSN
-import lucuma.itc.TotalSN
 import lucuma.itc.math.roundToSignificantFigures
 import monocle.Focus
 import monocle.std.these.*

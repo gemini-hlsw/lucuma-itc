@@ -10,6 +10,8 @@ import cats.syntax.all.*
 import io.circe.Decoder
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.core.util.NewType
 import lucuma.itc.*
 import lucuma.itc.client.json.decoders.given
