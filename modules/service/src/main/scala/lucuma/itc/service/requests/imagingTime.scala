@@ -26,7 +26,7 @@ case class ImagingTimeParameters(
 case class TargetImagingTimeRequest(
   target:     TargetData,
   parameters: ImagingTimeParameters
-) derives Hash:
+) extends ServiceRequest derives Hash:
   export parameters.*
 
 case class AsterismImagingTimeRequest(

@@ -7,7 +7,11 @@ import boopickle.DefaultBasic.*
 import buildinfo.BuildInfo
 import cats.*
 import cats.syntax.all.*
+import lucuma.core.math.Wavelength
 import lucuma.core.model.ExposureTimeMode
+import lucuma.core.model.SourceProfile
+import lucuma.core.model.SpectralDefinition.BandNormalized
+import lucuma.core.model.UnnormalizedSED
 import lucuma.itc.*
 import lucuma.itc.cache.BinaryEffectfulCache
 import lucuma.itc.input.customSed.CustomSed
@@ -22,14 +26,56 @@ import scala.concurrent.duration.*
  * in the cache
  */
 trait ItcCacheOrRemote extends Version:
-  val VersionKey: String                  = "itc:version"
+  val VersionKey: String = "itc:version"
+
   // Time to live for entries. The idea of having such a long TTL is that eviction is based on LRU
   // and cache size restriction. As such, Redis should be configured to use the `volatile-lru`
   // eviction policy. This will work better than `allkeys-lru` since it will prevent the version
   // key from being evicted, which will cause the cache to flush.
   private val TTL: Option[FiniteDuration] = FiniteDuration(365, DAYS).some
 
-  private def requestGraphs[F[_]](
+  private def customSedCotent(targetData: TargetData): Option[String] =
+    def describeSed(sedOpt: Option[UnnormalizedSED]): Option[String] =
+      sedOpt.collect:
+        case UnnormalizedSED.UserDefined(fluxDensities) =>
+          val header = s"UserDefined SED with ${fluxDensities.size} flux density points"
+          val lines  = fluxDensities.toNel.map: (wv, f) =>
+            f"${Wavelength.nanometers.reverseGet(wv)}%.1f $f%.3f"
+          (header :: lines).toList.mkString("\n")
+
+        case UnnormalizedSED.UserDefinedAttachment(id) =>
+          s"UserDefinedAttachment SED with attachment ID: $id"
+
+    val profile = targetData.sourceProfile
+
+    val integratedSed = SourceProfile.integratedBandNormalizedSpectralDefinition
+      .andThen(BandNormalized.sed)
+      .getOption(profile)
+      .map(describeSed)
+      .flatten
+    val surfaceSed    = SourceProfile.surfaceBandNormalizedSpectralDefinition
+      .andThen(BandNormalized.sed)
+      .getOption(profile)
+      .map(describeSed)
+      .flatten
+
+    integratedSed.orElse(surfaceSed)
+
+  private def logSedOnFailure[F[_]: MonadThrow: Logger](
+    request: ServiceRequest
+  ): PartialFunction[Throwable, F[Unit]] =
+    case error =>
+      customSedCotent(request.target)
+        .map: msg =>
+          Logger[F].error(s"""|
+            |ITC Calculation Failed for Custom SED:
+            |Request: ${request}
+            |Custom SED Data:
+            |$msg
+            |Error: ${error.getMessage}""".stripMargin)
+        .getOrElse(Applicative[F].unit)
+
+  private def requestGraphs[F[_]: MonadThrow: Logger](
     itc: Itc[F]
   )(request: TargetGraphRequest): F[TargetGraphsCalcResult] =
     itc
@@ -41,11 +87,13 @@ trait ItcCacheOrRemote extends Version:
         request.expTime,
         request.exp
       )
+      .onError:
+        logSedOnFailure(request)
 
   /**
    * Request a graph
    */
-  def graphsFromCacheOrRemote[F[_]: MonadThrow: Parallel: CustomSed.Resolver](
+  def graphsFromCacheOrRemote[F[_]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
     request: TargetGraphRequest
   )(
     itc:     Itc[F],
@@ -56,7 +104,7 @@ trait ItcCacheOrRemote extends Version:
       .flatMap: r =>
         cache.getOrInvokeBinary(r, requestGraphs(itc)(r), TTL, "itc:graph:spec")
 
-  private def requestSpecSNCalc[F[_]](itc: Itc[F])(
+  private def requestSpecSNCalc[F[_]: MonadThrow: Logger](itc: Itc[F])(
     calcRequest: TargetSpectroscopyTimeRequest,
     mode:        ExposureTimeMode.TimeAndCountMode
   ): F[TargetIntegrationTime] =
@@ -69,8 +117,10 @@ trait ItcCacheOrRemote extends Version:
         mode.time,
         mode.count
       )
+      .onError:
+        logSedOnFailure(calcRequest)
 
-  private def requestSpecTimeCalc[F[_]](itc: Itc[F])(
+  private def requestSpecTimeCalc[F[_]: MonadThrow: Logger](itc: Itc[F])(
     calcRequest: TargetSpectroscopyTimeRequest,
     mode:        ExposureTimeMode.SignalToNoiseMode
   ): F[TargetIntegrationTime] =
@@ -82,13 +132,15 @@ trait ItcCacheOrRemote extends Version:
         calcRequest.constraints,
         mode.value
       )
+      .onError:
+        logSedOnFailure(calcRequest)
 
   /**
    * Request exposure time calculation for spectroscopy
    */
   def spectroscopyFromCacheOrRemote[F[
     _
-  ]: MonadThrow: Parallel: CustomSed.Resolver](
+  ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
     calcRequest: TargetSpectroscopyTimeRequest
   )(
     itc:         Itc[F],
@@ -103,7 +155,7 @@ trait ItcCacheOrRemote extends Version:
           case m @ ExposureTimeMode.TimeAndCountMode(_, _, _) =>
             cache.getOrInvokeBinary(r, requestSpecSNCalc(itc)(r, m), TTL, "itc:calc:spec:tc")
 
-  private def requestImgTimeCalc[F[_]](itc: Itc[F])(
+  private def requestImgTimeCalc[F[_]: MonadThrow: Logger](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest,
     mode:        ExposureTimeMode.SignalToNoiseMode
   ): F[TargetIntegrationTime] =
@@ -115,8 +167,10 @@ trait ItcCacheOrRemote extends Version:
         calcRequest.constraints,
         mode.value
       )
+      .onError:
+        logSedOnFailure(calcRequest)
 
-  private def requestImgSNCalc[F[_]](itc: Itc[F])(
+  private def requestImgSNCalc[F[_]: MonadThrow: Logger](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest,
     mode:        ExposureTimeMode.TimeAndCountMode
   ): F[TargetIntegrationTime] =
@@ -129,12 +183,14 @@ trait ItcCacheOrRemote extends Version:
         mode.time,
         mode.count
       )
+      .onError:
+        logSedOnFailure(calcRequest)
 
   /**
    * Request exposure time calculation for imaging
    */
   def imagingFromCacheOrRemote[
-    F[_]: MonadThrow: Parallel: CustomSed.Resolver
+    F[_]: MonadThrow: Parallel: Logger: CustomSed.Resolver
   ](
     calcRequest: TargetImagingTimeRequest
   )(

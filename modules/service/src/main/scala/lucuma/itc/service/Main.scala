@@ -55,14 +55,14 @@ import java.io.FileFilter
 import java.net.URL
 import java.net.URLClassLoader
 import scala.concurrent.duration.*
-import scala.jdk.CollectionConverters.*
 import scala.util.Try
 
 // #server
 object Main extends IOApp with ItcCacheOrRemote {
   val ServiceName     = "lucuma-itc"
   val DefaultCacheTTL = 6.hours
-  val CustomSedTTL    = 10.minute
+  // Seems a bit optimistic
+  val CustomSedTTL    = 1.minute
 
   override protected def blockedThreadDetectionEnabled = true
 

@@ -33,7 +33,7 @@ case class GraphParameters(
 case class TargetGraphRequest(
   target:     TargetData,
   parameters: GraphParameters
-) derives Hash:
+) extends ServiceRequest derives Hash:
   export parameters.*
 
 case class AsterismGraphRequest(
