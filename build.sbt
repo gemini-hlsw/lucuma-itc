@@ -38,7 +38,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.7.3"
 ThisBuild / crossScalaVersions  := Seq("3.7.3")
-ThisBuild / tlBaseVersion       := "0.45"
+ThisBuild / tlBaseVersion       := "0.46"
 ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
 
@@ -200,9 +200,6 @@ lazy val service = project
     reStart / javaOptions := Seq(
       "-Dcats.effect.stackTracing=DISABLED",
       "-Dcats.effect.tracing.mode=none"
-    ),
-    reStart / envVars     := Map(
-      "ODB_BASE_URL" -> "https://lucuma-postgres-odb-dev.herokuapp.com"
     ),
     libraryDependencies ++= Seq(
       "org.typelevel"        %% "grackle-core"          % grackleVersion,

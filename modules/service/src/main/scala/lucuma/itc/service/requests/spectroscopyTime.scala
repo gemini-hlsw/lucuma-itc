@@ -29,7 +29,7 @@ case class SpectroscopyTimeParameters(
 case class TargetSpectroscopyTimeRequest(
   target:     TargetData,
   parameters: SpectroscopyTimeParameters
-) derives Hash:
+) extends ServiceRequest derives Hash:
   export parameters.*
 
 case class AsterismSpectroscopyTimeRequest(

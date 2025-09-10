@@ -10,6 +10,9 @@ import lucuma.core.model.SourceProfile
 import lucuma.itc.input.TargetDataInput
 import lucuma.itc.service.TargetData
 
+trait ServiceRequest:
+  val target: TargetData
+
 extension (asterism: List[TargetDataInput])
   def targetInputsToData: Result[NonEmptyChain[TargetData]] =
     for {
