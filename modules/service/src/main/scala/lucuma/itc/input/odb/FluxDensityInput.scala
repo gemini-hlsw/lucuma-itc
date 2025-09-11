@@ -6,24 +6,16 @@ package input
 package sourceprofile
 
 import cats.syntax.all.*
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import grackle.Result
 import lucuma.core.math.Wavelength
 import lucuma.odb.graphql.binding.*
 
-object FluxDensityInput {
+object FluxDensityInput:
 
-  val Binding: Matcher[(Wavelength, PosBigDecimal)] =
-    ObjectFieldsBinding.rmap {
+  val Binding: Matcher[(Wavelength, BigDecimal)] =
+    ObjectFieldsBinding.rmap:
       case List(
             WavelengthInput.Binding("wavelength", rWavelength),
             BigDecimalBinding("density", rDensity)
           ) =>
-        (rWavelength, rDensity).parTupled.flatMap { case (wavelength, density) =>
-          PosBigDecimal.from(density) match {
-            case Left(err) => Result.failure(err)
-            case Right(v)  => Result((wavelength, v))
-          }
-        }
-    }
-}
+        (rWavelength, rDensity).parTupled

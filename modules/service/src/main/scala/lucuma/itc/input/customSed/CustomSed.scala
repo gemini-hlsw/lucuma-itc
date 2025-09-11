@@ -8,7 +8,6 @@ import cats.Monad
 import cats.Parallel
 import cats.data.NonEmptyMap
 import cats.syntax.all.*
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.math.Wavelength
 import lucuma.core.model.Attachment
 import lucuma.core.model.SourceProfile
@@ -21,7 +20,7 @@ import lucuma.itc.service.requests.TargetSpectroscopyTimeRequest
 
 object CustomSed:
   trait Resolver[F[_]]:
-    def resolve(id: Attachment.Id): F[NonEmptyMap[Wavelength, PosBigDecimal]]
+    def resolve(id: Attachment.Id): F[NonEmptyMap[Wavelength, BigDecimal]]
 
   object Resolver:
     def apply[F[_]](using r: Resolver[F]): Resolver[F] = r
