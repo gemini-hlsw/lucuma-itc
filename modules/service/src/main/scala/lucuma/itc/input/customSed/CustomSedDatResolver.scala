@@ -7,7 +7,6 @@ import cats.Order.given
 import cats.data.NonEmptyMap
 import cats.effect.Concurrent
 import cats.syntax.all.*
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.math.Wavelength
 import lucuma.core.model.Attachment
 
@@ -28,24 +27,23 @@ trait CustomSedDatResolver[F[_]: Concurrent] extends CustomSed.Resolver[F]:
   private val EmptyLine  = "\\s*"
   private val Comment    = "\\s*#.*"
 
-  private def parseLine(line: String): Either[String, (Wavelength, PosBigDecimal)] =
+  private def parseLine(line: String): Either[String, (Wavelength, BigDecimal)] =
     line.split(Delimiters).take(2) match
       case Array(wavelength, density) =>
-        val w: Either[String, Wavelength]    =
+        val w: Either[String, Wavelength] =
           wavelength.toDoubleOption
             .flatMap:
               Wavelength.decimalNanometers.getOption(_)
             .toRight(s"Invalid wavelength in custom SED: [$wavelength].")
-        val d: Either[String, PosBigDecimal] =
+        val d: Either[String, BigDecimal] =
           density.toDoubleOption
-            .flatMap:
-              PosBigDecimal.from(_).toOption
+            .map(BigDecimal(_))
             .toRight(s"Invalid density in custom SED: [$density].")
         (w, d).parTupled
       case _                          =>
         Left(s"Invalid line in custom SED: [$line].")
 
-  def resolve(id: Attachment.Id): F[NonEmptyMap[Wavelength, PosBigDecimal]] =
+  def resolve(id: Attachment.Id): F[NonEmptyMap[Wavelength, BigDecimal]] =
     for
       lines <- datLines(id)
       pairs <-

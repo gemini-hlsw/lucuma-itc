@@ -295,7 +295,7 @@ private[legacy] object codecs:
               "spectrum" -> Json.fromString:
                 fluxDensities.toNel.toList
                   .map: (w, f) =>
-                    s"${w.toNanometers} ${f.value}"
+                    s"${w.toNanometers} $f"
                   .mkString("\n")
             )
           )
