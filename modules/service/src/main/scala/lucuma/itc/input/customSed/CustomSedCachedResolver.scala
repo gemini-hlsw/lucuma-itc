@@ -7,7 +7,6 @@ import boopickle.DefaultBasic.*
 import cats.Order.given
 import cats.data.NonEmptyMap
 import cats.syntax.all.*
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import lucuma.core.math.Wavelength
 import lucuma.core.model.Attachment
 import lucuma.itc.cache.BinaryEffectfulCache
@@ -21,5 +20,5 @@ class CustomSedCachedResolver[F[_]](
   cache:   BinaryEffectfulCache[F],
   ttl:     FiniteDuration
 ) extends CustomSed.Resolver[F]:
-  def resolve(id: Attachment.Id): F[NonEmptyMap[Wavelength, PosBigDecimal]] =
+  def resolve(id: Attachment.Id): F[NonEmptyMap[Wavelength, BigDecimal]] =
     cache.getOrInvokeBinary(id, wrapped.resolve(id), ttl.some, "itc:customSed:")

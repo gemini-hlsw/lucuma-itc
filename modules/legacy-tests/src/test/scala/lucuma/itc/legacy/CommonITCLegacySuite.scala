@@ -8,7 +8,6 @@ import cats.implicits.*
 import coulomb.*
 import coulomb.syntax.*
 import coulomb.units.si.*
-import eu.timepit.refined.types.numeric.PosBigDecimal
 import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax.*
 import lucuma.core.enums.*
@@ -476,10 +475,10 @@ trait CommonITCLegacySuite extends FunSuite:
   def testUserDefinedSED(name: String, baseParams: ItcParameters): Unit =
     test(s"$name - user defined SED".tag(LegacyITCTest)):
       val userDefinedFluxDensities = NonEmptyMap.of(
-        Wavelength.decimalNanometers.getOption(300).get -> PosBigDecimal.unsafeFrom(0.5),
-        Wavelength.decimalNanometers.getOption(500).get -> PosBigDecimal.unsafeFrom(1.0),
-        Wavelength.decimalNanometers.getOption(600).get -> PosBigDecimal.unsafeFrom(2.0),
-        Wavelength.decimalNanometers.getOption(700).get -> PosBigDecimal.unsafeFrom(3.0)
+        Wavelength.decimalNanometers.getOption(300).get -> BigDecimal(0.5),
+        Wavelength.decimalNanometers.getOption(500).get -> BigDecimal(1.0),
+        Wavelength.decimalNanometers.getOption(600).get -> BigDecimal(0.0),
+        Wavelength.decimalNanometers.getOption(700).get -> BigDecimal(-0.1)
       )
 
       val result = localItc
