@@ -477,8 +477,8 @@ trait CommonITCLegacySuite extends FunSuite:
       val userDefinedFluxDensities = NonEmptyMap.of(
         Wavelength.decimalNanometers.getOption(300).get -> BigDecimal(0.5),
         Wavelength.decimalNanometers.getOption(500).get -> BigDecimal(1.0),
-        Wavelength.decimalNanometers.getOption(600).get -> BigDecimal(2.0),
-        Wavelength.decimalNanometers.getOption(700).get -> BigDecimal(3.0)
+        Wavelength.decimalNanometers.getOption(600).get -> BigDecimal(0.0),
+        Wavelength.decimalNanometers.getOption(700).get -> BigDecimal(-0.1)
       )
 
       val result = localItc
