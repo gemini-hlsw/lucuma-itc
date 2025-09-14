@@ -20,8 +20,7 @@ val jmhVersion                  = "1.37"
 val keySemaphoreVersion         = "0.3.0-M1"
 val kittensVersion              = "3.5.0"
 val log4catsVersion             = "2.7.1"
-val lucumaCoreVersion           = "0.143.3"
-val lucumaRefinedVersion        = "0.1.4"
+val lucumaCoreVersion           = "0.144.0"
 val monocleVersion              = "3.3.0"
 val munitVersion                = "1.1.1"
 val munitCatsEffectVersion      = "2.1.0"
@@ -280,7 +279,6 @@ lazy val client = crossProject(JVMPlatform, JSPlatform)
     name := "lucuma-itc-client",
     libraryDependencies ++= Seq(
       "edu.gemini"    %%% "lucuma-core"       % lucumaCoreVersion,
-      "edu.gemini"    %%% "lucuma-refined"    % lucumaRefinedVersion,
       "org.typelevel" %%% "cats-core"         % catsVersion,
       "org.typelevel" %%% "cats-effect"       % catsEffectVersion,
       "org.http4s"    %%% "http4s-circe"      % http4sVersion,

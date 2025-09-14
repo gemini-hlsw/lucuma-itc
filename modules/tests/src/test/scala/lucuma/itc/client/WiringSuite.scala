@@ -55,6 +55,7 @@ import lucuma.core.model.SpectralDefinition.BandNormalized
 import lucuma.core.model.SpectralDefinition.EmissionLines
 import lucuma.core.model.UnnormalizedSED.Galaxy
 import lucuma.core.model.sequence.gmos.GmosCcdMode
+import lucuma.core.refined.auto.*
 import lucuma.core.util.*
 import lucuma.itc.AsterismIntegrationTimeOutcomes
 import lucuma.itc.CloudExtinctionInput
@@ -71,7 +72,6 @@ import lucuma.itc.TargetIntegrationTime
 import lucuma.itc.TargetIntegrationTimeOutcome
 import lucuma.itc.TotalSN
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
-import lucuma.refined.*
 
 import java.time.Instant
 import scala.collection.immutable.SortedMap

@@ -5,7 +5,7 @@ package lucuma.itc.legacy
 
 import cats.data.NonEmptyMap
 import cats.implicits.*
-import coulomb.*
+import coulomb.Quantity
 import coulomb.syntax.*
 import coulomb.units.si.*
 import eu.timepit.refined.types.numeric.PosInt

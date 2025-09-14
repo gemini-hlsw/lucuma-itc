@@ -4,7 +4,7 @@
 package lucuma.itc.service
 
 import cats.data.NonEmptyList
-import coulomb.*
+import coulomb.Quantity
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.numeric.PosLong
