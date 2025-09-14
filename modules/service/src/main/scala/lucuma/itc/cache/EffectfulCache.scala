@@ -26,6 +26,8 @@ trait EffectfulCache[F[_]: MonadCancelThrow: Trace: Logger, K, V]:
 
   protected def write(key: K, value: V, ttl: Option[FiniteDuration]): F[Unit]
 
+  protected def delete(key: K): F[Unit]
+
   def flush: F[Unit]
 
   def getOrInvoke(key: K, effect: F[V], ttl: Option[FiniteDuration]): F[V] =

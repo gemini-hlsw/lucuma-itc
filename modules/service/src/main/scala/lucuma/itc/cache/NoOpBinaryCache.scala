@@ -33,6 +33,9 @@ object NoOpBinaryCache:
           ): F[Unit] =
             Applicative[F].unit
 
+          protected def delete(key: Array[Byte]): F[Unit] =
+            Applicative[F].unit
+
           def flush: F[Unit] =
             Applicative[F].unit
         }

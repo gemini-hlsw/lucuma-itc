@@ -13,7 +13,7 @@ import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.*
 
-trait RedisEffectfulCache[F[_]](
+trait RedisEffectfulCache[F[_]: Async](
   redis:                      StringCommands[F, Array[Byte], Array[Byte]] & Flush[F, Array[Byte]],
   protected val keySemaphore: KeySemaphore[F, Array[Byte]]
 ) extends BinaryEffectfulCache[F]:
@@ -27,6 +27,9 @@ trait RedisEffectfulCache[F[_]](
     ttl:   Option[FiniteDuration]
   ): F[Unit] =
     ttl.fold(redis.set(key, value))(redis.setEx(key, value, _))
+
+  override protected def delete(key: Array[Byte]): F[Unit] =
+    redis.unsafe(_.del(key)).void
 
   override def flush: F[Unit] = redis.flushAll
 
