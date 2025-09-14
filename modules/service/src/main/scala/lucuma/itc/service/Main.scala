@@ -161,7 +161,7 @@ object Main extends IOApp with ItcCacheOrRemote {
       _                          <- Resource.eval(checkVersionToPurge[F](cache))
       customSedResolver          <- CustomSedOdbAttachmentResolver[F](cfg.odbBaseUrl, cfg.odbServiceToken)
       given CustomSed.Resolver[F] = CustomSedCachedResolver(customSedResolver, cache, CustomSedTTL)
-      mapping                    <- Resource.eval(ItcMapping[F](cfg.environment, cache, itc))
+      mapping                    <- Resource.eval(ItcMapping[F](cfg.environment, cache, itc, cfg))
     yield wsb =>
       // Routes for the ITC GraphQL service
       NatchezMiddleware.server:

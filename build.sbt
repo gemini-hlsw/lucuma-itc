@@ -181,10 +181,14 @@ lazy val model = crossProject(JVMPlatform, JSPlatform)
     )
   )
 
-lazy val ocslibHash = taskKey[String]("hash of ocslib")
+lazy val ocslibHash = taskKey[String]("hash of ocslib and graphql schema")
 ThisBuild / ocslibHash / fileInputs += (service / baseDirectory).value.toGlob / "ocslib" / "*.jar"
+ThisBuild / ocslibHash / fileInputs += (service / Compile / resourceDirectory).value.toGlob / "graphql" / "*.graphql"
 ThisBuild / ocslibHash := {
-  val hashes = ocslibHash.inputFiles.sorted.map(_.toFile).map(Hash(_))
+  val jarFiles = ocslibHash.inputFiles.filter(_.toString.endsWith(".jar")).sorted.map(_.toFile)
+  val schemaFiles = ocslibHash.inputFiles.filter(_.toString.endsWith(".graphql")).sorted.map(_.toFile)
+  val allFiles = jarFiles ++ schemaFiles
+  val hashes = allFiles.map(Hash(_))
   Hash.toHex(Hash(hashes.toArray.flatten))
 }
 

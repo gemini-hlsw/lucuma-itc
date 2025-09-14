@@ -15,6 +15,7 @@ import lucuma.core.model.UnnormalizedSED
 import lucuma.itc.*
 import lucuma.itc.cache.BinaryEffectfulCache
 import lucuma.itc.input.customSed.CustomSed
+import lucuma.itc.service.config.Config
 import lucuma.itc.service.redis.given
 import lucuma.itc.service.requests.*
 import org.typelevel.log4cats.Logger
@@ -26,13 +27,20 @@ import scala.concurrent.duration.*
  * in the cache
  */
 trait ItcCacheOrRemote extends Version:
-  val VersionKey: String = "itc:version"
+  // Manual version to manually force a flush
+  private val ManualCacheVersion = 1
+  private val CacheRootPrefix = "itc"
+  val VersionKeyRoot: String = "version"
 
-  // Time to live for entries. The idea of having such a long TTL is that eviction is based on LRU
-  // and cache size restriction. As such, Redis should be configured to use the `volatile-lru`
-  // eviction policy. This will work better than `allkeys-lru` since it will prevent the version
-  // key from being evicted, which will cause the cache to flush.
-  private val TTL: Option[FiniteDuration] = FiniteDuration(365, DAYS).some
+  private val versionKey: String =
+    s"$ManualCacheVersion-${BuildInfo.ocslibHash}"
+
+  // Time to live for entries. The idea is that eviction is based on LRU and cache size restriction.
+  // Redis should be configured to use the `volatile-lru` eviction policy. This will work better
+  // than `allkeys-lru` since it will prevent the version key from being evicted, which will
+  // cause the cache to flush.
+  private def TTL(config: Config): Option[FiniteDuration] =
+    FiniteDuration(config.cacheTtlDays, DAYS).some
 
   private def customSedCotent(targetData: TargetData): Option[String] =
     def describeSed(sedOpt: Option[UnnormalizedSED]): Option[String] =
@@ -97,12 +105,13 @@ trait ItcCacheOrRemote extends Version:
     request: TargetGraphRequest
   )(
     itc:     Itc[F],
-    cache:   BinaryEffectfulCache[F]
+    cache:   BinaryEffectfulCache[F],
+    config:  Config
   ): F[TargetGraphsCalcResult] =
     CustomSed // We must resolve CustomSed before caching.
       .resolveTargetGraphRequest(request)
       .flatMap: r =>
-        cache.getOrInvokeBinary(r, requestGraphs(itc)(r), TTL, "itc:graph:spec")
+        cache.getOrInvokeBinary(r, requestGraphs(itc)(r), TTL(config), s"$CacheRootPrefix:graph:spec")
 
   private def requestSpecSNCalc[F[_]: MonadThrow: Logger](itc: Itc[F])(
     calcRequest: TargetSpectroscopyTimeRequest,
@@ -144,16 +153,25 @@ trait ItcCacheOrRemote extends Version:
     calcRequest: TargetSpectroscopyTimeRequest
   )(
     itc:         Itc[F],
-    cache:       BinaryEffectfulCache[F]
+    cache:       BinaryEffectfulCache[F],
+    config:      Config
   ): F[TargetIntegrationTime] =
     CustomSed // We must resolve CustomSed before caching.
       .resolveTargetSpectroscopyTimeRequest(calcRequest)
       .flatMap: r =>
         r.exposureTimeMode match
           case m @ ExposureTimeMode.SignalToNoiseMode(_, _)   =>
-            cache.getOrInvokeBinary(r, requestSpecTimeCalc(itc)(r, m), TTL, "itc:calc:spec:sn")
+            cache.getOrInvokeBinary(r,
+                                    requestSpecTimeCalc(itc)(r, m),
+                                    TTL(config),
+                                    s"$CacheRootPrefix:calc:spec:sn"
+            )
           case m @ ExposureTimeMode.TimeAndCountMode(_, _, _) =>
-            cache.getOrInvokeBinary(r, requestSpecSNCalc(itc)(r, m), TTL, "itc:calc:spec:tc")
+            cache.getOrInvokeBinary(r,
+                                    requestSpecSNCalc(itc)(r, m),
+                                    TTL(config),
+                                    s"$CacheRootPrefix:calc:spec:tc"
+            )
 
   private def requestImgTimeCalc[F[_]: MonadThrow: Logger](itc: Itc[F])(
     calcRequest: TargetImagingTimeRequest,
@@ -195,16 +213,21 @@ trait ItcCacheOrRemote extends Version:
     calcRequest: TargetImagingTimeRequest
   )(
     itc:         Itc[F],
-    cache:       BinaryEffectfulCache[F]
+    cache:       BinaryEffectfulCache[F],
+    config:      Config
   ): F[TargetIntegrationTime] =
     CustomSed // We must resolve CustomSed before caching.
       .resolveTargetImagingTimeRequest(calcRequest)
       .flatMap: r =>
         r.exposureTimeMode match
           case m @ ExposureTimeMode.SignalToNoiseMode(_, _)   =>
-            cache.getOrInvokeBinary(r, requestImgTimeCalc(itc)(r, m), TTL, "itc:calc:img:sn")
+            cache.getOrInvokeBinary(r,
+                                    requestImgTimeCalc(itc)(r, m),
+                                    TTL(config),
+                                    s"$CacheRootPrefix:calc:img:sn"
+            )
           case m @ ExposureTimeMode.TimeAndCountMode(_, _, _) =>
-            cache.getOrInvokeBinary(r, requestImgSNCalc(itc)(r, m), TTL, "itc:calc:img:tc")
+            cache.getOrInvokeBinary(r, requestImgSNCalc(itc)(r, m), TTL(config), s"$CacheRootPrefix:calc:img:tc")
 
   /**
    * This method will get the version from the remote itc and compare it with the one on the cache.
@@ -217,15 +240,14 @@ trait ItcCacheOrRemote extends Version:
     val L      = Logger[F]
     val result = for
       _              <- L.info("Check for stale cache")
-      _              <- L.info(s"Current itc data checksum ${BuildInfo.ocslibHash}")
-      versionOnCache <- cache.readBinary[String, String](VersionKey)
-      _              <- L.info(s"itc data checksum on cache $versionOnCache")
+      versionOnCache <- cache.readBinary[String, String](VersionKeyRoot, s"$CacheRootPrefix:version")
+      _              <- L.info(s"itc data checksum on cache ${versionOnCache.orEmpty}, version $versionKey")
       _              <-
         (L.info( // if the version changes or is missing, flush cache
-          s"Flush cache on missing or changed ITC library version, set to [${BuildInfo.ocslibHash}]"
+          s"Flush cache on missing or changed ITC version key, set to [$versionKey]"
         ) *> cache.flush)
-          .whenA(versionOnCache.forall(_ =!= BuildInfo.ocslibHash))
-      _              <- cache.writeBinary(VersionKey, BuildInfo.ocslibHash, none)
+          .whenA(versionOnCache.forall(_ =!= versionKey))
+      _              <- cache.writeBinary(VersionKeyRoot, versionKey, none, s"$CacheRootPrefix:version")
     yield ()
     result.handleErrorWith(e => L.error(e)("Error doing version check to purge"))
   }
