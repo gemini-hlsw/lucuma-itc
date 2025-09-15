@@ -8,6 +8,8 @@ import cats.data.NonEmptyChain
 import cats.syntax.all.*
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.core.math.Wavelength
 import lucuma.itc.legacy.ItcRemoteCcd
 

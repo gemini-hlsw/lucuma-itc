@@ -11,6 +11,8 @@ import eu.timepit.refined.*
 import eu.timepit.refined.api.*
 import lucuma.core.data.Zipper
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.core.math.Wavelength
 import lucuma.core.util.Enumerated
 import lucuma.core.util.TimeSpan

@@ -16,6 +16,8 @@ import io.circe.syntax.*
 import lucuma.core.data.Zipper
 import lucuma.core.enums.Band
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.core.math.Wavelength
 import lucuma.core.util.TimeSpan
 import lucuma.itc.CalculationError
@@ -23,10 +25,8 @@ import lucuma.itc.IntegrationTime
 import lucuma.itc.ItcCcd
 import lucuma.itc.Millisecond
 import lucuma.itc.SignalToNoiseAt
-import lucuma.itc.SingleSN
 import lucuma.itc.TargetGraphsCalcResult
 import lucuma.itc.TargetIntegrationTime
-import lucuma.itc.TotalSN
 import lucuma.itc.legacy.codecs.given
 import lucuma.itc.service.Itc
 import lucuma.itc.service.ItcObservingConditions

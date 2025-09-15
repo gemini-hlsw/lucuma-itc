@@ -37,7 +37,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.7.3"
 ThisBuild / crossScalaVersions  := Seq("3.7.3")
-ThisBuild / tlBaseVersion       := "0.46"
+ThisBuild / tlBaseVersion       := "0.47"
 ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
 

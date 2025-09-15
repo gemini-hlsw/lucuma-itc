@@ -38,6 +38,8 @@ import lucuma.core.math.LineFluxValue
 import lucuma.core.math.LineWidthValue
 import lucuma.core.math.RadialVelocity
 import lucuma.core.math.SignalToNoise
+import lucuma.core.math.SingleSN
+import lucuma.core.math.TotalSN
 import lucuma.core.math.Wavelength
 import lucuma.core.math.dimensional.Measure
 import lucuma.core.math.dimensional.TaggedUnit
@@ -67,10 +69,8 @@ import lucuma.itc.ItcCcd
 import lucuma.itc.ItcVersions
 import lucuma.itc.SeriesDataType
 import lucuma.itc.SignalToNoiseAt
-import lucuma.itc.SingleSN
 import lucuma.itc.TargetIntegrationTime
 import lucuma.itc.TargetIntegrationTimeOutcome
-import lucuma.itc.TotalSN
 import lucuma.itc.service.ItcMapping.versionDateTimeFormatter
 
 import java.time.Instant
