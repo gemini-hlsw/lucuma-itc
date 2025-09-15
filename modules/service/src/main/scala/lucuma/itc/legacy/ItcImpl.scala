@@ -6,8 +6,7 @@ package lucuma.itc.legacy
 import algebra.instances.all.given
 import cats.*
 import cats.syntax.all.*
-import coulomb.*
-import coulomb.policy.spire.standard.given
+import coulomb.Quantity
 import coulomb.syntax.*
 import coulomb.units.si.*
 import eu.timepit.refined.types.numeric.NonNegInt
