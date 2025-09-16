@@ -18,7 +18,8 @@ final case class Config(
   odbServiceToken: String,
   honeycomb:       Option[HoneycombConfig],
   inHeroku:        Boolean,
-  metrics:         MetricsConfig
+  metrics:         MetricsConfig,
+  cacheTtlDays:    Int
 )
 
 object Config:
@@ -42,7 +43,8 @@ object Config:
      envOrProp("ODB_SERVICE_JWT"),
      HoneycombConfig.config.option,
      dynoCheck.map(_.isDefined),
-     MetricsConfig.config
+     MetricsConfig.config,
+     envOrProp("ITC_CACHE_TTL_DAYS").as[Int].default(7)
     ).parMapN(Config.apply)
 
   private def redisUrlConfig(

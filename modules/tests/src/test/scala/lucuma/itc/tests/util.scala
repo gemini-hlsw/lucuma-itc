@@ -13,12 +13,17 @@ import lucuma.itc.input.customSed.CustomSed
 import lucuma.itc.input.customSed.CustomSedDatResolver
 import lucuma.itc.service.Itc
 import lucuma.itc.service.ItcMapping
+import lucuma.itc.service.config.Config
 import lucuma.itc.service.config.ExecutionEnvironment
+import lucuma.itc.service.config.MetricsConfig
 import natchez.Trace
 import org.http4s.HttpApp
 import org.http4s.HttpRoutes
+import org.http4s.Uri
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
+
+import scala.concurrent.duration.*
 
 def app(
   itc: Itc[IO]
@@ -52,9 +57,21 @@ given CustomSed.Resolver[IO] = new CustomSedDatResolver[IO] {
 def routesForWsb(
   itc: Itc[IO]
 )(using Logger[IO], Trace[IO]): IO[WebSocketBuilder2[IO] => HttpRoutes[IO]] =
+  val testConfig = Config(
+    environment = ExecutionEnvironment.Local,
+    port = 6060,
+    redisUrl = None,
+    odbBaseUrl = Uri.unsafeFromString("http://localhost"),
+    odbServiceToken = "",
+    honeycomb = None,
+    inHeroku = false,
+    metrics = MetricsConfig(graphite = None, frequency = 60.seconds),
+    cacheTtlDays = 7
+  )
+
   for
     cache  <- RedisEffectfulCache[IO](new NoOpRedis[IO, Array[Byte], Array[Byte]]())
-    itcMap <- ItcMapping[IO](ExecutionEnvironment.Local, cache, itc)
+    itcMap <- ItcMapping[IO](ExecutionEnvironment.Local, cache, itc, testConfig)
   yield (wsb: WebSocketBuilder2[IO]) =>
     Routes.forService(_ => IO.pure(GraphQLService(itcMap).some), wsb)
 

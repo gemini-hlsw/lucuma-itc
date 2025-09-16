@@ -37,7 +37,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion        := "3.7.3"
 ThisBuild / crossScalaVersions  := Seq("3.7.3")
-ThisBuild / tlBaseVersion       := "0.47"
+ThisBuild / tlBaseVersion       := "0.48"
 ThisBuild / tlCiReleaseBranches := Seq("main")
 ThisBuild / scalacOptions ++= Seq("-Xmax-inlines", "50") // Hash derivation fails with default of 32
 
@@ -181,12 +181,52 @@ lazy val model = crossProject(JVMPlatform, JSPlatform)
     )
   )
 
-lazy val ocslibHash = taskKey[String]("hash of ocslib")
+lazy val ocslibHash = taskKey[String]("hash of ocslib and graphql schema")
 ThisBuild / ocslibHash / fileInputs += (service / baseDirectory).value.toGlob / "ocslib" / "*.jar"
+ThisBuild / ocslibHash / fileInputs += (service / Compile / resourceDirectory).value.toGlob / "graphql" / "*.graphql"
 ThisBuild / ocslibHash := {
-  val hashes = ocslibHash.inputFiles.sorted.map(_.toFile).map(Hash(_))
-  Hash.toHex(Hash(hashes.toArray.flatten))
+  val jarFiles      = ocslibHash.inputFiles.filter(_.toString.endsWith(".jar")).sorted.map(_.toFile)
+  val schemaFiles   =
+    ocslibHash.inputFiles.filter(_.toString.endsWith(".graphql")).sorted.map(_.toFile)
+  val allFiles      = jarFiles ++ schemaFiles
+  val hashes        = allFiles.map(Hash(_))
+  val describe      = ocsGitDescribe.value
+  val combinedInput = hashes.toArray.flatten ++ describe.getBytes("UTF-8")
+
+  Hash.toHex(Hash(combinedInput))
 }
+
+// OCS build info parsing
+lazy val ocsBuildInfo   = taskKey[(String, String, String, Boolean)]("OCS build info")
+lazy val ocsGitHash     = taskKey[String]("ocs git hash")
+lazy val ocsGitBranch   = taskKey[String]("ocs git branch")
+lazy val ocsGitDescribe = taskKey[String]("ocs git describe")
+lazy val ocsLocal       = taskKey[Boolean]("ocs local changes")
+
+ThisBuild / ocsBuildInfo := {
+  import scala.util.matching.*
+
+  val buildInfoFile = (service / baseDirectory).value / "ocslib" / "build-info.json"
+  val content       = IO.read(buildInfoFile)
+
+  def extractField(pattern: Regex, fieldName: String): String =
+    pattern.findFirstMatchIn(content) match {
+      case Some(m) => m.group(1)
+      case None    => throw new RuntimeException(s"$fieldName not found in build-info.json")
+    }
+
+  val gitHash     = extractField(""""ocs_git_hash":\s*"([^"]+)"""".r, "ocs_git_hash")
+  val gitBranch   = extractField(""""ocs_git_branch":\s*"([^"]+)"""".r, "ocs_git_branch")
+  val gitDescribe = extractField(""""ocs_git_describe":\s*"([^"]+)"""".r, "ocs_git_describe")
+  val local       = extractField(""""local":\s*(true|false)""".r, "local").toBoolean
+
+  (gitHash, gitBranch, gitDescribe, local)
+}
+
+ThisBuild / ocsGitHash     := ocsBuildInfo.value._1
+ThisBuild / ocsGitBranch   := ocsBuildInfo.value._2
+ThisBuild / ocsGitDescribe := ocsBuildInfo.value._3
+ThisBuild / ocsLocal       := ocsBuildInfo.value._4
 
 // Contains the grackle server
 lazy val service = project
@@ -234,9 +274,12 @@ lazy val service = project
       scalaVersion,
       sbtVersion,
       git.gitHeadCommit,
-      "herokuSourceVersion" -> sys.env.get("SOURCE_VERSION"),
-      "buildDateTime"       -> System.currentTimeMillis(),
-      ocslibHash
+      "buildDateTime" -> System.currentTimeMillis(),
+      ocslibHash,
+      ocsGitHash,
+      ocsGitBranch,
+      ocsGitDescribe,
+      ocsLocal
     )
   )
   .enablePlugins(BuildInfoPlugin)

@@ -26,6 +26,16 @@
             nodejs.enable = true;
             jdk.package = pkgs.jdk21;
           };
+          env = [
+            {
+              name = "ITC_PORT";
+              value = "6060";
+            }
+            {
+              name = "ODB_BASE_URL";
+              value = "https://lucuma-postgres-odb-dev.herokuapp.com";
+            }
+          ];
         };
       }
 
