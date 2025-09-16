@@ -72,8 +72,9 @@ object Main extends IOApp with ItcCacheOrRemote {
       if (cfg.inHeroku) "required on Heroku but missing!" else "disabled (no-op cache)"
     }("redis server at " + _.toString)
 
-    val runtime = Runtime.getRuntime
-    val banner  =
+    val runtime     = Runtime.getRuntime
+    val localStatus = if (BuildInfo.ocsLocal) " (local)" else ""
+    val banner      =
       s"""|
             |   / /_  _________  ______ ___  ____ _      (_) /______
             |  / / / / / ___/ / / / __ `__ \\/ __ `/_____/ / __/ ___/
@@ -83,7 +84,10 @@ object Main extends IOApp with ItcCacheOrRemote {
             | redis                : $redis
             | port                 : ${cfg.port}
             | data checksum        : ${BuildInfo.ocslibHash}
-            | version (git commit) : ${BuildInfo.gitHeadCommit}
+            | version (git commit) : ${BuildInfo.gitHeadCommit.getOrElse("----")}
+            | ocs branch           : ${BuildInfo.ocsGitBranch}$localStatus
+            | ocs git hash         : ${BuildInfo.ocsGitHash}
+            | ocs local            : ${BuildInfo.ocsLocal}
             | odb address          : ${cfg.odbBaseUrl}
             | cores                : ${runtime.availableProcessors()}
             | total memory         : ${runtime.totalMemory() / 1024 / 1024} MB

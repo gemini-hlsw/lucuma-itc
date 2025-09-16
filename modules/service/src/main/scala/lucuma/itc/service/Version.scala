@@ -14,7 +14,6 @@ import java.time.format.DateTimeFormatter
 
 trait Version:
   val gitHash = BuildInfo.gitHeadCommit
-    .orElse(BuildInfo.herokuSourceVersion)
 
   val versionDateFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("yyyyMMdd").withZone(ZoneId.from(ZoneOffset.UTC))
