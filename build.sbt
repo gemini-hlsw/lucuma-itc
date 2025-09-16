@@ -192,6 +192,7 @@ ThisBuild / ocslibHash := {
   val hashes        = allFiles.map(Hash(_))
   val describe      = ocsGitDescribe.value
   val combinedInput = hashes.toArray.flatten ++ describe.getBytes("UTF-8")
+
   Hash.toHex(Hash(combinedInput))
 }
 
