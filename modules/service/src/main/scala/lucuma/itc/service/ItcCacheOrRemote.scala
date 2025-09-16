@@ -29,8 +29,8 @@ import scala.concurrent.duration.*
 trait ItcCacheOrRemote extends Version:
   // Manual version to manually force a flush
   private val ManualCacheVersion = 1
-  private val CacheRootPrefix = "itc"
-  val VersionKeyRoot: String = "version"
+  private val CacheRootPrefix    = "itc"
+  val VersionKeyRoot: String     = "version"
 
   private val versionKey: String =
     s"$ManualCacheVersion-${BuildInfo.ocslibHash}"
@@ -111,7 +111,11 @@ trait ItcCacheOrRemote extends Version:
     CustomSed // We must resolve CustomSed before caching.
       .resolveTargetGraphRequest(request)
       .flatMap: r =>
-        cache.getOrInvokeBinary(r, requestGraphs(itc)(r), TTL(config), s"$CacheRootPrefix:graph:spec")
+        cache.getOrInvokeBinary(r,
+                                requestGraphs(itc)(r),
+                                TTL(config),
+                                s"$CacheRootPrefix:graph:spec"
+        )
 
   private def requestSpecSNCalc[F[_]: MonadThrow: Logger](itc: Itc[F])(
     calcRequest: TargetSpectroscopyTimeRequest,
@@ -227,7 +231,11 @@ trait ItcCacheOrRemote extends Version:
                                     s"$CacheRootPrefix:calc:img:sn"
             )
           case m @ ExposureTimeMode.TimeAndCountMode(_, _, _) =>
-            cache.getOrInvokeBinary(r, requestImgSNCalc(itc)(r, m), TTL(config), s"$CacheRootPrefix:calc:img:tc")
+            cache.getOrInvokeBinary(r,
+                                    requestImgSNCalc(itc)(r, m),
+                                    TTL(config),
+                                    s"$CacheRootPrefix:calc:img:tc"
+            )
 
   /**
    * This method will get the version from the remote itc and compare it with the one on the cache.
@@ -240,7 +248,8 @@ trait ItcCacheOrRemote extends Version:
     val L      = Logger[F]
     val result = for
       _              <- L.info("Check for stale cache")
-      versionOnCache <- cache.readBinary[String, String](VersionKeyRoot, s"$CacheRootPrefix:version")
+      versionOnCache <-
+        cache.readBinary[String, String](VersionKeyRoot, s"$CacheRootPrefix:version")
       _              <- L.info(s"itc data checksum on cache ${versionOnCache.orEmpty}, version $versionKey")
       _              <-
         (L.info( // if the version changes or is missing, flush cache

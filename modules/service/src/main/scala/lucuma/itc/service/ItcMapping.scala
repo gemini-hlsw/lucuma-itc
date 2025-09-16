@@ -106,10 +106,10 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   def calculateImagingIntegrationTime[F[
     _
   ]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
-    environment:  ExecutionEnvironment,
-    cache:        BinaryEffectfulCache[F],
-    itc:          Itc[F],
-    config:       Config
+    environment: ExecutionEnvironment,
+    cache:       BinaryEffectfulCache[F],
+    itc:         Itc[F],
+    config:      Config
   )(asterismRequest: AsterismImagingTimeRequest): F[Result[CalculationResult]] =
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetImagingTimeRequest) =>
@@ -180,10 +180,10 @@ object ItcMapping extends ItcCacheOrRemote with Version {
   }
 
   def spectroscopyGraphs[F[_]: MonadThrow: Parallel: Logger: CustomSed.Resolver](
-    environment:  ExecutionEnvironment,
-    cache:        BinaryEffectfulCache[F],
-    itc:          Itc[F],
-    config:       Config
+    environment: ExecutionEnvironment,
+    cache:       BinaryEffectfulCache[F],
+    itc:         Itc[F],
+    config:      Config
   )(asterismRequest: AsterismGraphRequest): F[Result[SpectroscopyGraphsResult]] =
     asterismRequest.toTargetRequests
       .parTraverse: (targetRequest: TargetGraphRequest) =>
@@ -262,10 +262,10 @@ object ItcMapping extends ItcCacheOrRemote with Version {
       .toGraphQLErrors
 
   def apply[F[_]: Sync: Logger: Parallel: CustomSed.Resolver](
-    environment:  ExecutionEnvironment,
-    cache:        BinaryEffectfulCache[F],
-    itc:          Itc[F],
-    config:       Config
+    environment: ExecutionEnvironment,
+    cache:       BinaryEffectfulCache[F],
+    itc:         Itc[F],
+    config:      Config
   ): F[Mapping[F]] =
     loadSchema[F].map { loadedSchema =>
       new CirceMapping[F] {
