@@ -73,52 +73,52 @@ ThisBuild / githubWorkflowJobSetup := {
     githubWorkflowGeneratedCacheSteps.value.toList
 }
 
-lazy val sbtDockerPublishLocal =
-  WorkflowStep.Sbt(
-    List("clean", "deploy/docker:publishLocal"),
-    name = Some("Build and Publish Docker image")
-  )
+// lazy val sbtDockerPublishLocal =
+//   WorkflowStep.Sbt(
+//     List("clean", "deploy/docker:publishLocal"),
+//     name = Some("Build and Publish Docker image")
+//   )
 
-val environments = List("dev", "staging", "production")
+// val environments = List("dev", "staging", "production")
 
-lazy val herokuRelease =
-  WorkflowStep.Run(
-    List(
-      "npm install -g heroku",
-      "heroku container:login"
-    ) ++
-      environments.flatMap(env =>
-        List(
-          s"docker tag noirlab/gpp-itc registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-${env}/web:$${{ github.sha }}",
-          s"docker push registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-${env}/web:$${{ github.sha }}"
-        )
-      ) ++ List( // Retag for easy release to dev
-        s"docker tag noirlab/gpp-itc registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web",
-        s"docker push registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web",
-        s"heroku container:release web -a $${{ vars.HEROKU_APP_NAME || 'itc' }}-dev -v"
-      ),
-    name = Some("Deploy and release app in Heroku")
-  )
+// lazy val herokuRelease =
+//   WorkflowStep.Run(
+//     List(
+//       "npm install -g heroku",
+//       "heroku container:login"
+//     ) ++
+//       environments.flatMap(env =>
+//         List(
+//           s"docker tag noirlab/gpp-itc registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-${env}/web:$${{ github.sha }}",
+//           s"docker push registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-${env}/web:$${{ github.sha }}"
+//         )
+//       ) ++ List( // Retag for easy release to dev
+//         s"docker tag noirlab/gpp-itc registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web",
+//         s"docker push registry.heroku.com/$${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web",
+//         s"heroku container:release web -a $${{ vars.HEROKU_APP_NAME || 'itc' }}-dev -v"
+//       ),
+//     name = Some("Deploy and release app in Heroku")
+//   )
 
-lazy val retrieveDockerImageSha = WorkflowStep.Run(
-  List(
-    "# Get Docker image SHA",
-    """echo "DOCKER_IMAGE_SHA=$(docker inspect registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web:${{ github.sha }} --format={{.Id}})" >> $GITHUB_ENV"""
-  ),
-  name = Some("Get Docker image SHA")
-)
+// lazy val retrieveDockerImageSha = WorkflowStep.Run(
+//   List(
+//     "# Get Docker image SHA",
+//     """echo "DOCKER_IMAGE_SHA=$(docker inspect registry.heroku.com/${{ vars.HEROKU_APP_NAME || 'itc' }}-dev/web:${{ github.sha }} --format={{.Id}})" >> $GITHUB_ENV"""
+//   ),
+//   name = Some("Get Docker image SHA")
+// )
 
-lazy val recordDeploymentMetadata = WorkflowStep.Run(
-  List(
-    """echo "Recording deployment: ${{ github.sha }} to ${{ github.repository }}"""",
-    """curl -X POST https://api.github.com/repos/${{ github.repository }}/deployments -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github+json" -d '{ "ref": "${{ github.sha }}", "environment": "development", "description": "ITC deployment to dev", "auto_merge": false, "required_contexts": [], "task": "deploy:ITC", "payload": { "docker_image_shas": { "web": "${{ env.DOCKER_IMAGE_SHA }}" } } }' """
-  ),
-  name = Some("Record deployment in GitHub")
-)
+// lazy val recordDeploymentMetadata = WorkflowStep.Run(
+//   List(
+//     """echo "Recording deployment: ${{ github.sha }} to ${{ github.repository }}"""",
+//     """curl -X POST https://api.github.com/repos/${{ github.repository }}/deployments -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github+json" -d '{ "ref": "${{ github.sha }}", "environment": "development", "description": "ITC deployment to dev", "auto_merge": false, "required_contexts": [], "task": "deploy:ITC", "payload": { "docker_image_shas": { "web": "${{ env.DOCKER_IMAGE_SHA }}" } } }' """
+//   ),
+//   name = Some("Record deployment in GitHub")
+// )
 
-val mainCond                 = "github.ref == 'refs/heads/main'"
-val geminiRepoCond           = "startsWith(github.repository, 'gemini')"
-def allConds(conds: String*) = conds.mkString("(", " && ", ")")
+// val mainCond                 = "github.ref == 'refs/heads/main'"
+// val geminiRepoCond           = "startsWith(github.repository, 'gemini')"
+// def allConds(conds: String*) = conds.mkString("(", " && ", ")")
 
 ThisBuild / watchOnTermination := { (action, cmd, times, state) =>
   val projNames = cmd
@@ -148,20 +148,20 @@ ThisBuild / githubWorkflowBuildPreamble +=
     cond = Some("github.event_name == 'pull_request'")
   )
 
-ThisBuild / githubWorkflowAddedJobs +=
-  WorkflowJob(
-    "deploy",
-    "Build and publish Docker image / Deploy to Heroku",
-    githubWorkflowJobSetup.value.toList :::
-      sbtDockerPublishLocal ::
-      herokuRelease ::
-      retrieveDockerImageSha ::
-      recordDeploymentMetadata ::
-      Nil,
-    scalas = List(scalaVersion.value),
-    javas = githubWorkflowJavaVersions.value.toList.take(1),
-    cond = Some(allConds(mainCond, geminiRepoCond))
-  )
+// ThisBuild / githubWorkflowAddedJobs +=
+//   WorkflowJob(
+//     "deploy",
+//     "Build and publish Docker image / Deploy to Heroku",
+//     githubWorkflowJobSetup.value.toList :::
+//       sbtDockerPublishLocal ::
+//       herokuRelease ::
+//       retrieveDockerImageSha ::
+//       recordDeploymentMetadata ::
+//       Nil,
+//     scalas = List(scalaVersion.value),
+//     javas = githubWorkflowJavaVersions.value.toList.take(1),
+//     cond = Some(allConds(mainCond, geminiRepoCond))
+//   )
 
 // Basic model classes
 lazy val model = crossProject(JVMPlatform, JSPlatform)
